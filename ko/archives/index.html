@@ -422,79 +422,6 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2018/06/01/02_spring/01_servlet/20190101_java_web_app/"
-                            aria-label=": [Servlet] Java Web Application 만들기"
-                        >
-                            [Servlet] Java Web Application 만들기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-06-01T00:00:00+09:00">
-	
-		    2018/06/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet/">Servlet</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p><code>Java Web Application</code>은 일반적인 <code>Java Application</code>과는 여러가지 차이점이 있습니다. Eclipse나 InteliJ 같은 IDE를 사용하면 Java Web Application 프로젝트를 쉽게 생성할 수 있습니다. 그러나 이번 포스트에서는 직접 Java Web Application 프로젝트를 구성하며 프로젝트 구조에 대해 알아보겠습니다.</p>
-<h1 id="1-프로젝트-구조"><a href="#1-프로젝트-구조" class="headerlink" title="1. 프로젝트 구조"></a>1. 프로젝트 구조</h1><p><code>Java Web Application</code>은 외부로 공개하는 디렉토리를 구성하고 그 안에 JSP 파일을 배치합니다. 또한 <code>WEB-INF</code> 디렉토리를 생성하고 그 안에 <code>web.xml</code>파일을 배치해야합니다. </p>
-<p><code>maven</code>과 maven에서 제공하는 <code>maven-archtype-webapp</code> 탬플릿을 사용하면 Java Web Application을 위한 디렉토리를 쉽게 구성할 수 있습니다.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp</span><br><span class="line"></span><br><span class="line">....</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;groupId&#x27;</span>: com.yologger</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;artifactId&#x27;</span>: web_app</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;version&#x27;</span> 1.0-SNAPSHOT: : 0.0.1</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;package&#x27;</span> com.yologger: : com.yologger</span><br><span class="line">Confirm properties configuration:</span><br><span class="line">groupId: com.yologger</span><br><span class="line">artifactId: web_app</span><br><span class="line">version: 0.0.1</span><br><span class="line">package: com.yologger</span><br><span class="line"> Y: : y</span><br><span class="line">....</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] BUILD SUCCESS</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Total time:  20.264 s</span><br><span class="line">[INFO] Finished at: 2021-12-07T17:31:11+09:00</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
-<p>생성된 프로젝트의 구조는 다음과 같습니다.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$  tree</span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── resources</span><br><span class="line">        └── webapp</span><br><span class="line">            ├── WEB-INF</span><br><span class="line">            │   └── web.xml</span><br><span class="line">            └── index.jsp</span><br></pre></td></tr></table></figure>
-<p><code>webapp</code>폴더에는 JSP 파일과 WEB-INF 폴더가 생성됩니다. 이 <code>webapp</code>폴더가 외부로 공개되며, 웹 브라우저에서 다음과 같이 접근할 수 있습니다.<br><img src="/ko/images/02_spring/01_servlet/20190101_java_web_app/1.png"></p>
-<h1 id="2-Java-파일은-어디에-작성해야할까"><a href="#2-Java-파일은-어디에-작성해야할까" class="headerlink" title="2. Java 파일은 어디에 작성해야할까?"></a>2. Java 파일은 어디에 작성해야할까?</h1><p>지금까지 생성한 프로젝트는 Java 프로젝트인데 <code>java</code>폴더가 없습니다. main폴더에 java폴더를 생성하고, 그 안에 패키지와 소스 코드 파일을 배치해나가면 됩니다.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$  tree</span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── java</span><br><span class="line">        │   └── com</span><br><span class="line">        │       └── yologger</span><br><span class="line">        │           └── controller</span><br><span class="line">        │               └── Controller.java    </span><br><span class="line">        ├── resources</span><br><span class="line">        └── webapp</span><br><span class="line">            ├── WEB-INF</span><br><span class="line">            │   └── web.xml</span><br><span class="line">            └── index.jsp</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Controller.java</span></span><br><span class="line"><span class="keyword">package</span> com.yologger.controller;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Controller</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Controller</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        response.getWriter().append(<span class="string">&quot;Served at: &quot;</span>).append(request.getContextPath());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doPost</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        doGet(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="3-의존성-추가"><a href="#3-의존성-추가" class="headerlink" title="3. 의존성 추가"></a>3. 의존성 추가</h1><p><code>JSP</code>, <code>Servlet</code> 등 Java Web Application의 핵심 요소들을 사용하려면 의존성을 추가해야합니다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- pom.xml --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- .... --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.servlet<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.servlet-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="4-Servlet-Container-준비"><a href="#4-Servlet-Container-준비" class="headerlink" title="4. Servlet Container 준비"></a>4. Servlet Container 준비</h1><p>일반적인 Java Application은 JDK만 준비되면 쉽게 실행할 수 있습니다. 그러나 Java Web Application은 JDK 외에도 <code>WAS(Web Application Server)</code>가 필요합니다. <code>Apache Tomcat</code>이 대표적인 WAS 입니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/06/01/02_spring/01_servlet/20190101_java_web_app/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
                             href="/ko/2018/06/01/08_tools/01_maven/20180601_maven/"
                             aria-label=": [Maven] Maven 프로젝트 생성하기"
                         >
@@ -558,6 +485,79 @@
                         <p>
                             <a
                                 href="/ko/2018/06/01/08_tools/01_maven/20180601_maven/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/06/01/02_spring/01_servlet/20190101_java_web_app/"
+                            aria-label=": [Servlet] Java Web Application 만들기"
+                        >
+                            [Servlet] Java Web Application 만들기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-06-01T00:00:00+09:00">
+	
+		    2018/06/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet/">Servlet</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p><code>Java Web Application</code>은 일반적인 <code>Java Application</code>과는 여러가지 차이점이 있습니다. Eclipse나 InteliJ 같은 IDE를 사용하면 Java Web Application 프로젝트를 쉽게 생성할 수 있습니다. 그러나 이번 포스트에서는 직접 Java Web Application 프로젝트를 구성하며 프로젝트 구조에 대해 알아보겠습니다.</p>
+<h1 id="1-프로젝트-구조"><a href="#1-프로젝트-구조" class="headerlink" title="1. 프로젝트 구조"></a>1. 프로젝트 구조</h1><p><code>Java Web Application</code>은 외부로 공개하는 디렉토리를 구성하고 그 안에 JSP 파일을 배치합니다. 또한 <code>WEB-INF</code> 디렉토리를 생성하고 그 안에 <code>web.xml</code>파일을 배치해야합니다. </p>
+<p><code>maven</code>과 maven에서 제공하는 <code>maven-archtype-webapp</code> 탬플릿을 사용하면 Java Web Application을 위한 디렉토리를 쉽게 구성할 수 있습니다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp</span><br><span class="line"></span><br><span class="line">....</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;groupId&#x27;</span>: com.yologger</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;artifactId&#x27;</span>: web_app</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;version&#x27;</span> 1.0-SNAPSHOT: : 0.0.1</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;package&#x27;</span> com.yologger: : com.yologger</span><br><span class="line">Confirm properties configuration:</span><br><span class="line">groupId: com.yologger</span><br><span class="line">artifactId: web_app</span><br><span class="line">version: 0.0.1</span><br><span class="line">package: com.yologger</span><br><span class="line"> Y: : y</span><br><span class="line">....</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] BUILD SUCCESS</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Total time:  20.264 s</span><br><span class="line">[INFO] Finished at: 2021-12-07T17:31:11+09:00</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p>생성된 프로젝트의 구조는 다음과 같습니다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$  tree</span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── resources</span><br><span class="line">        └── webapp</span><br><span class="line">            ├── WEB-INF</span><br><span class="line">            │   └── web.xml</span><br><span class="line">            └── index.jsp</span><br></pre></td></tr></table></figure>
+<p><code>webapp</code>폴더에는 JSP 파일과 WEB-INF 폴더가 생성됩니다. 이 <code>webapp</code>폴더가 외부로 공개되며, 웹 브라우저에서 다음과 같이 접근할 수 있습니다.<br><img src="/ko/images/02_spring/01_servlet/20190101_java_web_app/1.png"></p>
+<h1 id="2-Java-파일은-어디에-작성해야할까"><a href="#2-Java-파일은-어디에-작성해야할까" class="headerlink" title="2. Java 파일은 어디에 작성해야할까?"></a>2. Java 파일은 어디에 작성해야할까?</h1><p>지금까지 생성한 프로젝트는 Java 프로젝트인데 <code>java</code>폴더가 없습니다. main폴더에 java폴더를 생성하고, 그 안에 패키지와 소스 코드 파일을 배치해나가면 됩니다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$  tree</span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── java</span><br><span class="line">        │   └── com</span><br><span class="line">        │       └── yologger</span><br><span class="line">        │           └── controller</span><br><span class="line">        │               └── Controller.java    </span><br><span class="line">        ├── resources</span><br><span class="line">        └── webapp</span><br><span class="line">            ├── WEB-INF</span><br><span class="line">            │   └── web.xml</span><br><span class="line">            └── index.jsp</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Controller.java</span></span><br><span class="line"><span class="keyword">package</span> com.yologger.controller;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Controller</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Controller</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        response.getWriter().append(<span class="string">&quot;Served at: &quot;</span>).append(request.getContextPath());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doPost</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        doGet(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-의존성-추가"><a href="#3-의존성-추가" class="headerlink" title="3. 의존성 추가"></a>3. 의존성 추가</h1><p><code>JSP</code>, <code>Servlet</code> 등 Java Web Application의 핵심 요소들을 사용하려면 의존성을 추가해야합니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- pom.xml --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- .... --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.servlet<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.servlet-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="4-Servlet-Container-준비"><a href="#4-Servlet-Container-준비" class="headerlink" title="4. Servlet Container 준비"></a>4. Servlet Container 준비</h1><p>일반적인 Java Application은 JDK만 준비되면 쉽게 실행할 수 있습니다. 그러나 Java Web Application은 JDK 외에도 <code>WAS(Web Application Server)</code>가 필요합니다. <code>Apache Tomcat</code>이 대표적인 WAS 입니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/06/01/02_spring/01_servlet/20190101_java_web_app/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
