@@ -6,38 +6,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Yologger&#39;s Blog">
-    <title>[Servlet, JSP] Eclipse로 Java Web Application 구성하기 - Yologger&#39;s Blog</title>
+    <title>[Servlet, JSP] Server, Web Server, Web Application Server 차이점 - Yologger&#39;s Blog</title>
     <meta name="author" content="yologger">
     
     
         <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nEclipse를 실행하고 File &gt; Project를 선택한 후 Dynamic Web Project를 선택합니다.Project name, Project Location, Target runtime을 적절히 입력하고 Next &gt; 버튼을 누릅니다.Source folders on build path는 Java 파일이 위치할 경로입니다. Default output folder는 빌드된 파일이 위치할 경로입니다. 확인 후 Next &gt;버튼을 누릅니다.Context root와 Content directory은 기본값으로 두고 Generate web.xml deployment descriptor를 선택하고 Next &gt;버튼을 누릅니다.\n\nContext root: WAS(Tomcat)에는 여러 개의 Web Application이 구동될 수 있습니다. Context root는 WAS위의 Web Application을 구분하는데 사용됩니다. 예를 들어 Web Appication의 URL이 http://yourcompany.com/my_project라면 my_project가 context root를 의미합니다.\nContent directory: JSP파일이 저장되는 경로입니다. JSP파일 외에도 META-INF폴더, WEB-INF폴더, web.xml파일 등이 위치합니다.\nenerate web.xml deployment descriptor: WEB.xml 파일을 생성합니다.\n\n생성된 프로젝트의 구조는 다음과 같습니다.\n이제 JSP 파일을 생성해보겠습니다. src &gt; main &gt; webapp에 JSP 파일을 생성합니다.\nHelloWorld.jsp1234567891011&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;UTF-8&quot;%&gt;&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;    &lt;meta charset=&quot;UTF-8&quot;&gt;    &lt;title&gt;Hello World&lt;/title&gt;&lt;/head&gt;    &lt;body&gt;        &lt;h1&gt;Hello World&lt;/h1&gt;    &lt;/body&gt;&lt;/html&gt;\n\nTomcat에서 프로젝트를 실행하기 위해 Run on Server를 선택합니다.Tomcat을 선택하고 Next &gt;를 선택합니다.Configured항목으로 프로젝트를 이동시키고 Finish 버튼을 선택합니다.\n\nAvailable: 아직 Tomcat에 배포하지 않은 프로젝트\nConfigured: 이미 Toccat에 배포한 프로젝트\n\n이제 웹 브라우저에서 접속할 수 있습니다.\n참고Eclipse에 Tomcat 서버를 추가하면 Project Explorer에 서버의 디렉토리가 추가됩니다.server.xml에서는 Tomcat 서버의 설정 파일입니다.Tomcat 서버에는 여러 개의 Web Application을 배포할 수 있습니다. 배포된 Web Application은 server.xml에서 &lt;context&gt;태그로 등록됩니다.\nserver.xml1234567891011&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;Server port=&quot;8005&quot; shutdown=&quot;SHUTDOWN&quot;&gt;  &lt;Service name=&quot;Catalina&quot;&gt;    &lt;Host appBase=&quot;webapps&quot; autoDeploy=&quot;true&quot; name=&quot;localhost&quot; unpackWARs=&quot;true&quot;&gt;      &lt;!-- ... --&gt;      &lt;Context docBase=&quot;project1&quot; path=&quot;/project1&quot; reloadable=&quot;true&quot; source=&quot;org.eclipse.jst.jee.server:project1&quot; /&gt;      &lt;Context docBase=&quot;project2&quot; path=&quot;/project2&quot; reloadable=&quot;true&quot; source=&quot;org.eclipse.jst.jee.server:project2&quot; /&gt;    &lt;/Host&gt;  &lt;/Service&gt;&lt;/Server&gt;\n&lt;Context&gt;태그의 docBase속성은 프로젝트의 이름입니다. 또한 path속성을 통해 Context root를 변경할 수 있습니다.\n","dateCreated":"2019-01-02T00:00:00+09:00","dateModified":"2021-12-08T15:53:13+09:00","datePublished":"2019-01-02T00:00:00+09:00","description":"","headline":"[Servlet, JSP] Eclipse로 Java Web Application 구성하기","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/","keywords":"Servlet, JSP"}</script>
-    <meta name="description" content="Eclipse를 실행하고 File &gt; Project를 선택한 후 Dynamic Web Project를 선택합니다.Project name, Project Location, Target runtime을 적절히 입력하고 Next &gt; 버튼을 누릅니다.Source folders on build path는 Java 파일이 위치할 경로입니다. Default">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nServerServer는 Client에 정보나 서비스를 제공하는 컴퓨터 시스템입니다. 서버에는 보통 Linux, Unix, Windows 운영체제가 탑재됩니다.\nWeb Server\nWeb Server는 웹 브라우저 같은 클라이언트로부터 HTTP 요청을 받아들이고 HTML 문서와 같은 웹 페이지를 반환하는 프로그램입니다. \n대표적인 Web Server에는 Apache, Nginx, IIS가 있습니다. \nWeb Server는 HTML, CSS, JavaScript, 이미지, 파일 등 정적 컨텐츠를 제공합니다.\n\nWAS(Web Application Server)\nWAS 동적 컨텐츠를 제공합니다.\n대표적인 WAS에는 Apache Tomcat, IBM Websphere, Tmax JEUS가 있습니다.\n대부분의 WAS는 Container를 포함하며, Container는 동적으로 웹 페이지를 생성합니다.\n\nWeb Server vs. WAS\nWeb Server는 파일 시스템에 저장된 파일을 단순히 클라이언트에게 전달합니다. 이를 정적 컨텐츠를 제공한다고 합니다.\nWAS는 데이터베이스나 파일 시스템의 데이터를 읽어와 다양한 로직을 수행한 후 적절한 HTML 파일을 생성하여 클라이언트에게 전달합니다. 이를 동적 컨텐츠를 제공한다고 합니다.\n보통 Linux, Windows 같은 Server OS 위에서 WAS가 동작하며, WAS는 Web Server를 내장합니다.\n\n","dateCreated":"2019-01-04T00:00:00+09:00","dateModified":"2021-12-08T16:53:41+09:00","datePublished":"2019-01-04T00:00:00+09:00","description":"","headline":"[Servlet, JSP] Server, Web Server, Web Application Server 차이점","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/","keywords":"Servlet, JSP"}</script>
+    <meta name="description" content="ServerServer는 Client에 정보나 서비스를 제공하는 컴퓨터 시스템입니다. 서버에는 보통 Linux, Unix, Windows 운영체제가 탑재됩니다. Web Server Web Server는 웹 브라우저 같은 클라이언트로부터 HTTP 요청을 받아들이고 HTML 문서와 같은 웹 페이지를 반환하는 프로그램입니다.  대표적인 Web Server에는">
 <meta property="og:type" content="blog">
-<meta property="og:title" content="[Servlet, JSP] Eclipse로 Java Web Application 구성하기">
-<meta property="og:url" content="https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/index.html">
+<meta property="og:title" content="[Servlet, JSP] Server, Web Server, Web Application Server 차이점">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/index.html">
 <meta property="og:site_name" content="Yologger&#39;s Blog">
-<meta property="og:description" content="Eclipse를 실행하고 File &gt; Project를 선택한 후 Dynamic Web Project를 선택합니다.Project name, Project Location, Target runtime을 적절히 입력하고 Next &gt; 버튼을 누릅니다.Source folders on build path는 Java 파일이 위치할 경로입니다. Default">
+<meta property="og:description" content="ServerServer는 Client에 정보나 서비스를 제공하는 컴퓨터 시스템입니다. 서버에는 보통 Linux, Unix, Windows 운영체제가 탑재됩니다. Web Server Web Server는 웹 브라우저 같은 클라이언트로부터 HTTP 요청을 받아들이고 HTML 문서와 같은 웹 페이지를 반환하는 프로그램입니다.  대표적인 Web Server에는">
 <meta property="og:locale" content="ko_KR">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/1.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/2.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/3.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/4.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/5.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/6.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/7.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/8.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/9.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/10.png">
-<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/11.png">
-<meta property="article:published_time" content="2019-01-01T15:00:00.000Z">
-<meta property="article:modified_time" content="2021-12-08T06:53:13.872Z">
+<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190104_server_webserver_was/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190104_server_webserver_was/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190104_server_webserver_was/3.png">
+<meta property="article:published_time" content="2019-01-03T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-08T07:53:41.540Z">
 <meta property="article:author" content="yologger">
 <meta property="article:tag" content="Servlet, JSP">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/1.png">
+<meta name="twitter:image" content="https://yologger.github.io/ko/images/02_spring/01_servlet_jsp/20190104_server_webserver_was/1.png">
     
     
         
@@ -366,14 +358,14 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title">
-            [Servlet, JSP] Eclipse로 Java Web Application 구성하기
+            [Servlet, JSP] Server, Web Server, Web Application Server 차이점
         </h1>
     
     
         <div class="post-meta">
-    <time datetime="2019-01-02T00:00:00+09:00">
+    <time datetime="2019-01-04T00:00:00+09:00">
 	
-		    2019/01/02
+		    2019/01/04
     	
     </time>
     
@@ -392,25 +384,22 @@
     <div class="post-content markdown">
         <div class="main-content-wrap">
             <hr>
-<p>Eclipse를 실행하고 <code>File &gt; Project</code>를 선택한 후 <code>Dynamic Web Project</code>를 선택합니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/1.png"><br><code>Project name</code>, <code>Project Location</code>, <code>Target runtime</code>을 적절히 입력하고 <code>Next &gt;</code> 버튼을 누릅니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/2.png"><br><code>Source folders on build path</code>는 Java 파일이 위치할 경로입니다. <code>Default output folder</code>는 빌드된 파일이 위치할 경로입니다. 확인 후 <code>Next &gt;</code>버튼을 누릅니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/3.png"><br><code>Context root</code>와 <code>Content directory</code>은 기본값으로 두고 <code>Generate web.xml deployment descriptor</code>를 선택하고 <code>Next &gt;</code>버튼을 누릅니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/4.png"></p>
-<ul>
-<li><code>Context root</code>: WAS(Tomcat)에는 여러 개의 Web Application이 구동될 수 있습니다. Context root는 WAS위의 Web Application을 구분하는데 사용됩니다. 예를 들어 Web Appication의 URL이 <code>http://yourcompany.com/my_project</code>라면 <code>my_project</code>가 context root를 의미합니다.</li>
-<li><code>Content directory</code>: JSP파일이 저장되는 경로입니다. JSP파일 외에도 <code>META-INF</code>폴더, <code>WEB-INF</code>폴더, <code>web.xml</code>파일 등이 위치합니다.</li>
-<li><code>enerate web.xml deployment descriptor</code>: WEB.xml 파일을 생성합니다.</li>
+<h1 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h1><p><code>Server</code>는 Client에 정보나 서비스를 제공하는 컴퓨터 시스템입니다. 서버에는 보통 Linux, Unix, Windows 운영체제가 탑재됩니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190104_server_webserver_was/1.png"></p>
+<h1 id="Web-Server"><a href="#Web-Server" class="headerlink" title="Web Server"></a>Web Server</h1><ul>
+<li><code>Web Server</code>는 웹 브라우저 같은 클라이언트로부터 HTTP 요청을 받아들이고 HTML 문서와 같은 웹 페이지를 반환하는 프로그램입니다. </li>
+<li>대표적인 Web Server에는 Apache, Nginx, IIS가 있습니다. </li>
+<li>Web Server는 HTML, CSS, JavaScript, 이미지, 파일 등 <u>정적 컨텐츠</u>를 제공합니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190104_server_webserver_was/2.png"></li>
 </ul>
-<p>생성된 프로젝트의 구조는 다음과 같습니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/5.png"></p>
-<p>이제 JSP 파일을 생성해보겠습니다. <code>src &gt; main &gt; webapp</code>에 JSP 파일을 생성합니다.</p>
-<figure class="highlight html"><figcaption><span>HelloWorld.jsp</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;UTF-8&quot;%&gt;</span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>Tomcat에서 프로젝트를 실행하기 위해 <code>Run on Server</code>를 선택합니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/6.png"><br>Tomcat을 선택하고 <code>Next &gt;</code>를 선택합니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/7.png"><br><code>Configured</code>항목으로 프로젝트를 이동시키고 <code>Finish</code> 버튼을 선택합니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/8.png"></p>
-<ul>
-<li><code>Available</code>: 아직 Tomcat에 배포하지 않은 프로젝트</li>
-<li><code>Configured</code>: 이미 Toccat에 배포한 프로젝트</li>
+<h1 id="WAS-Web-Application-Server"><a href="#WAS-Web-Application-Server" class="headerlink" title="WAS(Web Application Server)"></a>WAS(Web Application Server)</h1><ul>
+<li><code>WAS</code> <u>동적 컨텐츠</u>를 제공합니다.</li>
+<li>대표적인 WAS에는 Apache Tomcat, IBM Websphere, Tmax JEUS가 있습니다.</li>
+<li>대부분의 WAS는 Container를 포함하며, Container는 동적으로 웹 페이지를 생성합니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190104_server_webserver_was/3.png"></li>
 </ul>
-<p>이제 웹 브라우저에서 접속할 수 있습니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/9.png"></p>
-<h1 id="참고"><a href="#참고" class="headerlink" title="참고"></a>참고</h1><p>Eclipse에 Tomcat 서버를 추가하면 <code>Project Explorer</code>에 서버의 디렉토리가 추가됩니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/10.png"><br><code>server.xml</code>에서는 Tomcat 서버의 설정 파일입니다.<br><img src="/ko/images/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/11.png"><br>Tomcat 서버에는 여러 개의 Web Application을 배포할 수 있습니다. 배포된 Web Application은 <code>server.xml</code>에서 <code>&lt;context&gt;</code>태그로 등록됩니다.</p>
-<figure class="highlight xml"><figcaption><span>server.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Server</span> <span class="attr">port</span>=<span class="string">&quot;8005&quot;</span> <span class="attr">shutdown</span>=<span class="string">&quot;SHUTDOWN&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Service</span> <span class="attr">name</span>=<span class="string">&quot;Catalina&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Host</span> <span class="attr">appBase</span>=<span class="string">&quot;webapps&quot;</span> <span class="attr">autoDeploy</span>=<span class="string">&quot;true&quot;</span> <span class="attr">name</span>=<span class="string">&quot;localhost&quot;</span> <span class="attr">unpackWARs</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line">      <span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">&quot;project1&quot;</span> <span class="attr">path</span>=<span class="string">&quot;/project1&quot;</span> <span class="attr">reloadable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">source</span>=<span class="string">&quot;org.eclipse.jst.jee.server:project1&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">&quot;project2&quot;</span> <span class="attr">path</span>=<span class="string">&quot;/project2&quot;</span> <span class="attr">reloadable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">source</span>=<span class="string">&quot;org.eclipse.jst.jee.server:project2&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Host</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">Service</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Server</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><code>&lt;Context&gt;</code>태그의 <code>docBase</code>속성은 프로젝트의 이름입니다. 또한 <code>path</code>속성을 통해 <code>Context root</code>를 변경할 수 있습니다.</p>
+<h1 id="Web-Server-vs-WAS"><a href="#Web-Server-vs-WAS" class="headerlink" title="Web Server vs. WAS"></a>Web Server vs. WAS</h1><ul>
+<li><code>Web Server</code>는 파일 시스템에 저장된 파일을 단순히 클라이언트에게 전달합니다. 이를 <u>정적 컨텐츠</u>를 제공한다고 합니다.</li>
+<li><code>WAS</code>는 데이터베이스나 파일 시스템의 데이터를 읽어와 다양한 로직을 수행한 후 적절한 HTML 파일을 생성하여 클라이언트에게 전달합니다. 이를 <u>동적 컨텐츠</u>를 제공한다고 합니다.</li>
+<li>보통 Linux, Windows 같은 Server OS 위에서 WAS가 동작하며, WAS는 Web Server를 내장합니다.</li>
+</ul>
 
             
 
@@ -432,14 +421,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
-                    data-tooltip="[Servlet, JSP] Server, Web Server, Web Application Server 차이점"
-                    aria-label="이전: [Servlet, JSP] Server, Web Server, Web Application Server 차이점"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">이전</span>
                     </a>
@@ -449,9 +435,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/ko/2019/01/01/04_android/01_android_platform/190101_apk/"
-                    data-tooltip="[안드로이드] APK 파일이란?"
-                    aria-label="다음: [안드로이드] APK 파일이란?"
+                    href="/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                    aria-label="다음: [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">다음</span>
@@ -476,7 +462,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                     title="Facebook에 공유하기"
                     aria-label="Facebook에 공유하기"
                 >
@@ -489,7 +475,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                     title="Twitter에 공유하기"
                     aria-label="Twitter에 공유하기"
                 >
@@ -502,7 +488,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                     title="Google+에 공유하기"
                     aria-label="Google+에 공유하기"
                 >
@@ -547,14 +533,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
-                    data-tooltip="[Servlet, JSP] Server, Web Server, Web Application Server 차이점"
-                    aria-label="이전: [Servlet, JSP] Server, Web Server, Web Application Server 차이점"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">이전</span>
                     </a>
@@ -564,9 +547,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/ko/2019/01/01/04_android/01_android_platform/190101_apk/"
-                    data-tooltip="[안드로이드] APK 파일이란?"
-                    aria-label="다음: [안드로이드] APK 파일이란?"
+                    href="/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                    aria-label="다음: [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">다음</span>
@@ -591,7 +574,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                     title="Facebook에 공유하기"
                     aria-label="Facebook에 공유하기"
                 >
@@ -604,7 +587,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                     title="Twitter에 공유하기"
                     aria-label="Twitter에 공유하기"
                 >
@@ -617,7 +600,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                     title="Google+에 공유하기"
                     aria-label="Google+에 공유하기"
                 >
@@ -651,7 +634,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                         aria-label="Facebook에 공유하기"
                     >
                         <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
@@ -664,7 +647,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                         aria-label="Twitter에 공유하기"
                     >
                         <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
@@ -677,7 +660,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/02/02_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/04/02_spring/01_servlet_jsp/20190104_server_webserver_was/"
                         aria-label="Google+에 공유하기"
                     >
                         <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
