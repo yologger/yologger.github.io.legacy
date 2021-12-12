@@ -6,23 +6,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Yologger&#39;s Blog">
-    <title>아카이브: 2018 - Yologger&#39;s Blog</title>
+    <title>[Maven] pom.xml - Yologger&#39;s Blog</title>
     <meta name="author" content="yologger">
     
     
         <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
     
     
-    <script type="application/ld+json">{}</script>
-    <meta name="description" content="Yologger&#39;s Blog">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\npom.xml모든 Maven 프로젝트는 pom.xml파일을 포함한다. 이 파일에는 프로젝트를 빌드하는데 필요한 정보들이 나열되어있다.\n(1) 프로젝트 기본 정보12345678910111213&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;   xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;  xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;&gt;    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;    &lt;groupId&gt;com.yologger.project&lt;/groupId&gt;    &lt;artifactId&gt;maven_project&lt;/artifactId&gt;    &lt;version&gt;0.0.1&lt;/version&gt;    &lt;name&gt;maven_project&lt;/name&gt;    &lt;packaging&gt;jar&lt;/packaging&gt;    &lt;url&gt;http://maven.apache.org&lt;/url&gt;&lt;/project&gt; \n\n&lt;project&gt;: 최상위 태그\n&lt;modelVersion&gt;: pom.xml 파일의 버전이며, 항상 4.0.0 값으로 설정한다.\n&lt;groupId&gt;: 조직의 고유 id를 입력한다. 보통 조직 도메인 네임의 역순을 입력한다.\n&lt;artifactId&gt;: 애플리케이션을 구분하는 고유 id를 입력한다.\n&lt;version&gt;: 해당 artifact의 버전을 입력한다.\n&lt;packaging&gt;: 어떤 파일 형식으로 패키징할지 정의한다. jar, war, exe 등이 올 수 있다.\n&lt;name&gt;: 애플리케이션의 이름을 입력한다.\n\n(2) 의존성&lt;dependencies&gt;태그를 사용하면 외부 의존성을 추가할 수 있다. 다음 예제에서는 JUnit 라이브러리를 추가하고있다.\npom.xml1234567891011121314&lt;project&gt;    &lt;!-- .. --&gt;    &lt;dependencies&gt;        &lt;dependency&gt;            &lt;groupId&gt;junit&lt;/groupId&gt;            &lt;artifactId&gt;junit&lt;/artifactId&gt;            &lt;version&gt;3.8.1&lt;/version&gt;            &lt;scope&gt;test&lt;/scope&gt;        &lt;/dependency&gt;    &lt;/dependencies&gt;&lt;/project&gt;\nMaven의 의존성은 scope를 가진다. scope는 의존성의 적용 범위를 제한하는데 사용한다. 예를 들어 scope를 사용하면 의존성을 컴파일 과정에만 적용할 수 도 있고, 런타임에만 적용할 수 있다. \n\ncompile: 컴파일 과정과 런타임에 모두 필요한 의존성이다. spring-context.jar, spring-webmvc.jar가 대표적이다.\nprovided: 컴파일 과정과 런타임에 모두 필요하지만, 런타임에서는 JDK나 Tomcat의 의존성을 사용한다. 예를 들어 JSP(jsp-api.jar), Servlet(servlet-api.jar)은 컴파일 과정에서 필요하지만 런타임 환경에서는 Tomcat에서 제공하는 라이브러리를 사용한다.\nruntime: 컴파일 과정에서는 필요없으나 런타임에서는 필요한 의존성이다. 예를 들어 JDBC Driver(mysql-connector-java.jar)가 대표적이다.\ntest: 테스트 코드를 컴파일할 때는 의존성을 포함하지만 배포할 때는 제외한다. JUnit(junit.jar)가 대표적이다.\n\n의존성을 다른 의존성을 가질 수 있다. 예를 들어 spring-context.jar는 다른 의존성을 가지고 있다. 이를 추이적 의존성이라고 한다.\n123456spring-context.jar├───── spring-core.jar├───── spring-aop.jar├───── spring-beans.jar├───── spring-asm.jar└───── spring-asm.jar\n추이적 의존성은 문제를 일으킬 수 있다. 아래 그림을 보자.Dependency A와 Dependency B는 모두 Dependency C에 의존하고 있다. 그러나 Dependency C는 버전이 다르다면 어떻게 될까?이러한 경우 문제가 발생할 수 있기 때문에 다음과 같이 의존 관계를 수정해야한다.이때 Dependency A와 Dependency B에서 &lt;exclusion&gt;태그를 사용하여 Dependency C를 제외할 수 있다. 아래 예제에서는 spring-context.jar에서 commons-logging.jar를 제외하고 있다.\npom.xml123456789101112131415161718192021&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;\txsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd&quot;&gt;    &lt;!-- ... --&gt;    &lt;dependencies&gt;        &lt;dependency&gt;            &lt;groupId&gt;org.springframework&lt;/groupId&gt;            &lt;artifactId&gt;spring-context&lt;/artifactId&gt;            &lt;version&gt;$&#123;org.springframework-version&#125;&lt;/version&gt;            &lt;exclusions&gt;                &lt;exclusion&gt;                    &lt;groupId&gt;commons-logging&lt;/groupId&gt;                    &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;                &lt;/exclusion&gt;            &lt;/exclusions&gt;        &lt;/dependency&gt;\t\t\t     &lt;/dependencies&gt;&lt;/project&gt;\n\n(3) properties&lt;properties&gt;태그는 pom.xml 파일 내에서 반복적으로 사용되는 상수를 정의할 때 사용한다.\npom.xml12345678910111213141516171819202122232425262728293031&lt;project&gt;    &lt;!-- properties --&gt;    &lt;properties&gt;        &lt;junit-version&gt;3.8.1&lt;/junit-version&gt;        &lt;org.springframework-version&gt;3.1.1.RELEASE&lt;/org.springframework-version&gt;    &lt;/properties&gt;    &lt;!-- dependencies --&gt;    &lt;dependencies&gt;        &lt;dependency&gt;            &lt;groupId&gt;junit&lt;/groupId&gt;            &lt;artifactId&gt;junit&lt;/artifactId&gt;            &lt;version&gt;$&#123;junit-version&#125;&lt;/version&gt;            &lt;scope&gt;test&lt;/scope&gt;        &lt;/dependency&gt;        &lt;dependency&gt;            &lt;groupId&gt;org.springframework&lt;/groupId&gt;            &lt;artifactId&gt;spring-context&lt;/artifactId&gt;            &lt;version&gt;$&#123;org.springframework-version&#125;&lt;/version&gt;            &lt;exclusions&gt;                &lt;exclusion&gt;                    &lt;groupId&gt;commons-logging&lt;/groupId&gt;                    &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;                &lt;/exclusion&gt;            &lt;/exclusions&gt;            &lt;scope&gt;provided&lt;/scope&gt;        &lt;/dependency&gt;    &lt;/dependencies&gt;&lt;/project&gt;\n\n(4) build 정보&lt;build&gt;태그 내부에는 Maven이 프로젝트를 빌드할 때 필요로 하는 정보를 나열한다.\npom.xml12345678910111213141516171819202122232425262728293031&lt;project&gt;    &lt;!-- .. --&gt;    &lt;build&gt;        &lt;sourceDirectory&gt;src/main/java&lt;/sourceDirectory&gt;        &lt;testSourceDirectory&gt;src/test/java&lt;/testSourceDirectory&gt;        &lt;outputDirectory&gt;$&#123;project.basedir&#125;/target/classes&lt;/outputDirectory&gt;        &lt;resources&gt;            &lt;resource&gt;                &lt;directory&gt;src/main/resources&lt;/directory&gt;                &lt;filtering&gt;true&lt;/filtering&gt;            &lt;/resource&gt;        &lt;/resources&gt;        &lt;plugins&gt;            &lt;plugin&gt;                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;                &lt;version&gt;2.5.1&lt;/version&gt;                &lt;configuration&gt;                    &lt;source&gt;1.6&lt;/source&gt;                    &lt;target&gt;1.6&lt;/target&gt;                    &lt;compilerArgument&gt;-Xlint:all&lt;/compilerArgument&gt;                    &lt;showWarnings&gt;true&lt;/showWarnings&gt;                    &lt;showDeprecation&gt;true&lt;/showDeprecation&gt;                &lt;/configuration&gt;            &lt;/plugin&gt;            &lt;/plugin&gt;        &lt;/plugins&gt;    &lt;/build&gt;&lt;/project&gt;\n\n&lt;build&gt;: 빌드 시 사용할 옵션을 나열한다.\n&lt;sourceDirectory&gt;: 자바 소스 코드를 관리하는 디렉토리\n&lt;testSourceDirectory&gt;: 테스트 소스를 관리하기 위한 디렉토리\n&lt;outputDirectory&gt;: sourceDirectory의 소스를 컴파일한 결과물이 위치하는 디렉토리\n&lt;testOutputDirectory&gt;: testSourceDirectory의 소스를 컴파일한 결과물이 위치하는 디렉토리\n&lt;resources&gt;: 프로젝트에서 사용하는 자원이 위치하는 디렉토리. 이 디렉토리에 포함된 파일들은 빌드 시 포함됩니다.\n&lt;testResources&gt;: 테스트에서 사용하는 자원이 위치하는 디렉토리\n&lt;plugins&gt;: 플러그인은 Maven이 애플리케이션을 빌드할 때 사용하는 도구다. 이 태그 안에 사용할 플러그인을 나열한다. 모든 Maven 플러그인은 이 곳에서 확인할 수 있다.\n\n(5) Repository의존성을 다운받을 원격 저장소를 나열한다. 별도로 기술하지 않을 때는 Maven 저장소가 기본적으로 사용된다.\n조직에서 사용하는 사설 저장소가 있다면 다음과 같이 추가할 수 있다. 자주 사용되는 메이븐 사설 저장소에는 Spring 저장소, JBoss 저장소가 있다.\npom.xml12345678910111213141516&lt;project&gt;    &lt;!-- .. --&gt;    &lt;!-- Repository --&gt;    &lt;repositories&gt;        &lt;repository&gt;            &lt;id&gt;springsource-repo&lt;/id\t            &lt;url&gt;http://repo.springsource.org/release&lt;/url&gt;        &lt;/repository&gt;        &lt;repository&gt;            &lt;id&gt;jboss-repo&lt;/id&gt;            &lt;url&gt;https://repository.jboss.org/nexus/content/groups/public/&lt;/url&gt;        &lt;/repository&gt;    &lt;/repositories&gt;&lt;/project&gt;\n원격 저장소에서 다운받은 의존성은 로컬 저장소에 저장된다. 로컬 저장소의 위치는 보통 /[user_home_directory]/.m2/repository에 위치한다.\n12345678910$ pwd/yologger/.m2/repository$ lsantlr                    classworlds              commons-collections      dom4j                    net                      xpp3aopalliance              com                      commons-digester         index                    orgasm                      commons-beanutils        commons-io               javax                    oroavalon-framework         commons-chain            commons-lang             junit                    sslextbackport-util-concurrent commons-cli              commons-logging          log4j                    xercesch                       commons-codec            commons-validator        logkit                   xml-apis\n\n(6) Plugin Repository&lt;pluginRepository&gt;에는 Maven 플러그인을 다운받을 수 있는 저장소를 나열한다.\npom.xml123456789101112131415&lt;project&gt;    &lt;pluginRepositories&gt;        &lt;pluginRepository&gt;            &lt;id&gt;acme corp&lt;/id&gt;            &lt;name&gt;Acme Internal Corporate Repository&lt;/name&gt;            &lt;url&gt;http://acmecorp.com/plugins&lt;/url&gt;            &lt;snapshots&gt;                &lt;enabled&gt;true&lt;/enabled&gt;            &lt;/snapshots&gt;            &lt;releases&gt;                &lt;enabled&gt;false&lt;/enabled&gt;            &lt;/releases&gt;        &lt;/pluginRepository&gt;    &lt;/pluginRepositories&gt;&lt;/project&gt;\n\n(7) 배포deploy goal을 실행했을 때 배포되는 위치를 기술한다.\npom.xml1234567891011121314&lt;project&gt;&lt;distributionManagement&gt;    &lt;repository&gt;        &lt;id&gt;releases-repo&lt;/id&gt;        &lt;name&gt;Releases Repository&lt;/name&gt;        &lt;url&gt;일반적인 회사 내부 repository url&lt;/url&gt;    &lt;/repository&gt;    &lt;snapshotRepository&gt;        &lt;id&gt;snapshots-repo&lt;/id&gt;        &lt;name&gt;Snapshots Repository&lt;/name&gt;        &lt;url&gt;일반적인 회사 내부 repository url&lt;/url&gt;    &lt;/snapshotRepository&gt;&lt;/distributionManagement&gt;s&lt;/project&gt;\n원격 저장소에서 다운받은 플러그인도 로컬 저장소에 저장된다. 로컬 저장소의 위치는 보통 /[user_home_directory]/.m2/repository/org/apache/maven/plugins에 위치한다.\n123456789101112131415$ pwd/Users/yologger/.m2/repository/org/apache/maven/pluginsls        maven-compiler-plugin           maven-install-plugin      maven-archetype-plugin          maven-dependency-plugin         maven-jar-plugin                 maven-war-plugin           maven-release-plugin         maven-deploy-plugin             maven-clean-plugin              maven-site-plugin// ...\n\nSuper pom.xmlMaven 프로젝트의 모든 pom.xml은 사전에 정의된 Super pom.xml을 암시적으로 상속한다. Super pom.xml에는 사전에 합리적으로 정의한 환경설정이 포함되어있다. 프로젝트의 pom.xml은 이 Super pom.xml을 암시적으로 상속하기 때문에 모든 환경설정을 번거롭게 구성할 필요가 없다. \n이처럼 사전에 합리적으로 정의된 환경설정을 제공하여 환경설정 비용을 줄이는 것을 설정보다 관습(CoC, Convention over Configuration)이라고 한다.\nSuper pom.xml 내용은 다음과 같다.\npom.xml123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109110111112113114115116117118119120121122123124125126127&lt;project&gt;  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;  &lt;repositories&gt;    &lt;repository&gt;      &lt;id&gt;central&lt;/id&gt;      &lt;name&gt;Central Repository&lt;/name&gt;      &lt;url&gt;http://repo.maven.apache.org/maven2&lt;/url&gt;      &lt;layout&gt;default&lt;/layout&gt;      &lt;snapshots&gt;        &lt;enabled&gt;false&lt;/enabled&gt;      &lt;/snapshots&gt;    &lt;/repository&gt;  &lt;/repositories&gt;  &lt;pluginRepositories&gt;    &lt;pluginRepository&gt;      &lt;id&gt;central&lt;/id&gt;      &lt;name&gt;Central Repository&lt;/name&gt;      &lt;url&gt;http://repo.maven.apache.org/maven2&lt;/url&gt;      &lt;layout&gt;default&lt;/layout&gt;      &lt;snapshots&gt;        &lt;enabled&gt;false&lt;/enabled&gt;      &lt;/snapshots&gt;      &lt;releases&gt;        &lt;updatePolicy&gt;never&lt;/updatePolicy&gt;      &lt;/releases&gt;    &lt;/pluginRepository&gt;  &lt;/pluginRepositories&gt;  &lt;build&gt;    &lt;directory&gt;$&#123;project.basedir&#125;/target&lt;/directory&gt;    &lt;outputDirectory&gt;$&#123;project.build.directory&#125;/classes&lt;/outputDirectory&gt;    &lt;finalName&gt;$&#123;project.artifactId&#125;-$&#123;project.version&#125;&lt;/finalName&gt;    &lt;testOutputDirectory&gt;$&#123;project.build.directory&#125;/test-classes&lt;/testOutputDirectory&gt;    &lt;sourceDirectory&gt;$&#123;project.basedir&#125;/src/main/java&lt;/sourceDirectory&gt;    &lt;scriptSourceDirectory&gt;src/main/scripts&lt;/scriptSourceDirectory&gt;    &lt;testSourceDirectory&gt;$&#123;project.basedir&#125;/src/test/java&lt;/testSourceDirectory&gt;    &lt;resources&gt;      &lt;resource&gt;        &lt;directory&gt;$&#123;project.basedir&#125;/src/main/resources&lt;/directory&gt;      &lt;/resource&gt;    &lt;/resources&gt;    &lt;testResources&gt;      &lt;testResource&gt;        &lt;directory&gt;$&#123;project.basedir&#125;/src/test/resources&lt;/directory&gt;      &lt;/testResource&gt;    &lt;/testResources&gt;    &lt;pluginManagement&gt;      &lt;!-- NOTE: These plugins will be removed from future versions of the super POM --&gt;      &lt;!-- They are kept for the moment as they are very unlikely to conflict with lifecycle mappings (MNG-4453) --&gt;      &lt;plugins&gt;        &lt;plugin&gt;          &lt;artifactId&gt;maven-antrun-plugin&lt;/artifactId&gt;          &lt;version&gt;1.3&lt;/version&gt;        &lt;/plugin&gt;        &lt;plugin&gt;          &lt;artifactId&gt;maven-assembly-plugin&lt;/artifactId&gt;          &lt;version&gt;2.2-beta-5&lt;/version&gt;        &lt;/plugin&gt;        &lt;plugin&gt;          &lt;artifactId&gt;maven-dependency-plugin&lt;/artifactId&gt;          &lt;version&gt;2.1&lt;/version&gt;        &lt;/plugin&gt;        &lt;plugin&gt;          &lt;artifactId&gt;maven-release-plugin&lt;/artifactId&gt;          &lt;version&gt;2.0&lt;/version&gt;        &lt;/plugin&gt;      &lt;/plugins&gt;    &lt;/pluginManagement&gt;  &lt;/build&gt;  &lt;reporting&gt;    &lt;outputDirectory&gt;$&#123;project.build.directory&#125;/site&lt;/outputDirectory&gt;  &lt;/reporting&gt;  &lt;profiles&gt;    &lt;!-- NOTE: The release profile will be removed from future versions of the super POM --&gt;    &lt;profile&gt;      &lt;id&gt;release-profile&lt;/id&gt;      &lt;activation&gt;        &lt;property&gt;          &lt;name&gt;performRelease&lt;/name&gt;          &lt;value&gt;true&lt;/value&gt;        &lt;/property&gt;      &lt;/activation&gt;      &lt;build&gt;        &lt;plugins&gt;          &lt;plugin&gt;            &lt;inherited&gt;true&lt;/inherited&gt;            &lt;artifactId&gt;maven-source-plugin&lt;/artifactId&gt;            &lt;executions&gt;              &lt;execution&gt;                &lt;id&gt;attach-sources&lt;/id&gt;                &lt;goals&gt;                  &lt;goal&gt;jar&lt;/goal&gt;                &lt;/goals&gt;              &lt;/execution&gt;            &lt;/executions&gt;          &lt;/plugin&gt;          &lt;plugin&gt;            &lt;inherited&gt;true&lt;/inherited&gt;            &lt;artifactId&gt;maven-javadoc-plugin&lt;/artifactId&gt;            &lt;executions&gt;              &lt;execution&gt;                &lt;id&gt;attach-javadocs&lt;/id&gt;                &lt;goals&gt;                  &lt;goal&gt;jar&lt;/goal&gt;                &lt;/goals&gt;              &lt;/execution&gt;            &lt;/executions&gt;          &lt;/plugin&gt;          &lt;plugin&gt;            &lt;inherited&gt;true&lt;/inherited&gt;            &lt;artifactId&gt;maven-deploy-plugin&lt;/artifactId&gt;            &lt;configuration&gt;              &lt;updateReleaseInfo&gt;true&lt;/updateReleaseInfo&gt;            &lt;/configuration&gt;          &lt;/plugin&gt;        &lt;/plugins&gt;      &lt;/build&gt;    &lt;/profile&gt;  &lt;/profiles&gt;&lt;/project&gt;\nEclipse 환경에서 프로젝트의 pom.xml 파일을 오픈하면 Effective POM 탭을 확인할 수 있다.Effective POM은 Super pom과 프로젝트의 pom.xml을 병합하여 프로젝트에 최종 적용되는 pom.xml이다.\n\nMaven LifecycleMaven은 사전에 정의된 순서대로 프로젝트를 빌드한다. 이 빌드 순서를 Lifecycle이라고 한다. Maven은 기본적으로 사전에 정의된 세 개의 Lifecycle을 제공한다.\n\nbuild(default): 프로젝트를 빌드하여 결과물을 생성한다.\nclean: 생성된 빌드 결과물을 제거한다.\nsite: 문서화 사이트를 생성한다.\n\nPhaseLifecycle은 여러 단계의 Phase로 구성된다. 프로젝트 컴파일을 위한 mvn compile, 프로젝트 패키징을 위한 mvn package 등의 명령어도 사실은 Phase다.\n예를 들어 프로젝트 빌드를 위한 build lifecycle은 다음 다섯 개의 Phase로 구성된다.\n\nmvn compile; 소스코드를 컴파일한다. 컴파일된 코드는 target/classes 폴더에 생성된다.\nmvn package: 프로젝트를 패키징한다.\nmvn install: 프로젝트를 로컬 리포지토리에 배포한다. 로컬 환경에 Tomcat이 설치되어있다면 이 곳에 배포하게된다.\nmvn deploy: 원격 리포지토리가 구성되어있다면 프로젝트를 원격 리포지토리에 배포한다.\nmvn clean: target 폴더를 삭제한다.\n\nPhase는 위에서 언급한 플러그인을 기반으로 동작한다.사실 메이븐이 제공하는 Phase는 위에서 언급한 Plugin 형태로 구현되며 다음과 같이 호출할 수 있다.\n12// mvn &lt;plugin&gt;$ mvn compile\n\nGoalPhase는 여러 개의 Goal로 구성되며 다음과 같이 실행한다.\n// mvn &lt;plugin&gt;:&lt;goal&gt;\n$ mvn archetype:generate\n\nmaven core plugins\nhttps://cornswrold.tistory.com/217https://cornswrold.tistory.com/217https://cornswrold.tistory.com/217\n","dateCreated":"2018-06-02T00:00:00+09:00","dateModified":"2021-12-12T04:34:48+09:00","datePublished":"2018-06-02T00:00:00+09:00","description":"","headline":"[Maven] pom.xml","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/","keywords":"Maven"}</script>
+    <meta name="description" content="pom.xml모든 Maven 프로젝트는 pom.xml파일을 포함한다. 이 파일에는 프로젝트를 빌드하는데 필요한 정보들이 나열되어있다. (1) 프로젝트 기본 정보12345678910111213&lt;project xmlns&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;POM&#x2F;4.0.0&quot;   xmlns:xsi&#x3D;&quot;http:&#x2F;&#x2F;www.">
 <meta property="og:type" content="blog">
-<meta property="og:title" content="Yologger&#39;s Blog">
-<meta property="og:url" content="https://yologger.github.io/ko/archives/2018/index.html">
+<meta property="og:title" content="[Maven] pom.xml">
+<meta property="og:url" content="https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/index.html">
 <meta property="og:site_name" content="Yologger&#39;s Blog">
-<meta property="og:description" content="Yologger&#39;s Blog">
+<meta property="og:description" content="pom.xml모든 Maven 프로젝트는 pom.xml파일을 포함한다. 이 파일에는 프로젝트를 빌드하는데 필요한 정보들이 나열되어있다. (1) 프로젝트 기본 정보12345678910111213&lt;project xmlns&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;POM&#x2F;4.0.0&quot;   xmlns:xsi&#x3D;&quot;http:&#x2F;&#x2F;www.">
 <meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/images/08_tools/01_maven/20180602_pom.xml/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/images/08_tools/01_maven/20180602_pom.xml/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/images/08_tools/01_maven/20180602_pom.xml/3.png">
+<meta property="og:image" content="https://yologger.github.io/ko/images/08_tools/01_maven/20180602_pom.xml/4.png">
+<meta property="og:image" content="https://yologger.github.io/ko/images/08_tools/01_maven/20180602_pom.xml/5.png">
+<meta property="article:published_time" content="2018-06-01T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-11T19:34:48.861Z">
 <meta property="article:author" content="yologger">
+<meta property="article:tag" content="Maven">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/images/08_tools/01_maven/20180602_pom.xml/1.png">
     
     
         
@@ -50,6 +59,8 @@
     
 
     
+        
+    
 </head>
 
     <body>
@@ -59,7 +70,7 @@
 
     
 
-<header id="header" data-behavior="1">
+<header id="header" data-behavior="4">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -86,7 +97,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="1">
+<nav id="sidebar" data-behavior="4">
     <div class="sidebar-container">
         
         
@@ -338,30 +349,22 @@
 </nav>
 
             
-            <div id="main" data-behavior="1"
+            <div id="main" data-behavior="4"
                  class="
                         hasCoverMetaIn
                         ">
                 
-    <section class="postShorten-group main-content-wrap">
+<article class="post">
     
     
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
-                            aria-label=": [Maven] pom.xml"
-                        >
-                            [Maven] pom.xml
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Maven] pom.xml
+        </h1>
+    
+    
+        <div class="post-meta">
     <time datetime="2018-06-02T00:00:00+09:00">
 	
 		    2018/06/02
@@ -376,10 +379,13 @@
     
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
 <h1 id="pom-xml"><a href="#pom-xml" class="headerlink" title="pom.xml"></a>pom.xml</h1><p>모든 Maven 프로젝트는 <code>pom.xml</code>파일을 포함한다. 이 파일에는 프로젝트를 빌드하는데 필요한 정보들이 나열되어있다.</p>
 <h3 id="1-프로젝트-기본-정보"><a href="#1-프로젝트-기본-정보" class="headerlink" title="(1) 프로젝트 기본 정보"></a>(1) 프로젝트 기본 정보</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> </span></span><br><span class="line"><span class="tag">  <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.yologger.project<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven_project<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>maven_project<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://maven.apache.org<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span> </span><br></pre></td></tr></table></figure>
 <ul>
@@ -465,383 +471,124 @@ $ mvn archetype:generate
 <p>maven core plugins</p>
 <p><a target="_blank" rel="noopener" href="https://cornswrold.tistory.com/217">https://cornswrold.tistory.com/217</a><br><a target="_blank" rel="noopener" href="https://cornswrold.tistory.com/217">https://cornswrold.tistory.com/217</a><br><a target="_blank" rel="noopener" href="https://cornswrold.tistory.com/217">https://cornswrold.tistory.com/217</a></p>
 
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
             
+
+
         </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
         
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/06/01/08_tools/01_maven/20180601_maven/"
-                            aria-label=": [Maven] Maven 프로젝트 생성하기"
-                        >
-                            [Maven] Maven 프로젝트 생성하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-06-01T00:00:00+09:00">
-	
-		    2018/06/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Maven/">Maven</a>
-
-
-    
-</div>
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Maven/" rel="tag">Maven</a>
 
             </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>MacOS 환경에서는 <code>Homebrew</code>를 통해 Maven을 설치할 수 있다.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ brew install maven</span><br></pre></td></tr></table></figure>
-<p>설치된 Maven의 버전을 확인해보자</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn -version</span><br></pre></td></tr></table></figure>
-<p>Homebrew의 <code>brew info</code>를 통해 설치경로 등의 패키지 정보를 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ brew info maven</span><br><span class="line">maven: stable 3.8.4 (bottled)</span><br><span class="line">Java-based project management</span><br><span class="line">https://maven.apache.org/</span><br><span class="line">Conflicts with:</span><br><span class="line">  mvnvm (because also installs a &#x27;mvn&#x27; executable)</span><br><span class="line">/usr/local/Cellar/maven/3.8.4 (79 files, 10MB) *</span><br><span class="line">  Poured from bottle on 2021-12-07 at 14:40:40</span><br><span class="line">From: https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/maven.rb</span><br><span class="line">License: Apache-2.0</span><br><span class="line">==&gt; Dependencies</span><br><span class="line">Required: openjdk ✔</span><br><span class="line">==&gt; Analytics</span><br><span class="line">install: 77,619 (30 days), 215,451 (90 days), 673,523 (365 days)</span><br><span class="line">install-on-request: 77,149 (30 days), 213,878 (90 days), 668,836 (365 days)</span><br></pre></td></tr></table></figure>
-
-<h1 id="Maven-프로젝트-생성하기"><a href="#Maven-프로젝트-생성하기" class="headerlink" title="Maven 프로젝트 생성하기"></a>Maven 프로젝트 생성하기</h1><p>프로젝트를 위한 디렉토리를 생성한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/yologger/workspace</span><br><span class="line"></span><br><span class="line">$ mkdir maven_project</span><br></pre></td></tr></table></figure>
-<p>프로젝트의 루트 디렉토리에 <code>pom.xml</code>파일을 생성한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ cd maven _project</span><br><span class="line"></span><br><span class="line">$ touch pom.xml</span><br></pre></td></tr></table></figure>
-<p>모든 Maven 프로젝트는 <code>pom.xml</code>파일을 포함해야하며, 다음 내용을 필수적으로 포함해야한다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.yologger.app<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven_project<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>maven_project<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://maven.apache.org<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.7.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>&lt;project&gt;</code>: 최상위 태그</li>
-<li><code>&lt;modelVersion&gt;</code>: pom.xml 파일의 버전이며, 항상 4.0.0 값으로 설정한다.</li>
-<li><code>&lt;groupId&gt;</code>: 조직의 고유 id를 입력한다. 보통 조직 도메인 네임의 역순을 입력한다.</li>
-<li><code>&lt;artifactId&gt;</code>: 애플리케이션을 구분하는 고유 id를 입력한다.</li>
-<li><code>&lt;version&gt;</code>: 해당 artifact의 버전을 입력한다.</li>
-<li><code>&lt;packaging&gt;</code>: 어떤 파일 형식으로 패키징할지 정의한다. jar, war, exe 등이 올 수 있다.</li>
-<li><code>&lt;name&gt;</code>: 애플리케이션의 이름을 입력한다.</li>
-<li><code>&lt;build&gt;</code>: 빌드 시 사용할 옵션을 입력한다.</li>
-<li><code>&lt;plugins&gt;</code>: 플러그인은 Maven이 애플리케이션을 빌드할 때 사용하는 도구다. 이 태그 안에 사용할 플러그인을 나열한다. 모든 Maven 플러그인은 <a target="_blank" rel="noopener" href="https://maven.apache.org/plugins/index.html">이 곳</a>에서 확인할 수 있다.</li>
-</ul>
-<p><code>maven-compiler-plugin</code>는 소스코드를 컴파일 할 때 사용되는 플러그인이다. <code>&lt;source&gt;</code>태그에는 소스코드의 Java 버전을 입력하고 <code>&lt;target&gt;</code>태그에는 생성될 class파일의 Java 버전을 입력한다.</p>
-<p>그 다음 <code>src/main/java</code> 디렉토리를 생성하고 <code>App.java</code>파일을 생성하자. </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello Maven Project!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>명령어를 입력하여 빌드 파일이 저장되는 디렉토리를 비운다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn clean</span><br></pre></td></tr></table></figure>
-<p>프로젝트를 빌드한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn compile</span><br></pre></td></tr></table></figure>
-<p>빌드가 완료되면 <code>target</code> 디렉토리에 결과물이 생성된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">pom.xml </span><br><span class="line">src</span><br><span class="line">target</span><br></pre></td></tr></table></figure>
-<p>이제 클래스 파일을 실행할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ java -classpath target/classes App</span><br><span class="line">Hello Maven Project! </span><br></pre></td></tr></table></figure>
-<h1 id="패키징"><a href="#패키징" class="headerlink" title="패키징"></a>패키징</h1><p><code>패키징(Packaging)</code>이란 프로젝트를 쉽게 배포할 수 있도록 <code>jar</code>, <code>war</code>, <code>zip</code> 형태로 빌드하는 것이다. <code>mvn package</code> 명령어를 사용하면 프로젝트를 패키징할 수 있다. <code>jar</code>파일로 패키징하려면 pom.xml에 <code>maven_jar_plugin</code>플러그인을 추가해야한다.</p>
-<figure class="highlight xml"><figcaption><span>pom.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- .. --&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- .. --&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-jar-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">archive</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">manifest</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">addClasspath</span>&gt;</span>true<span class="tag">&lt;/<span class="name">addClasspath</span>&gt;</span>  </span><br><span class="line">                <span class="tag">&lt;<span class="name">classpathPrefix</span>&gt;</span>lib/<span class="tag">&lt;/<span class="name">classpathPrefix</span>&gt;</span>  </span><br><span class="line">                <span class="tag">&lt;<span class="name">mainClass</span>&gt;</span>App<span class="tag">&lt;/<span class="name">mainClass</span>&gt;</span>  </span><br><span class="line">                <span class="tag">&lt;/<span class="name">manifest</span>&gt;</span>  </span><br><span class="line">            <span class="tag">&lt;/<span class="name">archive</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>다음 명령어를 입력하여 패키징한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn package</span><br></pre></td></tr></table></figure>
-<p><code>class</code>디렉토리에 <code>jar</code>파일이 생성된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ ./target</span><br><span class="line">maven_project-0.0.1.jar</span><br><span class="line">classes                 </span><br><span class="line">generated-sources       </span><br><span class="line">maven-archiver          </span><br><span class="line">maven-status            </span><br></pre></td></tr></table></figure>
-<p>패키징된 파일을 실행해보자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ java -jar target/maven_project-0.0.1.jar</span><br><span class="line">Hello Maven Project!</span><br></pre></td></tr></table></figure>
-
-<h1 id="템플릿-사용하기"><a href="#템플릿-사용하기" class="headerlink" title="템플릿 사용하기"></a>템플릿 사용하기</h1><p><code>mvn archetype:generate</code>을 사용하면 템플릿을 사용하여 Maven 프로젝트를 쉽게 생성할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn archetype:generate</span><br></pre></td></tr></table></figure>
-<p>이 때 세 개의 인자를 전달해야한다.</p>
-<ul>
-<li><code>groupId</code>: 조직의 고유 id를 입력한다. 보통 조직 도메인 네임의 역순을 입력한다.</li>
-<li><code>artifactId</code>: 애플리케이션을 구분하는 고유 id를 입력한다.</li>
-<li><code>archetypeArtifactId</code>: 프로젝트를 생성할 때 사용할 템플릿을 지정한다. 자주 사용되는 템플릿은 다음과 같으며, 모든 템플릿은 <a target="_blank" rel="noopener" href="https://maven.apache.org/guides/introduction/introduction-to-archetypes.html">이 곳</a>에서 확인 가능하다.<ul>
-<li>maven-archetype-quickstart</li>
-<li>maven-archetype-simple</li>
-<li>maven-archetype-webapp</li>
-</ul>
-</li>
-</ul>
-<p>이제 <code>maven-archetype-quickstart</code> 템플릿을 사용하여 프로젝트를 생성해보자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/yologger/workspace</span><br><span class="line"></span><br><span class="line">$ mvn archetype:generate -DgroupId=com.yologger.app -DartifactId=quickstart -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</span><br></pre></td></tr></table></figure>
-<p><code>maven-archetype-quickstart</code>템플릿을 사용하면 다음과 같은 구조로 프로젝트가 생성된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/yologger/workspace</span><br><span class="line"></span><br><span class="line">$ cd quickstart</span><br><span class="line"></span><br><span class="line">$ tree .</span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    ├── main</span><br><span class="line">    │   └── java</span><br><span class="line">    │       └── com</span><br><span class="line">    │           └── yologger</span><br><span class="line">    │               └── app</span><br><span class="line">    │                   └── App.java</span><br><span class="line">    └── test</span><br><span class="line">        └── java</span><br><span class="line">            └── com</span><br><span class="line">                └── yologger</span><br><span class="line">                    └── app</span><br><span class="line">                        └── AppTest.java</span><br></pre></td></tr></table></figure>
-<p>이번엔 <code>maven-archetype-webapp</code>템플릿을 사용해보자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn archetype:generate -DgroupId=com.yologger.webapp -DartifactId=webapp -DarchetypeArtifactId=maven-archetype-webapp -DinteractiveMode=false </span><br></pre></td></tr></table></figure>
-<p>다음과 같은 구조로 프로젝트가 생성된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── resources</span><br><span class="line">        └── webapp</span><br><span class="line">            ├── WEB-INF</span><br><span class="line">            │   └── web.xml</span><br><span class="line">            └── index.jsp</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/06/01/08_tools/01_maven/20180601_maven/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/01/03/01_programming/05_java/180103_data_type/"
-                            aria-label=": [Java] 자료형(Data Type)"
-                        >
-                            [Java] 자료형(Data Type)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-01-03T00:00:00+09:00">
-	
-		    2018/01/03
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Programming/">Programming</a>, <a class="category-link" href="/ko/categories/Programming/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="자료형"><a href="#자료형" class="headerlink" title="자료형"></a>자료형</h1><p><code>자료형(Data Type)</code>은 데이터의 종류를 의미합니다. 예를 들어 나이는 숫자고 이름은 문자열입니다. 여기서 숫자와 문자열을 자료형이라고 합니다. 이를 Java에서 다음과 같이 표현합니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> age = <span class="number">30</span>;</span><br><span class="line">String name = <span class="string">&quot;Paul&quot;</span>;</span><br></pre></td></tr></table></figure>
-<p>그럼 Java에서 제공하는 여러 자료형에 대해 알아봅시다.</p>
-<h2 id="1-정수형-숫자"><a href="#1-정수형-숫자" class="headerlink" title="(1) 정수형 숫자"></a>(1) 정수형 숫자</h2><p><code>10진수 정수형 숫자</code>는 다음과 같이 사용합니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span> age = <span class="number">24</span>;</span><br><span class="line"><span class="keyword">short</span> age = <span class="number">24</span>;</span><br><span class="line"><span class="keyword">int</span> age = <span class="number">24</span>;</span><br><span class="line"><span class="keyword">long</span> age = <span class="number">24</span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-정수형-숫자"><a href="#2-정수형-숫자" class="headerlink" title="(2) 정수형 숫자"></a>(2) 정수형 숫자</h2><p><code>실수형 숫자</code>는 다음과 같이 사용합니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> weight = <span class="number">78.9f</span>;</span><br><span class="line"><span class="keyword">double</span> height = <span class="number">180.8</span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-불리언"><a href="#3-불리언" class="headerlink" title="(3) 불리언"></a>(3) 불리언</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">boolean</span> isMarried = <span class="keyword">true</span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="4-문자"><a href="#4-문자" class="headerlink" title="(4) 문자"></a>(4) 문자</h2><p>문자를 선언하고 초기화할 때는 <code>따옴표(&#39;)</code>를 사용합니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span> alphabetA = <span class="string">&#x27;A&#x27;</span>;</span><br><span class="line"><span class="keyword">char</span> alphabetB = <span class="string">&#x27;B&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="5-문자열"><a href="#5-문자열" class="headerlink" title="(5) 문자열"></a>(5) 문자열</h2><p>문자열을 선언하고 초기화할 때는 <code>쌍따옴표(&quot;)</code>를 사용합니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String name = <span class="string">&quot;Ronaldo&quot;</span>;</span><br><span class="line">String nation = <span class="keyword">new</span> String(<span class="string">&quot;Portugal&quot;</span>);</span><br></pre></td></tr></table></figure>
-<p>문자열 타입의 변수에는 유용한 속성과 메소드가 내장되어 있습니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">name.length();          <span class="comment">// 7</span></span><br><span class="line">name.toLowerCase();     <span class="comment">// ronaldo</span></span><br><span class="line">name.toUpperCase();     <span class="comment">// RONALDO</span></span><br></pre></td></tr></table></figure>
-<p>문자열과 문자열을 합쳐 새로운 문자열을 만들 때는 <code>+</code>를 사용합니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String description = name + <span class="string">&quot; is from &quot;</span> + nation;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/01/03/01_programming/05_java/180103_data_type/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/01/02/01_programming/05_java/180102_java_platform/"
-                            aria-label=": [Java] 자바 플랫폼 종류"
-                        >
-                            [Java] 자바 플랫폼 종류
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-01-02T00:00:00+09:00">
-	
-		    2018/01/02
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Programming/">Programming</a>, <a class="category-link" href="/ko/categories/Programming/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p>자바 플랫폼은 크게 세 가지 에디션으로 나뉩니다.</p>
-<h1 id="1-Java-SE-Java-Platform-Standard-Edition"><a href="#1-Java-SE-Java-Platform-Standard-Edition" class="headerlink" title="1. Java SE (Java Platform, Standard Edition)"></a>1. Java SE (Java Platform, Standard Edition)</h1><ul>
-<li>가장 보편적으로 사용되는 에디션입니다.</li>
-<li>자바 <u>데스크탑, 스마트폰 어플리케이션 개발</u>에 사용됩니다.</li>
-<li>안드로이드 어플리케이션을 개발할 때에도 주로 Java SE가 사용됩니다.</li>
-<li>기초적인 데이터 타입부터 네트워킹, 보안, 데이터베이스 처리, GUI(Swing, AWT) 등 데스크탑 개발에 필요한 API를 포함합니다.</li>
-</ul>
-<h1 id="2-Java-EE-Java-Platform-Enterprise-Edition"><a href="#2-Java-EE-Java-Platform-Enterprise-Edition" class="headerlink" title="2. Java EE (Java Platform, Enterprise Edition)"></a>2. Java EE (Java Platform, Enterprise Edition)</h1><ul>
-<li>자바 <u>서버 어플리케이션 개발</u>에 사용됩니다.</li>
-<li>Java SE의 모든 API를 포함합니다.</li>
-<li>그 외 EJB, JSP, Sevlet, JDBC 등 서버 어플리케이션 개발을 위한 API가 포함됩니다.</li>
-<li>2017년 오라클은 오픈소스 진영인 이클립스 재단에 Java EE를 넘겼으며, 명칭은 <u>Jakarta EE</u>로 변경되었습니다.</li>
-</ul>
-<h1 id="3-Java-ME-Java-Platform-Micro-Edition"><a href="#3-Java-ME-Java-Platform-Micro-Edition" class="headerlink" title="3. Java ME (Java Platform, Micro Edition)"></a>3. Java ME (Java Platform, Micro Edition)</h1><ul>
-<li>Java SE API의 일부만 포함합니다.</li>
-<li><u>셋톱박스</u>, <u>PDA</u>등 소형 임베디드 시스템을 개발하는데 사용됩니다.</li>
-</ul>
-<p><img src="/ko/images/01_programming/05_java/180102_java_platform/1.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/01/02/01_programming/05_java/180102_java_platform/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/01/01/01_programming/05_java/180101_jvm_jre_jdk/"
-                            aria-label=": [Java] 자바 컴파일러, JVM, JRE, JDK, Java Platform 차이"
-                        >
-                            [Java] 자바 컴파일러, JVM, JRE, JDK, Java Platform 차이
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-01-01T00:00:00+09:00">
-	
-		    2018/01/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Programming/">Programming</a>, <a class="category-link" href="/ko/categories/Programming/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="자바-컴파일러"><a href="#자바-컴파일러" class="headerlink" title="자바 컴파일러"></a>자바 컴파일러</h1><p>자바로 작성한 파일 이름 뒤에는 <code>.java</code>라는 확장자 붙습니다. 이 파일은 <code>자바 소스코드</code>라고 합니다. <code>자바 컴파일러</code>는 이 소스코드를 <code>자바 바이트코드</code>로 변환합니다. 자바 바이트코드는 파일 이름 뒤에 <code>.class</code>확장자가 붙습니다.<br><img src="/ko/images/01_programming/05_java/180101_jvm_jre_jdk/1.png"></p>
-<h1 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h1><p><code>JVM(Java Virtual Machine)</code>은 자바 바이트코드를 운영체제에 종속적인 코드로 변환한 후 실행합니다.<br><img src="/ko/images/01_programming/05_java/180101_jvm_jre_jdk/2.png"></p>
-<p>서로 다른 운영체제라도 JVM만 설치되어 있다면, 같은 자바 어플리케이션을 다른 운영체제에서 실행할 수 있습니다.<br><img src="/ko/images/01_programming/05_java/180101_jvm_jre_jdk/3.png"></p>
-<p>단, JVM은 운영체제에 종속적이므로 각 운영체제에 맞는 JVM을 설치해야 합니다.</p>
-<h1 id="JRE"><a href="#JRE" class="headerlink" title="JRE"></a>JRE</h1><p><code>JRE(Java Runtime Edition)</code>은 Java 애플리케이션의 <u><b>실행</b></u>에 요소들입니다. JRE는 다음 두 요소로 구성되어있습니다.</p>
-<ul>
-<li>JVM</li>
-<li>Java 애플리케이션 실행을 위한 API</li>
-</ul>
-<h1 id="JDK"><a href="#JDK" class="headerlink" title="JDK"></a>JDK</h1><p><code>JDK(Java Development Kit)</code>는 Java 어플리케이션의 <u><b>개발</b></u>에 필요한 요소들입니다. JRE 외에도 <code>Java Compiler</code>, <code>Java Debugger</code> 등 개발에 필요한 도구들을 포함하고 있습니다.<br><img src="/ko/images/01_programming/05_java/180101_jvm_jre_jdk/4.png"></p>
-<h1 id="Java-SE-7-JDK-7-Java-7의-차이점"><a href="#Java-SE-7-JDK-7-Java-7의-차이점" class="headerlink" title="Java SE 7, JDK 7, Java 7의 차이점"></a>Java SE 7, JDK 7, Java 7의 차이점</h1><p><code>Java SE</code>는 Java Platform Standard Edition의 약자로 Java Platform의 근간을 이루는 <u>명세(Specification)</u>를 가리킵니다. </p>
-<p><code>JDK</code>는 명세를 코드로 구현한 <u>구현체(Implementation)</u>입니다. 즉 Java SE 7은 JSR-336로 규정된 Java SE의 일곱 번째 명세를 의미하며 JDK 7은 OpenJDK JDK 7, Oracle JDK 7과 같은 구현체를 의미합니다. </p>
-<p>추가적으로 <code>Java 7</code>은 엄밀히 말하자면 정확한 표현이 아닙니다. 하지만 Java SE 7이나 JDK 7보다 사용하기 편해서 흔히 Java 7이라고 부르는 것입니다. </p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/01/01/01_programming/05_java/180101_jvm_jre_jdk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    <div class="pagination-bar">
-    <ul class="pagination">
         
         
-        <li class="pagination-number">page 1 of 1</li>
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/01/02_spring/01_servlet_jsp/20190101_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Maven으로 Java Web Application 구성하기"
+                    aria-label="이전: [Servlet, JSP] Maven으로 Java Web Application 구성하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/06/01/08_tools/01_maven/20180601_maven/"
+                    data-tooltip="[Maven] Maven 프로젝트 생성하기"
+                    aria-label="다음: [Maven] Maven 프로젝트 생성하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
     </ul>
 </div>
 
-</section>
+
+        
+        
+            
+        
+    </div>
+</article>
 
 
 
@@ -852,6 +599,154 @@ $ mvn archetype:generate
 </footer>
 
             </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/01/02_spring/01_servlet_jsp/20190101_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Maven으로 Java Web Application 구성하기"
+                    aria-label="이전: [Servlet, JSP] Maven으로 Java Web Application 구성하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/06/01/08_tools/01_maven/20180601_maven/"
+                    data-tooltip="[Maven] Maven 프로젝트 생성하기"
+                    aria-label="다음: [Maven] Maven 프로젝트 생성하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/06/02/08_tools/01_maven/20180602_pom.xml/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
         
@@ -889,6 +784,8 @@ $ mvn archetype:generate
 
 <!--SCRIPTS END-->
 
+
+    
 
 
 
