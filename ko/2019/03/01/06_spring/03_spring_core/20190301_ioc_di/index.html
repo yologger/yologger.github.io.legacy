@@ -1,0 +1,854 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Spring Core] 제어의 역전과 의존성 주입 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nSpring CoreSpring Core는 Spring Framework의 핵심 컴포넌트입니다. Spring Core의 가장 중요한 기능은 제어의 역전(Inversion of Control)과 의존성 주입(Dependency Injection)입니다. \n\nSpring Core 설치Maven 프로젝트를 생성하고 다음 의존성을 추가해야합니다. \npom.xml12345678910111213&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; :schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;\t    &lt;dependencies&gt;        &lt;!-- Spring Core --&gt;        &lt;dependency&gt;            &lt;groupId&gt;org.springframework&lt;/groupId&gt;            &lt;artifactId&gt;spring-context&lt;/artifactId&gt;            &lt;version&gt;$&#123;spring-framework.version&#125;&lt;/version&gt;        &lt;/dependency&gt;    &lt;/dependencies&gt;&lt;/project&gt;\n\n\n제어의 역전과 의존성 주입제어의 역전(Inversion of Control)은 객체의 생성, 관리, 제거 등의 제어를 개발자가 직접 하지 않고 Spring IoC Container에 위임하는 것입니다. 의존성 주입(Dependency Injection)은 Spring IoC가 적절한 곳에 객체를 주입하는 것입니다.\n방법 1. setter우선 Phone.java라는 클래스를 정의합니다.\nPhone.java1234567891011121314151617181920package com.yologger.app;public class Phone &#123;    private String name;    private String manufacturer;\t    public String getName() &#123;        return name;    &#125;    public void setName(String name) &#123;        this.name = name;    &#125;    public String getManufacturer() &#123;        return manufacturer;    &#125;    public void setManufacturer(String manufacturer) &#123;        this.manufacturer = manufacturer;    &#125;&#125;\nApplicationContext.xml 파일을 생성하고 다음과 같이 Bean을 등록합니다.\nApplicationContext.xml12345678910111213141516&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;    &lt;bean id=&quot;myPhone&quot; class=&quot;com.yologger.app.Phone&quot;&gt;        &lt;property name=&quot;name&quot; value=&quot;iPhone 11&quot; /&gt;        &lt;property name=&quot;manufacturer&quot; value=&quot;Apple&quot; /&gt;    &lt;/bean&gt;    &lt;bean id=&quot;yourPhone&quot; class=&quot;com.yologger.app.Phone&quot;&gt;        &lt;property name=&quot;name&quot; value=&quot;Galaxy S22&quot; /&gt;        &lt;property name=&quot;manufacturer&quot; value=&quot;Samsung&quot; /&gt;    &lt;/bean&gt;&lt;/beans&gt;\n이제 코드에서 다음과 같이 IoC Container를 생성하고 객체를 주입할 수 있습니다.\nApp.java123456789101112131415161718192021import org.springframework.context.support.AbstractApplicationContext;import org.springframework.context.support.GenericXmlApplicationContext;public class App &#123;    public static void main(String[] args) &#123;        // IoC Container 생성        String configLocation = &quot;classpath:ApplicationContext.xml&quot;;        AbstractApplicationContext ctx = new GenericXmlApplicationContext(configLocation);\t\t        // 의존성 주입        Phone myPhone = ctx.getBean(&quot;myPhone&quot;, Phone.class);        Phone yourPhone = ctx.getBean(&quot;yourPhone&quot;, Phone.class);\t\t        System.out.println(myPhone.getName());  // iPhone 11        System.out.println(myPhone.getManufacturer());  // Apple                System.out.println(yourPhone.getName());  // Galaxy S22        System.out.println(yourPhone.getManufacturer());  // Samsung    &#125;&#125;\nBean이 다음과 같이 배열을 포함한다면\nPerson.java1234class Person &#123;    String name;    String[] hobbies;&#125;\nIoC Container에 다음과 같이 등록합니다.\napplicationContext.xml123456789101112&lt;bean id=&quot;me&quot; class=“com.company.app.Person”&gt;    &lt;property name=“name”&gt;        &lt;value&gt;Paul&lt;/value&gt;    &lt;/property&gt;    &lt;property name=“hobbies”&gt;        &lt;list&gt;            &lt;value&gt;soccer&lt;/value&gt;            &lt;value&gt;basketball&lt;/value&gt;             &lt;value&gt;swimming&lt;/value&gt;        &lt;/list&gt;    &lt;/property&gt;&lt;/bean&gt;\t\t\nBean이 참조 타입을 포함한다면\nPerson.java1234class Person &#123;    String name;    Car car;&#125;\nIoC Container에 다음과 같이 등록합니다.\napplicationContext.xml123456789101112&lt;bean id=&quot;myCar&quot; class=“com.company.app.Car”&gt;    ... &lt;/bean&gt;&lt;bean id=&quot;me&quot; class=“com.company.app.Person”&gt;    &lt;property name=“name”&gt;        &lt;value&gt;Paul&lt;/value&gt;    &lt;/property&gt;    &lt;property name=“car”&gt;        &lt;ref bean name=“myCar”&gt;    &lt;/property&gt;&lt;/bean&gt;\t\t\n\n\n방법 2. 생성자Phone.java에 생성자를 추가합니다.\nPhone.java1234567891011121314151617181920212223242526package com.yologger.app;public class Phone &#123;    private String name;    private String manufacturer;\t    // 생성자    public Phone(String name, String manufacturer) &#123;        this.name = name;        this.manufacturer = manufacturer;    &#125;\t    public String getName() &#123;        return name;    &#125;    public void setName(String name) &#123;        this.name = name;    &#125;    public String getManufacturer() &#123;        return manufacturer;    &#125;    public void setManufacturer(String manufacturer) &#123;        this.manufacturer = manufacturer;    &#125;&#125;\nApplicationContext.xml 파일을 생성하고 다음과 같이 생성자를 통해 Bean을 등록합니다.\nApplicationContext.xml12345678910111213141516&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;    &lt;bean id=&quot;myPhone&quot; class=&quot;com.yologger.app.Phone&quot;&gt;        &lt;constructor-arg value=&quot;Galaxy S22&quot;/&gt;        &lt;constructor-arg value=&quot;Samsung&quot;/&gt;    &lt;/bean&gt;    &lt;bean id=&quot;yourPhone&quot; class=&quot;com.yologger.app.Phone&quot;&gt;        &lt;constructor-arg value=&quot;iPhone 13&quot;/&gt;        &lt;constructor-arg value=&quot;Apple&quot;/&gt;    &lt;/bean&gt;\t&lt;/beans&gt;\n\n\n다형성과 IoC다형성을 활용하여 인터페이스에 여러 구현체를 주입할 수 있습니다. 다음과 같이 Car.java 인터페이스가 있습니다.\nCar.java12345package com.yologger.app;public interface Car &#123;    void drive();&#125;\n그리고 Car인터페이스를 구현한 Truck, SUV, Sedan클래스가 있습니다.\nTruck.java12345678package com.yologger.app;public class Truck implements Car &#123;    @Override    public void drive() &#123;        System.out.println(&quot;drive truck&quot;);    &#125;&#125;\nSUV.java12345678package com.yologger.app;public class SUV implements Car &#123;    @Override    public void drive() &#123;        System.out.println(&quot;drive SUV&quot;);    &#125;&#125;\nCar.java12345678package com.yologger.app;public class Sedan implements Car &#123;    @Override    public void drive() &#123;        System.out.println(&quot;drive sedan&quot;);    &#125;&#125;\n이제 다음과 같이 인터페이스에 구현체를 주입할 수 있습니다.\napplicationContext.xml12345678910&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot; :xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;    &lt;bean id=&quot;myCar&quot; class=&quot;com.yologger.app.Truck&quot; /&gt;    &lt;bean id=&quot;hisCar&quot; class=&quot;com.yologger.app.SUV&quot; /&gt;    &lt;bean id=&quot;herCar&quot; class=&quot;com.yologger.app.Sedan&quot; /&gt;\t&lt;/beans&gt;\nApp.java123456789101112131415161718import org.springframework.context.support.AbstractApplicationContext;import org.springframework.context.support.GenericXmlApplicationContext;public class App &#123;    public static void main(String[] args) &#123;        String configLocation = &quot;classpath:ApplicationContext.xml&quot;;        AbstractApplicationContext ctx = new GenericXmlApplicationContext(configLocation);\t\t        Car myCar = ctx.getBean(&quot;myCar&quot;, Car.class);        myCar.drive();\t\t// drive truck\t\t        Car hisCar = ctx.getBean(&quot;hisCar&quot;, Car.class);        hisCar.drive();\t\t// drive SUV\t\t        Car herCar = ctx.getBean(&quot;herCar&quot;, Car.class);        herCar.drive();\t\t// drive sedan    &#125;&#125;\n\n\nc namespace, p namespacec namespace와 p namespace를 사용하면 IoC Container에 등록한 빈의 속성값을 더 쉽게 설정할 수 있습니다. &lt;beans&gt; 태그에 다음 네임스페이스를 등록합니다.\n1. c namespacec namespace를 사용하면 생성자를 통한 속성값 설정을 더 쉽게 할 수 있습니다. c namespace를 사용하려면 객체에 생성자를 정의해야합니다.\nFamily.java123456789101112131415class Family&#123;    String father;    String mother;    String brother;    String sister;    // 생성자 정의    public Family(String father, String mother, String brother, String sister)&#123;        this.father = father;        this.mother = mother;        this.brother = brother;        this.sister = sister;    &#125;&#125;\n이제 XML 파일에 네임스페이스를 추가합니다.xmlns:c=&quot;http://www.springframework.org/schema/c&quot; \n예제를 첨부합니다.\napplicationContext.xml123456789&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:c=&quot;http://www.springframework.org/schema/c&quot; xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;    &lt;bean id=“samsungFamily” class=“com.company.app.Family” c:father=&quot;이건희&quot; c:mother=&quot;홍라희&quot; c:sister=&quot;이서현&quot; c:brother=&quot;이건희&quot; /&gt;&lt;/beans&gt;\t\n\n2. p namespacep namespace를 사용하면 setter를 통한 속성값 설정을 더 쉽게 할 수 있습니다. p namespace를 사용하려면 객체에 setter를 정의해야합니다.\nFamily.java1234567891011121314151617181920212223class Family&#123;    String father;    String mother;    String brother;    String sister;    public setFather(String name)&#123;        this.father = name;    &#125;    public setMother(String name)&#123;        this.mother = name;    &#125;    public setBrother(String name)&#123;        this.brother = name;    &#125;    public setSister(String name)&#123;        this.sister = name;    &#125;&#125;\n이제 XML 파일에 네임스페이스를 추가합니다.xmlns:p = “http://www.springframework.org/schema/p” \n예제를 첨부합니다.\napplicationContext.xml123456789&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:p = &quot;http://www.springframework.org/schema/p&quot; xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;    &lt;bean id=“samsungFamily” class=“com.company.app.Family” p:father=&quot;이건희&quot; p:mother=&quot;홍라희&quot; p:sister=&quot;이서현&quot; p:brother=&quot;이건희&quot; /&gt;&lt;/beans&gt;\t\n\n\nJava 파일을 통한 의존성 주입이때까지 appicationContext.xml이라는 XML 파일에 Bean을 등록했습니다. 그러나 Java 파일을 통해 Bean을 등록할 수도 있습니다.\nPerson.java123456789101112class Person&#123;    private String name;    public Person(String name)&#123;        this.name = name;    &#125;    public String getName()&#123;        return this.name;    &#125;&#125;\nApplicationConfig.java123456789101112131415161718import org.springframework.context.annotation.Bean;import org.springframework.context.annotation.Configuration;@Configurationpublic class ApplicationConfig &#123;\t@Bean\tpublic Person docter() &#123;\t\tPerson person = new Person(&quot;Paul&quot;);        return person;\t&#125;\t@Bean(name=&quot;programmer&quot;)\tpublic Person person() &#123;\t\tPerson person = new Person(&quot;Monica&quot;);        return person;\t&#125;&#125;\nApp.java1234567891011public class Main&#123;    public static void main(String[] args)&#123;        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ApplicationConfig.class);                Person docter = ctx.getBean(&quot;docter&quot;, Person.class);        Person programmer = ctx.getBean(&quot;programmer&quot;, Person.class);        System.out.println(docter.getName());       // Paul        System.out.println(programmer.getName());   // Monica    &#125;&#125;\n\n\nSpring IoC Container의 생명주기지금까지는 다음과 같은 방법으로 Spring IoC Container를 생성했습니다.\n1234GenericXmlApplicationContext ctx = GenericXmlApplicationContext(&quot;classpath:applicationCTX.xml&quot;)Person p = ctx.getBean(&quot;student&quot;, Person.class);System.out.println(p.getName()); \n이 것을 풀어서 작성하면 다음과 같습니다.\n123456789101112131415// Spring container 생성GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();// Spring container 설정정보 로드ctx.load(&quot;classpath:applicationCTX.xml&quot;);// xml이 수정되면 톰캣에서 설정정보를 다시 읽도록 refresh() 필수ctx.refresh();// Spring container의 class instance 사용Person person = ctx.getBean(&quot;student&quot;, Person.class);System.out.println(person.getName());// Spring container 종료ctx.close();\n\n\nBean의 생명주기Spring IoC Container는 Bean의 생성, 사용, 소멸을 제어하고 관리하며, Bean은 생명주기를 가지고 있다고 합니다. Bean의 생명주기는 두 가지 방법으로 탐지할 수 있습니다.\n방법 1) InitializingBean, DispoableBeanInitializingBean, DispoableBean 인터페이스를 구현하고 afterPropertiesSet(), destroy() 메소드를 구현하면 Bean의 생성과 소멸을 탐지할 수 있습니다.\nPerson.java123456789101112class Person implements InitializingBean, DispoableBean&#123;        @Override    public void afterPropertiesSet() &#123;        // Bean 초기화 과정(ctx.refresh())에서 호출    &#125;    @Override    public void destroy() &#123;        // Bean 소멸 과정(ctx.close())에서 호출    &#125;\t\t&#125;\n\n방법 2) @PostConstruct, @PreDestory@PostConstruct어노테이션을 추가한 메소드는 Bean이 생성될 때 호출됩니다. 비슷하게 @PreDestory어노테이션을 추가한 메소드는 Bean이 소멸할 때 호출합니다.\nPerson.java123456789101112class Person&#123;        @PostConstruct    public void initMethod() &#123;        // Bean이 생성될 때 호출    &#125;    @PreDestory    public void destoryMethod() &#123;\t        // Bean이 소멸할 때 호출    &#125;&#125;\n\n\nScopeBean은 Scope를 가집니다. 기본값은 prototype이며 빈을 주입할 때 마다 새로운 인스턴스가 생성됩니다.\napplicaionContext.xml1234&lt;bean id=“student” class=“com.company.app.domain.Student” scope=“prototype”&gt;    &lt;constructor-arg value=&quot;Paul&quot;&gt; &lt;/constructor-arg&gt;    &lt;constructor-arg value=&quot;USA&quot;&gt; &lt;/constructor-arg&gt;&lt;/bean&gt;\nMain.java12345678class Main&#123;    public static void main(String[] args)&#123;        // s1, s2는 다른 객체를 레퍼런스 합니다.        Student s1 = ctx.getBean(&quot;student&quot;, Student.class);        Student s2 = ctx.getBean(&quot;student&quot;, Student.class);        System.out.println(s1 === s2);      // false    &#125;&#125;\nscope를 singleton로 설정하면 Bean은 IoC Container내에서 오직 한 개만 존재합니다.\napplicaionContext.xml1234&lt;bean id=“student” class=“com.company.app.domain.Student” scope=“prototype”&gt;    &lt;constructor-arg value=&quot;Paul&quot;&gt; &lt;/constructor-arg&gt;    &lt;constructor-arg value=&quot;USA&quot;&gt; &lt;/constructor-arg&gt;&lt;/bean&gt;\nMain.java12345678class Main&#123;    public static void main(String[] args)&#123;        // s1, s2는 같은 객체를 레퍼런스 합니다.        Student s1 = ctx.getBean(&quot;student&quot;, Student.class);        Student s2 = ctx.getBean(&quot;student&quot;, Student.class);        System.out.println(s1 === s2);      // true    &#125;&#125;","dateCreated":"2019-03-01T00:00:00+09:00","dateModified":"2021-12-10T17:58:20+09:00","datePublished":"2019-03-01T00:00:00+09:00","description":"","headline":"[Spring Core] 제어의 역전과 의존성 주입","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/","keywords":"Spring, Spring Core"}</script>
+    <meta name="description" content="Spring CoreSpring Core는 Spring Framework의 핵심 컴포넌트입니다. Spring Core의 가장 중요한 기능은 제어의 역전(Inversion of Control)과 의존성 주입(Dependency Injection)입니다.   Spring Core 설치Maven 프로젝트를 생성하고 다음 의존성을 추가해야합니다.  pom.xml">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Spring Core] 제어의 역전과 의존성 주입">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="Spring CoreSpring Core는 Spring Framework의 핵심 컴포넌트입니다. Spring Core의 가장 중요한 기능은 제어의 역전(Inversion of Control)과 의존성 주입(Dependency Injection)입니다.   Spring Core 설치Maven 프로젝트를 생성하고 다음 의존성을 추가해야합니다.  pom.xml">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2019-02-28T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-10T08:58:20.470Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="Spring Core">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/html"
+                            
+                            rel="noopener"
+                            title="HTML"
+                        >
+                        <i class="sidebar-button-icon fab fa-html5" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">HTML</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/css"
+                            
+                            rel="noopener"
+                            title="CSS"
+                        >
+                        <i class="sidebar-button-icon fab fa-css3" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">CSS</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/javascript"
+                            
+                            rel="noopener"
+                            title="JavaScript"
+                        >
+                        <i class="sidebar-button-icon fab fa-js-square" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">JavaScript</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/nodejs"
+                            
+                            rel="noopener"
+                            title="Node.js"
+                        >
+                        <i class="sidebar-button-icon fab fa-node" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Node.js</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/database"
+                            
+                            rel="noopener"
+                            title="Database"
+                        >
+                        <i class="sidebar-button-icon fa fa-database" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Database</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infrastructure"
+                            
+                            rel="noopener"
+                            title="Infrastructure"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infrastructure</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Spring Core] 제어의 역전과 의존성 주입
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-03-01T00:00:00+09:00">
+	
+		    2019/03/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Spring-Core/">Spring Core</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="Spring-Core"><a href="#Spring-Core" class="headerlink" title="Spring Core"></a>Spring Core</h1><p><code>Spring Core</code>는 Spring Framework의 핵심 컴포넌트입니다. Spring Core의 가장 중요한 기능은 <code>제어의 역전(Inversion of Control)</code>과 <code>의존성 주입(Dependency Injection)</code>입니다. </p>
+<hr>
+<h1 id="Spring-Core-설치"><a href="#Spring-Core-설치" class="headerlink" title="Spring Core 설치"></a>Spring Core 설치</h1><p>Maven 프로젝트를 생성하고 다음 의존성을 추가해야합니다. </p>
+<figure class="highlight xml"><figcaption><span>pom.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">	</span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- Spring Core --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-context<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;spring-framework.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="제어의-역전과-의존성-주입"><a href="#제어의-역전과-의존성-주입" class="headerlink" title="제어의 역전과 의존성 주입"></a>제어의 역전과 의존성 주입</h1><p><code>제어의 역전(Inversion of Control)</code>은 객체의 생성, 관리, 제거 등의 제어를 개발자가 직접 하지 않고 <code>Spring IoC Container</code>에 위임하는 것입니다. <code>의존성 주입(Dependency Injection)</code>은 <code>Spring IoC</code>가 적절한 곳에 객체를 주입하는 것입니다.</p>
+<h3 id="방법-1-setter"><a href="#방법-1-setter" class="headerlink" title="방법 1. setter"></a>방법 1. setter</h3><p>우선 <code>Phone.java</code>라는 클래스를 정의합니다.</p>
+<figure class="highlight java"><figcaption><span>Phone.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Phone</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String manufacturer;</span><br><span class="line">	</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getManufacturer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> manufacturer;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setManufacturer</span><span class="params">(String manufacturer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.manufacturer = manufacturer;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ApplicationContext.xml</code> 파일을 생성하고 다음과 같이 Bean을 등록합니다.</p>
+<figure class="highlight xml"><figcaption><span>ApplicationContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;myPhone&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.yologger.app.Phone&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span> <span class="attr">value</span>=<span class="string">&quot;iPhone 11&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;manufacturer&quot;</span> <span class="attr">value</span>=<span class="string">&quot;Apple&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;yourPhone&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.yologger.app.Phone&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span> <span class="attr">value</span>=<span class="string">&quot;Galaxy S22&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;manufacturer&quot;</span> <span class="attr">value</span>=<span class="string">&quot;Samsung&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 코드에서 다음과 같이 <code>IoC Container</code>를 생성하고 객체를 주입할 수 있습니다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.context.support.AbstractApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.support.GenericXmlApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// IoC Container 생성</span></span><br><span class="line">        String configLocation = <span class="string">&quot;classpath:ApplicationContext.xml&quot;</span>;</span><br><span class="line">        AbstractApplicationContext ctx = <span class="keyword">new</span> GenericXmlApplicationContext(configLocation);</span><br><span class="line">		</span><br><span class="line">        <span class="comment">// 의존성 주입</span></span><br><span class="line">        Phone myPhone = ctx.getBean(<span class="string">&quot;myPhone&quot;</span>, Phone.class);</span><br><span class="line">        Phone yourPhone = ctx.getBean(<span class="string">&quot;yourPhone&quot;</span>, Phone.class);</span><br><span class="line">		</span><br><span class="line">        System.out.println(myPhone.getName());  <span class="comment">// iPhone 11</span></span><br><span class="line">        System.out.println(myPhone.getManufacturer());  <span class="comment">// Apple</span></span><br><span class="line">        </span><br><span class="line">        System.out.println(yourPhone.getName());  <span class="comment">// Galaxy S22</span></span><br><span class="line">        System.out.println(yourPhone.getManufacturer());  <span class="comment">// Samsung</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Bean이 다음과 같이 배열을 포함한다면</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    String name;</span><br><span class="line">    String[] hobbies;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>IoC Container에 다음과 같이 등록합니다.</p>
+<figure class="highlight xml"><figcaption><span>applicationContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;me&quot;</span> <span class="attr">class</span>=<span class="string">“com.company.app.Person”</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">“name”</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>Paul<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">“hobbies”</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">list</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">value</span>&gt;</span>soccer<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">value</span>&gt;</span>basketball<span class="tag">&lt;/<span class="name">value</span>&gt;</span> </span><br><span class="line">            <span class="tag">&lt;<span class="name">value</span>&gt;</span>swimming<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">list</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span>		</span><br></pre></td></tr></table></figure>
+<p>Bean이 참조 타입을 포함한다면</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    String name;</span><br><span class="line">    Car car;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>IoC Container에 다음과 같이 등록합니다.</p>
+<figure class="highlight xml"><figcaption><span>applicationContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;myCar&quot;</span> <span class="attr">class</span>=<span class="string">“com.company.app.Car”</span>&gt;</span></span><br><span class="line">    ... </span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;me&quot;</span> <span class="attr">class</span>=<span class="string">“com.company.app.Person”</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">“name”</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>Paul<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">“car”</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">ref</span> <span class="attr">bean</span> <span class="attr">name</span>=<span class="string">“myCar”</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span>		</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="방법-2-생성자"><a href="#방법-2-생성자" class="headerlink" title="방법 2. 생성자"></a>방법 2. 생성자</h3><p><code>Phone.java</code>에 생성자를 추가합니다.</p>
+<figure class="highlight java"><figcaption><span>Phone.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Phone</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String manufacturer;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 생성자</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Phone</span><span class="params">(String name, String manufacturer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.manufacturer = manufacturer;</span><br><span class="line">    &#125;</span><br><span class="line">	</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getManufacturer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> manufacturer;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setManufacturer</span><span class="params">(String manufacturer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.manufacturer = manufacturer;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ApplicationContext.xml</code> 파일을 생성하고 다음과 같이 생성자를 통해 Bean을 등록합니다.</p>
+<figure class="highlight xml"><figcaption><span>ApplicationContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;myPhone&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.yologger.app.Phone&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">value</span>=<span class="string">&quot;Galaxy S22&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">value</span>=<span class="string">&quot;Samsung&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;yourPhone&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.yologger.app.Phone&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">value</span>=<span class="string">&quot;iPhone 13&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">value</span>=<span class="string">&quot;Apple&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">	</span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="다형성과-IoC"><a href="#다형성과-IoC" class="headerlink" title="다형성과 IoC"></a>다형성과 IoC</h1><p>다형성을 활용하여 인터페이스에 여러 구현체를 주입할 수 있습니다. 다음과 같이 <code>Car.java</code> 인터페이스가 있습니다.</p>
+<figure class="highlight java"><figcaption><span>Car.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>그리고 <code>Car</code>인터페이스를 구현한 <code>Truck</code>, <code>SUV</code>, <code>Sedan</code>클래스가 있습니다.</p>
+<figure class="highlight java"><figcaption><span>Truck.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Truck</span> <span class="keyword">implements</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;drive truck&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>SUV.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SUV</span> <span class="keyword">implements</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;drive SUV&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>Car.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sedan</span> <span class="keyword">implements</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;drive sedan&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 다음과 같이 인터페이스에 구현체를 주입할 수 있습니다.</p>
+<figure class="highlight xml"><figcaption><span>applicationContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;myCar&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.yologger.app.Truck&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;hisCar&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.yologger.app.SUV&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;herCar&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.yologger.app.Sedan&quot;</span> /&gt;</span></span><br><span class="line">	</span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.context.support.AbstractApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.support.GenericXmlApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String configLocation = <span class="string">&quot;classpath:ApplicationContext.xml&quot;</span>;</span><br><span class="line">        AbstractApplicationContext ctx = <span class="keyword">new</span> GenericXmlApplicationContext(configLocation);</span><br><span class="line">		</span><br><span class="line">        Car myCar = ctx.getBean(<span class="string">&quot;myCar&quot;</span>, Car.class);</span><br><span class="line">        myCar.drive();		<span class="comment">// drive truck</span></span><br><span class="line">		</span><br><span class="line">        Car hisCar = ctx.getBean(<span class="string">&quot;hisCar&quot;</span>, Car.class);</span><br><span class="line">        hisCar.drive();		<span class="comment">// drive SUV</span></span><br><span class="line">		</span><br><span class="line">        Car herCar = ctx.getBean(<span class="string">&quot;herCar&quot;</span>, Car.class);</span><br><span class="line">        herCar.drive();		<span class="comment">// drive sedan</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="c-namespace-p-namespace"><a href="#c-namespace-p-namespace" class="headerlink" title="c namespace, p namespace"></a>c namespace, p namespace</h1><p><code>c namespace</code>와 <code>p namespace</code>를 사용하면 IoC Container에 등록한 빈의 속성값을 더 쉽게 설정할 수 있습니다. <code>&lt;beans&gt;</code> 태그에 다음 네임스페이스를 등록합니다.</p>
+<h3 id="1-c-namespace"><a href="#1-c-namespace" class="headerlink" title="1. c namespace"></a>1. c namespace</h3><p><code>c namespace</code>를 사용하면 생성자를 통한 속성값 설정을 더 쉽게 할 수 있습니다. <code>c namespace</code>를 사용하려면 객체에 생성자를 정의해야합니다.</p>
+<figure class="highlight java"><figcaption><span>Family.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Family</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    String father;</span><br><span class="line">    String mother;</span><br><span class="line">    String brother;</span><br><span class="line">    String sister;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 생성자 정의</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Family</span><span class="params">(String father, String mother, String brother, String sister)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.father = father;</span><br><span class="line">        <span class="keyword">this</span>.mother = mother;</span><br><span class="line">        <span class="keyword">this</span>.brother = brother;</span><br><span class="line">        <span class="keyword">this</span>.sister = sister;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 XML 파일에 네임스페이스를 추가합니다.<br><code>xmlns:c=&quot;http://www.springframework.org/schema/c&quot;</code> </p>
+<p>예제를 첨부합니다.</p>
+<figure class="highlight xml"><figcaption><span>applicationContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xmlns:c</span>=<span class="string">&quot;http://www.springframework.org/schema/c&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">“samsungFamily”</span> <span class="attr">class</span>=<span class="string">“com.company.app.Family”</span> <span class="attr">c:father</span>=<span class="string">&quot;이건희&quot;</span> <span class="attr">c:mother</span>=<span class="string">&quot;홍라희&quot;</span> <span class="attr">c:sister</span>=<span class="string">&quot;이서현&quot;</span> <span class="attr">c:brother</span>=<span class="string">&quot;이건희&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span>	</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-p-namespace"><a href="#2-p-namespace" class="headerlink" title="2. p namespace"></a>2. p namespace</h3><p><code>p namespace</code>를 사용하면 setter를 통한 속성값 설정을 더 쉽게 할 수 있습니다. <code>p namespace</code>를 사용하려면 객체에 setter를 정의해야합니다.</p>
+<figure class="highlight java"><figcaption><span>Family.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Family</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    String father;</span><br><span class="line">    String mother;</span><br><span class="line">    String brother;</span><br><span class="line">    String sister;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">setFather</span><span class="params">(String name)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.father = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">setMother</span><span class="params">(String name)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mother = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">setBrother</span><span class="params">(String name)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.brother = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">setSister</span><span class="params">(String name)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.sister = name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 XML 파일에 네임스페이스를 추가합니다.<br><code>xmlns:p = “http://www.springframework.org/schema/p”</code> </p>
+<p>예제를 첨부합니다.</p>
+<figure class="highlight xml"><figcaption><span>applicationContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xmlns:p</span> = <span class="string">&quot;http://www.springframework.org/schema/p&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">“samsungFamily”</span> <span class="attr">class</span>=<span class="string">“com.company.app.Family”</span> <span class="attr">p:father</span>=<span class="string">&quot;이건희&quot;</span> <span class="attr">p:mother</span>=<span class="string">&quot;홍라희&quot;</span> <span class="attr">p:sister</span>=<span class="string">&quot;이서현&quot;</span> <span class="attr">p:brother</span>=<span class="string">&quot;이건희&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span>	</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Java-파일을-통한-의존성-주입"><a href="#Java-파일을-통한-의존성-주입" class="headerlink" title="Java 파일을 통한 의존성 주입"></a>Java 파일을 통한 의존성 주입</h1><p>이때까지 appicationContext.xml이라는 <code>XML 파일</code>에 Bean을 등록했습니다. 그러나 <code>Java 파일</code>을 통해 Bean을 등록할 수도 있습니다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>ApplicationConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Bean</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Person <span class="title">docter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		Person person = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> person;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Bean(name=&quot;programmer&quot;)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Person <span class="title">person</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		Person person = <span class="keyword">new</span> Person(<span class="string">&quot;Monica&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> person;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        AnnotationConfigApplicationContext ctx = <span class="keyword">new</span> AnnotationConfigApplicationContext(ApplicationConfig.class);</span><br><span class="line">        </span><br><span class="line">        Person docter = ctx.getBean(<span class="string">&quot;docter&quot;</span>, Person.class);</span><br><span class="line">        Person programmer = ctx.getBean(<span class="string">&quot;programmer&quot;</span>, Person.class);</span><br><span class="line"></span><br><span class="line">        System.out.println(docter.getName());       <span class="comment">// Paul</span></span><br><span class="line">        System.out.println(programmer.getName());   <span class="comment">// Monica</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Spring-IoC-Container의-생명주기"><a href="#Spring-IoC-Container의-생명주기" class="headerlink" title="Spring IoC Container의 생명주기"></a>Spring IoC Container의 생명주기</h1><p>지금까지는 다음과 같은 방법으로 Spring IoC Container를 생성했습니다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GenericXmlApplicationContext ctx = GenericXmlApplicationContext(<span class="string">&quot;classpath:applicationCTX.xml&quot;</span>)</span><br><span class="line"></span><br><span class="line">Person p = ctx.getBean(<span class="string">&quot;student&quot;</span>, Person.class);</span><br><span class="line">System.out.println(p.getName()); </span><br></pre></td></tr></table></figure>
+<p>이 것을 풀어서 작성하면 다음과 같습니다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Spring container 생성</span></span><br><span class="line">GenericXmlApplicationContext ctx = <span class="keyword">new</span> GenericXmlApplicationContext();</span><br><span class="line"></span><br><span class="line"><span class="comment">// Spring container 설정정보 로드</span></span><br><span class="line">ctx.load(<span class="string">&quot;classpath:applicationCTX.xml&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// xml이 수정되면 톰캣에서 설정정보를 다시 읽도록 refresh() 필수</span></span><br><span class="line">ctx.refresh();</span><br><span class="line"></span><br><span class="line"><span class="comment">// Spring container의 class instance 사용</span></span><br><span class="line">Person person = ctx.getBean(<span class="string">&quot;student&quot;</span>, Person.class);</span><br><span class="line">System.out.println(person.getName());</span><br><span class="line"></span><br><span class="line"><span class="comment">// Spring container 종료</span></span><br><span class="line">ctx.close();</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Bean의-생명주기"><a href="#Bean의-생명주기" class="headerlink" title="Bean의 생명주기"></a>Bean의 생명주기</h1><p>Spring IoC Container는 <code>Bean</code>의 생성, 사용, 소멸을 제어하고 관리하며, <code>Bean</code>은 생명주기를 가지고 있다고 합니다. <code>Bean</code>의 생명주기는 두 가지 방법으로 탐지할 수 있습니다.</p>
+<h3 id="방법-1-InitializingBean-DispoableBean"><a href="#방법-1-InitializingBean-DispoableBean" class="headerlink" title="방법 1) InitializingBean, DispoableBean"></a>방법 1) InitializingBean, DispoableBean</h3><p><code>InitializingBean</code>, <code>DispoableBean</code> 인터페이스를 구현하고 <code>afterPropertiesSet()</code>, <code>destroy()</code> 메소드를 구현하면 Bean의 생성과 소멸을 탐지할 수 있습니다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span>, <span class="title">DispoableBean</span></span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Bean 초기화 과정(ctx.refresh())에서 호출</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Bean 소멸 과정(ctx.close())에서 호출</span></span><br><span class="line">    &#125;		</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="방법-2-PostConstruct-PreDestory"><a href="#방법-2-PostConstruct-PreDestory" class="headerlink" title="방법 2) @PostConstruct, @PreDestory"></a>방법 2) @PostConstruct, @PreDestory</h3><p><code>@PostConstruct</code>어노테이션을 추가한 메소드는 Bean이 생성될 때 호출됩니다. 비슷하게 <code>@PreDestory</code>어노테이션을 추가한 메소드는 Bean이 소멸할 때 호출합니다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Bean이 생성될 때 호출</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PreDestory</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destoryMethod</span><span class="params">()</span> </span>&#123;	</span><br><span class="line">        <span class="comment">// Bean이 소멸할 때 호출</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Scope"><a href="#Scope" class="headerlink" title="Scope"></a>Scope</h1><p>Bean은 <code>Scope</code>를 가집니다. 기본값은 <code>prototype</code>이며 빈을 주입할 때 마다 새로운 인스턴스가 생성됩니다.</p>
+<figure class="highlight xml"><figcaption><span>applicaionContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">“student”</span> <span class="attr">class</span>=<span class="string">“com.company.app.domain.Student”</span> <span class="attr">scope</span>=<span class="string">“prototype”</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">value</span>=<span class="string">&quot;Paul&quot;</span>&gt;</span> <span class="tag">&lt;/<span class="name">constructor-arg</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">value</span>=<span class="string">&quot;USA&quot;</span>&gt;</span> <span class="tag">&lt;/<span class="name">constructor-arg</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Main</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="comment">// s1, s2는 다른 객체를 레퍼런스 합니다.</span></span><br><span class="line">        Student s1 = ctx.getBean(<span class="string">&quot;student&quot;</span>, Student.class);</span><br><span class="line">        Student s2 = ctx.getBean(<span class="string">&quot;student&quot;</span>, Student.class);</span><br><span class="line">        System.out.println(s1 === s2);      <span class="comment">// false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>scope를 <code>singleton</code>로 설정하면 Bean은 IoC Container내에서 오직 한 개만 존재합니다.</p>
+<figure class="highlight xml"><figcaption><span>applicaionContext.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">“student”</span> <span class="attr">class</span>=<span class="string">“com.company.app.domain.Student”</span> <span class="attr">scope</span>=<span class="string">“prototype”</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">value</span>=<span class="string">&quot;Paul&quot;</span>&gt;</span> <span class="tag">&lt;/<span class="name">constructor-arg</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">value</span>=<span class="string">&quot;USA&quot;</span>&gt;</span> <span class="tag">&lt;/<span class="name">constructor-arg</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Main</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="comment">// s1, s2는 같은 객체를 레퍼런스 합니다.</span></span><br><span class="line">        Student s1 = ctx.getBean(<span class="string">&quot;student&quot;</span>, Student.class);</span><br><span class="line">        Student s2 = ctx.getBean(<span class="string">&quot;student&quot;</span>, Student.class);</span><br><span class="line">        System.out.println(s1 === s2);      <span class="comment">// true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Spring/" rel="tag">Spring</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Spring-Core/" rel="tag">Spring Core</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/03/02/06_spring/03_spring_core/20190302_properties_file/"
+                    data-tooltip="[Spring Core] 외부 파일에서 설정값 읽어오기 (Properties 파일)"
+                    aria-label="이전: [Spring Core] 외부 파일에서 설정값 읽어오기 (Properties 파일)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/02/01/06_spring/02_spring/20190201_eclipse_spring/"
+                    data-tooltip="[Eclipse] Eclipse에서 다양한 Spring 프로젝트 생성하기"
+                    aria-label="다음: [Eclipse] Eclipse에서 다양한 Spring 프로젝트 생성하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/03/02/06_spring/03_spring_core/20190302_properties_file/"
+                    data-tooltip="[Spring Core] 외부 파일에서 설정값 읽어오기 (Properties 파일)"
+                    aria-label="이전: [Spring Core] 외부 파일에서 설정값 읽어오기 (Properties 파일)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/02/01/06_spring/02_spring/20190201_eclipse_spring/"
+                    data-tooltip="[Eclipse] Eclipse에서 다양한 Spring 프로젝트 생성하기"
+                    aria-label="다음: [Eclipse] Eclipse에서 다양한 Spring 프로젝트 생성하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/03/01/06_spring/03_spring_core/20190301_ioc_di/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
