@@ -1,0 +1,817 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Gradle] Gradle Task - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nTaskTask는 빌드를 위한 작업 단위다. Task는 크게 두 종류가 있다.\n\nBuilt-in Task\nCustom Task\n\nBuilt-in TaskBuilt-in Task는 Gradle에 내장되어있는 Task다. Gradle 프로젝트를 초기화하는 gradle init, Gradle 프로젝트를 빌드하는 gradle build, Gradle 프로젝트를 실행하는 gradle run도 사실은 모두 Task다.\nGradle 프로젝트에서 gradle tasks명령어를 입력하면 모든 Built-in Task를 확인할 수 있다.\n123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263$ gradle tasks&gt; Task :tasks------------------------------------------------------------Tasks runnable from root project &#x27;KotlinApplication&#x27;------------------------------------------------------------Application tasks-----------------run - Runs this project as a JVM applicationBuild tasks-----------assemble - Assembles the outputs of this project.build - Assembles and tests this project.buildDependents - Assembles and tests this project and all projects that depend on it.buildKotlinToolingMetadata - Build metadata json file containing information about the used Kotlin toolingbuildNeeded - Assembles and tests this project and all projects it depends on.classes - Assembles main classes.clean - Deletes the build directory.jar - Assembles a jar archive containing the main classes.testClasses - Assembles test classes.Build Setup tasks-----------------init - Initializes a new Gradle build.wrapper - Generates Gradle wrapper files.Distribution tasks------------------assembleDist - Assembles the main distributionsdistTar - Bundles the project as a distribution.distZip - Bundles the project as a distribution.installDist - Installs the project as a distribution as-is.Documentation tasks-------------------javadoc - Generates Javadoc API documentation for the main source code.Help tasks----------buildEnvironment - Displays all buildscript dependencies declared in root project &#x27;KotlinApplication&#x27;.dependencies - Displays all dependencies declared in root project &#x27;KotlinApplication&#x27;.dependencyInsight - Displays the insight into a specific dependency in root project &#x27;KotlinApplication&#x27;.help - Displays a help message.javaToolchains - Displays the detected java toolchains.outgoingVariants - Displays the outgoing variants of root project &#x27;KotlinApplication&#x27;.projects - Displays the sub-projects of root project &#x27;KotlinApplication&#x27;.properties - Displays the properties of root project &#x27;KotlinApplication&#x27;.tasks - Displays the tasks runnable from root project &#x27;KotlinApplication&#x27; (some of the displayed tasks may belong to subprojects).Verification tasks------------------check - Runs all checks.test - Runs the test suite.To see all tasks and more detail, run gradle tasks --allTo see more detail about a task, run gradle help --task &lt;task&gt;BUILD SUCCESSFUL in 19s1 actionable task: 1 executed\n\nCustom TaskCustom Task는 사용자가 build.gradle에 직접 정의하는 Task다.\n(1) 정의Task는 다음과 같이 정의한다.\nbuild.gradle123task [task_name] &#123;  // ..&#125;\n다음과 같은 형태로도 정의할 수 있다.\nbuild.gradle123task([task_name]) &#123;  // ...&#125;\nTask는 콘솔에서 다음과 같이 실행한다.\n1$ gradle [task_name]\nprintHello라는 Task를 정의하고 실행해보자.\nbuild.gradle123task printHello &#123;  println &quot;Hello!&quot;&#125;\n123456$ gradle printHello&gt; Configure project :Hello!BUILD SUCCESSFUL in 667ms\nTask를 quite 모드로 실행하면 오직 결과값만 출력된다. -q을 지정하면 된다.\n12$ gradle -q printHelloHello!\n\n(2) 파라미터Task로 파라미터를 전달할 수 있다.\nbuild.gradle123456task sum &#123;    def x = x.toInteger()    def y = y.toInteger()    println x+y&#125;\n이제 다음과 같이 호출할 수 있다.\n12$ gradle -q sum -Px=10 -Py=1020\n(3) doFirst, doLast위에서는 Task를 다음과 같이 정의했다.\nbuild.gradle123task myTask &#123;  println &quot;myTask&quot;&#125;\n그러나 일반적으로 Task에서 실제로 수행할 작업은 doFirst, doLast 안에 정의한다.\nbuild.gradle12345678task [task_name] &#123;    doFirst &#123;        // ...    &#125;    doLast &#123;        // ...    &#125;&#125;","dateCreated":"2018-04-03T00:00:00+09:00","dateModified":"2021-12-14T00:30:55+09:00","datePublished":"2018-04-03T00:00:00+09:00","description":"","headline":"[Gradle] Gradle Task","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/","keywords":"Gradle"}</script>
+    <meta name="description" content="TaskTask는 빌드를 위한 작업 단위다. Task는 크게 두 종류가 있다.  Built-in Task Custom Task  Built-in TaskBuilt-in Task는 Gradle에 내장되어있는 Task다. Gradle 프로젝트를 초기화하는 gradle init, Gradle 프로젝트를 빌드하는 gradle build, Gradle 프로젝트를">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Gradle] Gradle Task">
+<meta property="og:url" content="https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="TaskTask는 빌드를 위한 작업 단위다. Task는 크게 두 종류가 있다.  Built-in Task Custom Task  Built-in TaskBuilt-in Task는 Gradle에 내장되어있는 Task다. Gradle 프로젝트를 초기화하는 gradle init, Gradle 프로젝트를 빌드하는 gradle build, Gradle 프로젝트를">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2018-04-02T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-13T15:30:55.922Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Gradle">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/html"
+                            
+                            rel="noopener"
+                            title="HTML"
+                        >
+                        <i class="sidebar-button-icon fab fa-html5" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">HTML</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/css"
+                            
+                            rel="noopener"
+                            title="CSS"
+                        >
+                        <i class="sidebar-button-icon fab fa-css3" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">CSS</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/javascript"
+                            
+                            rel="noopener"
+                            title="JavaScript"
+                        >
+                        <i class="sidebar-button-icon fab fa-js-square" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">JavaScript</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/nodejs"
+                            
+                            rel="noopener"
+                            title="Node.js"
+                        >
+                        <i class="sidebar-button-icon fab fa-node" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Node.js</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/database"
+                            
+                            rel="noopener"
+                            title="Database"
+                        >
+                        <i class="sidebar-button-icon fa fa-database" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Database</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infrastructure"
+                            
+                            rel="noopener"
+                            title="Infrastructure"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infrastructure</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Gradle] Gradle Task
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2018-04-03T00:00:00+09:00">
+	
+		    2018/04/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="Task"><a href="#Task" class="headerlink" title="Task"></a>Task</h1><p><code>Task</code>는 빌드를 위한 <u>작업 단위</u>다. Task는 크게 두 종류가 있다.</p>
+<ul>
+<li>Built-in Task</li>
+<li>Custom Task</li>
+</ul>
+<h1 id="Built-in-Task"><a href="#Built-in-Task" class="headerlink" title="Built-in Task"></a>Built-in Task</h1><p><code>Built-in Task</code>는 Gradle에 내장되어있는 Task다. Gradle 프로젝트를 초기화하는 <code>gradle init</code>, Gradle 프로젝트를 빌드하는 <code>gradle build</code>, Gradle 프로젝트를 실행하는 <code>gradle run</code>도 사실은 모두 Task다.</p>
+<p>Gradle 프로젝트에서 <code>gradle tasks</code>명령어를 입력하면 모든 Built-in Task를 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">$ gradle tasks</span><br><span class="line"></span><br><span class="line">&gt; Task :tasks</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------</span><br><span class="line">Tasks runnable from root project &#x27;KotlinApplication&#x27;</span><br><span class="line">------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">Application tasks</span><br><span class="line">-----------------</span><br><span class="line">run - Runs this project as a JVM application</span><br><span class="line"></span><br><span class="line">Build tasks</span><br><span class="line">-----------</span><br><span class="line">assemble - Assembles the outputs of this project.</span><br><span class="line">build - Assembles and tests this project.</span><br><span class="line">buildDependents - Assembles and tests this project and all projects that depend on it.</span><br><span class="line">buildKotlinToolingMetadata - Build metadata json file containing information about the used Kotlin tooling</span><br><span class="line">buildNeeded - Assembles and tests this project and all projects it depends on.</span><br><span class="line">classes - Assembles main classes.</span><br><span class="line">clean - Deletes the build directory.</span><br><span class="line">jar - Assembles a jar archive containing the main classes.</span><br><span class="line">testClasses - Assembles test classes.</span><br><span class="line"></span><br><span class="line">Build Setup tasks</span><br><span class="line">-----------------</span><br><span class="line">init - Initializes a new Gradle build.</span><br><span class="line">wrapper - Generates Gradle wrapper files.</span><br><span class="line"></span><br><span class="line">Distribution tasks</span><br><span class="line">------------------</span><br><span class="line">assembleDist - Assembles the main distributions</span><br><span class="line">distTar - Bundles the project as a distribution.</span><br><span class="line">distZip - Bundles the project as a distribution.</span><br><span class="line">installDist - Installs the project as a distribution as-is.</span><br><span class="line"></span><br><span class="line">Documentation tasks</span><br><span class="line">-------------------</span><br><span class="line">javadoc - Generates Javadoc API documentation for the main source code.</span><br><span class="line"></span><br><span class="line">Help tasks</span><br><span class="line">----------</span><br><span class="line">buildEnvironment - Displays all buildscript dependencies declared in root project &#x27;KotlinApplication&#x27;.</span><br><span class="line">dependencies - Displays all dependencies declared in root project &#x27;KotlinApplication&#x27;.</span><br><span class="line">dependencyInsight - Displays the insight into a specific dependency in root project &#x27;KotlinApplication&#x27;.</span><br><span class="line">help - Displays a help message.</span><br><span class="line">javaToolchains - Displays the detected java toolchains.</span><br><span class="line">outgoingVariants - Displays the outgoing variants of root project &#x27;KotlinApplication&#x27;.</span><br><span class="line">projects - Displays the sub-projects of root project &#x27;KotlinApplication&#x27;.</span><br><span class="line">properties - Displays the properties of root project &#x27;KotlinApplication&#x27;.</span><br><span class="line">tasks - Displays the tasks runnable from root project &#x27;KotlinApplication&#x27; (some of the displayed tasks may belong to subprojects).</span><br><span class="line"></span><br><span class="line">Verification tasks</span><br><span class="line">------------------</span><br><span class="line">check - Runs all checks.</span><br><span class="line">test - Runs the test suite.</span><br><span class="line"></span><br><span class="line">To see all tasks and more detail, run gradle tasks --all</span><br><span class="line"></span><br><span class="line">To see more detail about a task, run gradle help --task &lt;task&gt;</span><br><span class="line"></span><br><span class="line">BUILD SUCCESSFUL in 19s</span><br><span class="line">1 actionable task: 1 executed</span><br></pre></td></tr></table></figure>
+
+<h1 id="Custom-Task"><a href="#Custom-Task" class="headerlink" title="Custom Task"></a>Custom Task</h1><p><code>Custom Task</code>는 사용자가 <code>build.gradle</code>에 직접 정의하는 Task다.</p>
+<h3 id="1-정의"><a href="#1-정의" class="headerlink" title="(1) 정의"></a>(1) 정의</h3><p>Task는 다음과 같이 정의한다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">task [task_name] &#123;</span><br><span class="line">  <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같은 형태로도 정의할 수 있다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">task([task_name]) &#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Task는 콘솔에서 다음과 같이 실행한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle [task_name]</span><br></pre></td></tr></table></figure>
+<p><code>printHello</code>라는 Task를 정의하고 실행해보자.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">task printHello &#123;</span><br><span class="line">  println <span class="string">&quot;Hello!&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ gradle printHello</span><br><span class="line"></span><br><span class="line">&gt; Configure project :</span><br><span class="line">Hello!</span><br><span class="line"></span><br><span class="line">BUILD SUCCESSFUL in 667ms</span><br></pre></td></tr></table></figure>
+<p>Task를 <code>quite 모드</code>로 실행하면 오직 결과값만 출력된다. <code>-q</code>을 지정하면 된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gradle -q printHello</span><br><span class="line">Hello!</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-파라미터"><a href="#2-파라미터" class="headerlink" title="(2) 파라미터"></a>(2) 파라미터</h3><p>Task로 파라미터를 전달할 수 있다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">task sum &#123;</span><br><span class="line">    <span class="keyword">def</span> x = x.toInteger()</span><br><span class="line">    <span class="keyword">def</span> y = y.toInteger()</span><br><span class="line"></span><br><span class="line">    println x+y</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 다음과 같이 호출할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gradle -q sum -Px=10 -Py=10</span><br><span class="line">20</span><br></pre></td></tr></table></figure>
+<h3 id="3-doFirst-doLast"><a href="#3-doFirst-doLast" class="headerlink" title="(3) doFirst, doLast"></a>(3) doFirst, doLast</h3><p>위에서는 Task를 다음과 같이 정의했다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">task myTask &#123;</span><br><span class="line">  println <span class="string">&quot;myTask&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>그러나 일반적으로 Task에서 실제로 수행할 작업은 doFirst, doLast 안에 정의한다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">task [task_name] &#123;</span><br><span class="line">    doFirst &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    doLast &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Gradle/" rel="tag">Gradle</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/04/12_tools/02_gradle/20180404_plugin/"
+                    data-tooltip="[Gradle] Gradle Plugin"
+                    aria-label="이전: [Gradle] Gradle Plugin"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/02/12_tools/02_gradle/20180402_gradle/"
+                    data-tooltip="[Gradle] Gradle"
+                    aria-label="다음: [Gradle] Gradle"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/04/12_tools/02_gradle/20180404_plugin/"
+                    data-tooltip="[Gradle] Gradle Plugin"
+                    aria-label="이전: [Gradle] Gradle Plugin"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/02/12_tools/02_gradle/20180402_gradle/"
+                    data-tooltip="[Gradle] Gradle"
+                    aria-label="다음: [Gradle] Gradle"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
