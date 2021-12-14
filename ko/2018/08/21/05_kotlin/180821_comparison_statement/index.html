@@ -1,0 +1,808 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Kotlin] 비교문 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n비교연산자(1) ====는 내부적으로 equals()메소드를 호출한다. 우선 기본 데이터 타입의 비교는 다음과 같이 한다.\n12100 == 100      // true100 != 100      // false\n클래스의 인스턴스를 비교할 때도 마찬가지로 equals()를 호출한다. 단 equals()메소드를 오버라이드하여 구현해야한다.\n1234567class Person(var name: String) &#123;    override fun equals(other: Any?): Boolean &#123;        var target = other as Person        return this.name == target.name    &#125;&#125;\t\n이제 세 개의 인스턴스를 생성하자.\n123var p1 = Person(&quot;Ronaldo&quot;)\tvar p2 = Person(&quot;Ronaldo&quot;)\tvar p3 = Person(&quot;Bale&quot;)\t\n==를 사용하면 equals()메소드가 호출된다. 아래 두 줄은 동일한 코드다.\n12p1==p2          // truep1.equals(p2))  // true\n\n(2) ======는 같은 주소를 참조하고 있는지 주소값을 비교한다.\n123456var p1 = Person(&quot;Paul&quot;)\tvar p2 = Person(&quot;Paul&quot;)\tvar p3 = p1\tp1===p2     // falsep1===p3     // true\n\n타입 체크타입 체크를 할 때는 키워드is를 사용한다.\n1234567var p = Person()if (p is Person) &#123;    println(&quot;p is Person.&quot;)&#125; else &#123;    println(&quot;p is not Person.&quot;)&#125;\n\n조건문Kotlin은 두 가지의 조건문을 제공한다.\n(1) if 구문1234567var isMarried: Boolean = trueif (isMarried) &#123;    println(&quot;He is married.&quot;);&#125; else &#123;    println(&quot;He is not married.&quot;);        &#125;\n\n(2) when 구문1234567891011fun doWhen(nation: String) &#123;    when(nation) &#123;        &quot;Korea&quot; -&gt; println(&quot;He&#x27;s from Korea.&quot;)        &quot;Spain&quot; -&gt; println(&quot;He&#x27;s from Spain.&quot;)        &quot;France&quot; -&gt; println(&quot;He&#x27;s from France.&quot;)        else -&gt; println(&quot;Where are you from?&quot;)    &#125;&#125;doWhen(&quot;Korea&quot;)     // He&#x27;s from Korea.doWhen(&quot;Germany&quot;)   // Where are you from?\nwhen구문은 결과값을 변수에 할당할 수 있다.\n123456789101112fun doWhen(nation: String): String &#123;    var result: String = when(nation) &#123;        &quot;Korea&quot; -&gt; &quot;He&#x27;s from Korea.&quot;        &quot;Spain&quot; -&gt; &quot;He&#x27;s from Spain.&quot;        &quot;France&quot; -&gt; &quot;He&#x27;s from France.&quot;        else -&gt; &quot;Where are you from?&quot;    &#125;       return result&#125; var result = doWhen(&quot;Korean&quot;)println(result)","dateCreated":"2018-08-21T00:00:00+09:00","dateModified":"2021-12-14T23:36:44+09:00","datePublished":"2018-08-21T00:00:00+09:00","description":"","headline":"[Kotlin] 비교문","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/","keywords":"Kotlin"}</script>
+    <meta name="description" content="비교연산자(1) &#x3D;&#x3D;&#x3D;&#x3D;는 내부적으로 equals()메소드를 호출한다. 우선 기본 데이터 타입의 비교는 다음과 같이 한다. 12100 &#x3D;&#x3D; 100      &#x2F;&#x2F; true100 !&#x3D; 100      &#x2F;&#x2F; false 클래스의 인스턴스를 비교할 때도 마찬가지로 equals()를 호출한다. 단 equals()메소드를 오버라이드하여 구현해야한다. 1234567cl">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Kotlin] 비교문">
+<meta property="og:url" content="https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="비교연산자(1) &#x3D;&#x3D;&#x3D;&#x3D;는 내부적으로 equals()메소드를 호출한다. 우선 기본 데이터 타입의 비교는 다음과 같이 한다. 12100 &#x3D;&#x3D; 100      &#x2F;&#x2F; true100 !&#x3D; 100      &#x2F;&#x2F; false 클래스의 인스턴스를 비교할 때도 마찬가지로 equals()를 호출한다. 단 equals()메소드를 오버라이드하여 구현해야한다. 1234567cl">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2018-08-20T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-14T14:36:44.867Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Kotlin">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/html"
+                            
+                            rel="noopener"
+                            title="HTML"
+                        >
+                        <i class="sidebar-button-icon fab fa-html5" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">HTML</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/css"
+                            
+                            rel="noopener"
+                            title="CSS"
+                        >
+                        <i class="sidebar-button-icon fab fa-css3" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">CSS</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/javascript"
+                            
+                            rel="noopener"
+                            title="JavaScript"
+                        >
+                        <i class="sidebar-button-icon fab fa-js-square" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">JavaScript</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/nodejs"
+                            
+                            rel="noopener"
+                            title="Node.js"
+                        >
+                        <i class="sidebar-button-icon fab fa-node" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Node.js</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/database"
+                            
+                            rel="noopener"
+                            title="Database"
+                        >
+                        <i class="sidebar-button-icon fa fa-database" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Database</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infrastructure"
+                            
+                            rel="noopener"
+                            title="Infrastructure"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infrastructure</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Kotlin] 비교문
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2018-08-21T00:00:00+09:00">
+	
+		    2018/08/21
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="비교연산자"><a href="#비교연산자" class="headerlink" title="비교연산자"></a>비교연산자</h1><h3 id="1"><a href="#1" class="headerlink" title="(1) =="></a>(1) ==</h3><p><code>==</code>는 내부적으로 <code>equals()</code>메소드를 호출한다. 우선 기본 데이터 타입의 비교는 다음과 같이 한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">100</span> == <span class="number">100</span>      <span class="comment">// true</span></span><br><span class="line"><span class="number">100</span> != <span class="number">100</span>      <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>클래스의 인스턴스를 비교할 때도 마찬가지로 <code>equals()</code>를 호출한다. 단 <code>equals()</code>메소드를 오버라이드하여 구현해야한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">var</span> name: String) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">equals</span><span class="params">(other: <span class="type">Any</span>?)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> target = other <span class="keyword">as</span> Person</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.name == target.name</span><br><span class="line">    &#125;</span><br><span class="line">&#125;	</span><br></pre></td></tr></table></figure>
+<p>이제 세 개의 인스턴스를 생성하자.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> p1 = Person(<span class="string">&quot;Ronaldo&quot;</span>)	</span><br><span class="line"><span class="keyword">var</span> p2 = Person(<span class="string">&quot;Ronaldo&quot;</span>)	</span><br><span class="line"><span class="keyword">var</span> p3 = Person(<span class="string">&quot;Bale&quot;</span>)	</span><br></pre></td></tr></table></figure>
+<p><code>==</code>를 사용하면 <code>equals()</code>메소드가 호출된다. 아래 두 줄은 동일한 코드다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p1==p2          <span class="comment">// true</span></span><br><span class="line">p1.equals(p2))  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2"><a href="#2" class="headerlink" title="(2) ==="></a>(2) ===</h3><p><code>===</code>는 같은 주소를 참조하고 있는지 <code>주소값</code>을 비교한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> p1 = Person(<span class="string">&quot;Paul&quot;</span>)	</span><br><span class="line"><span class="keyword">var</span> p2 = Person(<span class="string">&quot;Paul&quot;</span>)	</span><br><span class="line"><span class="keyword">var</span> p3 = p1	</span><br><span class="line"></span><br><span class="line">p1===p2     <span class="comment">// false</span></span><br><span class="line">p1===p3     <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="타입-체크"><a href="#타입-체크" class="headerlink" title="타입 체크"></a>타입 체크</h1><p>타입 체크를 할 때는 키워드<code>is</code>를 사용한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> p = Person()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (p <span class="keyword">is</span> Person) &#123;</span><br><span class="line">    println(<span class="string">&quot;p is Person.&quot;</span>)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    println(<span class="string">&quot;p is not Person.&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="조건문"><a href="#조건문" class="headerlink" title="조건문"></a>조건문</h1><p>Kotlin은 두 가지의 조건문을 제공한다.</p>
+<h3 id="1-if-구문"><a href="#1-if-구문" class="headerlink" title="(1) if 구문"></a>(1) if 구문</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> isMarried: <span class="built_in">Boolean</span> = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (isMarried) &#123;</span><br><span class="line">    println(<span class="string">&quot;He is married.&quot;</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    println(<span class="string">&quot;He is not married.&quot;</span>);        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-when-구문"><a href="#2-when-구문" class="headerlink" title="(2) when 구문"></a>(2) when 구문</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doWhen</span><span class="params">(nation: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">when</span>(nation) &#123;</span><br><span class="line">        <span class="string">&quot;Korea&quot;</span> -&gt; println(<span class="string">&quot;He&#x27;s from Korea.&quot;</span>)</span><br><span class="line">        <span class="string">&quot;Spain&quot;</span> -&gt; println(<span class="string">&quot;He&#x27;s from Spain.&quot;</span>)</span><br><span class="line">        <span class="string">&quot;France&quot;</span> -&gt; println(<span class="string">&quot;He&#x27;s from France.&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span> -&gt; println(<span class="string">&quot;Where are you from?&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">doWhen(<span class="string">&quot;Korea&quot;</span>)     <span class="comment">// He&#x27;s from Korea.</span></span><br><span class="line">doWhen(<span class="string">&quot;Germany&quot;</span>)   <span class="comment">// Where are you from?</span></span><br></pre></td></tr></table></figure>
+<p><code>when</code>구문은 결과값을 변수에 할당할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doWhen</span><span class="params">(nation: <span class="type">String</span>)</span></span>: String &#123;</span><br><span class="line">    <span class="keyword">var</span> result: String = <span class="keyword">when</span>(nation) &#123;</span><br><span class="line">        <span class="string">&quot;Korea&quot;</span> -&gt; <span class="string">&quot;He&#x27;s from Korea.&quot;</span></span><br><span class="line">        <span class="string">&quot;Spain&quot;</span> -&gt; <span class="string">&quot;He&#x27;s from Spain.&quot;</span></span><br><span class="line">        <span class="string">&quot;France&quot;</span> -&gt; <span class="string">&quot;He&#x27;s from France.&quot;</span></span><br><span class="line">        <span class="keyword">else</span> -&gt; <span class="string">&quot;Where are you from?&quot;</span></span><br><span class="line">    &#125;   </span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> result = doWhen(<span class="string">&quot;Korean&quot;</span>)</span><br><span class="line">println(result)</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Kotlin/" rel="tag">Kotlin</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/08/22/05_kotlin/180822_iteration_statement/"
+                    data-tooltip="[Kotlin] 반복문"
+                    aria-label="이전: [Kotlin] 반복문"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/08/20/05_kotlin/180820_object/"
+                    data-tooltip="[Kotlin] object, companion object"
+                    aria-label="다음: [Kotlin] object, companion object"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/08/22/05_kotlin/180822_iteration_statement/"
+                    data-tooltip="[Kotlin] 반복문"
+                    aria-label="이전: [Kotlin] 반복문"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/08/20/05_kotlin/180820_object/"
+                    data-tooltip="[Kotlin] object, companion object"
+                    aria-label="다음: [Kotlin] object, companion object"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
