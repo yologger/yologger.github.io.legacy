@@ -1,0 +1,825 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Java] 람다, 함수형 인터페이스 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n람다람다(Lambda)는 함수를 하나의 식으로 표현한 것이다. 함수를 람다식으로 표현하면 메소드의 이름이 필요 없기 때문에 익명 함수(Anonymous Function)라고도 한다.\nKotlin에서의 람다Kotlin, Swift처럼 비교적 최근에 개발된 프로그래밍 언어는 자체적으로 람다를 지원한다. 그럼 Kotin 예제를 살펴보자.\nKotlin에서 함수는 다음과 같이 선언한다.\n123fun printName(name: String) &#123;    println(name)&#125;\n위 코드를 람다로 표현하면 다음과 같다.\n123&#123; name: String -&gt;    println(name)&#125;\nKotlin은 함수를 일급 객체로 취급하므로 람다를 변수에 할당할 수 있다.\n123var printName: (name: String) -&gt; Unit = &#123; name: String -&gt;    println(name)&#125;\n이는 언어 자체에서 함수 타입을 지원하기 때문이다. 정수 타입에는 정수를 할당하는 것처럼 함수 타입에는 함수를 할당할 수 있다. 위 예제에서는 (name: String) -&gt; Unit가 바로 함수 타입이다.\n람다는 함수의 매개변수로도 전달할 수 있다. 아래 코드는 run()이라는 함수의 매개변수로 람다를 전달하고 있다.\n123run(&#123; name: String -&gt;     printName()&#125;)\n\nJava에서의 람다Java는 Kotlin, Swift 같은 언어에 비해 비교적 오래되었다. 또한 객체지향 프로그래밍을 패러다임으로 만들어졌기 때문에 언어 자체적으로 람다와 함수형 프로그래밍을 지원하지 않는다. 그러나 Java 8부터 함수형 프로그래밍을 지원하기 위한 Java API가 추가되었다.\n함수형 인터페이스Java는 함수 타입이 없으므로 람다를 변수에 저장하거나 매개변수로 전달할 수 없다. 이를 해결하기 위해 도입된 개념이 함수형 인터페이스다.\n함수형 인터페이스를 구현하기 위해서는 인터페이스를 정의하고 그 내부에는 한 개 뿐인 추상 메소드를 선언한 후 @FunctionalInterface 어노테이션을 붙여주면 된다.\n1234@FunctionalInterfaceinterface PrintNameLambda &#123;    void printName(String name);&#125;\n이제 마치 변수에 함수를 할당하는 것처럼 사용할 수 있다.\n12345PrintNameLambda lambda = (String name) -&gt; &#123;    System.out.println(name);&#125;;lambda.printName(&quot;Paul&quot;);\n자바 API에서는 자주 사용될 것 같은 함수형 인터페이스가 이미 정의되어있다.\n(1) Supplier 매개변수 없이 반환값만 갖는 함수형 인터페이스다. Supplier는 T get()라는 추상 메소드를 가진다.\n123456789// 정의@FunctionalInterfacepublic interface Supplier&lt;T&gt; &#123;    T get();&#125;// 사용 방법Supplier&lt;String&gt; supplier = () -&gt; &quot;Hello World!&quot;;System.out.println(supplier.get());\n(2) Consumer 매개변수가 있고 반환값은 없는 함수형 인터페이스다. Consumer는 void accept(T t)라는 추상 메소드를 가진다.\n1234567891011121314151617// 정의@FunctionalInterfacepublic interface Consumer&lt;T&gt; &#123;    void accept(T t);    default Consumer&lt;T&gt; andThen(Consumer&lt;? super T&gt; after) &#123;        Objects.requireNonNull(after);        return (T t) -&gt; &#123; accept(t); after.accept(t); &#125;;    &#125;&#125;Consumer&lt;String&gt; consumer = (String name) -&gt; &#123;    System.out.println(name);&#125;;consumer.accept(&quot;Hello World&quot;);\n(3) Function &lt;T, R&gt;매개변수도 있고 반환값도 있는 함수형 인터페이스다. Function은 R apply(T t)라는 추상 메소드를 가진다.\n1234567891011121314151617181920212223242526// 정의@FunctionalInterfacepublic interface Function&lt;T, R&gt; &#123;    R apply(T t);    default &lt;V&gt; Function&lt;V, R&gt; compose(Function&lt;? super V, ? extends T&gt; before) &#123;        Objects.requireNonNull(before);        return (V v) -&gt; apply(before.apply(v));    &#125;    default &lt;V&gt; Function&lt;T, V&gt; andThen(Function&lt;? super R, ? extends V&gt; after) &#123;        Objects.requireNonNull(after);        return (T t) -&gt; after.apply(apply(t));    &#125;    static &lt;T&gt; Function&lt;T, T&gt; identity() &#123;        return t -&gt; t;    &#125;&#125;// 예시, 메소드 참조로 간소화 가능(String::length;)Function&lt;String, Integer&gt; function = (String str) -&gt; &#123;    str.length();&#125;function.apply(&quot;Hello World&quot;);\n(4) Predicate 매개변수가 있고 boolean타입의 값을 반환한다. Supplier는 boolean test(T t)라는 추상 메소드를 가진다. \n12345678910111213141516171819202122232425262728293031// 정의@FunctionalInterfacepublic interface Predicate&lt;T&gt; &#123;    boolean test(T t);    default Predicate&lt;T&gt; and(Predicate&lt;? super T&gt; other) &#123;        Objects.requireNonNull(other);        return (t) -&gt; test(t) &amp;&amp; other.test(t);    &#125;    default Predicate&lt;T&gt; negate() &#123;        return (t) -&gt; !test(t);    &#125;    default Predicate&lt;T&gt; or(Predicate&lt;? super T&gt; other) &#123;        Objects.requireNonNull(other);        return (t) -&gt; test(t) || other.test(t);    &#125;    static &lt;T&gt; Predicate&lt;T&gt; isEqual(Object targetRef) &#123;        return (null == targetRef)                ? Objects::isNull                : object -&gt; targetRef.equals(object);    &#125;    &#125;// 예시Predicate&lt;String&gt; predicate = (str) -&gt; str.equals(&quot;Hello World&quot;);predicate.test(&quot;Hello World&quot;);\n안드로이드에서의 람다식람다식 안드로이드 어플리케이션 개발에서도 자주 사용된다. 보통 버튼같은 위젯을 클릭했을 때 실행할 구문을 람다 안에 구현한다.\n우선 람다를 사용하지 않고 익명 클래스를 사용하여 특정 버튼을 클릭했을 때 실행할 구문을 등록해보자.\n12345678Button button = findViewById(R.id.button);button.setOnTouchListener(new View.OnTouchListener() &#123;    @Override    public boolean onTouch(View v, MotionEvent event) &#123;        return false;    &#125;&#125;);\n람다를 사용하면 다음과 같이 단축할 수 있다.\n123button.setOnTouchListener((View v, MotionEvent event) -&gt; &#123;    return false;&#125;);\n람다에서는 데이터 타입도 생략할 수 있다.\n123button.setOnTouchListener((v, event) -&gt; &#123;    return false;&#125;);\n함수의 몸체가 한 줄일 때는 중괄호&#123;&#125;도 생략하여 한 줄로 표현할 수 있다.\n1button.setOnTouchListener((v, event) -&gt; false);\n매개변수가 한 개일 때는 소괄호()도 생략할 수 있다.\n1button.setOnClickListener(v -&gt; System.out.println(&quot;Button clicked.&quot;));","dateCreated":"2018-03-19T00:00:00+09:00","dateModified":"2021-12-14T21:28:04+09:00","datePublished":"2018-03-19T00:00:00+09:00","description":"","headline":"[Java] 람다, 함수형 인터페이스","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/","keywords":"Java"}</script>
+    <meta name="description" content="람다람다(Lambda)는 함수를 하나의 식으로 표현한 것이다. 함수를 람다식으로 표현하면 메소드의 이름이 필요 없기 때문에 익명 함수(Anonymous Function)라고도 한다. Kotlin에서의 람다Kotlin, Swift처럼 비교적 최근에 개발된 프로그래밍 언어는 자체적으로 람다를 지원한다. 그럼 Kotin 예제를 살펴보자. Kotlin에서 함수는">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Java] 람다, 함수형 인터페이스">
+<meta property="og:url" content="https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="람다람다(Lambda)는 함수를 하나의 식으로 표현한 것이다. 함수를 람다식으로 표현하면 메소드의 이름이 필요 없기 때문에 익명 함수(Anonymous Function)라고도 한다. Kotlin에서의 람다Kotlin, Swift처럼 비교적 최근에 개발된 프로그래밍 언어는 자체적으로 람다를 지원한다. 그럼 Kotin 예제를 살펴보자. Kotlin에서 함수는">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2018-03-18T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-14T12:28:04.966Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/html"
+                            
+                            rel="noopener"
+                            title="HTML"
+                        >
+                        <i class="sidebar-button-icon fab fa-html5" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">HTML</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/css"
+                            
+                            rel="noopener"
+                            title="CSS"
+                        >
+                        <i class="sidebar-button-icon fab fa-css3" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">CSS</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/javascript"
+                            
+                            rel="noopener"
+                            title="JavaScript"
+                        >
+                        <i class="sidebar-button-icon fab fa-js-square" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">JavaScript</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/nodejs"
+                            
+                            rel="noopener"
+                            title="Node.js"
+                        >
+                        <i class="sidebar-button-icon fab fa-node" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Node.js</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/database"
+                            
+                            rel="noopener"
+                            title="Database"
+                        >
+                        <i class="sidebar-button-icon fa fa-database" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Database</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infrastructure"
+                            
+                            rel="noopener"
+                            title="Infrastructure"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infrastructure</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Java] 람다, 함수형 인터페이스
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2018-03-19T00:00:00+09:00">
+	
+		    2018/03/19
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="람다"><a href="#람다" class="headerlink" title="람다"></a>람다</h1><p><code>람다(Lambda)</code>는 함수를 하나의 식으로 표현한 것이다. 함수를 람다식으로 표현하면 메소드의 이름이 필요 없기 때문에 <code>익명 함수(Anonymous Function)</code>라고도 한다.</p>
+<h1 id="Kotlin에서의-람다"><a href="#Kotlin에서의-람다" class="headerlink" title="Kotlin에서의 람다"></a>Kotlin에서의 람다</h1><p>Kotlin, Swift처럼 비교적 최근에 개발된 프로그래밍 언어는 자체적으로 람다를 지원한다. 그럼 Kotin 예제를 살펴보자.</p>
+<p>Kotlin에서 함수는 다음과 같이 선언한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printName</span><span class="params">(name: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    println(name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드를 람다로 표현하면 다음과 같다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123; name: String -&gt;</span><br><span class="line">    println(name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Kotlin은 함수를 <code>일급 객체</code>로 취급하므로 람다를 변수에 할당할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> printName: (name: String) -&gt; <span class="built_in">Unit</span> = &#123; name: String -&gt;</span><br><span class="line">    println(name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이는 언어 자체에서 <code>함수 타입</code>을 지원하기 때문이다. <code>정수 타입</code>에는 정수를 할당하는 것처럼 <code>함수 타입</code>에는 함수를 할당할 수 있다. 위 예제에서는 <code>(name: String) -&gt; Unit</code>가 바로 <code>함수 타입</code>이다.</p>
+<p>람다는 함수의 매개변수로도 전달할 수 있다. 아래 코드는 <code>run()</code>이라는 함수의 매개변수로 람다를 전달하고 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">run(&#123; name: String -&gt; </span><br><span class="line">    printName()</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h1 id="Java에서의-람다"><a href="#Java에서의-람다" class="headerlink" title="Java에서의 람다"></a>Java에서의 람다</h1><p>Java는 Kotlin, Swift 같은 언어에 비해 비교적 오래되었다. 또한 객체지향 프로그래밍을 패러다임으로 만들어졌기 때문에 언어 자체적으로 람다와 함수형 프로그래밍을 지원하지 않는다. 그러나 Java 8부터 함수형 프로그래밍을 지원하기 위한 Java API가 추가되었다.</p>
+<h1 id="함수형-인터페이스"><a href="#함수형-인터페이스" class="headerlink" title="함수형 인터페이스"></a>함수형 인터페이스</h1><p>Java는 <code>함수 타입</code>이 없으므로 람다를 변수에 저장하거나 매개변수로 전달할 수 없다. 이를 해결하기 위해 도입된 개념이 <code>함수형 인터페이스</code>다.</p>
+<p>함수형 인터페이스를 구현하기 위해서는 인터페이스를 정의하고 그 내부에는 한 개 뿐인 추상 메소드를 선언한 후 <code>@FunctionalInterface</code> 어노테이션을 붙여주면 된다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">PrintNameLambda</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">printName</span><span class="params">(String name)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 마치 변수에 함수를 할당하는 것처럼 사용할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PrintNameLambda lambda = (String name) -&gt; &#123;</span><br><span class="line">    System.out.println(name);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">lambda.printName(<span class="string">&quot;Paul&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>자바 API에서는 자주 사용될 것 같은 함수형 인터페이스가 이미 정의되어있다.</p>
+<h3 id="1-Supplier"><a href="#1-Supplier" class="headerlink" title="(1) Supplier "></a>(1) Supplier <T></h3><p>매개변수 없이 반환값만 갖는 함수형 인터페이스다. Supplier는 <code>T get()</code>라는 추상 메소드를 가진다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 정의</span></span><br><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Supplier</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">T <span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 사용 방법</span></span><br><span class="line">Supplier&lt;String&gt; supplier = () -&gt; <span class="string">&quot;Hello World!&quot;</span>;</span><br><span class="line">System.out.println(supplier.get());</span><br></pre></td></tr></table></figure>
+<h3 id="2-Consumer"><a href="#2-Consumer" class="headerlink" title="(2) Consumer "></a>(2) Consumer <T></h3><p>매개변수가 있고 반환값은 없는 함수형 인터페이스다. Consumer는 <code>void accept(T t)</code>라는 추상 메소드를 가진다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 정의</span></span><br><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Consumer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">accept</span><span class="params">(T t)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> Consumer&lt;T&gt; <span class="title">andThen</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> T&gt; after)</span> </span>&#123;</span><br><span class="line">        Objects.requireNonNull(after);</span><br><span class="line">        <span class="keyword">return</span> (T t) -&gt; &#123; accept(t); after.accept(t); &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Consumer&lt;String&gt; consumer = (String name) -&gt; &#123;</span><br><span class="line">    System.out.println(name);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">consumer.accept(<span class="string">&quot;Hello World&quot;</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="3-Function-lt-T-R-gt"><a href="#3-Function-lt-T-R-gt" class="headerlink" title="(3) Function &lt;T, R&gt;"></a>(3) Function &lt;T, R&gt;</h3><p>매개변수도 있고 반환값도 있는 함수형 인터페이스다. Function은 <code>R apply(T t)</code>라는 추상 메소드를 가진다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 정의</span></span><br><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Function</span>&lt;<span class="title">T</span>, <span class="title">R</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function">R <span class="title">apply</span><span class="params">(T t)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span> &lt;V&gt; <span class="function">Function&lt;V, R&gt; <span class="title">compose</span><span class="params">(Function&lt;? <span class="keyword">super</span> V, ? extends T&gt; before)</span> </span>&#123;</span><br><span class="line">        Objects.requireNonNull(before);</span><br><span class="line">        <span class="keyword">return</span> (V v) -&gt; apply(before.apply(v));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span> &lt;V&gt; <span class="function">Function&lt;T, V&gt; <span class="title">andThen</span><span class="params">(Function&lt;? <span class="keyword">super</span> R, ? extends V&gt; after)</span> </span>&#123;</span><br><span class="line">        Objects.requireNonNull(after);</span><br><span class="line">        <span class="keyword">return</span> (T t) -&gt; after.apply(apply(t));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &lt;T&gt; <span class="function">Function&lt;T, T&gt; <span class="title">identity</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> t -&gt; t;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 예시, 메소드 참조로 간소화 가능(String::length;)</span></span><br><span class="line">Function&lt;String, Integer&gt; function = (String str) -&gt; &#123;</span><br><span class="line">    str.length();</span><br><span class="line">&#125;</span><br><span class="line">function.apply(<span class="string">&quot;Hello World&quot;</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="4-Predicate"><a href="#4-Predicate" class="headerlink" title="(4) Predicate "></a>(4) Predicate <T></h3><p>매개변수가 있고 <code>boolean</code>타입의 값을 반환한다. Supplier는 <code>boolean test(T t)</code>라는 추상 메소드를 가진다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 정의</span></span><br><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Predicate</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">test</span><span class="params">(T t)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> Predicate&lt;T&gt; <span class="title">and</span><span class="params">(Predicate&lt;? <span class="keyword">super</span> T&gt; other)</span> </span>&#123;</span><br><span class="line">        Objects.requireNonNull(other);</span><br><span class="line">        <span class="keyword">return</span> (t) -&gt; test(t) &amp;&amp; other.test(t);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> Predicate&lt;T&gt; <span class="title">negate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (t) -&gt; !test(t);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> Predicate&lt;T&gt; <span class="title">or</span><span class="params">(Predicate&lt;? <span class="keyword">super</span> T&gt; other)</span> </span>&#123;</span><br><span class="line">        Objects.requireNonNull(other);</span><br><span class="line">        <span class="keyword">return</span> (t) -&gt; test(t) || other.test(t);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &lt;T&gt; <span class="function">Predicate&lt;T&gt; <span class="title">isEqual</span><span class="params">(Object targetRef)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">null</span> == targetRef)</span><br><span class="line">                ? Objects::isNull</span><br><span class="line">                : object -&gt; targetRef.equals(object);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 예시</span></span><br><span class="line">Predicate&lt;String&gt; predicate = (str) -&gt; str.equals(<span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">predicate.test(<span class="string">&quot;Hello World&quot;</span>);</span><br></pre></td></tr></table></figure>
+<h1 id="안드로이드에서의-람다식"><a href="#안드로이드에서의-람다식" class="headerlink" title="안드로이드에서의 람다식"></a>안드로이드에서의 람다식</h1><p>람다식 안드로이드 어플리케이션 개발에서도 자주 사용된다. 보통 버튼같은 위젯을 클릭했을 때 실행할 구문을 람다 안에 구현한다.</p>
+<p>우선 람다를 사용하지 않고 익명 클래스를 사용하여 특정 버튼을 클릭했을 때 실행할 구문을 등록해보자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Button button = findViewById(R.id.button);</span><br><span class="line"></span><br><span class="line">button.setOnTouchListener(<span class="keyword">new</span> View.OnTouchListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTouch</span><span class="params">(View v, MotionEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>람다를 사용하면 다음과 같이 단축할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">button.setOnTouchListener((View v, MotionEvent event) -&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>람다에서는 데이터 타입도 생략할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">button.setOnTouchListener((v, event) -&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>함수의 몸체가 한 줄일 때는 <code>중괄호&#123;&#125;</code>도 생략하여 한 줄로 표현할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">button.setOnTouchListener((v, event) -&gt; <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+<p>매개변수가 한 개일 때는 <code>소괄호()</code>도 생략할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">button.setOnClickListener(v -&gt; System.out.println(<span class="string">&quot;Button clicked.&quot;</span>));</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Java/" rel="tag">Java</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/01/12_tools/02_gradle/20180401_compile_build/"
+                    data-tooltip="[Gradle] Compile과 Build"
+                    aria-label="이전: [Gradle] Compile과 Build"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/03/18/04_java/180318_functional_programming/"
+                    data-tooltip="[Java] 일급 객체와 함수형 프로그래밍"
+                    aria-label="다음: [Java] 일급 객체와 함수형 프로그래밍"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/01/12_tools/02_gradle/20180401_compile_build/"
+                    data-tooltip="[Gradle] Compile과 Build"
+                    aria-label="이전: [Gradle] Compile과 Build"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/03/18/04_java/180318_functional_programming/"
+                    data-tooltip="[Java] 일급 객체와 함수형 프로그래밍"
+                    aria-label="다음: [Java] 일급 객체와 함수형 프로그래밍"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/19/04_java/180319_lambda_functional_interface/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
