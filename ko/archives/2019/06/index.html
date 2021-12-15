@@ -354,6 +354,454 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                            aria-label=": [Android] URI와 UriMatcher"
+                        >
+                            [Android] URI와 UriMatcher
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-15T01:00:00+09:00">
+	
+		    2019/06/15
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="URI"><a href="#URI" class="headerlink" title="URI"></a>URI</h1><p><code>URI(Uniform Resource Identifier, 통합 자원 식별자)</code>는 자원을 구분해주는 식별자입니다. 내 스마트폰이나 데스크톱에는 많은 자원(파일, 이미지, 비디오 등)이 존재합니다. 또한 연결된 인터넷 상에도 많은 자원이 존재합니다. URI는 이 자원을 구분하고 식별하는데 사용됩니다.</p>
+<p>우리는 구글에 접속할 때 웹 브라우저의 주소창에 <code>http://www.google.com</code>를 입력합니다. 이때 <code>http://www.google.com</code> 뒤에는 <code>index.html</code>이 생략되어있습니다</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://www.google.com/index.html">http://www.google.com/index.html</a></p>
+</blockquote>
+<p>이 주소도 URI입니다. 웹 브라우저는 URI에 위치한 index.html 파일을 가져와서 화면에 보여줍니다. 이처럼 URI는 자원을 구분하고 식별하는데 사용됩니다.</p>
+<h1 id="URI-구조"><a href="#URI-구조" class="headerlink" title="URI 구조"></a>URI 구조</h1><p>URI는 다음과 같은 구조를 가지고 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scheme:[//[user[:password]@]host[:port]][/path][?query]</span><br></pre></td></tr></table></figure>
+<p><code>scheme</code>와 <code>host</code>는 필수사항이고 나머지는 선택사항입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 예시</span><br><span class="line">https://www.google.com/index.html</span><br><span class="line">mailto:yologger@gmail.com</span><br><span class="line">tel:+82-10-1111-2222</span><br><span class="line">ftp://yologger:1234@192.168.0.1:21</span><br><span class="line">content://com.korea.trains/line/1</span><br><span class="line">file:///usr/local/bin/</span><br><span class="line">data:text/vnd-example+xyz;foo=bar;base64,R0lGODdh</span><br><span class="line">news:comp.infosystems.www.servers.unix</span><br><span class="line">telnet://192.0.2.16:80/</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-Scheme"><a href="#1-Scheme" class="headerlink" title="(1) Scheme"></a>(1) Scheme</h3><p><code>scheme</code>은 어떤 프로토콜을 사용할지 지정합니다. 자주 쓰는 스킴에는 http, https, ftp, content, file, data가 있습니다. 모든 URI 스킴은 <a target="_blank" rel="noopener" href="http://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">이 곳</a>에서 확인할 수 있습니다.</p>
+<h3 id="2-Host"><a href="#2-Host" class="headerlink" title="(2) Host"></a>(2) Host</h3><p>네트워크에 연결되어 있는 모든 컴퓨터 각각을 <code>호스트</code>라고 합니다. 보통 <code>도메인 네임</code>이나 <code>IP 주소</code>을 사용하여 호스트를 구분하고 식별합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 도메인 네임</span><br><span class="line">http://www.netflix.com</span><br><span class="line">https://www.google.com</span><br><span class="line"></span><br><span class="line">// IP 주소</span><br><span class="line">https://172.217.27.78</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Port"><a href="#3-Port" class="headerlink" title="(3) Port"></a>(3) Port</h3><p>컴퓨터 내에서 실행되고있는 어플리케이션들을 구분하기 위해 사용하는 번호입니다. 보통 HTTP 프로토콜을 사용할 때는 80, HTTPS 프로토콜을 사용할 때는 443 포트를 사용합니다. 예제는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://www.netflix.com:80</span><br><span class="line">https://www.google.com:443</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Authority"><a href="#4-Authority" class="headerlink" title="(4) Authority"></a>(4) Authority</h3><p><code>authority</code>는 사용자 이름과 비밀번호, 호스트, 포트번호의 조합입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">authority = [ username &quot;:&quot; password &quot;@&quot; ] host [ &quot;:&quot; port ]</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yologger:1234@mail.google.com/:587</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="5-Path"><a href="#5-Path" class="headerlink" title="(5) Path"></a>(5) Path</h3><p>요청할 자원에 대한 경로를 의미합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 사람 자원의 경로</span><br><span class="line">https://www.example.com/person</span><br><span class="line"></span><br><span class="line">// 사람 중 프로그래머 자원의 경로</span><br><span class="line">https://www.example.com/person/programmer</span><br><span class="line"></span><br><span class="line">// 차량 자원의 경로</span><br><span class="line">https://www.example.com/car</span><br><span class="line"></span><br><span class="line">// 책 자원의 경로</span><br><span class="line">https://192.168.0.1/book</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Query"><a href="#6-Query" class="headerlink" title="(6) Query"></a>(6) Query</h3><p>경로에 있는 자원의 범위를 한정하기 위해 사용합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 이름이 paul인 사람</span><br><span class="line">https://www.example.com/person?name=paul</span><br><span class="line"></span><br><span class="line">// 국가가 england인 사람</span><br><span class="line">https://www.example.com/person?nation=england</span><br><span class="line"></span><br><span class="line">// 이름이 john이고 국가가 america인 사람</span><br><span class="line">https://www.example.com/person?name=john&amp;nation=america</span><br><span class="line"></span><br><span class="line">// 제조업체가 benz인 자동차</span><br><span class="line">https://www.example.com/car?manufacturer=benz</span><br><span class="line"></span><br><span class="line">// 저자가 paul인 책</span><br><span class="line">https://192.168.0.1/book?author=paul</span><br><span class="line"></span><br><span class="line">// 저자가 john인 책</span><br><span class="line">https://192.168.0.1/book?author=john</span><br></pre></td></tr></table></figure>
+
+<h1 id="안드로이드에서의-URI"><a href="#안드로이드에서의-URI" class="headerlink" title="안드로이드에서의 URI"></a>안드로이드에서의 URI</h1><p>안드로이드 API는 URI를 취급하기 위해 <code>Uri</code>클래스를 제공합니다. <code>Uri</code>클래스는 암시적 인텐트, 컨텐트 프로바이더 등 안드로이드의 다양한 분야에서 많이 사용됩니다.</p>
+<p><code>Uri.Builder</code>클래스의 <code>build()</code>메소드를 사용하여 <code>Uri</code>객체를 생성할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> uri: Uri = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;paul&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;nation&quot;</span>, <span class="string">&quot;england&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
+<p><code>Uri</code>클래스의 <code>parse()</code>메소드를 사용할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> uri = Uri.parse(<span class="string">&quot;https://www.example.com/person/programmer?name=paul&amp;nation=england&quot;</span>)</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="UriMatcher"><a href="#UriMatcher" class="headerlink" title="UriMatcher"></a>UriMatcher</h1><p><code>UriMatcher</code>클래스는 두 개의 <code>Uri</code>를 비교하여 사용자가 정의한 값을 반환하는데 사용합니다. <code>UriMatcher</code>클래스는 두 개의 메소드만을 가지고 있습니다.</p>
+<h3 id="1-addUri"><a href="#1-addUri" class="headerlink" title="(1) addUri()"></a>(1) addUri()</h3><p>기준이 되는 Uri를 등록하는데 사용합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addUri([authority], [path], [code])</span><br></pre></td></tr></table></figure>
+<p>세 번째 인자인 <code>code</code>는 두 <code>Uri</code>가 일치할 때 반환되는 정수값입니다.</p>
+<p><code>UriMatcher</code>객체를 생성하고 세 개의 <code>Uri</code>를 등록해봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uriMatcher = UriMatcher(UriMatcher.NO_MATCH)</span><br><span class="line"></span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person&quot;</span>, <span class="number">1</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person/*&quot;</span>, <span class="number">2</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;car/*&quot;</span>, <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="2-match"><a href="#2-match" class="headerlink" title="(2) match()"></a>(2) match()</h3><p>인자로 전달된 <code>Uri</code>와 위에서 등록한 <code>Uri</code>과 비교하여 정수값을 반환합니다. </p>
+<p>우선 네 개의 <code>Uri</code>를 생성합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// https://www.example.com/person</span></span><br><span class="line"><span class="keyword">val</span> uri1 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer</span></span><br><span class="line"><span class="keyword">val</span> uri2 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/car/convertible</span></span><br><span class="line"><span class="keyword">val</span> uri3 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;car&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;convertible&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.test.com/book</span></span><br><span class="line"><span class="keyword">val</span> uri4 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.test.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;book&quot;</span>)</span><br><span class="line">    .build()</span><br></pre></td></tr></table></figure>
+<p>이제 다음과 같이 두 <code>Uri</code>를 비교할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> result1 = uriMatcher.match(uri1)    <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result2 = uriMatcher.match(uri2)    <span class="comment">// 2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result3 = uriMatcher.match(uri3)    <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 일치하는 uri가 없으면 -1을 반환합니다.</span></span><br><span class="line"><span class="keyword">val</span> result4 = uriMatcher.match(uri4)    <span class="comment">// -1</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/"
+                            aria-label=": [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기"
+                        >
+                            [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-14T01:00:00+09:00">
+	
+		    2019/06/14
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="ADB-Android-Debug-Bridge"><a href="#ADB-Android-Debug-Bridge" class="headerlink" title="ADB(Android Debug Bridge)"></a>ADB(Android Debug Bridge)</h1><p><code>ADB(Android Debug Bridge)</code>는 안드로이드 기기와 통신할 수 있는 명령어 도구입니다. ADB를 사용하면 윈도우의 계열 <u>명령 프롬프트</u>나 리눅스 계열의 <u>터미널</u>처럼 연결된 기기에 접근할 수 있습니다.</p>
+<p>ADB는 <code>안드로이드 SDK</code>의 <code>Platform Tools</code>에 포함되어 있습니다. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/Users/[your_username]/Library/Android/sdk/platform-tools</span><br><span class="line"></span><br><span class="line">$ ls</span><br><span class="line">adb</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>어느 위치에서든 ADB 명령어를 사용하려면 아래와 같이 경로 설정을 해야합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cd ~ </span><br><span class="line"></span><br><span class="line">$ echo &#x27;/Users/[your_username]/Library/Android/sdk/platform-tools&#x27; &gt;&gt; ~/.bash_profile</span><br><span class="line"></span><br><span class="line">$ source ~/.bash_profile</span><br></pre></td></tr></table></figure>
+
+
+<p>이제 <code>adb --help</code> 명령어를 입력하면 ADB와 관련된 옵션들을 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb --<span class="built_in">help</span></span></span><br><span class="line">Android Debug Bridge version 1.0.41</span><br><span class="line">Version 31.0.0-7110759</span><br><span class="line">Installed as /usr/local/bin/adb</span><br><span class="line"></span><br><span class="line">global options:</span><br><span class="line"> -a         listen on all network interfaces, not just localhost</span><br><span class="line"> -d         use USB device (error if multiple devices connected)</span><br><span class="line"> -e         use TCP/IP device (error if multiple TCP/IP devices available)</span><br><span class="line"> -s SERIAL  use device with given serial (overrides $ANDROID_SERIAL)</span><br><span class="line"> -t ID      use device with given transport id</span><br><span class="line"> -H         name of adb server host [default=localhost]</span><br><span class="line"> -P         port of adb server [default=5037]</span><br><span class="line"> -L SOCKET  listen on given socket for adb server [default=tcp:localhost:5037]</span><br><span class="line"></span><br><span class="line">general commands:</span><br><span class="line"> devices [-l]             list connected devices (-l for long output)</span><br><span class="line"> help                     show this help message</span><br><span class="line"> version                  show version num</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>안드로이드는 리눅스 기반의 운영체제입니다. 따라서 연결된 기기의 리눅스 쉘에 접속할 수 있습니다. 이 때는 <code>adb shell</code> 명령어를 사용합니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span></span><br></pre></td></tr></table></figure>
+<p>이제 연결된 기기의 디렉토리 구조를 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">bin</span><br><span class="line">data</span><br><span class="line">sdcard</span><br><span class="line">storage</span><br><span class="line">dev</span><br><span class="line">sys</span><br><span class="line">system</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h1 id="자주-쓰는-adb-명령어"><a href="#자주-쓰는-adb-명령어" class="headerlink" title="자주 쓰는 adb 명령어"></a>자주 쓰는 adb 명령어</h1><p><code>adb devices</code>명령어를 사용하면 실제 기기와 정상적으로 연결되었는지 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb devices</span></span><br><span class="line">List of devices attached</span><br><span class="line">R3CN109JVFK     device</span><br><span class="line">R332AEW32AA     device</span><br><span class="line">R3CN238IKEF     offline</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>offline</td>
+<td>기기가 연결되지 않았거나 비정상인 경우</td>
+</tr>
+<tr>
+<td>device</td>
+<td>정상적으로 기기가 연결된 경우</td>
+</tr>
+<tr>
+<td>no device</td>
+<td>연결된 기기가 없는 경우</td>
+</tr>
+</tbody></table>
+<p><code>adb reboot</code>명령어를 사용하면 기기를 재시작할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb reboot</span></span><br></pre></td></tr></table></figure>
+<p>PC에서 안드로이드 기기로 파일을 복사할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb push &quot;파일 명&quot; &quot;복사할 경로&quot;</span><br><span class="line"></span><br><span class="line">$ adb push backup.zip /sdcard</span><br></pre></td></tr></table></figure>
+<p>안드로이드 기기에서 PC로 파일을 복사할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb pull &quot;파일 명&quot; &quot;복사할 경로&quot;</span><br><span class="line"></span><br><span class="line">$ adb pull /sdcard/log.txt .</span><br></pre></td></tr></table></figure>
+<p>APK 파일을 직접 설치할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb install [app_name].apk</span><br><span class="line"></span><br><span class="line">$ adb install my_app.apk</span><br></pre></td></tr></table></figure>
+<p>앱을 삭제할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb uninstall [package_name]</span><br><span class="line"></span><br><span class="line">$ adb uninstall com.yologger.package</span><br></pre></td></tr></table></figure>
+<p>연결된 기기의 시스템 정보를 가져올 수 도 있습니다. </p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys</span></span><br></pre></td></tr></table></figure>
+<p>아래와 같이 액티비티와 태스크의 스택을 확인할 때 많이 사용합니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities</span></span><br></pre></td></tr></table></figure>
+
+<p>위 명령어를 입력하면 너무 방대한 정보가 한꺼번에 출력됩니다. 따라서 여러 옵션과 <code>grep</code>을 적절히 활용하여 필요한 정보만 출력할 수 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb shell dumpsys activity activities | grep -i [package_name] | grep -i Hist</span><br><span class="line"></span><br><span class="line">$ adb shell dumpsys activity activities | grep -i com.yologger.activity | grep -i Hist</span><br></pre></td></tr></table></figure>
+
+<h1 id="액티비티-스택-확인하기"><a href="#액티비티-스택-확인하기" class="headerlink" title="액티비티 스택 확인하기"></a>액티비티 스택 확인하기</h1><p><code>ADB(Android Debug Bridge)</code>를 사용하면 현재 앱에서 실행 중인 모든 서비스를 확인할 수 있습니다.</p>
+<p><code>adb shell</code> 명령어를 사용하면 연결된 기기에 접속할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span> </span><br></pre></td></tr></table></figure>
+<p><code>dumpsys</code> 명령어를 사용하면 모든 서비스를 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> dumpsys</span> </span><br></pre></td></tr></table></figure>
+<p>다음과 같이 호출할 수도 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys</span> </span><br></pre></td></tr></table></figure>
+
+<p>현재 기기에서 실행 중인 태스크와 액티비티만을 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities</span></span><br></pre></td></tr></table></figure>
+<p>특정 앱의 태스크와 액티비티만 확인할 수도 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities | grep -i [package_name] | grep -i Hist</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities | grep -i com.yologger.myapp | grep -i Hist</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/13/08_android/01_android_platform/190613_compileSdkVersion_minSdkVersion_targetSdkVersion/"
+                            aria-label=": [Android] compileSdkVersion, minSdkVersion, targetSdkVersion 차이점"
+                        >
+                            [Android] compileSdkVersion, minSdkVersion, targetSdkVersion 차이점
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-13T01:00:00+09:00">
+	
+		    2019/06/13
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="1-compileSdkVersion"><a href="#1-compileSdkVersion" class="headerlink" title="(1) compileSdkVersion"></a>(1) compileSdkVersion</h1><p>안드로이드 스튜디오에서 앱을 빌드할 때 어떤 SDK 버전을 사용할 것인지 지정합니다. 즉 <code>comileSdkVersion</code>은 지원할 수 있는 가장 높은 버전을 의미합니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>안드로이드 스튜디오의 SDK Manager에 해당 SDK가 설치되어있어야 합니다.<br><img src="0.png"></p>
+<h1 id="2-minSdkVersion"><a href="#2-minSdkVersion" class="headerlink" title="(2) minSdkVersion"></a>(2) minSdkVersion</h1><p>최소 지원 SDK 버전을 의미합니다. 즉 해당 버전 이하의 안드로이드 운영체제가 설치된 기기에서는 앱을 설치할 수 없습니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-targetSdkVersion"><a href="#3-targetSdkVersion" class="headerlink" title="(3) targetSdkVersion"></a>(3) targetSdkVersion</h1><p>앱을 실제 기기에서 실행할 때 어떤 SDK 버전을 사용할지 지정합니다. 기능은 똑같아도 SDK 버전에 따라 다르게 동작하는 API도 있습니다. 이때는 <code>targetSdkVersion</code>에 맞는 API를 사용하게 됩니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        targetSdkVersion <span class="number">27</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>targetSdkVersion</code>을 지정하지 않으면 기본 값은 <code>minSdkVersion</code>과 동일하게 적용됩니다. </p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>모듈 수준의 <code>build.gradle</code>파일에서 다음과 같이 SDK 버전 설정을 설정합니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        targetSdkVersion <span class="number">27</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이는 SDK 버전이 25 이상 30 이하에서만 이 앱이 실행될 수 있음을 의미합니다. 또한 실제 동작은 27 버전으로 동작하게 됩니다. 보통 실무에서는 </p>
+<div class="alert warning icon"><p>minSdkVersion &lt;= targetSdkVersion == compileSdkVersion</p>
+</div>
+
+<p>로 SDK 버전을 설정합니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/13/08_android/01_android_platform/190613_compileSdkVersion_minSdkVersion_targetSdkVersion/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/12/08_android/01_android_platform/190612_sdk_version/"
+                            aria-label=": [Android] 런타임에서 SDK 버전 확인하기"
+                        >
+                            [Android] 런타임에서 SDK 버전 확인하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-12T01:00:00+09:00">
+	
+		    2019/06/12
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="런타임에서-현재-기기의-SDK-버전-확인하기"><a href="#런타임에서-현재-기기의-SDK-버전-확인하기" class="headerlink" title="런타임에서 현재 기기의 SDK 버전 확인하기"></a>런타임에서 현재 기기의 SDK 버전 확인하기</h1><p>런타임에서 현재 기기의 SDK 버전을 확인할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        println(Build.VERSION.SDK_INT)  <span class="comment">// 기기의 SDK Version 확인</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;      </span><br></pre></td></tr></table></figure>
+<p>안드로이드 API에는 SDK의 버전이 상수 값으로 정의되어있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        println(Build.VERSION_CODES.BASE)                   <span class="comment">// 1</span></span><br><span class="line">        println(Build.VERSION_CODES.BASE_1_1)               <span class="comment">// 2</span></span><br><span class="line">        println(Build.VERSION_CODES.CUPCAKE)                <span class="comment">// 3</span></span><br><span class="line">        println(Build.VERSION_CODES.DONUT)                  <span class="comment">// 4</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR)                 <span class="comment">// 5</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR_0_1)             <span class="comment">// 6</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR_MR1)             <span class="comment">// 7</span></span><br><span class="line">        println(Build.VERSION_CODES.FROYO)                  <span class="comment">// 8</span></span><br><span class="line">        println(Build.VERSION_CODES.GINGERBREAD)            <span class="comment">// 9</span></span><br><span class="line">        println(Build.VERSION_CODES.GINGERBREAD_MR1)        <span class="comment">// 10</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB)              <span class="comment">// 11</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB_MR1)          <span class="comment">// 12</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB_MR2)          <span class="comment">// 13</span></span><br><span class="line">        println(Build.VERSION_CODES.ICE_CREAM_SANDWICH)     <span class="comment">// 14</span></span><br><span class="line">        println(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) <span class="comment">// 15</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN)             <span class="comment">// 16</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN_MR1)         <span class="comment">// 17</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN_MR2)         <span class="comment">// 18</span></span><br><span class="line">        println(Build.VERSION_CODES.KITKAT)                 <span class="comment">// 19</span></span><br><span class="line">        println(Build.VERSION_CODES.KITKAT_WATCH)           <span class="comment">// 20</span></span><br><span class="line">        println(Build.VERSION_CODES.LOLLIPOP)               <span class="comment">// 21</span></span><br><span class="line">        println(Build.VERSION_CODES.LOLLIPOP_MR1)           <span class="comment">// 22</span></span><br><span class="line">        println(Build.VERSION_CODES.M)                      <span class="comment">// 23</span></span><br><span class="line">        println(Build.VERSION_CODES.N)                      <span class="comment">// 24</span></span><br><span class="line">        println(Build.VERSION_CODES.N_MR1)                  <span class="comment">// 25</span></span><br><span class="line">        println(Build.VERSION_CODES.O)                      <span class="comment">// 26</span></span><br><span class="line">        println(Build.VERSION_CODES.O_MR1)                  <span class="comment">// 27</span></span><br><span class="line">        println(Build.VERSION_CODES.P)                      <span class="comment">// 28</span></span><br><span class="line">        println(Build.VERSION_CODES.Q)                      <span class="comment">// 29</span></span><br><span class="line">        println(Build.VERSION_CODES.R)                      <span class="comment">// 30</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+
+
+
+
+<p>비교문을 사용하여 버전에 따른 분기처리를 할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.M) &#123;</span><br><span class="line">    <span class="comment">// do something when os version is lower than Marshmallow(23).</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// do something when os version is equal or higher than Marshmallow(23).</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/12/08_android/01_android_platform/190612_sdk_version/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/11/08_android/01_android_platform/190611_android_sdk/"
+                            aria-label=": [Android] 안드로이드 SDK란"
+                        >
+                            [Android] 안드로이드 SDK란
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-11T01:00:00+09:00">
+	
+		    2019/06/11
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="안드로이드-SDK"><a href="#안드로이드-SDK" class="headerlink" title="안드로이드 SDK"></a>안드로이드 SDK</h1><p><code>안드로이드 SDK(Software Development Kit)</code>는 안드로이드 앱을 개발하기 위한 툴 킷입니다. </p>
+<p>안드로이드 스튜디오는 <code>SDK Manager</code>를 제공하는데 이 곳에서 안드로이드 SDK를 설치, 삭제, 설정 할 수 있습니다. 또한 SDK Manager에서 SDK의 설치 경로를 확인할 수 있습니다.<br><img src="2.png"></p>
+<p>그럼 터미널에서 SDK의 설치 경로로 이동해보겠습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> /Users/[user_name]/Library/Android/sdk</span></span><br></pre></td></tr></table></figure>
+<p>SDK에 무엇이 설치되어있는지 확인해봅시다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">build-tools    extras         icons          patcher        platforms      skins          system-images</span><br><span class="line">emulator       fonts          licenses       platform-tools skiaparser     sources        tools</span><br></pre></td></tr></table></figure>
+<h3 id="1-system-images"><a href="#1-system-images" class="headerlink" title="(1) system-images"></a>(1) system-images</h3><p><code>system-images</code>폴더에는 에뮬레이터가 사용하는 안드로이드 운영체제 이미지가 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/system-images</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">android-23 android-27</span><br></pre></td></tr></table></figure>
+<p><img src="3.png"></p>
+<h3 id="2-platforms"><a href="#2-platforms" class="headerlink" title="(2) platforms"></a>(2) platforms</h3><p><code>platforms</code>폴더에는 안드로이드 플랫폼이 설치되어 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/platforms</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">android-23 android-25 android-26 android-27 android-28 android-29 android-30</span><br></pre></td></tr></table></figure>
+<p><img src="4.png"></p>
+<h3 id="3-tools"><a href="#3-tools" class="headerlink" title="(3) tools"></a>(3) tools</h3><p><code>tools</code>폴더와 <code>tools/bin</code>폴더에는 앱을 개발하고 디버깅하기 위한 여러가지 툴이 있습니다. 에뮬레이터, SDK 매니저, AVD 매니저, UI 뷰어 등이 이 폴더에 설치되어있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/tools</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">bin               </span><br><span class="line">emulator</span><br><span class="line">monitor</span><br><span class="line">proguard</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/tools/bin</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">avdmanager</span><br><span class="line">sdkmanager</span><br><span class="line">uiautomatorviewer</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>안드로이드 스튜디오에서도 <code>tools</code>폴더에 설치된 툴을 확인할 수 있습니다.<br><img src="5.png"></p>
+<h3 id="4-build-tools"><a href="#4-build-tools" class="headerlink" title="(4) build-tools"></a>(4) build-tools</h3><p><code>build-tools</code>폴더에는 앱을 빌드하기 위한 도구들이 설치되어있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]]/Library/Android/sdk/build-tools</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">25.0.2 26.0.2 27.0.3 28.0.3 29.0.2 29.0.3 30.0.2 30.0.3</span><br></pre></td></tr></table></figure>
+<p><img src="6.png"></p>
+<h3 id="5-platform-tools"><a href="#5-platform-tools" class="headerlink" title="(5) platform-tools"></a>(5) platform-tools</h3><p><code>platform-tools</code>폴더에는 안드로이드 기기와 연결했을 때 사용하는 도구들이 설치되어있습니다. adb, fastboot, systrace, sqlite3 등이 이 폴더에 설치되어있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]]/Library/Android/sdk/platform-tools</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">adb</span><br><span class="line">fastboot</span><br><span class="line">systrace</span><br><span class="line">sqlite3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/11/08_android/01_android_platform/190611_android_sdk/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/06/10/08_android/01_android_platform/190610_multi_dex/"
                             aria-label=": [Android] 멀티 덱스(Multi Dex)"
                         >
@@ -393,8 +841,6 @@
 <figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class App: MultiDexApplication() &#123;</span><br><span class="line">    // ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>AndroidManifest.xml</code>에서 <code>&lt;application&gt;</code>태그의 <code>android:name</code>속성을 다음과 같이 설정합니다.</p>
 <figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;.App&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">...</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<hr>
-
                     
                         
 
@@ -748,203 +1194,22 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/03/08_android/01_android_platform/190603_analyze_apk/"
-                            aria-label=": [Android] APK 분석하기 (APK Analyzer)"
-                        >
-                            [Android] APK 분석하기 (APK Analyzer)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-03T01:00:00+09:00">
-	
-		    2019/06/03
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p>안드로이드 스튜디오의 <code>APK Analyzer</code>를 사용하면 APK 파일을 분석할 수 있습니다.</p>
-<h1 id="APK-Analyzer"><a href="#APK-Analyzer" class="headerlink" title="APK Analyzer"></a>APK Analyzer</h1><p><code>Android Studio &gt; Build &gt; Analyze APK</code>를 선택합니다.</p>
-<p><img src="1.png"><br>APK 파일을 선택하면 분석 정보를 확인할 수 있습니다.<br><img src="2.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/03/08_android/01_android_platform/190603_analyze_apk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/02/08_android/01_android_platform/190602_extract_apk/"
-                            aria-label=": [Android] 앱에서 APK 추출하기 (APK Extractor)"
-                        >
-                            [Android] 앱에서 APK 추출하기 (APK Extractor)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-02T01:00:00+09:00">
-	
-		    2019/06/02
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>구글 플레이스토어에는 설치된 앱에서 <code>APK</code> 파일을 추출하는 앱들이 출시되어있습니다. 이번 포스트에서는 <code>APK Extractor</code> 앱을 사용하여 APK 파일을 추출해보겠습니다.</p>
-<h1 id="APK-Extractor"><a href="#APK-Extractor" class="headerlink" title="APK Extractor"></a>APK Extractor</h1><p>구글 플레이스토어에서 APK Extractor를 설치합니다.<br><img src="1.png"><br>검색창에 추출하려는 앱의 이름을 입력합니다.<br><img src="2.png"><br>앱을 클릭하면 해당 경로에 APK 파일이 추출됩니다.<br><img src="3.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/02/08_android/01_android_platform/190602_extract_apk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/01/08_android/01_android_platform/190601_dex_apk/"
-                            aria-label=": [Android] APK 파일, DEX 파일이란?"
-                        >
-                            [Android] APK 파일, DEX 파일이란?
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-01T01:00:00+09:00">
-	
-		    2019/06/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="APK"><a href="#APK" class="headerlink" title="APK"></a>APK</h1><p><code>APK(Android Application Package)</code>는 안드로이드 어플리캐이션 설치 파일이다. 안드로이드 시스템에서 APK 파일을 사용하여 어플리케이션을 설치할 수 있다. Windows 계열의 운영체제에서의 인스톨러와 유사하다.</p>
-<h1 id="APK-생성-과정"><a href="#APK-생성-과정" class="headerlink" title="APK 생성 과정"></a>APK 생성 과정</h1><p>APK 파일은 다음과 같은 과정을 거쳐 생성된다.</p>
-<ol>
-<li>안드로이드 프로젝트는 <code>소스코드 및 리소스로 구성된 모듈</code>과 <code>의존성</code>으로 구성된다.</li>
-<li>Gradle은 이 모든 것을 빌드하여 <code>DEX 파일</code>과 <code>컴파일된 리소스</code>를 생성한다.</li>
-<li>APK Manager는 개인키로 서명하여 <code>APK 파일</code>를 생성한다.</li>
-<li><code>APK 파일</code>은 구글 플레이스토어에 업로드하거나 안드로이드 시스템에 직접 설치할 수 있다.</li>
-</ol>
-<p><img src="1.png"></p>
-<h1 id="APK-생성-위치"><a href="#APK-생성-위치" class="headerlink" title="APK 생성 위치"></a>APK 생성 위치</h1><p>디버그 모드에서 앱을 빌드하면 아래 경로에 APK 파일이 생성된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[your_project]\app\build\outputs\apk</span><br></pre></td></tr></table></figure>
-
-<h1 id="DEX-파일"><a href="#DEX-파일" class="headerlink" title="DEX 파일"></a>DEX 파일</h1><p><code>APK</code>이 설치 파일이라면 <code>DEX(Dalvik Executable)</code>은 실행 파일입니다. Java 클래스 파일(.class)이 JVM에서 실행되는 것처럼 DEX 파일은 DVM(Dalvik Virtual Machine)에서 실행됩니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/01/08_android/01_android_platform/190601_dex_apk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
         
-        <li class="pagination-number">page 1 of 1</li>
+          <li class="pagination-next">
+            <a
+                class="btn btn--default btn--small"
+                href="/ko/archives/2019/06/page/2/"
+                aria-label="이전 포스트"
+            >
+              <span>이전 포스트</span>
+              <i class="fa fa-angle-right text-base icon-ml"></i>
+            </a>
+          </li>
+        
+        <li class="pagination-number">page 1 of 2</li>
     </ul>
 </div>
 

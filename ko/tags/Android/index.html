@@ -1128,23 +1128,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2019/06/10/08_android/01_android_platform/190610_multi_dex/"
-                            aria-label=": [Android] 멀티 덱스(Multi Dex)"
+                            href="/ko/2019/07/02/08_android/06_android_studio/20190702_layout_validation/"
+                            aria-label=": [Android Studio] Layout Validation - 기기 크기에 따라 서로 다른 UI 화면 동시에 보기"
                         >
-                            [Android] 멀티 덱스(Multi Dex)
+                            [Android Studio] Layout Validation - 기기 크기에 따라 서로 다른 UI 화면 동시에 보기
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2019-06-10T01:00:00+09:00">
+    <time datetime="2019-07-02T00:00:00+09:00">
 	
-		    2019/06/10
+		    2019/07/02
     	
     </time>
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Studio/">Android Studio</a>
 
 
     
@@ -1154,20 +1154,9 @@
             
                 <div class="postShorten-content">
                     <hr>
-<h1 id="Why-use-Multidex"><a href="#Why-use-Multidex" class="headerlink" title="Why use Multidex?"></a>Why use Multidex?</h1><p>안드로이드에서 Java 소스코드나 Kotlin 소스코드는 DEX 파일로 컴파일됩니다. 이 DEX 파일의 메소드가 <code>64K(65,536)</code>개를 초과하면 안드로이드 시스템은 다음과 같은 빌드 오류를 발생시킵니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">trouble writing output:</span><br><span class="line">Too many field references: 131000; max is 65536.</span><br><span class="line">You may try using --multi-dex option.</span><br></pre></td></tr></table></figure>
-<p><code>멀티 덱스(Multidex)</code>는 <u>메소드가 64K(65,536)개를 초과하지 않도록 DEX 파일을 여러 개로 나누는 기술</u>입니다.</p>
-<h1 id="사용-방법"><a href="#사용-방법" class="headerlink" title="사용 방법"></a>사용 방법</h1><p>우선 모듈 수준의 <code>build.gradle</code>에 다음 코드를 추가합니다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig&#123;</span><br><span class="line">        <span class="comment">// 멀티덱스 기능 true</span></span><br><span class="line">        multiDexEnabled <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// 의존성 추가</span></span><br><span class="line">    implementation <span class="string">&#x27;com.android.support:multidex:1.0.3&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>AndroidManifest.xml</code>에서 <code>&lt;application&gt;</code>태그의 <code>android:name</code>속성을 다음과 같이 설정합니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.multidex.MultiDexApplication&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">...</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>만약 <code>Application</code>클래스를 사용 중이라면 다음과 같이 수정합니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class App: MultiDexApplication() &#123;</span><br><span class="line">    // ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>AndroidManifest.xml</code>에서 <code>&lt;application&gt;</code>태그의 <code>android:name</code>속성을 다음과 같이 설정합니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;.App&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">...</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<hr>
+<h1 id="Layout-Validation"><a href="#Layout-Validation" class="headerlink" title="Layout Validation"></a>Layout Validation</h1><p><code>Layout Validation</code>을 사용하면 기기 크기에 따른 UI 구성을 동시에 확인할 수 있습니다.</p>
+<h1 id="사용법"><a href="#사용법" class="headerlink" title="사용법"></a>사용법</h1><p><code>Android Studio</code>에서 <code>레이아웃 XML</code>파일을 열면 오른쪽 상단에 <code>Layout Validation</code> 탭이 활성화됩니다. 이 탭을 선택합니다.<br><img src="1.png"></p>
+<p>이제 <code>Layout Validation</code> 패널에서 기기 크기에 따른 UI 구성을 동시에 확인할 수 있습니다.<br><img src="2.png"></p>
 
                     
                         
@@ -1177,7 +1166,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2019/06/10/08_android/01_android_platform/190610_multi_dex/#post-footer"
+                                href="/ko/2019/07/02/08_android/06_android_studio/20190702_layout_validation/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1200,23 +1189,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2019/06/09/08_android/01_android_platform/190609_jvm_dalvik_art/"
-                            aria-label=": [Android] JVM, 달빅 가상머신, ART 차이점"
+                            href="/ko/2019/07/01/08_android/06_android_studio/20190701_layout_inspector/"
+                            aria-label=": [Android Studio] Layout Inspector - 실시간으로 UI 디버깅하기"
                         >
-                            [Android] JVM, 달빅 가상머신, ART 차이점
+                            [Android Studio] Layout Inspector - 실시간으로 UI 디버깅하기
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2019-06-09T01:00:00+09:00">
+    <time datetime="2019-07-01T00:00:00+09:00">
 	
-		    2019/06/09
+		    2019/07/01
     	
     </time>
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Studio/">Android Studio</a>
 
 
     
@@ -1226,89 +1215,20 @@
             
                 <div class="postShorten-content">
                     <hr>
-<h1 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h1><p><code>JVM(Java Virtual Machine)</code>은 Java 바이트코드를 실행하는 가상머신입니다. </p>
-<p><img src="1.png"></p>
-<p><code>Java Compiler</code>는 Java 소스코드를 컴파일하여 Java 바이트코드를 생성합니다. JVM은 이 <u>Java 바이트코드를 실행하는 주체</u>입니다. 플랫폼에 적절한 JVM만 설치되면 어떤 플랫폼에서든 Java 바이트코드를 실행할 수 있습니다.</p>
-<h1 id="DVM"><a href="#DVM" class="headerlink" title="DVM"></a>DVM</h1><p><code>DEX 컴파일러</code>는 Java 바이트코드를 <code>DEX(Dalvik Executable)</code>파일로 통합합니다.<br><img src="2.png"></p>
-<p><code>DVM(Dalvik Virtual Machine)</code>은 안드로이드 애플리캐이션을 실행하는 주체입니다. 정확하게 말하자면 DVM는 이 DEX 파일을 실행합니다.</p>
-<p>구글은 자바 가상머신인 JVM을 사용할 수도 있었지만 오라클과의 라이센스 문제 때문에 DVM을 개발하여 안드로이드에 넣게 됩니다.</p>
-<p>뿐만 아니라 모바일 기기는 베터리 수명, 컴퓨팅 능력, 메모리 등의 자원이 데스크탑 환경에 비해 열악합니다. 이 때문에 모바일 기기에 맞게 나온 가상머신이 바로 DVM 입니다.</p>
-<p>DVM은 내부적으로 <code>JIT(Just In Time) 컴파일러</code>를 사용합니다. 이 컴파일러는 애플리캐이션을 <u>실행</u>할 때마다 자바 바이트코드를 기계어로 컴파일합니다. 이 덕분에 설치 파일은 작아졌으나 CPU, 메모리, 베터리 사용이 높아지게 되었습니다.</p>
-<h1 id="ART"><a href="#ART" class="headerlink" title="ART"></a>ART</h1><p><code>ART(Android Runtime)</code>은 안드로이드에서 사용되던 기존 DVM의 한계점을 해결하기 위해서 구글에서 새로 개발한 런타임입니다.</p>
-<p>ART는 내부적으로 <code>AOT(Ahead On Time) 컴파일러</code>를 사용합니다. 이 컴파일러는 애플리캐이션을 <u>설치</u>할 때 자바 바이트코드를 기계어로 컴파일합니다. 따라서 설치 파일이 커지고 설치 시간이 오래 걸린다는 단점이 있으나 런타임에서 CPU, 메모리, 베터리 사용량이 낮아지고 퍼포먼스가 좋아지게 되었습니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/09/08_android/01_android_platform/190609_jvm_dalvik_art/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/08/08_android/01_android_platform/190606_dex_compiler/"
-                            aria-label=": [Android] DEX 컴파일러"
-                        >
-                            [Android] DEX 컴파일러
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-08T01:00:00+09:00">
-	
-		    2019/06/08
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="DEX-컴파일러"><a href="#DEX-컴파일러" class="headerlink" title="DEX 컴파일러"></a>DEX 컴파일러</h1><p><code>DEX 컴파일러</code>는 자바 바이트코드를 안드로이드 시스템에서 실행 가능한 DEX 파일로 변환합니다. DEX 컴파일러는 오랜 시간에 걸쳐 발전해왔습니다.</p>
-<h3 id="1-DX-컴파일러"><a href="#1-DX-컴파일러" class="headerlink" title="(1) DX 컴파일러"></a>(1) DX 컴파일러</h3><p>D8 컴파일러가 출시되기 전까지 사용되었던 DEX 컴파일러입니다.</p>
-<h3 id="2-D8-컴파일러"><a href="#2-D8-컴파일러" class="headerlink" title="(2) D8 컴파일러"></a>(2) D8 컴파일러</h3><p>구글이 2018년 출시한 새로운 DEX 컴파일러입니다. <code>Android Studio 3.0 버전</code>부터 사용할 수 있으며, <code>Android Studio 3.1 버전</code>부터 기본 DEX 컴파일러가 되었습니다. DEX 컴파일러는 <code>Android Gradle Plugin</code>에 포함되어있습니다.</p>
-<h3 id="3-R8-컴파일러"><a href="#3-R8-컴파일러" class="headerlink" title="(3) R8 컴파일러"></a>(3) R8 컴파일러</h3><p>구글이 2019년 출시한 새로운 DEX 컴파일러입니다. <code>Android Stuido 3.4 버전</code>부터 사용할 수 있습니다. R8 컴파일러는 프로가드(ProGurad)가 기존에 수행하던 <u>코드 난독화</u> 및 <u>최적화 작업</u>을 대신 수행합니다. 따라서 <code>Android Gradle Plugin 3.4.0</code> 버전부터는 ProGuard 대신 R8 컴파일러를 사용하여 코드 난독화와 최적화 작업을 수행할 수 있습니다.</p>
-<p>R8 컴파일러 이전에는 DEX 파일을 생성하는 과정이 두 단계로 나누어 있었습니다.</p>
+<h1 id="Layout-Inspector"><a href="#Layout-Inspector" class="headerlink" title="Layout Inspector"></a>Layout Inspector</h1><p><code>Layout Inspector</code>를 사용하면 레이아웃 XML 파일을 실시간으로 디버깅할 수 있습니다. <code>Layout Inspector</code>가 제공하는 기능은 다음과 같습니다.</p>
+<ul>
+<li><code>Component Tree</code>: UI의 계층구조를 파악할 수 있습니다.</li>
+<li><code>Attribute</code>: 선택한 UI 요소의 속성값들을 파악할 수 있습니다.</li>
+</ul>
+<h1 id="사용법"><a href="#사용법" class="headerlink" title="사용법"></a>사용법</h1><p><code>Layout Inspector</code>는 다음 단계로 실행합니다.</p>
 <ol>
-<li>프로가드(ProGurad)가 수행하는 난독화와 최적화 작업</li>
-<li>D8 컴파일러가 수행하는 DEX 컴파일 </li>
+<li>에뮬레이터나 연결된 기기에서 앱을 실행합니다.</li>
+<li>Tools &gt; Layout Inspector를 클릭합니다.</li>
 </ol>
-<p><img src="1.png"></p>
-<p>R8 컴파일러는 이 두 과정을 한 단계로 통합했습니다.</p>
-<p><img src="2.png"></p>
-<p>프로가드와 D8 컴파일러 대신 R8 컴파일러를 사용하는 것은 매우 간단합니다. <code>gradle.properties</code>파일에 다음 한 줄을 추가하면 됩니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">android.enableR8=true</span><br></pre></td></tr></table></figure>
-<p>이 코드를 추가하면 <code>Android Gradle Plugin 3.4.0</code> 버전부터는 ProGuard 대신 R8 컴파일러를 사용하여 코드 난독화와 최적화 작업을 수행합니다.</p>
+<p>정상적으로 실행되면 화면 하단에 <code>Layout Inspector</code> 패널이 등장합니다.<br><img src="1.png"></p>
+<p>상단 툴바에서 <code>Live Updates</code>를 활성화하면 실행 중인 앱의 상태가 <code>Layout Inspector</code>에 실시간 반영됩니다.<br><img src="2.png"></p>
+<p>특정 위젯을 클릭하면 오른쪽 패널에서 선택된 위젯의 속성들을 확인할 수 있습니다.<br><img src="3.png"></p>
+<p>왼쪽 위젯에서는 위젯의 계층구조를 확인할 수 있습니다.<br><img src="4.png"></p>
 
                     
                         
@@ -1318,7 +1238,110 @@
                     
                         <p>
                             <a
-                                href="/ko/2019/06/08/08_android/01_android_platform/190606_dex_compiler/#post-footer"
+                                href="/ko/2019/07/01/08_android/06_android_studio/20190701_layout_inspector/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                            aria-label=": [Android] URI와 UriMatcher"
+                        >
+                            [Android] URI와 UriMatcher
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-15T01:00:00+09:00">
+	
+		    2019/06/15
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="URI"><a href="#URI" class="headerlink" title="URI"></a>URI</h1><p><code>URI(Uniform Resource Identifier, 통합 자원 식별자)</code>는 자원을 구분해주는 식별자입니다. 내 스마트폰이나 데스크톱에는 많은 자원(파일, 이미지, 비디오 등)이 존재합니다. 또한 연결된 인터넷 상에도 많은 자원이 존재합니다. URI는 이 자원을 구분하고 식별하는데 사용됩니다.</p>
+<p>우리는 구글에 접속할 때 웹 브라우저의 주소창에 <code>http://www.google.com</code>를 입력합니다. 이때 <code>http://www.google.com</code> 뒤에는 <code>index.html</code>이 생략되어있습니다</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://www.google.com/index.html">http://www.google.com/index.html</a></p>
+</blockquote>
+<p>이 주소도 URI입니다. 웹 브라우저는 URI에 위치한 index.html 파일을 가져와서 화면에 보여줍니다. 이처럼 URI는 자원을 구분하고 식별하는데 사용됩니다.</p>
+<h1 id="URI-구조"><a href="#URI-구조" class="headerlink" title="URI 구조"></a>URI 구조</h1><p>URI는 다음과 같은 구조를 가지고 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scheme:[//[user[:password]@]host[:port]][/path][?query]</span><br></pre></td></tr></table></figure>
+<p><code>scheme</code>와 <code>host</code>는 필수사항이고 나머지는 선택사항입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 예시</span><br><span class="line">https://www.google.com/index.html</span><br><span class="line">mailto:yologger@gmail.com</span><br><span class="line">tel:+82-10-1111-2222</span><br><span class="line">ftp://yologger:1234@192.168.0.1:21</span><br><span class="line">content://com.korea.trains/line/1</span><br><span class="line">file:///usr/local/bin/</span><br><span class="line">data:text/vnd-example+xyz;foo=bar;base64,R0lGODdh</span><br><span class="line">news:comp.infosystems.www.servers.unix</span><br><span class="line">telnet://192.0.2.16:80/</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-Scheme"><a href="#1-Scheme" class="headerlink" title="(1) Scheme"></a>(1) Scheme</h3><p><code>scheme</code>은 어떤 프로토콜을 사용할지 지정합니다. 자주 쓰는 스킴에는 http, https, ftp, content, file, data가 있습니다. 모든 URI 스킴은 <a target="_blank" rel="noopener" href="http://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">이 곳</a>에서 확인할 수 있습니다.</p>
+<h3 id="2-Host"><a href="#2-Host" class="headerlink" title="(2) Host"></a>(2) Host</h3><p>네트워크에 연결되어 있는 모든 컴퓨터 각각을 <code>호스트</code>라고 합니다. 보통 <code>도메인 네임</code>이나 <code>IP 주소</code>을 사용하여 호스트를 구분하고 식별합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 도메인 네임</span><br><span class="line">http://www.netflix.com</span><br><span class="line">https://www.google.com</span><br><span class="line"></span><br><span class="line">// IP 주소</span><br><span class="line">https://172.217.27.78</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Port"><a href="#3-Port" class="headerlink" title="(3) Port"></a>(3) Port</h3><p>컴퓨터 내에서 실행되고있는 어플리케이션들을 구분하기 위해 사용하는 번호입니다. 보통 HTTP 프로토콜을 사용할 때는 80, HTTPS 프로토콜을 사용할 때는 443 포트를 사용합니다. 예제는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://www.netflix.com:80</span><br><span class="line">https://www.google.com:443</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Authority"><a href="#4-Authority" class="headerlink" title="(4) Authority"></a>(4) Authority</h3><p><code>authority</code>는 사용자 이름과 비밀번호, 호스트, 포트번호의 조합입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">authority = [ username &quot;:&quot; password &quot;@&quot; ] host [ &quot;:&quot; port ]</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yologger:1234@mail.google.com/:587</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="5-Path"><a href="#5-Path" class="headerlink" title="(5) Path"></a>(5) Path</h3><p>요청할 자원에 대한 경로를 의미합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 사람 자원의 경로</span><br><span class="line">https://www.example.com/person</span><br><span class="line"></span><br><span class="line">// 사람 중 프로그래머 자원의 경로</span><br><span class="line">https://www.example.com/person/programmer</span><br><span class="line"></span><br><span class="line">// 차량 자원의 경로</span><br><span class="line">https://www.example.com/car</span><br><span class="line"></span><br><span class="line">// 책 자원의 경로</span><br><span class="line">https://192.168.0.1/book</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Query"><a href="#6-Query" class="headerlink" title="(6) Query"></a>(6) Query</h3><p>경로에 있는 자원의 범위를 한정하기 위해 사용합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 이름이 paul인 사람</span><br><span class="line">https://www.example.com/person?name=paul</span><br><span class="line"></span><br><span class="line">// 국가가 england인 사람</span><br><span class="line">https://www.example.com/person?nation=england</span><br><span class="line"></span><br><span class="line">// 이름이 john이고 국가가 america인 사람</span><br><span class="line">https://www.example.com/person?name=john&amp;nation=america</span><br><span class="line"></span><br><span class="line">// 제조업체가 benz인 자동차</span><br><span class="line">https://www.example.com/car?manufacturer=benz</span><br><span class="line"></span><br><span class="line">// 저자가 paul인 책</span><br><span class="line">https://192.168.0.1/book?author=paul</span><br><span class="line"></span><br><span class="line">// 저자가 john인 책</span><br><span class="line">https://192.168.0.1/book?author=john</span><br></pre></td></tr></table></figure>
+
+<h1 id="안드로이드에서의-URI"><a href="#안드로이드에서의-URI" class="headerlink" title="안드로이드에서의 URI"></a>안드로이드에서의 URI</h1><p>안드로이드 API는 URI를 취급하기 위해 <code>Uri</code>클래스를 제공합니다. <code>Uri</code>클래스는 암시적 인텐트, 컨텐트 프로바이더 등 안드로이드의 다양한 분야에서 많이 사용됩니다.</p>
+<p><code>Uri.Builder</code>클래스의 <code>build()</code>메소드를 사용하여 <code>Uri</code>객체를 생성할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> uri: Uri = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;paul&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;nation&quot;</span>, <span class="string">&quot;england&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
+<p><code>Uri</code>클래스의 <code>parse()</code>메소드를 사용할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> uri = Uri.parse(<span class="string">&quot;https://www.example.com/person/programmer?name=paul&amp;nation=england&quot;</span>)</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="UriMatcher"><a href="#UriMatcher" class="headerlink" title="UriMatcher"></a>UriMatcher</h1><p><code>UriMatcher</code>클래스는 두 개의 <code>Uri</code>를 비교하여 사용자가 정의한 값을 반환하는데 사용합니다. <code>UriMatcher</code>클래스는 두 개의 메소드만을 가지고 있습니다.</p>
+<h3 id="1-addUri"><a href="#1-addUri" class="headerlink" title="(1) addUri()"></a>(1) addUri()</h3><p>기준이 되는 Uri를 등록하는데 사용합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addUri([authority], [path], [code])</span><br></pre></td></tr></table></figure>
+<p>세 번째 인자인 <code>code</code>는 두 <code>Uri</code>가 일치할 때 반환되는 정수값입니다.</p>
+<p><code>UriMatcher</code>객체를 생성하고 세 개의 <code>Uri</code>를 등록해봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uriMatcher = UriMatcher(UriMatcher.NO_MATCH)</span><br><span class="line"></span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person&quot;</span>, <span class="number">1</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person/*&quot;</span>, <span class="number">2</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;car/*&quot;</span>, <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="2-match"><a href="#2-match" class="headerlink" title="(2) match()"></a>(2) match()</h3><p>인자로 전달된 <code>Uri</code>와 위에서 등록한 <code>Uri</code>과 비교하여 정수값을 반환합니다. </p>
+<p>우선 네 개의 <code>Uri</code>를 생성합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// https://www.example.com/person</span></span><br><span class="line"><span class="keyword">val</span> uri1 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer</span></span><br><span class="line"><span class="keyword">val</span> uri2 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/car/convertible</span></span><br><span class="line"><span class="keyword">val</span> uri3 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;car&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;convertible&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.test.com/book</span></span><br><span class="line"><span class="keyword">val</span> uri4 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.test.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;book&quot;</span>)</span><br><span class="line">    .build()</span><br></pre></td></tr></table></figure>
+<p>이제 다음과 같이 두 <code>Uri</code>를 비교할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> result1 = uriMatcher.match(uri1)    <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result2 = uriMatcher.match(uri2)    <span class="comment">// 2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result3 = uriMatcher.match(uri3)    <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 일치하는 uri가 없으면 -1을 반환합니다.</span></span><br><span class="line"><span class="keyword">val</span> result4 = uriMatcher.match(uri4)    <span class="comment">// -1</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1347,7 +1370,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 1 of 4</li>
+        <li class="pagination-number">page 1 of 5</li>
     </ul>
 </div>
 

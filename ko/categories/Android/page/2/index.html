@@ -1098,23 +1098,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2019/06/10/08_android/01_android_platform/190610_multi_dex/"
-                            aria-label=": [Android] 멀티 덱스(Multi Dex)"
+                            href="/ko/2019/07/02/08_android/06_android_studio/20190702_layout_validation/"
+                            aria-label=": [Android Studio] Layout Validation - 기기 크기에 따라 서로 다른 UI 화면 동시에 보기"
                         >
-                            [Android] 멀티 덱스(Multi Dex)
+                            [Android Studio] Layout Validation - 기기 크기에 따라 서로 다른 UI 화면 동시에 보기
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2019-06-10T01:00:00+09:00">
+    <time datetime="2019-07-02T00:00:00+09:00">
 	
-		    2019/06/10
+		    2019/07/02
     	
     </time>
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Studio/">Android Studio</a>
 
 
     
@@ -1124,20 +1124,9 @@
             
                 <div class="postShorten-content">
                     <hr>
-<h1 id="Why-use-Multidex"><a href="#Why-use-Multidex" class="headerlink" title="Why use Multidex?"></a>Why use Multidex?</h1><p>안드로이드에서 Java 소스코드나 Kotlin 소스코드는 DEX 파일로 컴파일됩니다. 이 DEX 파일의 메소드가 <code>64K(65,536)</code>개를 초과하면 안드로이드 시스템은 다음과 같은 빌드 오류를 발생시킵니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">trouble writing output:</span><br><span class="line">Too many field references: 131000; max is 65536.</span><br><span class="line">You may try using --multi-dex option.</span><br></pre></td></tr></table></figure>
-<p><code>멀티 덱스(Multidex)</code>는 <u>메소드가 64K(65,536)개를 초과하지 않도록 DEX 파일을 여러 개로 나누는 기술</u>입니다.</p>
-<h1 id="사용-방법"><a href="#사용-방법" class="headerlink" title="사용 방법"></a>사용 방법</h1><p>우선 모듈 수준의 <code>build.gradle</code>에 다음 코드를 추가합니다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig&#123;</span><br><span class="line">        <span class="comment">// 멀티덱스 기능 true</span></span><br><span class="line">        multiDexEnabled <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// 의존성 추가</span></span><br><span class="line">    implementation <span class="string">&#x27;com.android.support:multidex:1.0.3&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>AndroidManifest.xml</code>에서 <code>&lt;application&gt;</code>태그의 <code>android:name</code>속성을 다음과 같이 설정합니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.multidex.MultiDexApplication&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">...</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>만약 <code>Application</code>클래스를 사용 중이라면 다음과 같이 수정합니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class App: MultiDexApplication() &#123;</span><br><span class="line">    // ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>AndroidManifest.xml</code>에서 <code>&lt;application&gt;</code>태그의 <code>android:name</code>속성을 다음과 같이 설정합니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;.App&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">...</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<hr>
+<h1 id="Layout-Validation"><a href="#Layout-Validation" class="headerlink" title="Layout Validation"></a>Layout Validation</h1><p><code>Layout Validation</code>을 사용하면 기기 크기에 따른 UI 구성을 동시에 확인할 수 있습니다.</p>
+<h1 id="사용법"><a href="#사용법" class="headerlink" title="사용법"></a>사용법</h1><p><code>Android Studio</code>에서 <code>레이아웃 XML</code>파일을 열면 오른쪽 상단에 <code>Layout Validation</code> 탭이 활성화됩니다. 이 탭을 선택합니다.<br><img src="1.png"></p>
+<p>이제 <code>Layout Validation</code> 패널에서 기기 크기에 따른 UI 구성을 동시에 확인할 수 있습니다.<br><img src="2.png"></p>
 
                     
                         
@@ -1147,7 +1136,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2019/06/10/08_android/01_android_platform/190610_multi_dex/#post-footer"
+                                href="/ko/2019/07/02/08_android/06_android_studio/20190702_layout_validation/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1170,23 +1159,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2019/06/09/08_android/01_android_platform/190609_jvm_dalvik_art/"
-                            aria-label=": [Android] JVM, 달빅 가상머신, ART 차이점"
+                            href="/ko/2019/07/01/08_android/06_android_studio/20190701_layout_inspector/"
+                            aria-label=": [Android Studio] Layout Inspector - 실시간으로 UI 디버깅하기"
                         >
-                            [Android] JVM, 달빅 가상머신, ART 차이점
+                            [Android Studio] Layout Inspector - 실시간으로 UI 디버깅하기
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2019-06-09T01:00:00+09:00">
+    <time datetime="2019-07-01T00:00:00+09:00">
 	
-		    2019/06/09
+		    2019/07/01
     	
     </time>
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Studio/">Android Studio</a>
 
 
     
@@ -1196,16 +1185,20 @@
             
                 <div class="postShorten-content">
                     <hr>
-<h1 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h1><p><code>JVM(Java Virtual Machine)</code>은 Java 바이트코드를 실행하는 가상머신입니다. </p>
-<p><img src="1.png"></p>
-<p><code>Java Compiler</code>는 Java 소스코드를 컴파일하여 Java 바이트코드를 생성합니다. JVM은 이 <u>Java 바이트코드를 실행하는 주체</u>입니다. 플랫폼에 적절한 JVM만 설치되면 어떤 플랫폼에서든 Java 바이트코드를 실행할 수 있습니다.</p>
-<h1 id="DVM"><a href="#DVM" class="headerlink" title="DVM"></a>DVM</h1><p><code>DEX 컴파일러</code>는 Java 바이트코드를 <code>DEX(Dalvik Executable)</code>파일로 통합합니다.<br><img src="2.png"></p>
-<p><code>DVM(Dalvik Virtual Machine)</code>은 안드로이드 애플리캐이션을 실행하는 주체입니다. 정확하게 말하자면 DVM는 이 DEX 파일을 실행합니다.</p>
-<p>구글은 자바 가상머신인 JVM을 사용할 수도 있었지만 오라클과의 라이센스 문제 때문에 DVM을 개발하여 안드로이드에 넣게 됩니다.</p>
-<p>뿐만 아니라 모바일 기기는 베터리 수명, 컴퓨팅 능력, 메모리 등의 자원이 데스크탑 환경에 비해 열악합니다. 이 때문에 모바일 기기에 맞게 나온 가상머신이 바로 DVM 입니다.</p>
-<p>DVM은 내부적으로 <code>JIT(Just In Time) 컴파일러</code>를 사용합니다. 이 컴파일러는 애플리캐이션을 <u>실행</u>할 때마다 자바 바이트코드를 기계어로 컴파일합니다. 이 덕분에 설치 파일은 작아졌으나 CPU, 메모리, 베터리 사용이 높아지게 되었습니다.</p>
-<h1 id="ART"><a href="#ART" class="headerlink" title="ART"></a>ART</h1><p><code>ART(Android Runtime)</code>은 안드로이드에서 사용되던 기존 DVM의 한계점을 해결하기 위해서 구글에서 새로 개발한 런타임입니다.</p>
-<p>ART는 내부적으로 <code>AOT(Ahead On Time) 컴파일러</code>를 사용합니다. 이 컴파일러는 애플리캐이션을 <u>설치</u>할 때 자바 바이트코드를 기계어로 컴파일합니다. 따라서 설치 파일이 커지고 설치 시간이 오래 걸린다는 단점이 있으나 런타임에서 CPU, 메모리, 베터리 사용량이 낮아지고 퍼포먼스가 좋아지게 되었습니다.</p>
+<h1 id="Layout-Inspector"><a href="#Layout-Inspector" class="headerlink" title="Layout Inspector"></a>Layout Inspector</h1><p><code>Layout Inspector</code>를 사용하면 레이아웃 XML 파일을 실시간으로 디버깅할 수 있습니다. <code>Layout Inspector</code>가 제공하는 기능은 다음과 같습니다.</p>
+<ul>
+<li><code>Component Tree</code>: UI의 계층구조를 파악할 수 있습니다.</li>
+<li><code>Attribute</code>: 선택한 UI 요소의 속성값들을 파악할 수 있습니다.</li>
+</ul>
+<h1 id="사용법"><a href="#사용법" class="headerlink" title="사용법"></a>사용법</h1><p><code>Layout Inspector</code>는 다음 단계로 실행합니다.</p>
+<ol>
+<li>에뮬레이터나 연결된 기기에서 앱을 실행합니다.</li>
+<li>Tools &gt; Layout Inspector를 클릭합니다.</li>
+</ol>
+<p>정상적으로 실행되면 화면 하단에 <code>Layout Inspector</code> 패널이 등장합니다.<br><img src="1.png"></p>
+<p>상단 툴바에서 <code>Live Updates</code>를 활성화하면 실행 중인 앱의 상태가 <code>Layout Inspector</code>에 실시간 반영됩니다.<br><img src="2.png"></p>
+<p>특정 위젯을 클릭하면 오른쪽 패널에서 선택된 위젯의 속성들을 확인할 수 있습니다.<br><img src="3.png"></p>
+<p>왼쪽 위젯에서는 위젯의 계층구조를 확인할 수 있습니다.<br><img src="4.png"></p>
 
                     
                         
@@ -1215,7 +1208,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2019/06/09/08_android/01_android_platform/190609_jvm_dalvik_art/#post-footer"
+                                href="/ko/2019/07/01/08_android/06_android_studio/20190701_layout_inspector/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1255,7 +1248,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 2 of 5</li>
+        <li class="pagination-number">page 2 of 6</li>
     </ul>
 </div>
 

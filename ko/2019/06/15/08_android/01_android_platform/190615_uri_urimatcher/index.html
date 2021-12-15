@@ -1,0 +1,749 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] URI와 UriMatcher - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nURIURI(Uniform Resource Identifier, 통합 자원 식별자)는 자원을 구분해주는 식별자입니다. 내 스마트폰이나 데스크톱에는 많은 자원(파일, 이미지, 비디오 등)이 존재합니다. 또한 연결된 인터넷 상에도 많은 자원이 존재합니다. URI는 이 자원을 구분하고 식별하는데 사용됩니다.\n우리는 구글에 접속할 때 웹 브라우저의 주소창에 http://www.google.com를 입력합니다. 이때 http://www.google.com 뒤에는 index.html이 생략되어있습니다\n\nhttp://www.google.com/index.html\n\n이 주소도 URI입니다. 웹 브라우저는 URI에 위치한 index.html 파일을 가져와서 화면에 보여줍니다. 이처럼 URI는 자원을 구분하고 식별하는데 사용됩니다.\nURI 구조URI는 다음과 같은 구조를 가지고 있습니다.\n1scheme:[//[user[:password]@]host[:port]][/path][?query]\nscheme와 host는 필수사항이고 나머지는 선택사항입니다.\n12345678910// 예시https://www.google.com/index.htmlmailto:yologger@gmail.comtel:+82-10-1111-2222ftp://yologger:1234@192.168.0.1:21content://com.korea.trains/line/1file:///usr/local/bin/data:text/vnd-example+xyz;foo=bar;base64,R0lGODdhnews:comp.infosystems.www.servers.unixtelnet://192.0.2.16:80/\n\n(1) Schemescheme은 어떤 프로토콜을 사용할지 지정합니다. 자주 쓰는 스킴에는 http, https, ftp, content, file, data가 있습니다. 모든 URI 스킴은 이 곳에서 확인할 수 있습니다.\n(2) Host네트워크에 연결되어 있는 모든 컴퓨터 각각을 호스트라고 합니다. 보통 도메인 네임이나 IP 주소을 사용하여 호스트를 구분하고 식별합니다.\n123456// 도메인 네임http://www.netflix.comhttps://www.google.com// IP 주소https://172.217.27.78\n\n(3) Port컴퓨터 내에서 실행되고있는 어플리케이션들을 구분하기 위해 사용하는 번호입니다. 보통 HTTP 프로토콜을 사용할 때는 80, HTTPS 프로토콜을 사용할 때는 443 포트를 사용합니다. 예제는 다음과 같습니다.\n12http://www.netflix.com:80https://www.google.com:443\n\n(4) Authorityauthority는 사용자 이름과 비밀번호, 호스트, 포트번호의 조합입니다.\n1authority = [ username &quot;:&quot; password &quot;@&quot; ] host [ &quot;:&quot; port ]\n1yologger:1234@mail.google.com/:587\n\n\n(5) Path요청할 자원에 대한 경로를 의미합니다.\n1234567891011// 사람 자원의 경로https://www.example.com/person// 사람 중 프로그래머 자원의 경로https://www.example.com/person/programmer// 차량 자원의 경로https://www.example.com/car// 책 자원의 경로https://192.168.0.1/book\n\n(6) Query경로에 있는 자원의 범위를 한정하기 위해 사용합니다.\n1234567891011121314151617// 이름이 paul인 사람https://www.example.com/person?name=paul// 국가가 england인 사람https://www.example.com/person?nation=england// 이름이 john이고 국가가 america인 사람https://www.example.com/person?name=john&amp;nation=america// 제조업체가 benz인 자동차https://www.example.com/car?manufacturer=benz// 저자가 paul인 책https://192.168.0.1/book?author=paul// 저자가 john인 책https://192.168.0.1/book?author=john\n\n안드로이드에서의 URI안드로이드 API는 URI를 취급하기 위해 Uri클래스를 제공합니다. Uri클래스는 암시적 인텐트, 컨텐트 프로바이더 등 안드로이드의 다양한 분야에서 많이 사용됩니다.\nUri.Builder클래스의 build()메소드를 사용하여 Uri객체를 생성할 수 있습니다.\n12345678910111213import android.net.Urival uri: Uri = Uri.Builder()    .scheme(&quot;https&quot;)    .authority(&quot;www.example.com&quot;)    .appendPath(&quot;person&quot;)    .appendPath(&quot;programmer&quot;)    .appendQueryParameter(&quot;name&quot;, &quot;paul&quot;)    .appendQueryParameter(&quot;nation&quot;, &quot;england&quot;)    .build()println(uri.toString())     // https://www.example.com/person/programmer?name=paul&amp;nation=england\nUri클래스의 parse()메소드를 사용할 수도 있습니다.\n123456import android.net.Urivar uri = Uri.parse(&quot;https://www.example.com/person/programmer?name=paul&amp;nation=england&quot;)println(uri.toString())     // https://www.example.com/person/programmer?name=paul&amp;nation=england\n\nUriMatcherUriMatcher클래스는 두 개의 Uri를 비교하여 사용자가 정의한 값을 반환하는데 사용합니다. UriMatcher클래스는 두 개의 메소드만을 가지고 있습니다.\n(1) addUri()기준이 되는 Uri를 등록하는데 사용합니다. \n1addUri([authority], [path], [code])\n세 번째 인자인 code는 두 Uri가 일치할 때 반환되는 정수값입니다.\nUriMatcher객체를 생성하고 세 개의 Uri를 등록해봅시다.\n12345val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)uriMatcher.addURI(&quot;www.example.com&quot;, &quot;person&quot;, 1)uriMatcher.addURI(&quot;www.example.com&quot;, &quot;person/*&quot;, 2)uriMatcher.addURI(&quot;www.example.com&quot;, &quot;car/*&quot;, 3)\n(2) match()인자로 전달된 Uri와 위에서 등록한 Uri과 비교하여 정수값을 반환합니다. \n우선 네 개의 Uri를 생성합시다.\n1234567891011121314151617181920212223242526272829// https://www.example.com/personval uri1 = Uri.Builder()    .scheme(&quot;https&quot;)    .authority(&quot;www.example.com&quot;)    .appendPath(&quot;person&quot;)    .build()// https://www.example.com/person/programmerval uri2 = Uri.Builder()    .scheme(&quot;https&quot;)    .authority(&quot;www.example.com&quot;)    .appendPath(&quot;person&quot;)    .appendPath(&quot;programmer&quot;)    .build()// https://www.example.com/car/convertibleval uri3 = Uri.Builder()    .scheme(&quot;https&quot;)    .authority(&quot;www.example.com&quot;)    .appendPath(&quot;car&quot;)    .appendPath(&quot;convertible&quot;)    .build()// https://www.test.com/bookval uri4 = Uri.Builder()    .scheme(&quot;https&quot;)    .authority(&quot;www.test.com&quot;)    .appendPath(&quot;book&quot;)    .build()\n이제 다음과 같이 두 Uri를 비교할 수 있습니다.\n12345678val result1 = uriMatcher.match(uri1)    // 1val result2 = uriMatcher.match(uri2)    // 2val result3 = uriMatcher.match(uri3)    // 3// 일치하는 uri가 없으면 -1을 반환합니다.val result4 = uriMatcher.match(uri4)    // -1","dateCreated":"2019-06-15T01:00:00+09:00","dateModified":"2021-12-16T02:34:15+09:00","datePublished":"2019-06-15T01:00:00+09:00","description":"","headline":"[Android] URI와 UriMatcher","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/","keywords":"Android"}</script>
+    <meta name="description" content="URIURI(Uniform Resource Identifier, 통합 자원 식별자)는 자원을 구분해주는 식별자입니다. 내 스마트폰이나 데스크톱에는 많은 자원(파일, 이미지, 비디오 등)이 존재합니다. 또한 연결된 인터넷 상에도 많은 자원이 존재합니다. URI는 이 자원을 구분하고 식별하는데 사용됩니다. 우리는 구글에 접속할 때 웹 브라우저의 주소창에 ht">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] URI와 UriMatcher">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="URIURI(Uniform Resource Identifier, 통합 자원 식별자)는 자원을 구분해주는 식별자입니다. 내 스마트폰이나 데스크톱에는 많은 자원(파일, 이미지, 비디오 등)이 존재합니다. 또한 연결된 인터넷 상에도 많은 자원이 존재합니다. URI는 이 자원을 구분하고 식별하는데 사용됩니다. 우리는 구글에 접속할 때 웹 브라우저의 주소창에 ht">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2019-06-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T17:34:15.409Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] URI와 UriMatcher
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-06-15T01:00:00+09:00">
+	
+		    2019/06/15
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="URI"><a href="#URI" class="headerlink" title="URI"></a>URI</h1><p><code>URI(Uniform Resource Identifier, 통합 자원 식별자)</code>는 자원을 구분해주는 식별자입니다. 내 스마트폰이나 데스크톱에는 많은 자원(파일, 이미지, 비디오 등)이 존재합니다. 또한 연결된 인터넷 상에도 많은 자원이 존재합니다. URI는 이 자원을 구분하고 식별하는데 사용됩니다.</p>
+<p>우리는 구글에 접속할 때 웹 브라우저의 주소창에 <code>http://www.google.com</code>를 입력합니다. 이때 <code>http://www.google.com</code> 뒤에는 <code>index.html</code>이 생략되어있습니다</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://www.google.com/index.html">http://www.google.com/index.html</a></p>
+</blockquote>
+<p>이 주소도 URI입니다. 웹 브라우저는 URI에 위치한 index.html 파일을 가져와서 화면에 보여줍니다. 이처럼 URI는 자원을 구분하고 식별하는데 사용됩니다.</p>
+<h1 id="URI-구조"><a href="#URI-구조" class="headerlink" title="URI 구조"></a>URI 구조</h1><p>URI는 다음과 같은 구조를 가지고 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scheme:[//[user[:password]@]host[:port]][/path][?query]</span><br></pre></td></tr></table></figure>
+<p><code>scheme</code>와 <code>host</code>는 필수사항이고 나머지는 선택사항입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 예시</span><br><span class="line">https://www.google.com/index.html</span><br><span class="line">mailto:yologger@gmail.com</span><br><span class="line">tel:+82-10-1111-2222</span><br><span class="line">ftp://yologger:1234@192.168.0.1:21</span><br><span class="line">content://com.korea.trains/line/1</span><br><span class="line">file:///usr/local/bin/</span><br><span class="line">data:text/vnd-example+xyz;foo=bar;base64,R0lGODdh</span><br><span class="line">news:comp.infosystems.www.servers.unix</span><br><span class="line">telnet://192.0.2.16:80/</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-Scheme"><a href="#1-Scheme" class="headerlink" title="(1) Scheme"></a>(1) Scheme</h3><p><code>scheme</code>은 어떤 프로토콜을 사용할지 지정합니다. 자주 쓰는 스킴에는 http, https, ftp, content, file, data가 있습니다. 모든 URI 스킴은 <a target="_blank" rel="noopener" href="http://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">이 곳</a>에서 확인할 수 있습니다.</p>
+<h3 id="2-Host"><a href="#2-Host" class="headerlink" title="(2) Host"></a>(2) Host</h3><p>네트워크에 연결되어 있는 모든 컴퓨터 각각을 <code>호스트</code>라고 합니다. 보통 <code>도메인 네임</code>이나 <code>IP 주소</code>을 사용하여 호스트를 구분하고 식별합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 도메인 네임</span><br><span class="line">http://www.netflix.com</span><br><span class="line">https://www.google.com</span><br><span class="line"></span><br><span class="line">// IP 주소</span><br><span class="line">https://172.217.27.78</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Port"><a href="#3-Port" class="headerlink" title="(3) Port"></a>(3) Port</h3><p>컴퓨터 내에서 실행되고있는 어플리케이션들을 구분하기 위해 사용하는 번호입니다. 보통 HTTP 프로토콜을 사용할 때는 80, HTTPS 프로토콜을 사용할 때는 443 포트를 사용합니다. 예제는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://www.netflix.com:80</span><br><span class="line">https://www.google.com:443</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Authority"><a href="#4-Authority" class="headerlink" title="(4) Authority"></a>(4) Authority</h3><p><code>authority</code>는 사용자 이름과 비밀번호, 호스트, 포트번호의 조합입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">authority = [ username &quot;:&quot; password &quot;@&quot; ] host [ &quot;:&quot; port ]</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yologger:1234@mail.google.com/:587</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="5-Path"><a href="#5-Path" class="headerlink" title="(5) Path"></a>(5) Path</h3><p>요청할 자원에 대한 경로를 의미합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 사람 자원의 경로</span><br><span class="line">https://www.example.com/person</span><br><span class="line"></span><br><span class="line">// 사람 중 프로그래머 자원의 경로</span><br><span class="line">https://www.example.com/person/programmer</span><br><span class="line"></span><br><span class="line">// 차량 자원의 경로</span><br><span class="line">https://www.example.com/car</span><br><span class="line"></span><br><span class="line">// 책 자원의 경로</span><br><span class="line">https://192.168.0.1/book</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Query"><a href="#6-Query" class="headerlink" title="(6) Query"></a>(6) Query</h3><p>경로에 있는 자원의 범위를 한정하기 위해 사용합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 이름이 paul인 사람</span><br><span class="line">https://www.example.com/person?name=paul</span><br><span class="line"></span><br><span class="line">// 국가가 england인 사람</span><br><span class="line">https://www.example.com/person?nation=england</span><br><span class="line"></span><br><span class="line">// 이름이 john이고 국가가 america인 사람</span><br><span class="line">https://www.example.com/person?name=john&amp;nation=america</span><br><span class="line"></span><br><span class="line">// 제조업체가 benz인 자동차</span><br><span class="line">https://www.example.com/car?manufacturer=benz</span><br><span class="line"></span><br><span class="line">// 저자가 paul인 책</span><br><span class="line">https://192.168.0.1/book?author=paul</span><br><span class="line"></span><br><span class="line">// 저자가 john인 책</span><br><span class="line">https://192.168.0.1/book?author=john</span><br></pre></td></tr></table></figure>
+
+<h1 id="안드로이드에서의-URI"><a href="#안드로이드에서의-URI" class="headerlink" title="안드로이드에서의 URI"></a>안드로이드에서의 URI</h1><p>안드로이드 API는 URI를 취급하기 위해 <code>Uri</code>클래스를 제공합니다. <code>Uri</code>클래스는 암시적 인텐트, 컨텐트 프로바이더 등 안드로이드의 다양한 분야에서 많이 사용됩니다.</p>
+<p><code>Uri.Builder</code>클래스의 <code>build()</code>메소드를 사용하여 <code>Uri</code>객체를 생성할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> uri: Uri = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;paul&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;nation&quot;</span>, <span class="string">&quot;england&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
+<p><code>Uri</code>클래스의 <code>parse()</code>메소드를 사용할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> uri = Uri.parse(<span class="string">&quot;https://www.example.com/person/programmer?name=paul&amp;nation=england&quot;</span>)</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="UriMatcher"><a href="#UriMatcher" class="headerlink" title="UriMatcher"></a>UriMatcher</h1><p><code>UriMatcher</code>클래스는 두 개의 <code>Uri</code>를 비교하여 사용자가 정의한 값을 반환하는데 사용합니다. <code>UriMatcher</code>클래스는 두 개의 메소드만을 가지고 있습니다.</p>
+<h3 id="1-addUri"><a href="#1-addUri" class="headerlink" title="(1) addUri()"></a>(1) addUri()</h3><p>기준이 되는 Uri를 등록하는데 사용합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addUri([authority], [path], [code])</span><br></pre></td></tr></table></figure>
+<p>세 번째 인자인 <code>code</code>는 두 <code>Uri</code>가 일치할 때 반환되는 정수값입니다.</p>
+<p><code>UriMatcher</code>객체를 생성하고 세 개의 <code>Uri</code>를 등록해봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uriMatcher = UriMatcher(UriMatcher.NO_MATCH)</span><br><span class="line"></span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person&quot;</span>, <span class="number">1</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person/*&quot;</span>, <span class="number">2</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;car/*&quot;</span>, <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="2-match"><a href="#2-match" class="headerlink" title="(2) match()"></a>(2) match()</h3><p>인자로 전달된 <code>Uri</code>와 위에서 등록한 <code>Uri</code>과 비교하여 정수값을 반환합니다. </p>
+<p>우선 네 개의 <code>Uri</code>를 생성합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// https://www.example.com/person</span></span><br><span class="line"><span class="keyword">val</span> uri1 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer</span></span><br><span class="line"><span class="keyword">val</span> uri2 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/car/convertible</span></span><br><span class="line"><span class="keyword">val</span> uri3 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;car&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;convertible&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.test.com/book</span></span><br><span class="line"><span class="keyword">val</span> uri4 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.test.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;book&quot;</span>)</span><br><span class="line">    .build()</span><br></pre></td></tr></table></figure>
+<p>이제 다음과 같이 두 <code>Uri</code>를 비교할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> result1 = uriMatcher.match(uri1)    <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result2 = uriMatcher.match(uri2)    <span class="comment">// 2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result3 = uriMatcher.match(uri3)    <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 일치하는 uri가 없으면 -1을 반환합니다.</span></span><br><span class="line"><span class="keyword">val</span> result4 = uriMatcher.match(uri4)    <span class="comment">// -1</span></span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/01/08_android/06_android_studio/20190701_layout_inspector/"
+                    data-tooltip="[Android Studio] Layout Inspector - 실시간으로 UI 디버깅하기"
+                    aria-label="이전: [Android Studio] Layout Inspector - 실시간으로 UI 디버깅하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/"
+                    data-tooltip="[Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기"
+                    aria-label="다음: [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/01/08_android/06_android_studio/20190701_layout_inspector/"
+                    data-tooltip="[Android Studio] Layout Inspector - 실시간으로 UI 디버깅하기"
+                    aria-label="이전: [Android Studio] Layout Inspector - 실시간으로 UI 디버깅하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/"
+                    data-tooltip="[Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기"
+                    aria-label="다음: [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

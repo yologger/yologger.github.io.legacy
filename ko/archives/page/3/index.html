@@ -354,6 +354,592 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
+                            aria-label=": [Android] URI와 UriMatcher"
+                        >
+                            [Android] URI와 UriMatcher
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-15T01:00:00+09:00">
+	
+		    2019/06/15
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="URI"><a href="#URI" class="headerlink" title="URI"></a>URI</h1><p><code>URI(Uniform Resource Identifier, 통합 자원 식별자)</code>는 자원을 구분해주는 식별자입니다. 내 스마트폰이나 데스크톱에는 많은 자원(파일, 이미지, 비디오 등)이 존재합니다. 또한 연결된 인터넷 상에도 많은 자원이 존재합니다. URI는 이 자원을 구분하고 식별하는데 사용됩니다.</p>
+<p>우리는 구글에 접속할 때 웹 브라우저의 주소창에 <code>http://www.google.com</code>를 입력합니다. 이때 <code>http://www.google.com</code> 뒤에는 <code>index.html</code>이 생략되어있습니다</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://www.google.com/index.html">http://www.google.com/index.html</a></p>
+</blockquote>
+<p>이 주소도 URI입니다. 웹 브라우저는 URI에 위치한 index.html 파일을 가져와서 화면에 보여줍니다. 이처럼 URI는 자원을 구분하고 식별하는데 사용됩니다.</p>
+<h1 id="URI-구조"><a href="#URI-구조" class="headerlink" title="URI 구조"></a>URI 구조</h1><p>URI는 다음과 같은 구조를 가지고 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scheme:[//[user[:password]@]host[:port]][/path][?query]</span><br></pre></td></tr></table></figure>
+<p><code>scheme</code>와 <code>host</code>는 필수사항이고 나머지는 선택사항입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 예시</span><br><span class="line">https://www.google.com/index.html</span><br><span class="line">mailto:yologger@gmail.com</span><br><span class="line">tel:+82-10-1111-2222</span><br><span class="line">ftp://yologger:1234@192.168.0.1:21</span><br><span class="line">content://com.korea.trains/line/1</span><br><span class="line">file:///usr/local/bin/</span><br><span class="line">data:text/vnd-example+xyz;foo=bar;base64,R0lGODdh</span><br><span class="line">news:comp.infosystems.www.servers.unix</span><br><span class="line">telnet://192.0.2.16:80/</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-Scheme"><a href="#1-Scheme" class="headerlink" title="(1) Scheme"></a>(1) Scheme</h3><p><code>scheme</code>은 어떤 프로토콜을 사용할지 지정합니다. 자주 쓰는 스킴에는 http, https, ftp, content, file, data가 있습니다. 모든 URI 스킴은 <a target="_blank" rel="noopener" href="http://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">이 곳</a>에서 확인할 수 있습니다.</p>
+<h3 id="2-Host"><a href="#2-Host" class="headerlink" title="(2) Host"></a>(2) Host</h3><p>네트워크에 연결되어 있는 모든 컴퓨터 각각을 <code>호스트</code>라고 합니다. 보통 <code>도메인 네임</code>이나 <code>IP 주소</code>을 사용하여 호스트를 구분하고 식별합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 도메인 네임</span><br><span class="line">http://www.netflix.com</span><br><span class="line">https://www.google.com</span><br><span class="line"></span><br><span class="line">// IP 주소</span><br><span class="line">https://172.217.27.78</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Port"><a href="#3-Port" class="headerlink" title="(3) Port"></a>(3) Port</h3><p>컴퓨터 내에서 실행되고있는 어플리케이션들을 구분하기 위해 사용하는 번호입니다. 보통 HTTP 프로토콜을 사용할 때는 80, HTTPS 프로토콜을 사용할 때는 443 포트를 사용합니다. 예제는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://www.netflix.com:80</span><br><span class="line">https://www.google.com:443</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Authority"><a href="#4-Authority" class="headerlink" title="(4) Authority"></a>(4) Authority</h3><p><code>authority</code>는 사용자 이름과 비밀번호, 호스트, 포트번호의 조합입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">authority = [ username &quot;:&quot; password &quot;@&quot; ] host [ &quot;:&quot; port ]</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yologger:1234@mail.google.com/:587</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="5-Path"><a href="#5-Path" class="headerlink" title="(5) Path"></a>(5) Path</h3><p>요청할 자원에 대한 경로를 의미합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 사람 자원의 경로</span><br><span class="line">https://www.example.com/person</span><br><span class="line"></span><br><span class="line">// 사람 중 프로그래머 자원의 경로</span><br><span class="line">https://www.example.com/person/programmer</span><br><span class="line"></span><br><span class="line">// 차량 자원의 경로</span><br><span class="line">https://www.example.com/car</span><br><span class="line"></span><br><span class="line">// 책 자원의 경로</span><br><span class="line">https://192.168.0.1/book</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Query"><a href="#6-Query" class="headerlink" title="(6) Query"></a>(6) Query</h3><p>경로에 있는 자원의 범위를 한정하기 위해 사용합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 이름이 paul인 사람</span><br><span class="line">https://www.example.com/person?name=paul</span><br><span class="line"></span><br><span class="line">// 국가가 england인 사람</span><br><span class="line">https://www.example.com/person?nation=england</span><br><span class="line"></span><br><span class="line">// 이름이 john이고 국가가 america인 사람</span><br><span class="line">https://www.example.com/person?name=john&amp;nation=america</span><br><span class="line"></span><br><span class="line">// 제조업체가 benz인 자동차</span><br><span class="line">https://www.example.com/car?manufacturer=benz</span><br><span class="line"></span><br><span class="line">// 저자가 paul인 책</span><br><span class="line">https://192.168.0.1/book?author=paul</span><br><span class="line"></span><br><span class="line">// 저자가 john인 책</span><br><span class="line">https://192.168.0.1/book?author=john</span><br></pre></td></tr></table></figure>
+
+<h1 id="안드로이드에서의-URI"><a href="#안드로이드에서의-URI" class="headerlink" title="안드로이드에서의 URI"></a>안드로이드에서의 URI</h1><p>안드로이드 API는 URI를 취급하기 위해 <code>Uri</code>클래스를 제공합니다. <code>Uri</code>클래스는 암시적 인텐트, 컨텐트 프로바이더 등 안드로이드의 다양한 분야에서 많이 사용됩니다.</p>
+<p><code>Uri.Builder</code>클래스의 <code>build()</code>메소드를 사용하여 <code>Uri</code>객체를 생성할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> uri: Uri = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;paul&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;nation&quot;</span>, <span class="string">&quot;england&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
+<p><code>Uri</code>클래스의 <code>parse()</code>메소드를 사용할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> uri = Uri.parse(<span class="string">&quot;https://www.example.com/person/programmer?name=paul&amp;nation=england&quot;</span>)</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="UriMatcher"><a href="#UriMatcher" class="headerlink" title="UriMatcher"></a>UriMatcher</h1><p><code>UriMatcher</code>클래스는 두 개의 <code>Uri</code>를 비교하여 사용자가 정의한 값을 반환하는데 사용합니다. <code>UriMatcher</code>클래스는 두 개의 메소드만을 가지고 있습니다.</p>
+<h3 id="1-addUri"><a href="#1-addUri" class="headerlink" title="(1) addUri()"></a>(1) addUri()</h3><p>기준이 되는 Uri를 등록하는데 사용합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addUri([authority], [path], [code])</span><br></pre></td></tr></table></figure>
+<p>세 번째 인자인 <code>code</code>는 두 <code>Uri</code>가 일치할 때 반환되는 정수값입니다.</p>
+<p><code>UriMatcher</code>객체를 생성하고 세 개의 <code>Uri</code>를 등록해봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uriMatcher = UriMatcher(UriMatcher.NO_MATCH)</span><br><span class="line"></span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person&quot;</span>, <span class="number">1</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person/*&quot;</span>, <span class="number">2</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;car/*&quot;</span>, <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="2-match"><a href="#2-match" class="headerlink" title="(2) match()"></a>(2) match()</h3><p>인자로 전달된 <code>Uri</code>와 위에서 등록한 <code>Uri</code>과 비교하여 정수값을 반환합니다. </p>
+<p>우선 네 개의 <code>Uri</code>를 생성합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// https://www.example.com/person</span></span><br><span class="line"><span class="keyword">val</span> uri1 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer</span></span><br><span class="line"><span class="keyword">val</span> uri2 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/car/convertible</span></span><br><span class="line"><span class="keyword">val</span> uri3 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;car&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;convertible&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.test.com/book</span></span><br><span class="line"><span class="keyword">val</span> uri4 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.test.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;book&quot;</span>)</span><br><span class="line">    .build()</span><br></pre></td></tr></table></figure>
+<p>이제 다음과 같이 두 <code>Uri</code>를 비교할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> result1 = uriMatcher.match(uri1)    <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result2 = uriMatcher.match(uri2)    <span class="comment">// 2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result3 = uriMatcher.match(uri3)    <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 일치하는 uri가 없으면 -1을 반환합니다.</span></span><br><span class="line"><span class="keyword">val</span> result4 = uriMatcher.match(uri4)    <span class="comment">// -1</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/"
+                            aria-label=": [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기"
+                        >
+                            [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-14T01:00:00+09:00">
+	
+		    2019/06/14
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="ADB-Android-Debug-Bridge"><a href="#ADB-Android-Debug-Bridge" class="headerlink" title="ADB(Android Debug Bridge)"></a>ADB(Android Debug Bridge)</h1><p><code>ADB(Android Debug Bridge)</code>는 안드로이드 기기와 통신할 수 있는 명령어 도구입니다. ADB를 사용하면 윈도우의 계열 <u>명령 프롬프트</u>나 리눅스 계열의 <u>터미널</u>처럼 연결된 기기에 접근할 수 있습니다.</p>
+<p>ADB는 <code>안드로이드 SDK</code>의 <code>Platform Tools</code>에 포함되어 있습니다. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/Users/[your_username]/Library/Android/sdk/platform-tools</span><br><span class="line"></span><br><span class="line">$ ls</span><br><span class="line">adb</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>어느 위치에서든 ADB 명령어를 사용하려면 아래와 같이 경로 설정을 해야합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cd ~ </span><br><span class="line"></span><br><span class="line">$ echo &#x27;/Users/[your_username]/Library/Android/sdk/platform-tools&#x27; &gt;&gt; ~/.bash_profile</span><br><span class="line"></span><br><span class="line">$ source ~/.bash_profile</span><br></pre></td></tr></table></figure>
+
+
+<p>이제 <code>adb --help</code> 명령어를 입력하면 ADB와 관련된 옵션들을 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb --<span class="built_in">help</span></span></span><br><span class="line">Android Debug Bridge version 1.0.41</span><br><span class="line">Version 31.0.0-7110759</span><br><span class="line">Installed as /usr/local/bin/adb</span><br><span class="line"></span><br><span class="line">global options:</span><br><span class="line"> -a         listen on all network interfaces, not just localhost</span><br><span class="line"> -d         use USB device (error if multiple devices connected)</span><br><span class="line"> -e         use TCP/IP device (error if multiple TCP/IP devices available)</span><br><span class="line"> -s SERIAL  use device with given serial (overrides $ANDROID_SERIAL)</span><br><span class="line"> -t ID      use device with given transport id</span><br><span class="line"> -H         name of adb server host [default=localhost]</span><br><span class="line"> -P         port of adb server [default=5037]</span><br><span class="line"> -L SOCKET  listen on given socket for adb server [default=tcp:localhost:5037]</span><br><span class="line"></span><br><span class="line">general commands:</span><br><span class="line"> devices [-l]             list connected devices (-l for long output)</span><br><span class="line"> help                     show this help message</span><br><span class="line"> version                  show version num</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>안드로이드는 리눅스 기반의 운영체제입니다. 따라서 연결된 기기의 리눅스 쉘에 접속할 수 있습니다. 이 때는 <code>adb shell</code> 명령어를 사용합니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span></span><br></pre></td></tr></table></figure>
+<p>이제 연결된 기기의 디렉토리 구조를 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">bin</span><br><span class="line">data</span><br><span class="line">sdcard</span><br><span class="line">storage</span><br><span class="line">dev</span><br><span class="line">sys</span><br><span class="line">system</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h1 id="자주-쓰는-adb-명령어"><a href="#자주-쓰는-adb-명령어" class="headerlink" title="자주 쓰는 adb 명령어"></a>자주 쓰는 adb 명령어</h1><p><code>adb devices</code>명령어를 사용하면 실제 기기와 정상적으로 연결되었는지 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb devices</span></span><br><span class="line">List of devices attached</span><br><span class="line">R3CN109JVFK     device</span><br><span class="line">R332AEW32AA     device</span><br><span class="line">R3CN238IKEF     offline</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>offline</td>
+<td>기기가 연결되지 않았거나 비정상인 경우</td>
+</tr>
+<tr>
+<td>device</td>
+<td>정상적으로 기기가 연결된 경우</td>
+</tr>
+<tr>
+<td>no device</td>
+<td>연결된 기기가 없는 경우</td>
+</tr>
+</tbody></table>
+<p><code>adb reboot</code>명령어를 사용하면 기기를 재시작할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb reboot</span></span><br></pre></td></tr></table></figure>
+<p>PC에서 안드로이드 기기로 파일을 복사할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb push &quot;파일 명&quot; &quot;복사할 경로&quot;</span><br><span class="line"></span><br><span class="line">$ adb push backup.zip /sdcard</span><br></pre></td></tr></table></figure>
+<p>안드로이드 기기에서 PC로 파일을 복사할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb pull &quot;파일 명&quot; &quot;복사할 경로&quot;</span><br><span class="line"></span><br><span class="line">$ adb pull /sdcard/log.txt .</span><br></pre></td></tr></table></figure>
+<p>APK 파일을 직접 설치할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb install [app_name].apk</span><br><span class="line"></span><br><span class="line">$ adb install my_app.apk</span><br></pre></td></tr></table></figure>
+<p>앱을 삭제할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb uninstall [package_name]</span><br><span class="line"></span><br><span class="line">$ adb uninstall com.yologger.package</span><br></pre></td></tr></table></figure>
+<p>연결된 기기의 시스템 정보를 가져올 수 도 있습니다. </p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys</span></span><br></pre></td></tr></table></figure>
+<p>아래와 같이 액티비티와 태스크의 스택을 확인할 때 많이 사용합니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities</span></span><br></pre></td></tr></table></figure>
+
+<p>위 명령어를 입력하면 너무 방대한 정보가 한꺼번에 출력됩니다. 따라서 여러 옵션과 <code>grep</code>을 적절히 활용하여 필요한 정보만 출력할 수 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb shell dumpsys activity activities | grep -i [package_name] | grep -i Hist</span><br><span class="line"></span><br><span class="line">$ adb shell dumpsys activity activities | grep -i com.yologger.activity | grep -i Hist</span><br></pre></td></tr></table></figure>
+
+<h1 id="액티비티-스택-확인하기"><a href="#액티비티-스택-확인하기" class="headerlink" title="액티비티 스택 확인하기"></a>액티비티 스택 확인하기</h1><p><code>ADB(Android Debug Bridge)</code>를 사용하면 현재 앱에서 실행 중인 모든 서비스를 확인할 수 있습니다.</p>
+<p><code>adb shell</code> 명령어를 사용하면 연결된 기기에 접속할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span> </span><br></pre></td></tr></table></figure>
+<p><code>dumpsys</code> 명령어를 사용하면 모든 서비스를 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> dumpsys</span> </span><br></pre></td></tr></table></figure>
+<p>다음과 같이 호출할 수도 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys</span> </span><br></pre></td></tr></table></figure>
+
+<p>현재 기기에서 실행 중인 태스크와 액티비티만을 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities</span></span><br></pre></td></tr></table></figure>
+<p>특정 앱의 태스크와 액티비티만 확인할 수도 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities | grep -i [package_name] | grep -i Hist</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities | grep -i com.yologger.myapp | grep -i Hist</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/13/08_android/01_android_platform/190613_compileSdkVersion_minSdkVersion_targetSdkVersion/"
+                            aria-label=": [Android] compileSdkVersion, minSdkVersion, targetSdkVersion 차이점"
+                        >
+                            [Android] compileSdkVersion, minSdkVersion, targetSdkVersion 차이점
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-13T01:00:00+09:00">
+	
+		    2019/06/13
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="1-compileSdkVersion"><a href="#1-compileSdkVersion" class="headerlink" title="(1) compileSdkVersion"></a>(1) compileSdkVersion</h1><p>안드로이드 스튜디오에서 앱을 빌드할 때 어떤 SDK 버전을 사용할 것인지 지정합니다. 즉 <code>comileSdkVersion</code>은 지원할 수 있는 가장 높은 버전을 의미합니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>안드로이드 스튜디오의 SDK Manager에 해당 SDK가 설치되어있어야 합니다.<br><img src="0.png"></p>
+<h1 id="2-minSdkVersion"><a href="#2-minSdkVersion" class="headerlink" title="(2) minSdkVersion"></a>(2) minSdkVersion</h1><p>최소 지원 SDK 버전을 의미합니다. 즉 해당 버전 이하의 안드로이드 운영체제가 설치된 기기에서는 앱을 설치할 수 없습니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-targetSdkVersion"><a href="#3-targetSdkVersion" class="headerlink" title="(3) targetSdkVersion"></a>(3) targetSdkVersion</h1><p>앱을 실제 기기에서 실행할 때 어떤 SDK 버전을 사용할지 지정합니다. 기능은 똑같아도 SDK 버전에 따라 다르게 동작하는 API도 있습니다. 이때는 <code>targetSdkVersion</code>에 맞는 API를 사용하게 됩니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        targetSdkVersion <span class="number">27</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>targetSdkVersion</code>을 지정하지 않으면 기본 값은 <code>minSdkVersion</code>과 동일하게 적용됩니다. </p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>모듈 수준의 <code>build.gradle</code>파일에서 다음과 같이 SDK 버전 설정을 설정합니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        targetSdkVersion <span class="number">27</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이는 SDK 버전이 25 이상 30 이하에서만 이 앱이 실행될 수 있음을 의미합니다. 또한 실제 동작은 27 버전으로 동작하게 됩니다. 보통 실무에서는 </p>
+<div class="alert warning icon"><p>minSdkVersion &lt;= targetSdkVersion == compileSdkVersion</p>
+</div>
+
+<p>로 SDK 버전을 설정합니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/13/08_android/01_android_platform/190613_compileSdkVersion_minSdkVersion_targetSdkVersion/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/12/08_android/01_android_platform/190612_sdk_version/"
+                            aria-label=": [Android] 런타임에서 SDK 버전 확인하기"
+                        >
+                            [Android] 런타임에서 SDK 버전 확인하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-12T01:00:00+09:00">
+	
+		    2019/06/12
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="런타임에서-현재-기기의-SDK-버전-확인하기"><a href="#런타임에서-현재-기기의-SDK-버전-확인하기" class="headerlink" title="런타임에서 현재 기기의 SDK 버전 확인하기"></a>런타임에서 현재 기기의 SDK 버전 확인하기</h1><p>런타임에서 현재 기기의 SDK 버전을 확인할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        println(Build.VERSION.SDK_INT)  <span class="comment">// 기기의 SDK Version 확인</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;      </span><br></pre></td></tr></table></figure>
+<p>안드로이드 API에는 SDK의 버전이 상수 값으로 정의되어있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        println(Build.VERSION_CODES.BASE)                   <span class="comment">// 1</span></span><br><span class="line">        println(Build.VERSION_CODES.BASE_1_1)               <span class="comment">// 2</span></span><br><span class="line">        println(Build.VERSION_CODES.CUPCAKE)                <span class="comment">// 3</span></span><br><span class="line">        println(Build.VERSION_CODES.DONUT)                  <span class="comment">// 4</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR)                 <span class="comment">// 5</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR_0_1)             <span class="comment">// 6</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR_MR1)             <span class="comment">// 7</span></span><br><span class="line">        println(Build.VERSION_CODES.FROYO)                  <span class="comment">// 8</span></span><br><span class="line">        println(Build.VERSION_CODES.GINGERBREAD)            <span class="comment">// 9</span></span><br><span class="line">        println(Build.VERSION_CODES.GINGERBREAD_MR1)        <span class="comment">// 10</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB)              <span class="comment">// 11</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB_MR1)          <span class="comment">// 12</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB_MR2)          <span class="comment">// 13</span></span><br><span class="line">        println(Build.VERSION_CODES.ICE_CREAM_SANDWICH)     <span class="comment">// 14</span></span><br><span class="line">        println(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) <span class="comment">// 15</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN)             <span class="comment">// 16</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN_MR1)         <span class="comment">// 17</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN_MR2)         <span class="comment">// 18</span></span><br><span class="line">        println(Build.VERSION_CODES.KITKAT)                 <span class="comment">// 19</span></span><br><span class="line">        println(Build.VERSION_CODES.KITKAT_WATCH)           <span class="comment">// 20</span></span><br><span class="line">        println(Build.VERSION_CODES.LOLLIPOP)               <span class="comment">// 21</span></span><br><span class="line">        println(Build.VERSION_CODES.LOLLIPOP_MR1)           <span class="comment">// 22</span></span><br><span class="line">        println(Build.VERSION_CODES.M)                      <span class="comment">// 23</span></span><br><span class="line">        println(Build.VERSION_CODES.N)                      <span class="comment">// 24</span></span><br><span class="line">        println(Build.VERSION_CODES.N_MR1)                  <span class="comment">// 25</span></span><br><span class="line">        println(Build.VERSION_CODES.O)                      <span class="comment">// 26</span></span><br><span class="line">        println(Build.VERSION_CODES.O_MR1)                  <span class="comment">// 27</span></span><br><span class="line">        println(Build.VERSION_CODES.P)                      <span class="comment">// 28</span></span><br><span class="line">        println(Build.VERSION_CODES.Q)                      <span class="comment">// 29</span></span><br><span class="line">        println(Build.VERSION_CODES.R)                      <span class="comment">// 30</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+
+
+
+
+<p>비교문을 사용하여 버전에 따른 분기처리를 할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.M) &#123;</span><br><span class="line">    <span class="comment">// do something when os version is lower than Marshmallow(23).</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// do something when os version is equal or higher than Marshmallow(23).</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/12/08_android/01_android_platform/190612_sdk_version/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/11/08_android/01_android_platform/190611_android_sdk/"
+                            aria-label=": [Android] 안드로이드 SDK란"
+                        >
+                            [Android] 안드로이드 SDK란
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-11T01:00:00+09:00">
+	
+		    2019/06/11
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="안드로이드-SDK"><a href="#안드로이드-SDK" class="headerlink" title="안드로이드 SDK"></a>안드로이드 SDK</h1><p><code>안드로이드 SDK(Software Development Kit)</code>는 안드로이드 앱을 개발하기 위한 툴 킷입니다. </p>
+<p>안드로이드 스튜디오는 <code>SDK Manager</code>를 제공하는데 이 곳에서 안드로이드 SDK를 설치, 삭제, 설정 할 수 있습니다. 또한 SDK Manager에서 SDK의 설치 경로를 확인할 수 있습니다.<br><img src="2.png"></p>
+<p>그럼 터미널에서 SDK의 설치 경로로 이동해보겠습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> /Users/[user_name]/Library/Android/sdk</span></span><br></pre></td></tr></table></figure>
+<p>SDK에 무엇이 설치되어있는지 확인해봅시다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">build-tools    extras         icons          patcher        platforms      skins          system-images</span><br><span class="line">emulator       fonts          licenses       platform-tools skiaparser     sources        tools</span><br></pre></td></tr></table></figure>
+<h3 id="1-system-images"><a href="#1-system-images" class="headerlink" title="(1) system-images"></a>(1) system-images</h3><p><code>system-images</code>폴더에는 에뮬레이터가 사용하는 안드로이드 운영체제 이미지가 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/system-images</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">android-23 android-27</span><br></pre></td></tr></table></figure>
+<p><img src="3.png"></p>
+<h3 id="2-platforms"><a href="#2-platforms" class="headerlink" title="(2) platforms"></a>(2) platforms</h3><p><code>platforms</code>폴더에는 안드로이드 플랫폼이 설치되어 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/platforms</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">android-23 android-25 android-26 android-27 android-28 android-29 android-30</span><br></pre></td></tr></table></figure>
+<p><img src="4.png"></p>
+<h3 id="3-tools"><a href="#3-tools" class="headerlink" title="(3) tools"></a>(3) tools</h3><p><code>tools</code>폴더와 <code>tools/bin</code>폴더에는 앱을 개발하고 디버깅하기 위한 여러가지 툴이 있습니다. 에뮬레이터, SDK 매니저, AVD 매니저, UI 뷰어 등이 이 폴더에 설치되어있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/tools</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">bin               </span><br><span class="line">emulator</span><br><span class="line">monitor</span><br><span class="line">proguard</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/tools/bin</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">avdmanager</span><br><span class="line">sdkmanager</span><br><span class="line">uiautomatorviewer</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>안드로이드 스튜디오에서도 <code>tools</code>폴더에 설치된 툴을 확인할 수 있습니다.<br><img src="5.png"></p>
+<h3 id="4-build-tools"><a href="#4-build-tools" class="headerlink" title="(4) build-tools"></a>(4) build-tools</h3><p><code>build-tools</code>폴더에는 앱을 빌드하기 위한 도구들이 설치되어있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]]/Library/Android/sdk/build-tools</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">25.0.2 26.0.2 27.0.3 28.0.3 29.0.2 29.0.3 30.0.2 30.0.3</span><br></pre></td></tr></table></figure>
+<p><img src="6.png"></p>
+<h3 id="5-platform-tools"><a href="#5-platform-tools" class="headerlink" title="(5) platform-tools"></a>(5) platform-tools</h3><p><code>platform-tools</code>폴더에는 안드로이드 기기와 연결했을 때 사용하는 도구들이 설치되어있습니다. adb, fastboot, systrace, sqlite3 등이 이 폴더에 설치되어있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]]/Library/Android/sdk/platform-tools</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">adb</span><br><span class="line">fastboot</span><br><span class="line">systrace</span><br><span class="line">sqlite3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/11/08_android/01_android_platform/190611_android_sdk/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/10/08_android/01_android_platform/190610_multi_dex/"
+                            aria-label=": [Android] 멀티 덱스(Multi Dex)"
+                        >
+                            [Android] 멀티 덱스(Multi Dex)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-10T01:00:00+09:00">
+	
+		    2019/06/10
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Why-use-Multidex"><a href="#Why-use-Multidex" class="headerlink" title="Why use Multidex?"></a>Why use Multidex?</h1><p>안드로이드에서 Java 소스코드나 Kotlin 소스코드는 DEX 파일로 컴파일됩니다. 이 DEX 파일의 메소드가 <code>64K(65,536)</code>개를 초과하면 안드로이드 시스템은 다음과 같은 빌드 오류를 발생시킵니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">trouble writing output:</span><br><span class="line">Too many field references: 131000; max is 65536.</span><br><span class="line">You may try using --multi-dex option.</span><br></pre></td></tr></table></figure>
+<p><code>멀티 덱스(Multidex)</code>는 <u>메소드가 64K(65,536)개를 초과하지 않도록 DEX 파일을 여러 개로 나누는 기술</u>입니다.</p>
+<h1 id="사용-방법"><a href="#사용-방법" class="headerlink" title="사용 방법"></a>사용 방법</h1><p>우선 모듈 수준의 <code>build.gradle</code>에 다음 코드를 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig&#123;</span><br><span class="line">        <span class="comment">// 멀티덱스 기능 true</span></span><br><span class="line">        multiDexEnabled <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// 의존성 추가</span></span><br><span class="line">    implementation <span class="string">&#x27;com.android.support:multidex:1.0.3&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>AndroidManifest.xml</code>에서 <code>&lt;application&gt;</code>태그의 <code>android:name</code>속성을 다음과 같이 설정합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.multidex.MultiDexApplication&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">...</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>만약 <code>Application</code>클래스를 사용 중이라면 다음과 같이 수정합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class App: MultiDexApplication() &#123;</span><br><span class="line">    // ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>AndroidManifest.xml</code>에서 <code>&lt;application&gt;</code>태그의 <code>android:name</code>속성을 다음과 같이 설정합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;.App&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">...</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/10/08_android/01_android_platform/190610_multi_dex/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/09/08_android/01_android_platform/190609_jvm_dalvik_art/"
+                            aria-label=": [Android] JVM, 달빅 가상머신, ART 차이점"
+                        >
+                            [Android] JVM, 달빅 가상머신, ART 차이점
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-09T01:00:00+09:00">
+	
+		    2019/06/09
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h1><p><code>JVM(Java Virtual Machine)</code>은 Java 바이트코드를 실행하는 가상머신입니다. </p>
+<p><img src="1.png"></p>
+<p><code>Java Compiler</code>는 Java 소스코드를 컴파일하여 Java 바이트코드를 생성합니다. JVM은 이 <u>Java 바이트코드를 실행하는 주체</u>입니다. 플랫폼에 적절한 JVM만 설치되면 어떤 플랫폼에서든 Java 바이트코드를 실행할 수 있습니다.</p>
+<h1 id="DVM"><a href="#DVM" class="headerlink" title="DVM"></a>DVM</h1><p><code>DEX 컴파일러</code>는 Java 바이트코드를 <code>DEX(Dalvik Executable)</code>파일로 통합합니다.<br><img src="2.png"></p>
+<p><code>DVM(Dalvik Virtual Machine)</code>은 안드로이드 애플리캐이션을 실행하는 주체입니다. 정확하게 말하자면 DVM는 이 DEX 파일을 실행합니다.</p>
+<p>구글은 자바 가상머신인 JVM을 사용할 수도 있었지만 오라클과의 라이센스 문제 때문에 DVM을 개발하여 안드로이드에 넣게 됩니다.</p>
+<p>뿐만 아니라 모바일 기기는 베터리 수명, 컴퓨팅 능력, 메모리 등의 자원이 데스크탑 환경에 비해 열악합니다. 이 때문에 모바일 기기에 맞게 나온 가상머신이 바로 DVM 입니다.</p>
+<p>DVM은 내부적으로 <code>JIT(Just In Time) 컴파일러</code>를 사용합니다. 이 컴파일러는 애플리캐이션을 <u>실행</u>할 때마다 자바 바이트코드를 기계어로 컴파일합니다. 이 덕분에 설치 파일은 작아졌으나 CPU, 메모리, 베터리 사용이 높아지게 되었습니다.</p>
+<h1 id="ART"><a href="#ART" class="headerlink" title="ART"></a>ART</h1><p><code>ART(Android Runtime)</code>은 안드로이드에서 사용되던 기존 DVM의 한계점을 해결하기 위해서 구글에서 새로 개발한 런타임입니다.</p>
+<p>ART는 내부적으로 <code>AOT(Ahead On Time) 컴파일러</code>를 사용합니다. 이 컴파일러는 애플리캐이션을 <u>설치</u>할 때 자바 바이트코드를 기계어로 컴파일합니다. 따라서 설치 파일이 커지고 설치 시간이 오래 걸린다는 단점이 있으나 런타임에서 CPU, 메모리, 베터리 사용량이 낮아지고 퍼포먼스가 좋아지게 되었습니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/09/08_android/01_android_platform/190609_jvm_dalvik_art/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/06/08/08_android/01_android_platform/190606_dex_compiler/"
                             aria-label=": [Android] DEX 컴파일러"
                         >
@@ -595,588 +1181,6 @@
                         <p>
                             <a
                                 href="/ko/2019/06/04/08_android/01_android_platform/190604_decompile_apk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/03/08_android/01_android_platform/190603_analyze_apk/"
-                            aria-label=": [Android] APK 분석하기 (APK Analyzer)"
-                        >
-                            [Android] APK 분석하기 (APK Analyzer)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-03T01:00:00+09:00">
-	
-		    2019/06/03
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p>안드로이드 스튜디오의 <code>APK Analyzer</code>를 사용하면 APK 파일을 분석할 수 있습니다.</p>
-<h1 id="APK-Analyzer"><a href="#APK-Analyzer" class="headerlink" title="APK Analyzer"></a>APK Analyzer</h1><p><code>Android Studio &gt; Build &gt; Analyze APK</code>를 선택합니다.</p>
-<p><img src="1.png"><br>APK 파일을 선택하면 분석 정보를 확인할 수 있습니다.<br><img src="2.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/03/08_android/01_android_platform/190603_analyze_apk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/02/08_android/01_android_platform/190602_extract_apk/"
-                            aria-label=": [Android] 앱에서 APK 추출하기 (APK Extractor)"
-                        >
-                            [Android] 앱에서 APK 추출하기 (APK Extractor)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-02T01:00:00+09:00">
-	
-		    2019/06/02
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>구글 플레이스토어에는 설치된 앱에서 <code>APK</code> 파일을 추출하는 앱들이 출시되어있습니다. 이번 포스트에서는 <code>APK Extractor</code> 앱을 사용하여 APK 파일을 추출해보겠습니다.</p>
-<h1 id="APK-Extractor"><a href="#APK-Extractor" class="headerlink" title="APK Extractor"></a>APK Extractor</h1><p>구글 플레이스토어에서 APK Extractor를 설치합니다.<br><img src="1.png"><br>검색창에 추출하려는 앱의 이름을 입력합니다.<br><img src="2.png"><br>앱을 클릭하면 해당 경로에 APK 파일이 추출됩니다.<br><img src="3.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/02/08_android/01_android_platform/190602_extract_apk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/01/08_android/01_android_platform/190601_dex_apk/"
-                            aria-label=": [Android] APK 파일, DEX 파일이란?"
-                        >
-                            [Android] APK 파일, DEX 파일이란?
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-01T01:00:00+09:00">
-	
-		    2019/06/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="APK"><a href="#APK" class="headerlink" title="APK"></a>APK</h1><p><code>APK(Android Application Package)</code>는 안드로이드 어플리캐이션 설치 파일이다. 안드로이드 시스템에서 APK 파일을 사용하여 어플리케이션을 설치할 수 있다. Windows 계열의 운영체제에서의 인스톨러와 유사하다.</p>
-<h1 id="APK-생성-과정"><a href="#APK-생성-과정" class="headerlink" title="APK 생성 과정"></a>APK 생성 과정</h1><p>APK 파일은 다음과 같은 과정을 거쳐 생성된다.</p>
-<ol>
-<li>안드로이드 프로젝트는 <code>소스코드 및 리소스로 구성된 모듈</code>과 <code>의존성</code>으로 구성된다.</li>
-<li>Gradle은 이 모든 것을 빌드하여 <code>DEX 파일</code>과 <code>컴파일된 리소스</code>를 생성한다.</li>
-<li>APK Manager는 개인키로 서명하여 <code>APK 파일</code>를 생성한다.</li>
-<li><code>APK 파일</code>은 구글 플레이스토어에 업로드하거나 안드로이드 시스템에 직접 설치할 수 있다.</li>
-</ol>
-<p><img src="1.png"></p>
-<h1 id="APK-생성-위치"><a href="#APK-생성-위치" class="headerlink" title="APK 생성 위치"></a>APK 생성 위치</h1><p>디버그 모드에서 앱을 빌드하면 아래 경로에 APK 파일이 생성된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[your_project]\app\build\outputs\apk</span><br></pre></td></tr></table></figure>
-
-<h1 id="DEX-파일"><a href="#DEX-파일" class="headerlink" title="DEX 파일"></a>DEX 파일</h1><p><code>APK</code>이 설치 파일이라면 <code>DEX(Dalvik Executable)</code>은 실행 파일입니다. Java 클래스 파일(.class)이 JVM에서 실행되는 것처럼 DEX 파일은 DVM(Dalvik Virtual Machine)에서 실행됩니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/01/08_android/01_android_platform/190601_dex_apk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
-                            aria-label=": [Android] 커스텀 위젯 만들기 - (2) View의 생명주기와 Custom View"
-                        >
-                            [Android] 커스텀 위젯 만들기 - (2) View의 생명주기와 Custom View
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-05-13T01:00:00+09:00">
-	
-		    2019/05/13
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/UI/">UI</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="View의-생명주기"><a href="#View의-생명주기" class="headerlink" title="View의 생명주기"></a>View의 생명주기</h1><p><code>Activity</code>와 <code>Fragment</code>처럼 <code>View</code>도 생명주기가 있습니다. <code>Custom View</code>를 만드려면 <code>View</code>의 생명주기를 이해해야합니다.<br><img src="1.png"><br>생명주기 함수에서 중요한 것은 <code>onMeasure()</code>, <code>onLayout()</code>, <code>onDraw()</code> 입니다.</p>
-<h3 id="1-measure-onMeasure"><a href="#1-measure-onMeasure" class="headerlink" title="(1) measure(), onMeasure()"></a>(1) measure(), onMeasure()</h3><p><code>LinearLayout</code>, <code>ConstraintLayout</code> 같은 <code>ViewGroup</code>은 자식 뷰를 가질 수 있으며, 보통 두 가지 방법으로 자식 뷰를 추가합니다.</p>
-<ul>
-<li>코드에서 자식 뷰 추가<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> button = Button(<span class="keyword">this</span>)</span><br><span class="line">addView(button)</span><br></pre></td></tr></table></figure></li>
-<li>레이아웃 XML 파일에서 추가<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>이때 부모 뷰는 내부적으로 자식 뷰의 <code>measure()</code>를 호출합니다.  이때 부모 뷰는 자식 뷰의 대략적인 크기 정보를 함께 전달해야합니다. 자식 뷰의 크기는 부모 뷰에 따라 달라질 수 있기 때문입니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">button.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)</span><br></pre></td></tr></table></figure>
-<p><code>MeasureSpec</code>가 가질 수 있는 값은 다음과 같습니다. </p>
-<ul>
-<li><code>MeasureSpec.AT_MOST</code>: 자식 뷰의 크기를 <code>wrap_content</code>로 설정했을 때</li>
-<li><code>MeasureSpec.EXACTLY</code>: 자식 뷰의 크기를 <code>match_parent</code>로 설정했을 때</li>
-<li><code>MeasureSpec.UNSPECIFIED</code>: 자식 뷰의 크기를 <code>30dp</code> 등으로 직접 설정했을 때</li>
-</ul>
-<p>부모 뷰가 <code>measure()</code>를 호출하면 자식 뷰의 <code>onMeasure()</code> 메소드가 호출됩니다. <code>onMeasure()</code>에서는 <code>setMeasuredDimension()</code>를 호출하여 자식 뷰의 크기를 결정하게 됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChildView</span>: <span class="type">View &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line">        <span class="comment">// 자식 뷰의 크기를 가로 500, 세로 500으로 설정</span></span><br><span class="line">        setMeasuredDimension(<span class="number">500</span>, <span class="number">500</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>요약하자면 <code>measure()</code>와 <code>onMeasure()</code>는 자식 뷰의 <u>크기</u>를 결정하는데 사용됩니다.</p>
-<h3 id="2-layout-onLayout"><a href="#2-layout-onLayout" class="headerlink" title="(2) layout(), onLayout()"></a>(2) layout(), onLayout()</h3><p>이제 자식 뷰가 부모 뷰의 어디에 <u>위치</u>할지를 결정해야합니다. 이때 부모 뷰는 내부적으로 자식 뷰의 <code>layout()</code>을 호출합니다. 또한 자식 뷰의 위치를 매개변수로 함께 전달합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">childView.layout(left: <span class="number">100</span>, top: <span class="number">100</span>, right: <span class="number">100</span>, bottom: <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
-<p>부모 뷰가 자식 뷰의 <code>layout()</code>을 호출하면 자식 뷰의 <code>onLayout()</code>이 호출됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChildView</span>: <span class="type">View &#123;</span></span></span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> void onLayout(boolean changed, int left, int top, int right, int bottom) &#123;</span><br><span class="line">        <span class="comment">// ..</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>만약 뷰를 다시 그렸다면 첫 번째 인자인 <code>changed</code>를 통해 변화를 확인할 수 있습니다.</p>
-<h3 id="3-draw-onDraw"><a href="#3-draw-onDraw" class="headerlink" title="(3) draw(), onDraw()"></a>(3) draw(), onDraw()</h3><p>자식 뷰의 크기와 위치가 결정되면 부모 뷰는 내부적으로 자식 뷰의 <code>draw()</code>를 호출합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">childView.draw(canvas)</span><br></pre></td></tr></table></figure>
-<p>이제 자식 뷰의 <code>onDraw()</code>가 호출되며, 이 안에서 <code>Canvas</code>를 통해 뷰를 그릴 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChildView</span>: <span class="type">View &#123;</span></span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">        <span class="comment">// 그리기 </span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="Custom-View-구현하기"><a href="#Custom-View-구현하기" class="headerlink" title="Custom View 구현하기"></a>Custom View 구현하기</h1><p>이제 <code>Custom View</code>를 직접 구현해보겠습니다. <code>CircleView</code>라는 뷰를 정의합시다. 이 뷰는 원을 그려줍니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CircleView</span>: <span class="type">View &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Custom View</code>를 구현할 때는 두 개의 생성자를 반드시 선언해야합니다. 첫 번째 생성자는 <code>Context</code>객체를 인자로 받으며, 코드에서 뷰를 생성할 때 사용됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>두 번째 생성자는 <code>Context</code>객체 외에도 <code>AttributeSet</code>을 인자로 받으며, 레이아웃 파일에서 뷰를 생성할 때 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 <code>onDraw()</code>와 <code>onMeasure()</code>를 구현합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CircleView</span>: <span class="type">View &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line">        <span class="comment">// 뷰의 크기를 가로 400, 세로 400으로 지정</span></span><br><span class="line">        setMeasuredDimension(<span class="number">400</span>, <span class="number">400</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Canvas의 배경을 회색으로 설정</span></span><br><span class="line">        canvas?.drawColor(Color.GRAY)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 중심 좌표가 (200, 200)이고 반지름이 200인 원을 그린다.</span></span><br><span class="line">        paint.color = Color.BLUE</span><br><span class="line">        canvas?.drawCircle(<span class="number">200F</span>, <span class="number">200F</span>, <span class="number">200F</span>, paint)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>부모 뷰의 레이아웃 파일에 <code>FigureView</code>를 추가합니다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.yologger.project.CircleView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>앱을 실행하면 다음과 같습니다. <code>Canvas</code>는 회색, 원은 파란색입니다.<br><img src="2.png"></p>
-<h1 id="커스텀-속성-추가하기"><a href="#커스텀-속성-추가하기" class="headerlink" title="커스텀 속성 추가하기"></a>커스텀 속성 추가하기</h1><p>원의 색상과 크기를 설정할 수 있도록 커스텀 속성을 추가하겠습니다. 우선 <code>res &gt; values</code>에 <code>attrs.xml</code> 파일을 생성합니다.</p>
-<figure class="highlight xml"><figcaption><span>attrs.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">declare-styleable</span> <span class="attr">name</span>=<span class="string">&quot;FigureView&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">&quot;radius&quot;</span> <span class="attr">format</span>=<span class="string">&quot;dimension&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">&quot;figureColor&quot;</span> <span class="attr">format</span>=<span class="string">&quot;color&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">declare-styleable</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>액티비티의 레이아웃 파일을 수정합니다.</p>
-<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.yologger.project.CircleView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:figureColor</span>=<span class="string">&quot;#FF0000&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:radius</span>=<span class="string">&quot;100dp&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.yologger.project.CircleView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:figureColor</span>=<span class="string">&quot;#FFC107&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:radius</span>=<span class="string">&quot;50dp&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><code>CircleView</code> 파일을 수정합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>FigureView.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.project</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.content.Context</span><br><span class="line"><span class="keyword">import</span> android.content.res.TypedArray</span><br><span class="line"><span class="keyword">import</span> android.graphics.Canvas</span><br><span class="line"><span class="keyword">import</span> android.graphics.Color</span><br><span class="line"><span class="keyword">import</span> android.graphics.Paint</span><br><span class="line"><span class="keyword">import</span> android.util.AttributeSet</span><br><span class="line"><span class="keyword">import</span> android.view.View</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CircleView</span>: <span class="type">View &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> color: <span class="built_in">Int</span> = Color.TRANSPARENT</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> radius: <span class="built_in">Float</span> = <span class="number">0F</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> centerX: <span class="built_in">Float</span> = <span class="number">0.0f</span></span><br><span class="line">        <span class="keyword">get</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> radius</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> centerY: <span class="built_in">Float</span> = <span class="number">0.0f</span></span><br><span class="line">        <span class="keyword">get</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> radius</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line">        <span class="keyword">val</span> typedArray: TypedArray = context.obtainStyledAttributes(attrs, R.styleable.FigureView)</span><br><span class="line">        color = typedArray.getColor(R.styleable.FigureView_figureColor, Color.TRANSPARENT)</span><br><span class="line">        radius = typedArray.getDimension(R.styleable.FigureView_radius, <span class="number">0.0f</span>)</span><br><span class="line">        typedArray.recycle()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line">        setMeasuredDimension((centerX*<span class="number">2</span>).toInt(), (centerY*<span class="number">2</span>).toInt());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">        paint.color = color</span><br><span class="line">        canvas?.drawColor(Color.GRAY)</span><br><span class="line">        canvas?.drawCircle(centerX, centerX, radius, paint)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 앱을 실행합니다.<br><img src="3.png"></p>
-<p><a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/ui/custom-components">안드로이드 공식문서</a>에 가시면 <code>커스텀 뷰</code>에 대한 더 자세한 내용을 확인하실 수 있습니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/05/13/08_android/02_ui/190513_custom_view/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/05/12/08_android/02_ui/190512_compound_view/"
-                            aria-label=": [Android] 커스텀 위젯 만들기 - (1) Compound View"
-                        >
-                            [Android] 커스텀 위젯 만들기 - (1) Compound View
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-05-12T01:00:00+09:00">
-	
-		    2019/05/12
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/UI/">UI</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="커스텀-위젯"><a href="#커스텀-위젯" class="headerlink" title="커스텀 위젯"></a>커스텀 위젯</h1><p>안드로이드에서는 UI 구성을 위한 <code>뷰(View)</code>를 제공합니다. <code>TextView</code>, <code>EditText</code>, <code>Button</code>과 같은 위젯과 <code>LinearLayout</code>, <code>ConstraintLayout</code>같은 <code>뷰 그룹(ViewGroup)</code>이 대표적입니다.</p>
-<p>안드로이드에서는 기본으로 제공하는 위젯 외에도 직접 커스텀 위젯을 만들 수 있습니다. 커스텀 위젯을 만드는 방법에는 크게 두 가지가 있습니다.</p>
-<ul>
-<li><code>Compound View</code></li>
-<li><code>Custom View</code></li>
-</ul>
-<p>이번 포스트에서는 <code>Compound View</code>에 대해 알아보겠습니다.</p>
-<h1 id="Compound-View"><a href="#Compound-View" class="headerlink" title="Compound View"></a>Compound View</h1><p><code>Compound View</code>는 <code>ViewGroup</code>과 기존 <code>View</code>를 조합하여 새로운 뷰를 구성합니다. 예제에서는 다음과 같은 <code>PostView</code>를 구현하겠습니다.<br><img src="1.png"></p>
-<p><code>Compound View</code>를 만들기 위해서는 별도의 레이아웃 XML 파일을 구성해야합니다.</p>
-<figure class="highlight xml"><figcaption><span>view_post.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">RelativeLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:padding</span>=<span class="string">&quot;16dp&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">ImageView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">&quot;@+id/view_post_iv_avatar&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">&quot;75dp&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">&quot;75dp&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_alignParentLeft</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_centerVertical</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">&quot;@+id/view_post_tv_writer&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_toRightOf</span>=<span class="string">&quot;@+id/view_post_iv_avatar&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;16dp&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_centerVertical</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/view_post_tv_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>이제 <code>view_post.xml</code>의 루트 뷰인 <code>LinearLayout</code>을 상속하는 <code>PostView</code> 클래스를 정의합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>PostView.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PostView</span>: <span class="type">LinearLayout &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mImageViewAvatar: ImageView</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mTextViewWriter: TextView</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mTextViewContent: TextView</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line">        inflateView()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line">        inflateView()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">inflateView</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> view = inflate(context, R.layout.view_post, <span class="keyword">this</span>)</span><br><span class="line">        mImageViewAvatar = view.findViewById(R.id.view_post_iv_avatar)</span><br><span class="line">        mTextViewWriter = view.findViewById(R.id.view_post_tv_writer)</span><br><span class="line">        mTextViewContent = view.findViewById(R.id.view_post_tv_content)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Compound View</code>를 구성할 때는 기본적으로 두 개의 생성자를 반드시 정의해야합니다. 첫 번째 생성자는 코드에서 동적으로 <code>View</code>를 생성할 때 호출됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line">    inflateView()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>두 번째 생성자는 <code>Layout Editor</code>에서 <code>View</code>를 생성할 때 호출됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line">    inflateView()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>View</code>클래스에는 <code>inflate()</code> 함수가 정의되어있습니다. 이 함수는 XML 리소스에서 뷰를 <code>인플레이트</code>합니다. <code>inflateView()</code>함수에서 <code>inflate()</code>를 호출하여 뷰를 <code>인플레이트</code>합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">inflateView</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> view = inflate(context, R.layout.view_post, <span class="keyword">this</span>)</span><br><span class="line">    mImageViewAvatar = view.findViewById(R.id.view_post_iv_avatar)</span><br><span class="line">    mTextViewWriter = view.findViewById(R.id.view_post_tv_writer)</span><br><span class="line">    mTextViewContent = view.findViewById(R.id.view_post_tv_content)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 <code>activity_main.xml</code>에서 <code>PostView</code>를 다음과 같이 사용할 수 있습니다.</p>
-<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.yologger.project.PostView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="커스텀-속성-추가하기"><a href="#커스텀-속성-추가하기" class="headerlink" title="커스텀 속성 추가하기"></a>커스텀 속성 추가하기</h1><p><code>ImageView</code>는 <code>src</code>속성으로 보여줄 이미지를 설정할 수 있습니다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ImageView</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;75dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;75dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:src</span>=<span class="string">&quot;@drawable/your_image&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><code>TextView</code>도  <code>text</code> 속성으로 보여줄 문자열을 설정할 수 있습니다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:text</span>=<span class="string">&quot;Your Text&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>이처럼 <code>Compound Widget</code>에도 사용자 정의 속성을 추가할 수 있습니다. </p>
-<p>이제 아바타 이미지를 설정하는 <code>avatarSrc</code>, 글쓴이를 설정하는 <code>writerText</code>, 본문을 설정하는 <code>contentWriter</code> 속성을 추가하겠습니다. 커스텀 속성을 추가하려면 <code>res &gt; values</code> 아래에 <code>attrs.xml</code>을 생성하고 다음과 같이 작성합니다.</p>
-<figure class="highlight xml"><figcaption><span>attrs.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">declare-styleable</span> <span class="attr">name</span>=<span class="string">&quot;PostView&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">&quot;avatarSrc&quot;</span> <span class="attr">format</span>=<span class="string">&quot;reference&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">&quot;writerText&quot;</span> <span class="attr">format</span>=<span class="string">&quot;string&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">&quot;contentText&quot;</span> <span class="attr">format</span>=<span class="string">&quot;string&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">declare-styleable</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>이제 <code>activity_main.xml</code>에서 위 속성들을 사용할 수 있습니다.</p>
-<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.yologger.project.PostView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:avatarSrc</span>=<span class="string">&quot;@drawable/paul_image&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:writerText</span>=<span class="string">&quot;Paul&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:contentText</span>=<span class="string">&quot;Hello. My name is Paul. Nice to meet you.&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>다음은 <code>PostView</code> 클래스를 다음과 같이 수정합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>PostView.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PostView</span>: <span class="type">LinearLayout &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mImageViewAvatar: ImageView</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mTextViewWriter: TextView</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mTextViewContent: TextView</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line">        inflateView()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line">        inflateView()</span><br><span class="line">        applyAttrs()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">inflateView</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> view = inflate(context, R.layout.view_post, <span class="keyword">this</span>)</span><br><span class="line">        mImageViewAvatar = view.findViewById(R.id.view_post_iv_avatar)</span><br><span class="line">        mTextViewWriter = view.findViewById(R.id.view_post_tv_writer)</span><br><span class="line">        mTextViewContent = view.findViewById(R.id.view_post_tv_content)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">applyAttrs</span><span class="params">(attrs: <span class="type">AttributeSet</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> typedArray: TypedArray = context.obtainStyledAttributes(attrs, R.styleable.PostView)</span><br><span class="line">        <span class="keyword">val</span> avatarSrc = typedArray.getResourceId(R.styleable.PostView_avatarSrc, <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">val</span> writerText = typedArray.getText(R.styleable.PostView_writerText)</span><br><span class="line">        <span class="keyword">val</span> contentText = typedArray.getText(R.styleable.PostView_contentText)</span><br><span class="line">        typedArray.recycle()</span><br><span class="line"></span><br><span class="line">        mImageViewAvatar.setImageResource(avatarSrc)</span><br><span class="line">        mTextViewWriter.text = writerText</span><br><span class="line">        mTextViewContent.text = contentText</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Context</code>의 <code>obtainStyledAttributes()</code>를 호출하면 <code>TypeArray</code> 타입의 객체를 반환합니다. 이 객체에는 레이아웃 XML 파일에서 추가한 속성값들이 저장되어있으며 <code>getResourceId()</code>, <code>getText()</code> 등의 메소드로 속성값을 추출할 수 있습니다. <code>TypedArray</code>객체를 사용한 후에는 <code>recycle()</code>을 호출하여 자원을 해제합니다.</p>
-<p>마지막으로 코드로 <code>Compound View</code>를 생성할 때 속성값을 설정하는 코드를 추가합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>PostView.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PostView</span>: <span class="type">LinearLayout &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mImageViewAvatar: ImageView</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mTextViewWriter: TextView</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mTextViewContent: TextView</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">setAvatarImage</span><span class="params">(<span class="meta">@DrawableRes</span> resId: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        mImageViewAvatar.setImageResource(resId)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">setWriter</span><span class="params">(text: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">        mTextViewWriter.text = text</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">setContext</span><span class="params">(text: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">        mTextViewContent.text = text</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/05/12/08_android/02_ui/190512_compound_view/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/05/11/08_android/02_ui/190511_canvas_paint/"
-                            aria-label=": [Android] 화면에 그림 그리기 - Canvas, Paint"
-                        >
-                            [Android] 화면에 그림 그리기 - Canvas, Paint
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-05-11T01:00:00+09:00">
-	
-		    2019/05/11
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/UI/">UI</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p><code>Canvas</code>와 <code>Paint</code>를 사용하면 화면에 원하는 그림을 그릴 수 있습니다. </p>
-<h1 id="Canvas"><a href="#Canvas" class="headerlink" title="Canvas"></a>Canvas</h1><p><code>Canvas</code>는 도화지입니다. <code>Canvas</code>는 <code>Bitmap</code>을 통해 생성됩니다. <code>Bitmap</code>은 <code>createBitmap()</code>을 통해 생성하며 매개변수는 다음과 같습니다.</p>
-<ul>
-<li><code>witdh</code>: 가로 길이</li>
-<li><code>height</code>: 세로 길이</li>
-<li><code>config</code>: 보통 <code>Bitmap.Config.ARGB_8888</code> 값을 넣습니다. 한 픽셀은 4바이트로 저장되며, 각 바이트는 <code>Alpha</code>, <code>Red</code>, <code>Green</code>, <code>Blue</code>를 의미합니다. 1바이트는 256개의 값을 표현할 수 있습니다.</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.graphics.Bitmap</span><br><span class="line"></span><br><span class="line"><span class="comment">// 가로 800, 세로 800의 비트맵 생성</span></span><br><span class="line"><span class="keyword">val</span> bitmap = Bitmap.createBitmap(<span class="number">800</span>, <span class="number">800</span>, Bitmap.Config.ARGB_8888)</span><br></pre></td></tr></table></figure>
-<p><code>Bitmap</code>을 사용하여 <code>Canvas</code>를 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.graphics.Canvas</span><br><span class="line"></span><br><span class="line"><span class="comment">// Canvas 생성</span></span><br><span class="line"><span class="keyword">val</span> canvas = Canvas(bitmap)</span><br></pre></td></tr></table></figure>
-<p><code>Canvas</code>의 배경화면은 기본적으로 투명색입니다. <code>Canvas</code>의 색상을 회색으로 변경하겠습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Canvas의 Background 설정</span></span><br><span class="line">canvas.drawColor(Color.GRAY)</span><br></pre></td></tr></table></figure>
-<p>이제 <code>Canvas</code>를 <code>ImageView</code>에 표시하겠습니다.</p>
-<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:gravity</span>=<span class="string">&quot;center&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">ImageView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_iv&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> imageView: ImageView <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_iv) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> bitmap = Bitmap.createBitmap(<span class="number">800</span>, <span class="number">800</span>, Bitmap.Config.ARGB_8888)</span><br><span class="line">        <span class="keyword">val</span> canvas = Canvas(bitmap)</span><br><span class="line">        canvas.drawColor(Color.GRAY)</span><br><span class="line"></span><br><span class="line">        imageView.setImageBitmap(bitmap)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>앱을 실행해봅시다.<br><img src="1.png"></p>
-<h1 id="Paint"><a href="#Paint" class="headerlink" title="Paint"></a>Paint</h1><p><code>Canvas</code>가 도화지라면 <code>Paint</code>는 물감입니다. <code>Paint</code>를 사용하면 <code>Canvas</code>위에 그림을 그릴 수 있습니다. <code>Paint</code>는 다음과 같이 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> paint = Paint().apply &#123;</span><br><span class="line">    <span class="comment">// 페인트 색상</span></span><br><span class="line">    color = Color.BLUE</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 페인트 굵기</span></span><br><span class="line">    strokeWidth = <span class="number">30F</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="1-점-그리기"><a href="#1-점-그리기" class="headerlink" title="(1) 점 그리기"></a>(1) 점 그리기</h3><p><code>Canvas</code>에는 <code>Paint</code>로 그림을 그리기 위한 여러가지 메소드가 포함되있습니다. <code>drawPoint()</code>를 사용하여 <code>Canvas</code>에 점을 찍어보겠습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// x축 200, y축 200에 점을 그린다.</span></span><br><span class="line">canvas.drawPoint(<span class="number">200</span>, <span class="number">200</span>, paint)</span><br></pre></td></tr></table></figure>
-<p>앱을 실행합시다.<br><img src="2.png"><br>완성된 코드는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> imageView: ImageView <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_iv) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> bitmap = Bitmap.createBitmap(<span class="number">800</span>, <span class="number">800</span>, Bitmap.Config.ARGB_8888)</span><br><span class="line">        <span class="keyword">val</span> canvas = Canvas(bitmap)</span><br><span class="line">        canvas.drawColor(Color.GRAY)</span><br><span class="line"></span><br><span class="line">        imageView.setImageBitmap(bitmap)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> paint = Paint().apply &#123;</span><br><span class="line">            color = Color.BLUE</span><br><span class="line">            strokeWidth = <span class="number">30F</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        canvas.drawPoint(<span class="number">200F</span>, <span class="number">200F</span>, paint)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-직사각형-그리기"><a href="#2-직사각형-그리기" class="headerlink" title="(2) 직사각형 그리기"></a>(2) 직사각형 그리기</h3><p><code>Canvas</code>의 <code>drawRect()</code> 메소드를 사용하면 직사각형을 그릴 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> paint = Paint().apply &#123;</span><br><span class="line">    color = Color.BLUE</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">canvas.drawRect(<span class="number">100F</span>, <span class="number">100F</span>, <span class="number">300F</span>, <span class="number">300F</span>, paint)</span><br></pre></td></tr></table></figure>
-<p><img src="3.png"></p>
-<h3 id="3-원-그리기"><a href="#3-원-그리기" class="headerlink" title="(3) 원 그리기"></a>(3) 원 그리기</h3><p><code>Canvas</code>의 <code>drawArc()</code>를 사용하면 원을 그릴 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> paint = Paint().apply &#123;</span><br><span class="line">    color = Color.BLUE</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">canvas.drawCircle(<span class="number">100F</span>, <span class="number">100F</span>, <span class="number">50F</span>, paint)</span><br></pre></td></tr></table></figure>
-<p><img src="4.png"></p>
-<h3 id="4-텍스트-그리기"><a href="#4-텍스트-그리기" class="headerlink" title="(4) 텍스트 그리기"></a>(4) 텍스트 그리기</h3><p><code>Canvas</code>의 <code>drawText()</code>를 사용하면 텍스트를 그릴 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> paint = Paint().apply &#123;</span><br><span class="line">    color = Color.BLUE</span><br><span class="line">    textSize = <span class="number">50F</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">canvas.drawText(<span class="string">&quot;Hello World&quot;</span>, <span class="number">100F</span>, <span class="number">100F</span>, paint)</span><br></pre></td></tr></table></figure>
-<p><img src="5.png"></p>
-<h3 id="5-선-그리기"><a href="#5-선-그리기" class="headerlink" title="(5) 선 그리기"></a>(5) 선 그리기</h3><p><code>Canvas</code>의 <code>drawLine()</code>을 사용하면 선을 그릴 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> paint = Paint().apply &#123;</span><br><span class="line">    color = Color.BLUE</span><br><span class="line">    strokeWidth = <span class="number">5F</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">canvas.drawLine(<span class="number">100F</span>, <span class="number">100F</span>, <span class="number">700F</span>, <span class="number">700F</span>, paint)</span><br></pre></td></tr></table></figure>
-<p><img src="6.png"></p>
-<h3 id="6-경로"><a href="#6-경로" class="headerlink" title="(6) 경로"></a>(6) 경로</h3><p><code>Path</code>클래스와 <code>Canvas</code>의 <code>drawPath()</code>를 사용하면 그림을 그릴 경로를 지정할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> paint = Paint().apply &#123;</span><br><span class="line">    color = Color.BLUE</span><br><span class="line">    strokeWidth = <span class="number">5F</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> path = Path().apply &#123;</span><br><span class="line">    <span class="comment">// 시작점 설정</span></span><br><span class="line">    moveTo(<span class="number">100F</span>, <span class="number">100F</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 경로 이동</span></span><br><span class="line">    lineTo(<span class="number">100F</span>, <span class="number">500F</span>)</span><br><span class="line">    lineTo(<span class="number">500F</span>, <span class="number">300F</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">canvas.drawPath(path, paint)</span><br></pre></td></tr></table></figure>
-<p><img src="7.png"></p>
-<h1 id="마치며"><a href="#마치며" class="headerlink" title="마치며"></a>마치며</h1><p><code>Canvas</code>에는 그림을 그리기 위한 다양한 메소드가 있습니다. <a target="_blank" rel="noopener" href="https://developer.android.com/reference/android/graphics/Canvas#drawArc(float,%20float,%20float,%20float,%20float,%20float,%20boolean,%20android.graphics.Paint)">공식 문서</a>에서 이 메소드들을 확인할 수 있습니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/05/11/08_android/02_ui/190511_canvas_paint/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/05/10/08_android/02_ui/190510_add_view_dynamically/"
-                            aria-label=": [Android] 코드에서 동적으로 View 추가하기"
-                        >
-                            [Android] 코드에서 동적으로 View 추가하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-05-10T01:00:00+09:00">
-	
-		    2019/05/10
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/UI/">UI</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p>안드로이드에서는 보통 다음과 같은 방법으로 화면을 구성합니다.</p>
-<ol>
-<li><code>XML 레이아웃 파일</code>에 <code>View</code>를 추가한다.</li>
-<li>액티비티에서 <code>setContentView()</code>를 호출하여 인플레이트한다.</li>
-</ol>
-<p>예제는 루트 뷰를 <code>LinearLayout</code>으로 구성하고 두 개의 버튼을 추가했습니다.</p>
-<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/button1&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button 1&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/button2&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button 2&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="1.png"></p>
-<p>그러나 <code>XML 레이아웃 파일</code>을 사용하지 않고도 화면을 구성할 수 있습니다. 우선 루트 뷰 역할을 하는 <code>LinearLayout</code>은 다음과 같이 추가할 수 있습니다.</p>
-<figure class="highlight xml"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">class MainActivity : AppCompatActivity() &#123;</span><br><span class="line">    override fun onCreate(savedInstanceState: Bundle?) &#123;</span><br><span class="line">        super.onCreate(savedInstanceState)</span><br><span class="line">        // setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        val linearLayout = LinearLayout(this)</span><br><span class="line">        linearLayout.orientation = LinearLayout.VERTICAL</span><br><span class="line">        setContentView(linearLayout)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>두 개의 버튼을 생성합니다. 그리고 <code>addView()</code>를 사용하여 버튼을 추가합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        <span class="comment">// setContentView(R.layout.activity_main)</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> linearLayout = LinearLayout(<span class="keyword">this</span>)</span><br><span class="line">        linearLayout.orientation = LinearLayout.VERTICAL</span><br><span class="line">        setContentView(linearLayout)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> button1 = Button(<span class="keyword">this</span>)</span><br><span class="line">        button1.text = <span class="string">&quot;Button 1&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> button2 = Button(<span class="keyword">this</span>)</span><br><span class="line">        button2.text = <span class="string">&quot;Button 2&quot;</span></span><br><span class="line"></span><br><span class="line">        linearLayout.addView(button1)</span><br><span class="line">        linearLayout.addView(button2)        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>결과는 다음과 같습니다.<br><img src="2.png"></p>
-<h1 id="LayoutParams"><a href="#LayoutParams" class="headerlink" title="LayoutParams"></a>LayoutParams</h1><p>안드로이드 공식 문서에서는 <code>LayoutParams</code>를 다음과 같이 정의하고 있습니다.</p>
-<div class="alert success icon"><p><b>LayoutParams</b> are used by views to tell their parents how they want to be laid out.</p>
-</div>
-<p>즉 부모 뷰가 자식 뷰를 배치할 때 필요로 하는 정보를 <code>LayoutParams</code>로 전달하게 됩니다. 예를 들어 버튼의 글자나 패딩은 부모 뷰가 필요로 하는 정보가 아니기 때문에 <code>LayoutParams</code>를 필요로 하지 않습니다. 그저 버튼 객체의 속성이나 메소드를 사용하면 됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> button = Button(<span class="keyword">this</span>)</span><br><span class="line">button.text = <span class="string">&quot;Button 1&quot;</span></span><br><span class="line">button.setPadding(<span class="number">10</span>, <span class="number">30</span>, <span class="number">30</span>, <span class="number">10</span>)</span><br></pre></td></tr></table></figure>
-
-<p>반면 <code>layout_width</code>, <code>layout_height</code>, <code>margin</code> 같은 속성은 부모 뷰에 따라 상대적으로 설정되므로 <code>LayoutParams</code>를 통해 설정하게 됩니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> linearLayout = LinearLayout(<span class="keyword">this</span>)</span><br><span class="line">        setContentView(linearLayout)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> button = Button(<span class="keyword">this</span>)</span><br><span class="line">        button.text = <span class="string">&quot;Button&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> params = LinearLayout.LayoutParams(</span><br><span class="line">            LinearLayout.LayoutParams.MATCH_PARENT,</span><br><span class="line">            LinearLayout.LayoutParams.WRAP_CONTENT</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        params.setMargins(<span class="number">100</span>, <span class="number">50</span>, <span class="number">100</span>, <span class="number">50</span>)</span><br><span class="line"></span><br><span class="line">        linearLayout.addView(button, params)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>화면은 다음과 같습니다.<br><img src="3.png"></p>
-<h1 id="ConstraintLayout"><a href="#ConstraintLayout" class="headerlink" title="ConstraintLayout"></a>ConstraintLayout</h1><p>우선 <code>XML 레이아웃 파일</code>로 구성한 화면은 다음과 같습니다.</p>
-<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/button1&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toTopOf</span>=<span class="string">&quot;@+id/button2&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button 1&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/button2&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">&quot;@+id/button1&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button 2&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>화면은 다음과 같습니다.<br><img src="4.png"></p>
-<p>이를 코드로 구현하면 다음과 같습니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        <span class="comment">// setContentView(R.layout.activity_main)</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> constraintLayout = ConstraintLayout(<span class="keyword">this</span>)</span><br><span class="line">        setContentView(constraintLayout)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> button1 = Button(<span class="keyword">this</span>)</span><br><span class="line">        button1.id = generateViewId()</span><br><span class="line">        button1.text = <span class="string">&quot;Button 1&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> button2 = Button(<span class="keyword">this</span>)</span><br><span class="line">        button2.id = generateViewId()</span><br><span class="line">        button2.text = <span class="string">&quot;Button 2&quot;</span></span><br><span class="line"></span><br><span class="line">        constraintLayout.addView(button1)</span><br><span class="line">        constraintLayout.addView(button2)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> constraintSet1 = ConstraintSet()</span><br><span class="line">        constraintSet1.clone(constraintLayout)</span><br><span class="line">        constraintSet1.connect(button1.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP, <span class="number">0</span>)</span><br><span class="line">        constraintSet1.connect(button1.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, <span class="number">0</span>)</span><br><span class="line">        constraintSet1.connect(button1.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, <span class="number">0</span>)</span><br><span class="line">        constraintSet1.connect(button1.id, ConstraintSet.BOTTOM, button2.id, ConstraintSet.TOP, <span class="number">0</span>)</span><br><span class="line">        constraintSet1.applyTo(constraintLayout)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> constraintSet2 = ConstraintSet()</span><br><span class="line">        constraintSet2.clone(constraintLayout)</span><br><span class="line">        constraintSet2.connect(button2.id, ConstraintSet.TOP, button1.id, ConstraintSet.BOTTOM, <span class="number">0</span>)</span><br><span class="line">        constraintSet2.connect(button2.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, <span class="number">0</span>)</span><br><span class="line">        constraintSet2.connect(button2.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, <span class="number">0</span>)</span><br><span class="line">        constraintSet2.connect(button2.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM, <span class="number">0</span>)</span><br><span class="line">        constraintSet2.applyTo(constraintLayout)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>결과는 다음과 같습니다.<br><img src="5.png"></p>
-<p><code>ConstraintLayout</code>에 제약조건을 추가하려면 <code>ConstraintSet</code>클래스를 사용합니다. 이 클래스의 <code>connect()</code>를 사용하여 다른 뷰와의 제약조건을 생성할 수 있습니다. 또한 제약조건 설정이 완료되면 <code>applyTo()</code>를 호출하여 적용을 해야합니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/05/10/08_android/02_ui/190510_add_view_dynamically/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

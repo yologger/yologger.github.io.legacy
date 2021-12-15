@@ -354,6 +354,572 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/"
+                            aria-label=": [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType"
+                        >
+                            [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-05T01:00:00+09:00">
+	
+		    2019/01/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="왜-빌드-변형이-필요할까"><a href="#왜-빌드-변형이-필요할까" class="headerlink" title="왜 빌드 변형이 필요할까?"></a>왜 빌드 변형이 필요할까?</h1><p>안드로이드에서는 하나의 프로젝트를 여러 버전의 앱으로 빌드할 수 있습니다. 그렇다면 왜 여러 버전의 앱으로 빌드를 해야할까요? </p>
+<h4 id="1-스마트폰-앱-vs-태블릿-앱"><a href="#1-스마트폰-앱-vs-태블릿-앱" class="headerlink" title="(1) 스마트폰 앱 vs. 태블릿 앱"></a>(1) 스마트폰 앱 vs. 태블릿 앱</h4><p>스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 기능은 동일하고 레이아웃만 약간 다릅니다. 이러한 경우 두 개의 프로젝트를 생성하여 각각 관리한다면 매우 비효율적일 것입니다.</p>
+<h4 id="2-무료-앱-vs-유료-앱"><a href="#2-무료-앱-vs-유료-앱" class="headerlink" title="(2) 무료 앱 vs. 유료 앱"></a>(2) 무료 앱 vs. 유료 앱</h4><p>이번엔 무료 앱과 유료 앱을 출시한다고 가정합시다. 두 앱은 레이아웃은 동일하며, 기능만 약간 다릅니다. 이러한 경우에도 두 개의 프로젝트를 생성하는 것은 비효율적입니다.</p>
+<h4 id="3-개발용-앱-vs-출시용-앱"><a href="#3-개발용-앱-vs-출시용-앱" class="headerlink" title="(3) 개발용 앱 vs 출시용 앱"></a>(3) 개발용 앱 vs 출시용 앱</h4><p>마지막으로 개발용 앱과 출시용 앱이 있다고 가정합시다. <code>프로가드(ProGuard)</code>는 앱 용량을 축소하고 코드를 난독화합니다. 다만 프로가드를 적용하면 빌드 시간이 길어지는데 굳이 디버그용 앱에 적용할 필요가 있을까요? 이러한 경우 출시용 앱에만 적용되도록 할 수 있습니다.</p>
+<h1 id="빌드-변형"><a href="#빌드-변형" class="headerlink" title="빌드 변형"></a>빌드 변형</h1><p>하나의 프로젝트가 여러 버전으로 빌드되면 각각의 앱을 <code>빌드 변형(Build Variant)</code>이라고 합니다. 빌드 변형을 만드는 방법에는 두 가지가 있습니다.</p>
+<ul>
+<li><code>빌드 타입(Build Type)</code></li>
+<li><code>프로덕트 플래이버(Product Flavor)</code></li>
+</ul>
+<hr>
+<h1 id="빌드-타입"><a href="#빌드-타입" class="headerlink" title="빌드 타입"></a>빌드 타입</h1><p>안드로이드 스튜디오 프로젝트를 생성하면 <code>debug</code>, <code>release</code>라는 두 개의 <code>빌드 타입(BuildType)</code>이 자동으로 생성됩니다.</p>
+<p><code>안드로이드 스튜디오 &gt; 왼쪽 하단의 Build Variant</code> 탭에서 빌드 타입을 확인할 수 있습니다.<br><img src="1.png"></p>
+<p>각 빌드 타입에 대한 설정은 <code>모듈 수준의 build.gradle</code>의 <code>buildTypes 섹션</code>에서 할 수 있습니다. 프로젝트를 처음 생성하면 아마 아래와 같은 모습일 것입니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>release 섹션</code>만 있고 <code>debug 색션</code>은 없습니다. 따라서 <code>debug</code>모드로 빌드하면 기본값이 적용됩니다. 물론 다음과 같이 <code>debug</code>모드의 설정을 직접 할 수도 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>직접 빌드 타입을 추가할 수도 있습니다. <code>alpha</code>, <code>beta</code>를 추가하고 그래들의 <code>Sync Now</code>버튼을 클릭합시다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        alpha &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        beta &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>alpha</code>와 <code>beta</code>가 추가된 것을 확인할 수 있습니다.<br><img src="2.png"></p>
+<p>이처럼 빌드 타입을 사용하면 빌드 타입에 따라 다른 빌드 방식을 설정할 수 있습니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/04/08_android/00_gradle/190804_properties/"
+                            aria-label=": [Android] Gradle - (4) 코드에서 환경변수 분리하기 - properties 파일"
+                        >
+                            [Android] Gradle - (4) 코드에서 환경변수 분리하기 - properties 파일
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-04T01:00:00+09:00">
+	
+		    2019/01/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="왜-환경변수를-코드에서-분리해야할까"><a href="#왜-환경변수를-코드에서-분리해야할까" class="headerlink" title="왜 환경변수를 코드에서 분리해야할까?"></a>왜 환경변수를 코드에서 분리해야할까?</h1><p>많은 어플리케이션이 Google, Facebook과 같은 SNS 계정을 통한 로그인을 지원합니다. 개발자는 SNS 로그인 API를 사용하기 위해 <code>키(Key)</code>를 발급받는데, 이를 소스코드에 포함시키면 여러 보안 이슈가 발생할 수 있습니다. </p>
+<p><code>properties 파일</code>을 사용하면 민감한 데이터를 코드에서 분리하여 이 파일에 저장할 수 있습니다.</p>
+<h1 id="properties-파일-만들기"><a href="#properties-파일-만들기" class="headerlink" title=".properties 파일 만들기"></a>.properties 파일 만들기</h1><p>프로젝트의 루트 디렉토리에 <code>config.properties</code>파일을 생성합니다.<br><img src="1.png"></p>
+<figure class="highlight groovy"><figcaption><span>config.properties</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CLIENT_ID=<span class="string">&quot;your_client_id&quot;</span></span><br><span class="line">CLIENT_SECRET=<span class="string">&quot;your_client_secret&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="모듈-수준의-build-gradle-설정하기"><a href="#모듈-수준의-build-gradle-설정하기" class="headerlink" title="모듈 수준의 build.gradle 설정하기"></a>모듈 수준의 build.gradle 설정하기</h1><p><code>build.gradle</code>에서 다음과 같이 <code>config.properties</code>파일을 읽어올 수 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> configPropertiesFile = rootProject.file(<span class="string">&quot;config.properties&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> configProperties = <span class="keyword">new</span> Properties()</span><br><span class="line">configProperties.load(<span class="keyword">new</span> FileInputStream(configPropertiesFile))</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>configProperties[&#39;your_key&#39;]</code>형태로 값을 읽어올 수 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> configPropertiesFile = rootProject.file(<span class="string">&quot;config.properties&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> configProperties = <span class="keyword">new</span> Properties()</span><br><span class="line">configProperties.load(<span class="keyword">new</span> FileInputStream(configPropertiesFile))</span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.example.simple_memo&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">        testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// for xml file</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_ID&#x27;</span>]</span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_SECRET&#x27;</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment">// for source file</span></span><br><span class="line">        buildConfigField(<span class="string">&quot;String&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_ID&#x27;</span>])</span><br><span class="line">        buildConfigField(<span class="string">&quot;String&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_SECRET&#x27;</span>])</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="소스코드에서-값을-사용하기"><a href="#소스코드에서-값을-사용하기" class="headerlink" title="소스코드에서 값을 사용하기"></a>소스코드에서 값을 사용하기</h1><p>이제 <code>소스 코드</code>에서 사용할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> clientId = BuildConfig.CLIENT_ID            <span class="comment">// your_client_id</span></span><br><span class="line">        <span class="keyword">val</span> clientSecret = BuildConfig.CLIENT_SECRET    <span class="comment">// your_client_secret</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="xml-파일에서-값을-사용하기"><a href="#xml-파일에서-값을-사용하기" class="headerlink" title="xml 파일에서 값을 사용하기"></a>xml 파일에서 값을 사용하기</h1><p><code>xml 파일</code>에서도 접근할 수 있습니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_ID&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_SECRET&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="gitignore파일에-추가하기"><a href="#gitignore파일에-추가하기" class="headerlink" title=".gitignore파일에 추가하기"></a>.gitignore파일에 추가하기</h1><p>보통 <code>.properties</code>파일처럼 민감한 데이터가 포함된 파일은 원격 저장소에 업로드하지 않습니다. <code>.gitignore</code>에 <code>config.properties</code>파일을 추가합시다.</p>
+<figure class="highlight groovy"><figcaption><span>.gitignore</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config.properties</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/04/08_android/00_gradle/190804_properties/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/04/06_spring/01_servlet_jsp/20190104_server_webserver_was/"
+                            aria-label=": [Servlet, JSP] Server, Web Server, WAS 차이점"
+                        >
+                            [Servlet, JSP] Server, Web Server, WAS 차이점
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-04T00:00:00+09:00">
+	
+		    2019/01/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h1><p><code>Server</code>는 Client에 정보나 서비스를 제공하는 컴퓨터 시스템이다. 서버에는 보통 Linux, Unix, Windows 운영체제가 탑재된다.<br><img src="1.png"></p>
+<h1 id="Web-Server"><a href="#Web-Server" class="headerlink" title="Web Server"></a>Web Server</h1><ul>
+<li><code>Web Server</code>는 웹 브라우저 같은 클라이언트로부터 HTTP 요청을 받아들이고 HTML 문서와 같은 웹 페이지를 반환하는 프로그램이다. </li>
+<li>Web Server의 대표적인 제품군에는 Apache, Nginx, IIS가 있다. </li>
+<li><code>Web Server</code>는 파일 시스템에 저장된 파일(HTML, CSS, JavaScript, 이미지, 파일 등)을 단순히 클라이언트에게 전달한다. 이를 <u>정적 컨텐츠</u>를 제공한다고 한다.</li>
+</ul>
+<p><img src="2.png"></p>
+<h1 id="WAS-Web-Application-Server"><a href="#WAS-Web-Application-Server" class="headerlink" title="WAS(Web Application Server)"></a>WAS(Web Application Server)</h1><p><code>WAS</code>는 데이터베이스, 파일 시스템, 네트워크 등에서 데이터를 읽어와 다양한 로직을 수행한 후 적절한 HTML 파일을 생성하여 클라이언트에게 전달한다. 이를 <u>동적 컨텐츠</u>를 제공한다고 한다.<br><img src="3.png"></p>
+<p>WAS의 대표적인 제품군에는 Apache Tomcat, Oracle WebLogic, IBM Websphere, Tmax JEUS, Red Hat Jboss가 있다. 제품군에 따라 다르지만 WAS는 크게 세 가지 요소로 구성된다.</p>
+<ul>
+<li><code>Web Container</code><ol>
+<li>JSP파일을 Servlet으로 변환한다.</li>
+<li>Servlet의 생성, 소멸 등의 생명주기를 관리한다.</li>
+<li>HttpServletRequest, HttpServletResponse의 생성, 소멸 등의 생명주기를 관리한다.</li>
+<li>Web Container는 <code>Servlet Container</code>라고도 불린다.</li>
+</ol>
+</li>
+<li><code>Web Server</code>: Web Container가 동적으로 생성한 웹 페이지를 Client에게 제공한다.</li>
+<li><code>EJB Container</code>: <ol>
+<li>EJB(Enterprise Java Bean)의 생명주기를 관리한다.</li>
+<li>EJB는 한국에서는 Spring Framework에 밀려서 잘 사용되지 않는다.</li>
+</ol>
+</li>
+</ul>
+<p>Oracle WebLogic, Red Hat Jboss 같은 제품군은 세 가지 요소를 모두 포함한다. 그러나 Apache Tomcat은 Web Server와 Web Container만을 포함한다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/04/06_spring/01_servlet_jsp/20190104_server_webserver_was/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/03/08_android/00_gradle/190803_buildConfig/"
+                            aria-label=": [Android] Gradle - (3) 코드에서 환경변수 분리하기 - BuildConfig"
+                        >
+                            [Android] Gradle - (3) 코드에서 환경변수 분리하기 - BuildConfig
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-03T01:00:00+09:00">
+	
+		    2019/01/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="BuildConfig"><a href="#BuildConfig" class="headerlink" title="BuildConfig"></a>BuildConfig</h1><p>안드로이드 시스템은 앱을 빌드할 때 여러가지 파일을 자동으로 생성합니다. 그 중 하나가 <code>BuildConfig</code>클래스입니다. 이 클래스에는 현재 빌드와 관련된 정보가 상수 형태로 정의되어 있으며, 코드에서도 직접 참조할 수 있습니다.</p>
+<h1 id="코드에서-BuildConfig에-접근하기"><a href="#코드에서-BuildConfig에-접근하기" class="headerlink" title="코드에서 BuildConfig에 접근하기"></a>코드에서 BuildConfig에 접근하기</h1><p>자동으로 생성된 <code>BuildConfig</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight java"><figcaption><span>BuildConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Automatically generated file. DO NOT MODIFY</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BuildConfig</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> DEBUG = Boolean.parseBoolean(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String APPLICATION_ID = <span class="string">&quot;com.yologger.example&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String BUILD_TYPE = <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VERSION_CODE = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String VERSION_NAME = <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>BuildConfig</code>클래스에 정의된 상수는 코드에서 다음과 같이 접근할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> applicationId = BuildConfig.APPLICATION_ID  <span class="comment">// &quot;com.yologger.example&quot;</span></span><br><span class="line">        <span class="keyword">val</span> versionCode = BuildConfig.VERSION_CODE      <span class="comment">// 1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>그렇다면 이 상수는 어디에 정의되어 있을까요? 바로 모듈 수준의 <code>build.gradle</code>입니다. 이 파일의 <code>defaultConfig 섹션</code>에 상수가 정의되어 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.example&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="상수를-직접-정의하고-사용하기"><a href="#상수를-직접-정의하고-사용하기" class="headerlink" title="상수를 직접 정의하고 사용하기"></a>상수를 직접 정의하고 사용하기</h1><p><code>buildConfigField</code>를 사용하면 상수를 직접 정의하고 코드에서 참조할 수도 있습니다. 모듈 수준의 <code>build.gradle</code>에 <code>buildConfigField (&quot;DATA_TYPE&quot;, &quot;KEY&quot;, &quot;VALUE&quot;)</code> 형태로 선언하면 됩니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.example&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">        </span><br><span class="line">        buildConfigField (<span class="string">&quot;String&quot;</span>, <span class="string">&quot;AUTH_API_KEY&quot;</span>, <span class="string">&#x27;&quot;your_auth_api_key&quot;&#x27;</span>)</span><br><span class="line">        buildConfigField (<span class="string">&quot;String&quot;</span>, <span class="string">&quot;AUTH_API_URL&quot;</span>, <span class="string">&#x27;&quot;your_auth_api_url&quot;&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<div class="alert warning icon"><p>추가 후 <code>Gradle Sync</code>를 해야만 BuildConfig 클래스가 생성됩니다.</p>
+</div>
+
+<div class="alert warning icon"><p>문자열의 경우 작은 따옴표로 감싸주어야 합니다.</p>
+</div>
+
+<p>새로 생성된 <code>BuildConfig</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight java"><figcaption><span>BuildConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.simple_memo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BuildConfig</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> DEBUG = Boolean.parseBoolean(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String APPLICATION_ID = <span class="string">&quot;com.yologger.example&quot;</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String BUILD_TYPE = <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VERSION_CODE = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String VERSION_NAME = <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">  <span class="comment">// Field from default config.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTH_API_KEY = <span class="string">&quot;your_auth_api_key&quot;</span>;</span><br><span class="line">  <span class="comment">// Field from default config.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTH_API_URL = <span class="string">&quot;your_auth_api_url&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>생성된 상수에 접근해봅시다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> apiKey = BuildConfig.AUTH_API_KEY       <span class="comment">// your_auth_api_key</span></span><br><span class="line">        <span class="keyword">val</span> apiUrl = BuildConfig.AUTH_API_URL       <span class="comment">// your_auth_api_url</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="상수를-xml-파일에서-사용하기"><a href="#상수를-xml-파일에서-사용하기" class="headerlink" title="상수를 xml 파일에서 사용하기"></a>상수를 xml 파일에서 사용하기</h1><p><code>xml 파일</code>에서 사용할 상수는 <code>resValue</code>를 사용하여 선언합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="comment">// buildConfigField (&quot;String&quot;, &quot;AUTH_API_KEY&quot;, &#x27;&quot;your_auth_api_key&quot;&#x27;)</span></span><br><span class="line">        <span class="comment">// buildConfigField (&quot;String&quot;, &quot;AUTH_API_URL&quot;, &#x27;&quot;your_auth_api_url&quot;&#x27;)</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, <span class="string">&quot;your_client_id&quot;</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, <span class="string">&quot;your_client_secret&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 사용할 수 있습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_ID&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_SECRET&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/03/08_android/00_gradle/190803_buildConfig/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/02/08_android/00_gradle/190802_module/"
+                            aria-label=": [Android] Gradle - (2) 모듈(Module)"
+                        >
+                            [Android] Gradle - (2) 모듈(Module)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-02T01:00:00+09:00">
+	
+		    2019/01/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="모듈"><a href="#모듈" class="headerlink" title="모듈"></a>모듈</h1><p><a target="_blank" rel="noopener" href="https://developer.android.com/guide/app-bundle/configure-base?hl=ko">Android Developers</a>에서는 <code>모듈(Module)</code>을 다음과 같이 정의하고 있습니다.</p>
+<div class="alert success no-icon"><p><b>모듈</b>은 소스 파일 및 빌드 설정으로 구성된 모음이며, 이를 통해 프로젝트를 별개의 기능 단위로 분할할 수 있습니다. 프로젝트에는 하나 이상의 모듈이 포함될 수 있으며, 하나의 모듈이 다른 모듈을 종속 항목으로 사용할 수 있습니다. 각 모듈은 개별적으로 빌드, 테스트 및 디버그할 수 있습니다.</p>
+</div>
+
+<p>프로젝트와 모듈을 직접 만들어보면서 모듈이 무엇인지 알아보겠습니다.</p>
+<h1 id="모듈-생성하기"><a href="#모듈-생성하기" class="headerlink" title="모듈 생성하기"></a>모듈 생성하기</h1><p>안드로이드 스튜디오 프로젝트를 생성하면 <code>app</code>이라는 모듈이 자동으로 생성됩니다.<br><img src="1.png"></p>
+<p>이제 새로운 모듈을 추가해보겠습니다. <code>Android Studio &gt; File &gt; New &gt; New Module</code>을 선택하면 다양한 모듈을 선택할 수 있습니다. 일단 <code>Java or Kotlin Module</code>을 선택합시다.<br><img src="2.png"><br>모듈의 이름은 <code>test_module</code>입니다.<br><img src="3.png"><br>새로운 모듈 <code>test_module</code>이 추가된 것을 확인할 수 있습니다.<br><img src="4.png"><br>모듈 <code>test_module</code>에 대한 <code>build.gradle</code>파일이 별도로 생성되었다는 것에 주목합시다.<br><img src="5.png"><br>모듈 <code>test_module</code>에 <code>TestModule</code>클래스를 다음과 같이 작성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.test_module</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestModule</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="모듈-사용하기"><a href="#모듈-사용하기" class="headerlink" title="모듈 사용하기"></a>모듈 사용하기</h1><p>이제 <code>app</code>모듈에서 <code>test_module</code>모듈 의 <code>TestModule</code>클래스를 사용하겠습니다. 우선 <code>app</code>모듈의 <code>build.gradle</code>파일에 의존성을 추가해야합니다.</p>
+<figure class="codeblock codeblock--tabbed"><figcaption><span>build.gradle(Module: my_project.app)</span><ul class="tabs"><li class="tab active">groovy</li></ul></figcaption><div class="tabs-content"><figure class="highlight groovy" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies { </span><br><span class="line">    implementation project(<span class="string">':test_module'</span>)</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure></div></figure>
+<p>이제 <code>app</code>모듈에서 <code>TestModule</code>클래스를 사용할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.my_project</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.yologger.test_module.TestModule</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">var</span> module = TestModule()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="멀티-모듈의-장점"><a href="#멀티-모듈의-장점" class="headerlink" title="멀티 모듈의 장점"></a>멀티 모듈의 장점</h1><p>위 예제처럼 <u>하나의 프로젝트에서 여러 개의 모듈을 사용하는 것</u>을 <code>멀티 모듈</code>이라고 합니다. </p>
+<p>각 모듈은 자신만의 <code>build.gradle</code>을 가지고 있습니다. 이는 각 모듈 단위로 빌드할 수 있다는 뜻입니다. 이를 통해 빌드 시간을 단축시킬 수 있습니다. 또한 기능별로 코드를 분리하여 중복을 제거하고 재사용성을 높일 수 있습니다. 뿐만 아니라 모듈 단위로 테스트를 할 수도 있어 테스트 용이성이 높아집니다.</p>
+<h1 id="모듈의-종류"><a href="#모듈의-종류" class="headerlink" title="모듈의 종류"></a>모듈의 종류</h1><p>자주 사용하는 모듈은 크게 세 가지입니다.</p>
+<h3 id="1-Phone-amp-Tablet-Module"><a href="#1-Phone-amp-Tablet-Module" class="headerlink" title="(1) Phone &amp; Tablet Module"></a>(1) Phone &amp; Tablet Module</h3><p><code>Phone &amp; Tablet Module Module</code>을 빌드하면 안드로이드 운영체제에서 실행 가능한 <a href="/ko/2019/03/01/android/003_01_android_platform/190301-01-apk/"><code>APK(Android Application Package)</code></a>파일이 생성됩니다. 똑같은 앱을 스마트폰, 태플릿 용도로 나누어 출시한다던가 유료 앱, 무료 앱을 구분하여 출시할 때 사용할 수 있습니다. 프로젝트를 생성하면 기본으로 생성되는 <code>app</code>모듈이 바로 <code>Phone &amp; Tablet Module Module</code>입니다.</p>
+<p><code>Phone &amp; Tablet Module Module</code>의 <code>build.gradle</code>을 보면 다음과 같은 플러그인을 적용하고 있습니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Android-Library"><a href="#2-Android-Library" class="headerlink" title="(2) Android Library"></a>(2) Android Library</h3><p>안드로이드 프레임워크와 관련된 모듈입니다. <code>AppCompatActivity</code>클래스, <code>Context</code>클래스처럼 안드로이드 프레임워크에서만 제공하는 API에 접근할 수 있습니다. 빌드의 결과로 <code>AAR(Android Archieve)</code> 파일이 생성됩니다.</p>
+<p><code>Android Library</code>의 <code>build.gradle</code>을 보면 다음과 같은 플러그인을 적용하고 있습니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.android.library&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Java-or-Kotlin-Library"><a href="#3-Java-or-Kotlin-Library" class="headerlink" title="(3) Java or Kotlin Library"></a>(3) Java or Kotlin Library</h3><p>순수하게 자바 또는 코틀린으로 이루어진 모듈입니다. 안드로이드 프레임워크와는 독립적이며, 빌드 결과로 <code>JAR(Java Archive)</code>파일이 생성됩니다.</p>
+<p><code>Java or Kotlin Library</code>의 <code>build.gradle</code>을 보면 다음과 같은 플러그인을 적용하고 있습니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;java-library&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/02/08_android/00_gradle/190802_module/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                            aria-label=": [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                        >
+                            [Servlet, JSP] Eclipse로 Java Web Application 구성하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-02T00:00:00+09:00">
+	
+		    2019/01/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p>Eclipse를 실행하고 <code>File &gt; Project</code>를 선택한 후 <code>Dynamic Web Project</code>를 선택한다.<br><img src="1.png"><br><code>Project name</code>, <code>Project Location</code>, <code>Target runtime</code>을 적절히 입력하고 <code>Next &gt;</code> 버튼을 누른다.<br><img src="2.png"><br><code>Source folders on build path</code>는 Java 파일이 위치할 경로다. <code>Default output folder</code>는 빌드된 파일이 위치할 경로다. 확인 후 <code>Next &gt;</code>버튼을 누른다.<br><img src="3.png"><br><code>Context root</code>와 <code>Content directory</code>은 기본값으로 두고 <code>Generate web.xml deployment descriptor</code>를 선택하고 <code>Next &gt;</code>버튼을 누른다.<br><img src="4.png"></p>
+<ul>
+<li><code>Context root</code>: WAS(Tomcat)에는 여러 개의 Web Application이 구동될 수 있다. Context root는 WAS위의 Web Application을 구분하는데 사용된다. 예를 들어 Web Appication의 URL이 <code>http://yourcompany.com/my_project</code>라면 <code>my_project</code>가 context root를 의미한다.</li>
+<li><code>Content directory</code>: JSP파일이 저장되는 경로다. JSP파일 외에도 <code>META-INF</code>폴더, <code>WEB-INF</code>폴더, <code>web.xml</code>파일 등이 위치한다.</li>
+<li><code>enerate web.xml deployment descriptor</code>: WEB.xml 파일을 생성한다.</li>
+</ul>
+<p>생성된 프로젝트의 구조는 다음과 같다.<br><img src="5.png"></p>
+<p>이제 JSP 파일을 생성해보자. <code>src &gt; main &gt; webapp</code>에 JSP 파일을 생성한다.</p>
+<figure class="highlight html"><figcaption><span>HelloWorld.jsp</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;UTF-8&quot;%&gt;</span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Tomcat에서 프로젝트를 실행하기 위해 <code>Run on Server</code>를 선택한다.<br><img src="6.png"><br>Tomcat을 선택하고 <code>Next &gt;</code>를 선택한다.<br><img src="7.png"><br><code>Configured</code>항목으로 프로젝트를 이동시키고 <code>Finish</code> 버튼을 누른다.<br><img src="8.png"></p>
+<ul>
+<li><code>Available</code>: 아직 Tomcat에 배포하지 않은 프로젝트</li>
+<li><code>Configured</code>: 이미 Toccat에 배포한 프로젝트</li>
+</ul>
+<p>이제 웹 브라우저에서 접속할 수 있다.<br><img src="9.png"></p>
+<h1 id="참고"><a href="#참고" class="headerlink" title="참고"></a>참고</h1><p>Eclipse에 Tomcat 서버를 추가하면 <code>Project Explorer</code>에 서버의 디렉토리가 추가된다.<br><img src="10.png"><br><code>server.xml</code>에서는 Tomcat 서버의 설정 파일이다.<br><img src="11.png"><br>Tomcat 서버에는 여러 개의 Web Application을 배포할 수 있다. 배포된 Web Application은 <code>server.xml</code>에서 <code>&lt;context&gt;</code>태그로 등록된다.</p>
+<figure class="highlight xml"><figcaption><span>server.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Server</span> <span class="attr">port</span>=<span class="string">&quot;8005&quot;</span> <span class="attr">shutdown</span>=<span class="string">&quot;SHUTDOWN&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Service</span> <span class="attr">name</span>=<span class="string">&quot;Catalina&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Host</span> <span class="attr">appBase</span>=<span class="string">&quot;webapps&quot;</span> <span class="attr">autoDeploy</span>=<span class="string">&quot;true&quot;</span> <span class="attr">name</span>=<span class="string">&quot;localhost&quot;</span> <span class="attr">unpackWARs</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line">      <span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">&quot;project1&quot;</span> <span class="attr">path</span>=<span class="string">&quot;/project1&quot;</span> <span class="attr">reloadable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">source</span>=<span class="string">&quot;org.eclipse.jst.jee.server:project1&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">&quot;project2&quot;</span> <span class="attr">path</span>=<span class="string">&quot;/project2&quot;</span> <span class="attr">reloadable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">source</span>=<span class="string">&quot;org.eclipse.jst.jee.server:project2&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Host</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">Service</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Server</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>&lt;Context&gt;</code>태그의 <code>docBase</code>속성은 프로젝트의 이름이다. 또한 <code>path</code>속성을 통해 <code>Context root</code>를 변경할 수 있다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                            aria-label=": [Android] Gradle - (1) build.gradle 파일"
+                        >
+                            [Android] Gradle - (1) build.gradle 파일
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-01T01:00:00+09:00">
+	
+		    2019/01/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="build-gradle-파일"><a href="#build-gradle-파일" class="headerlink" title="build.gradle 파일"></a>build.gradle 파일</h1><p><code>build.gradle</code>은 <u>Gradle 설정 파일</u>입니다. 이 파일에 어떤 식으로 앱을 빌드할 지를 명시합니다. Gradle은 이 파일을 참조하여 프로젝트를 빌드합니다.</p>
+<p>안드로이드 프로젝트를 생성하면 기본적으로 두 개의 <code>build.gradle</code>가 생성됩니다.<br><img src="1.png"></p>
+<h1 id="1-프로젝트-수준의-build-gradle"><a href="#1-프로젝트-수준의-build-gradle" class="headerlink" title="(1) 프로젝트 수준의 build.gradle"></a>(1) 프로젝트 수준의 build.gradle</h1><p>하나의 프로젝트는 여러 개의 <code>모듈(Module)</code>로 구성될 수 있습니다. 프로젝트 수준의 <code>build.gradle</code>은 프로젝트 전체에, 다시 말해 모든 모듈에 적용되는 설정 파일입니다.</p>
+<p>프로젝트를 생성하면 자동으로 생성되는 프로젝트 수준의 <code>build.gradle</code>파일은 다음과 같습니다.</p>
+<figure class="highlight groovy"><figcaption><span>프로젝트 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 그래들에서 사용할 변수</span></span><br><span class="line">    ext &#123;</span><br><span class="line">        kotlin_version = <span class="string">&quot;1.3.72&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 라이브러리를 다운 받을 원격 저장소</span></span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dependencies &#123;</span><br><span class="line">        <span class="comment">// 안드로이드 그래들 플러그인</span></span><br><span class="line">        classpath <span class="string">&quot;com.android.tools.build:gradle:4.1.2&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 코틀린 그래들 플러그인</span></span><br><span class="line">        classpath <span class="string">&quot;org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">allprojects &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Task, 앱을 새로 빌드할 때 이전에 빌드했던 컴파일된 코드를 삭제</span></span><br><span class="line">task clean(<span class="attr">type:</span> Delete) &#123;</span><br><span class="line">    delete rootProject.buildDir</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>여기서는 설정 파일에서 사용할 변수, 원격 라이브러리를 다운받을 저장소, 안드로이드 그래들 플러그인, 코틀린 그래들 플러그인 등이 선언되어있습니다.</p>
+<h1 id="2-모듈-수준의-build-gradle"><a href="#2-모듈-수준의-build-gradle" class="headerlink" title="(2) 모듈 수준의 build.gradle"></a>(2) 모듈 수준의 build.gradle</h1><p>모듈 수준의 <code>build.gradle</code>은 특정 모듈에만 적용되는 설정 파일입니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">    id <span class="string">&#x27;kotlin-android&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    buildToolsVersion <span class="string">&quot;30.0.3&quot;</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.app&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line"></span><br><span class="line">        testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            applicationIdSuffix <span class="string">&#x27;.prod&#x27;</span></span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">            buildConfigField <span class="string">&quot;boolean&quot;</span>, <span class="string">&quot;IS_DEBUG&quot;</span>, <span class="string">&quot;true&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    compileOptions &#123;</span><br><span class="line">        sourceCompatibility JavaVersion.VERSION_1_8</span><br><span class="line">        targetCompatibility JavaVersion.VERSION_1_8</span><br><span class="line">    &#125;</span><br><span class="line">    kotlinOptions &#123;</span><br><span class="line">        jvmTarget = <span class="string">&#x27;1.8&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 의존성</span></span><br><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version&quot;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.core:core-ktx:1.5.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.appcompat:appcompat:1.3.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.material:material:1.3.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.constraintlayout:constraintlayout:2.0.4&#x27;</span></span><br><span class="line">    testImplementation <span class="string">&#x27;junit:junit:4.+&#x27;</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.ext:junit:1.1.2&#x27;</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>plugins</code>섹션에는 적용할 Gradle 플러그인을 나열합니다. 위 코드에서는 안드로이드 플러그인과 코틀린 플러그인의 적용하고 있습니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">    id <span class="string">&#x27;kotlin-android&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>android</code>섹션에서는 빌드할 때 사용할 SDK와 빌드 도구의 버전을 정의하고 있습니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    buildToolsVersion <span class="string">&quot;30.0.3&quot;</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>defaultConfig</code>섹션에 선언된 항목들은 빌드하는 동안 해당 모듈의 <code>AndroidManifest.xml</code>파일로 생성되는 요소를 정의합니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">defaultConfig &#123;</span><br><span class="line">    applicationId <span class="string">&quot;com.yologger.build_variant&quot;</span></span><br><span class="line">    minSdkVersion <span class="number">21</span></span><br><span class="line">    targetSdkVersion <span class="number">30</span></span><br><span class="line">    versionCode <span class="number">1</span></span><br><span class="line">    versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line"></span><br><span class="line">    testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>buildType</code>섹션에는 어플리케이션을 어떻게 빌드할 지를 명시합니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">buildTypes &#123;</span><br><span class="line">    release &#123;</span><br><span class="line">        applicationIdSuffix <span class="string">&#x27;.prod&#x27;</span></span><br><span class="line">        minifyEnabled <span class="literal">true</span></span><br><span class="line">        proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>dependencies 섹션</code>은 외부 모듈이나 라이브러리를 사용할 때 정의합니다. 같은 프로젝트 내 다른 모듈, jar 파일, 다른 개발자가 만든 라이브러리 등을 사용하려면 이 섹션에 명시해야합니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version&quot;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.core:core-ktx:1.5.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.appcompat:appcompat:1.3.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.material:material:1.3.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.constraintlayout:constraintlayout:2.0.4&#x27;</span></span><br><span class="line">    testImplementation <span class="string">&#x27;junit:junit:4.+&#x27;</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.ext:junit:1.1.2&#x27;</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="CoC"><a href="#CoC" class="headerlink" title="CoC"></a>CoC</h1><p>그래들은 <code>설정보다는 관례(CoC, Convention over Configuration)</code>라는 개념을 구현하고 있습니다. 즉, 그래들은 사전에 정의된 합리적인 기본 설정값을 가지고 있습니다. 따라서 모든 설정을 설정하지 않아도 기본 설정값이 적용됩니다. 이 덕분에 개발자는 모든 설정을 모두 설정할 필요가 없어집니다. 자신의 요구 사항에 맞지 않는 설정만 빌드 설정 파일에서 변경하면 됩니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/01/01/06_spring/01_servlet_jsp/20190101_maven_java_web_app/"
                             aria-label=": [Servlet, JSP] Maven으로 Java Web Application 구성하기"
                         >
