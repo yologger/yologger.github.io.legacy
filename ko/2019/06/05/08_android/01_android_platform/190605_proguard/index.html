@@ -1,0 +1,768 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 프로가드(ProGuard) - 코드 난독화 및 최적화 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n프로가드프로가드(ProGuard)를 적용하면 어플리캐이션에 코드 난독화와 최적화를 적용할 수 있습니다. 프로가드를 이해하기 위해 알아야 할 개념은 다음과 같습니다.\n(1) 역공학과 디컴파일역공학(Reverse Engineering)은 완성된 결과물을 반대로 분해하고 조각내어 설계와 원리를 분석하는 것을 의미합니다. 비유하자면 완성된 비행기를 분해하며 어떻게 조립되었고 동작하는지를 분석하는 것입니다.\n소프트웨어 공학에서 역공학의 핵심 기술은 디컴파일입니다. 디컴파일(Decompile)은 실행 가능한 소프트웨어를 사람이 읽을 수 있는 소스코드로 변환하는 것을 말합니다. 안드로이드에서는 APK 파일을 사용하여 소스코드 파일로 복원하는 작업을 의미합니다. 컴파일이나 빌드의 반대 작업이라고 이해하시면 됩니다.\n(2) 난독화APK 파일을 추출하는 앱을 사용하면 구글 플레이스토어에서 다운받은 앱의 APK 파일을 추출할 수 있습니다. 여기에 디컴파일까지 적용하면 앱의 소스코드를 볼 수 있게 됩니다.\n코드 난독화(Code Obfuscation)은 악의적으로 앱의 소스코드에 접근하는 공격자로부터 코드를 보호하는 기술입니다. 소스코드를 읽기 어렵게 만들어 가독성을 떨어지게 할 수 있습니다.\n(3) 코드 축소와 리소스 축소코드에서 사용하지 않는 클래스, 속성, 메소드를 탐지하여 안전하게 삭제하는 것을 코드 축소(Code shrinking)라고 합니다. 또한 앱에서 사용하지 않는 리소스를 안전하게 삭제하는 것을 리소스 축소(Resource shrinking)라고 합니다. \n\n프로가드 사용법프로가드(ProGuard)를 사용하면 빌드 타입별로 난독화, 코드 축소, 리소스 축소를 적용할 수 있습니다.\n모듈 수준의 build.gradle에 두 개의 빌드 타입 debug, release를 추가합니다.\n수준의 build.gradle12345678910android &#123;    buildTypes &#123;        debug &#123;        &#125;        release &#123;        &#125;    &#125;&#125;\nrelease빌드 타입에 프로가드를 적용하겠습니다. minifyEnabled값을 true로 설정하면 난독화, 코드 축소, 최적화를 진행합니다.\n수준의 build.gradle12345678910android &#123;    buildTypes &#123;        debug &#123;        &#125;        release &#123;            minifyEnabled true        &#125;    &#125;&#125;\n\nshrinkResources값을 true로 설정하면 리소스 축소가 적용됩니다.\n수준의 build.gradle1234567891011android &#123;    buildTypes &#123;        debug &#123;        &#125;        release &#123;            shrinkResources true            minifyEnabled true        &#125;    &#125;&#125;\n\nproguardFiles 속성을 사용하여 난독화에 사용할 파일을 여러 개 지정할 수 있습니다. 아래 코드는 두 개의 파일을 지정하고 있습니다.\n수준의 build.gradle12345678910android &#123;    buildTypes &#123;        debug &#123;        &#125;        release &#123;            proguardFiles getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;), &#x27;proguard-rules.pro&#x27;        &#125;    &#125;&#125;\n위 코드는 아래 코드와 동일합니다.\n수준의 build.gradle123456789101112android &#123;    buildTypes &#123;        debug &#123;        &#125;        release &#123;            // proguardFiles getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;), &#x27;proguard-rules.pro&#x27;            proguardFile getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;)            proguardFile &#x27;proguard-rules.pro&#x27;        &#125;    &#125;&#125;\nproguard-android-optimize.txt은 안드로이드 그래들 플러그인이 자동으로 생성합니다.\n수준의 build.gradle12345678buildscript &#123;    dependencies &#123;        // 안드로이드 그래이들 플러그인        classpath &quot;com.android.tools.build:gradle:4.1.2&quot;        // ...    &#125;&#125;\n이 파일에는 사전에 정해진 합리적인 규칙이 정의되어있습니다. 따라서 개발자는 이 파일을 수정할 필요가 없습니다.\nproguard-rules.pro는 안드로이드 프로젝트나 모듈을 생성하면 모듈의 루트 디렉토리에 자동으로 생성됩니다.개발자는 이 파일을 수정하여 프로가드 규칙을 적용할 수 있습니다.\n\n프로가드 설정파일proguard-rules.pro를 프로가드 설정파일이라고 합니다. 이 파일에서는 특정 클래스나 멤버변수를 난독화에서 제외한다든지, 최적화를 진행하지 않는다든지, 코드 축소를 하지 않는다든지 등의 규칙을 설정을 할 수 있습니다. \n자주 사용하는 프로가드 규칙은 다음과 같습니다.\n\nkeepclass [패키지명]: 특정 패키지 난독화에서 제외\nkeepclassmembers: 클래스 멤버의 원 상태 유지\nkeepattributes: 소스코드, 라인정보 유지\ndontoptimize: 최적화 하지 않기\ndontshrink: 사용하지 않는 메소드 코드 축소 하지 않기\nignorewarning: 경고 무시\ndontwarn [패키지명]: 특정 패키지에 대한 경고 무시\n\n프로가드의 모든 규칙은 이 곳에서 확인할 수 있습니다.\n외부 라이브러리에 프로가드 적용하기안드로이드 개발을 하다보면 다양한 외부 라이브러리를 사용하게 됩니다. 프로가드와 외부 라이브러리를 함께 사용하는 경우, 외부 라이브러리에 대한 프로가드 설정이 필요한지를 라이브러리 공식 홈페이지에서 꼭 확인하시기 바랍니다.\n(1) RetrofitRetrofit은 HTTP 통신 라이브러리입니다. Retrofit을 사용하기 위해 프로가드에 추가 설정이 필요합니다. Retrofit 공식 홈페이지에서 프로가드 설정 파일을 제공하고 있습니다. 해당 파일을 proguard-rules.pro에 복사해줍니다.\n1234567891011121314151617181920212223242526272829303132333435# Retrofit does reflection on generic parameters. InnerClasses is required to use Signature and# EnclosingMethod is required to use InnerClasses.-keepattributes Signature, InnerClasses, EnclosingMethod# Retrofit does reflection on method and parameter annotations.-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations# Keep annotation default values (e.g., retrofit2.http.Field.encoded).-keepattributes AnnotationDefault# Retain service method parameters when optimizing.-keepclassmembers,allowshrinking,allowobfuscation interface * &#123;    @retrofit2.http.* &lt;methods&gt;;&#125;# Ignore annotation used for build tooling.-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement# Ignore JSR 305 annotations for embedding nullability information.-dontwarn javax.annotation.**# Guarded by a NoClassDefFoundError try/catch and only used when on the classpath.-dontwarn kotlin.Unit# Top-level functions that can only be used by Kotlin.-dontwarn retrofit2.KotlinExtensions-dontwarn retrofit2.KotlinExtensions$*# With R8 full mode, it sees no subtypes of Retrofit interfaces since they are created with a Proxy# and replaces all potential values with null. Explicitly keeping the interfaces prevents this.-if interface * &#123; @retrofit2.http.* &lt;methods&gt;; &#125;-keep,allowobfuscation interface &lt;1&gt;# Keep generic signature of Call (R8 full mode strips signatures from non-kept items).-keep,allowobfuscation,allowshrinking interface retrofit2.Call\n\n\n(2) OkHttpOkHttp의 GitHub 저장소에서 확인할 수 있습니다.\n123456789101112# JSR 305 annotations are for embedding nullability information.-dontwarn javax.annotation.**# A resource is loaded with a relative path so the package of this class must be preserved.-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase# Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.-dontwarn org.codehaus.mojo.animal_sniffer.*# OkHttp platform used only on JVM and when Conscrypt dependency is available.-dontwarn okhttp3.internal.platform.ConscryptPlatform-dontwarn org.conscrypt.ConscryptHostnameVerifier\n\n(3) GlideGlide의 GitHub 저장소에서 확인할 수 있습니다.\n1234567891011121314-keep public class * implements com.bumptech.glide.module.GlideModule-keep class * extends com.bumptech.glide.module.AppGlideModule &#123; &lt;init&gt;(...);&#125;-keep public enum com.bumptech.glide.load.ImageHeaderParser$** &#123;  **[] $VALUES;  public *;&#125;-keep class com.bumptech.glide.load.data.ParcelFileDescriptorRewinder$InternalRewinder &#123;  *** rewind();&#125;# for DexGuard only-keepresourcexmlelements manifest/application/meta-data@value=GlideModule\n\n(4) GsonGson의 GitHub 저장소에서 확인할 수 있습니다.\n12345678910111213141516171819202122232425262728##---------------Begin: proguard configuration for Gson  ----------# Gson uses generic type information stored in a class file when working with fields. Proguard# removes such information by default, so configure it to keep all of it.-keepattributes Signature# For using GSON @Expose annotation-keepattributes *Annotation*# Gson specific classes-dontwarn sun.misc.**#-keep class com.google.gson.stream.** &#123; *; &#125;# Application classes that will be serialized/deserialized over Gson-keep class com.google.gson.examples.android.model.** &#123; &lt;fields&gt;; &#125;# Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,# JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)-keep class * extends com.google.gson.TypeAdapter-keep class * implements com.google.gson.TypeAdapterFactory-keep class * implements com.google.gson.JsonSerializer-keep class * implements com.google.gson.JsonDeserializer# Prevent R8 from leaving Data object members always null-keepclassmembers,allowobfuscation class * &#123;  @com.google.gson.annotations.SerializedName &lt;fields&gt;;&#125;##---------------End: proguard configuration for Gson  ----------\n\n프로가드 설정파일 분리하기외부 라이브러리에 따라 프로가드 설정파일을 분리하는 것을 권장합니다.\n모듈의 루트 디렉토리에 다음 다섯 개의 프로가드 설정파일을 생성합니다.\n\nproguard-common.pro\nproguard-retrofit.pro\nproguard-okhttp.pro\nproguard-glide.pro\nproguard-gson.pro\n\n모듈 수준의 build.gradle에 프로가드 설정파일을 추가합니다.\n수준의 build.gradle1234567891011121314151617181920android &#123;    buildTypes &#123;        debug &#123;        &#125;        release &#123;            proguardFile getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;)            // 공통            proguardFile &#x27;proguard-common.pro&#x27;            // Retrofit을 위한 프로가드 설정파일            proguardFile &#x27;proguard-retrofit.pro&#x27;            // OkHttp를 위한 프로가드 설정파일            proguardFile &#x27;proguard-okhttp.pro&#x27;            // Glide를 위한 프로가드 설정파일            proguardFile &#x27;proguard-glide.pro&#x27;            // Gson 위한 프로가드 설정파일            proguardFile &#x27;proguard-gson.pro&#x27;        &#125;    &#125;&#125;","dateCreated":"2019-06-05T01:00:00+09:00","dateModified":"2021-12-15T23:06:46+09:00","datePublished":"2019-06-05T01:00:00+09:00","description":"","headline":"[Android] 프로가드(ProGuard) - 코드 난독화 및 최적화","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/","keywords":"Android"}</script>
+    <meta name="description" content="프로가드프로가드(ProGuard)를 적용하면 어플리캐이션에 코드 난독화와 최적화를 적용할 수 있습니다. 프로가드를 이해하기 위해 알아야 할 개념은 다음과 같습니다. (1) 역공학과 디컴파일역공학(Reverse Engineering)은 완성된 결과물을 반대로 분해하고 조각내어 설계와 원리를 분석하는 것을 의미합니다. 비유하자면 완성된 비행기를 분해하며 어떻">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 프로가드(ProGuard) - 코드 난독화 및 최적화">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="프로가드프로가드(ProGuard)를 적용하면 어플리캐이션에 코드 난독화와 최적화를 적용할 수 있습니다. 프로가드를 이해하기 위해 알아야 할 개념은 다음과 같습니다. (1) 역공학과 디컴파일역공학(Reverse Engineering)은 완성된 결과물을 반대로 분해하고 조각내어 설계와 원리를 분석하는 것을 의미합니다. 비유하자면 완성된 비행기를 분해하며 어떻">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/2.png">
+<meta property="article:published_time" content="2019-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T14:06:46.947Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 프로가드(ProGuard) - 코드 난독화 및 최적화
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-06-05T01:00:00+09:00">
+	
+		    2019/06/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="프로가드"><a href="#프로가드" class="headerlink" title="프로가드"></a>프로가드</h1><p><code>프로가드(ProGuard)</code>를 적용하면 어플리캐이션에 <u>코드 난독화</u>와 <u>최적화</u>를 적용할 수 있습니다. 프로가드를 이해하기 위해 알아야 할 개념은 다음과 같습니다.</p>
+<h3 id="1-역공학과-디컴파일"><a href="#1-역공학과-디컴파일" class="headerlink" title="(1) 역공학과 디컴파일"></a>(1) 역공학과 디컴파일</h3><p><code>역공학(Reverse Engineering)</code>은 <u>완성된 결과물을 반대로 분해하고 조각내어 설계와 원리를 분석하는 것</u>을 의미합니다. 비유하자면 완성된 비행기를 분해하며 어떻게 조립되었고 동작하는지를 분석하는 것입니다.</p>
+<p>소프트웨어 공학에서 역공학의 핵심 기술은 디컴파일입니다. <code>디컴파일(Decompile)</code>은 <u>실행 가능한 소프트웨어를 사람이 읽을 수 있는 소스코드로 변환하는 것</u>을 말합니다. 안드로이드에서는 APK 파일을 사용하여 소스코드 파일로 복원하는 작업을 의미합니다. 컴파일이나 빌드의 반대 작업이라고 이해하시면 됩니다.</p>
+<h3 id="2-난독화"><a href="#2-난독화" class="headerlink" title="(2) 난독화"></a>(2) 난독화</h3><p>APK 파일을 추출하는 앱을 사용하면 구글 플레이스토어에서 다운받은 앱의 APK 파일을 추출할 수 있습니다. 여기에 디컴파일까지 적용하면 앱의 소스코드를 볼 수 있게 됩니다.</p>
+<p><code>코드 난독화(Code Obfuscation)</code>은 악의적으로 앱의 소스코드에 접근하는 공격자로부터 코드를 보호하는 기술입니다. <u>소스코드를 읽기 어렵게 만들어 가독성을 떨어지게 할 수 있습니다</u>.</p>
+<h3 id="3-코드-축소와-리소스-축소"><a href="#3-코드-축소와-리소스-축소" class="headerlink" title="(3) 코드 축소와 리소스 축소"></a>(3) 코드 축소와 리소스 축소</h3><p>코드에서 사용하지 않는 클래스, 속성, 메소드를 탐지하여 안전하게 삭제하는 것을 <code>코드 축소(Code shrinking)</code>라고 합니다. 또한 앱에서 사용하지 않는 리소스를 안전하게 삭제하는 것을 <code>리소스 축소(Resource shrinking)</code>라고 합니다. </p>
+<hr>
+<h1 id="프로가드-사용법"><a href="#프로가드-사용법" class="headerlink" title="프로가드 사용법"></a>프로가드 사용법</h1><p><code>프로가드(ProGuard)</code>를 사용하면 빌드 타입별로 난독화, 코드 축소, 리소스 축소를 적용할 수 있습니다.</p>
+<p>모듈 수준의 <code>build.gradle</code>에 두 개의 빌드 타입 <code>debug</code>, <code>release</code>를 추가합니다.</p>
+<figure class="highlight plaintext"><figcaption><span>수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>release</code>빌드 타입에 프로가드를 적용하겠습니다. <code>minifyEnabled</code>값을 <code>true</code>로 설정하면 난독화, 코드 축소, 최적화를 진행합니다.</p>
+<figure class="highlight plaintext"><figcaption><span>수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled true</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>shrinkResources</code>값을 <code>true</code>로 설정하면 리소스 축소가 적용됩니다.</p>
+<figure class="highlight plaintext"><figcaption><span>수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            shrinkResources true</span><br><span class="line">            minifyEnabled true</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>proguardFiles</code> 속성을 사용하여 난독화에 사용할 파일을 여러 개 지정할 수 있습니다. 아래 코드는 두 개의 파일을 지정하고 있습니다.</p>
+<figure class="highlight plaintext"><figcaption><span>수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            proguardFiles getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;), &#x27;proguard-rules.pro&#x27;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드는 아래 코드와 동일합니다.</p>
+<figure class="highlight plaintext"><figcaption><span>수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            // proguardFiles getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;), &#x27;proguard-rules.pro&#x27;</span><br><span class="line">            proguardFile getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;)</span><br><span class="line">            proguardFile &#x27;proguard-rules.pro&#x27;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>proguard-android-optimize.txt</code>은 안드로이드 그래들 플러그인이 자동으로 생성합니다.</p>
+<figure class="highlight plaintext"><figcaption><span>수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line"></span><br><span class="line">    dependencies &#123;</span><br><span class="line">        // 안드로이드 그래이들 플러그인</span><br><span class="line">        classpath &quot;com.android.tools.build:gradle:4.1.2&quot;</span><br><span class="line">        // ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 파일에는 사전에 정해진 합리적인 규칙이 정의되어있습니다. 따라서 개발자는 이 파일을 수정할 필요가 없습니다.</p>
+<p><code>proguard-rules.pro</code>는 안드로이드 프로젝트나 모듈을 생성하면 모듈의 루트 디렉토리에 자동으로 생성됩니다.<br><img src="1.png"><br><img src="2.png"><br>개발자는 이 파일을 수정하여 프로가드 규칙을 적용할 수 있습니다.</p>
+<hr>
+<h1 id="프로가드-설정파일"><a href="#프로가드-설정파일" class="headerlink" title="프로가드 설정파일"></a>프로가드 설정파일</h1><p><code>proguard-rules.pro</code>를 프로가드 설정파일이라고 합니다. 이 파일에서는 특정 클래스나 멤버변수를 난독화에서 제외한다든지, 최적화를 진행하지 않는다든지, 코드 축소를 하지 않는다든지 등의 <u><b>규칙</b></u>을 설정을 할 수 있습니다. </p>
+<p>자주 사용하는 프로가드 <u><b>규칙</b></u>은 다음과 같습니다.</p>
+<ul>
+<li><code>keepclass [패키지명]</code>: 특정 패키지 난독화에서 제외</li>
+<li><code>keepclassmembers</code>: 클래스 멤버의 원 상태 유지</li>
+<li><code>keepattributes</code>: 소스코드, 라인정보 유지</li>
+<li><code>dontoptimize</code>: 최적화 하지 않기</li>
+<li><code>dontshrink</code>: 사용하지 않는 메소드 코드 축소 하지 않기</li>
+<li><code>ignorewarning</code>: 경고 무시</li>
+<li><code>dontwarn [패키지명]</code>: 특정 패키지에 대한 경고 무시</li>
+</ul>
+<p>프로가드의 모든 규칙은 <a target="_blank" rel="noopener" href="https://www.guardsquare.com/manual/configuration/usage">이 곳</a>에서 확인할 수 있습니다.</p>
+<h1 id="외부-라이브러리에-프로가드-적용하기"><a href="#외부-라이브러리에-프로가드-적용하기" class="headerlink" title="외부 라이브러리에 프로가드 적용하기"></a>외부 라이브러리에 프로가드 적용하기</h1><p>안드로이드 개발을 하다보면 다양한 <u>외부 라이브러리</u>를 사용하게 됩니다. 프로가드와 외부 라이브러리를 함께 사용하는 경우, 외부 라이브러리에 대한 프로가드 설정이 필요한지를 라이브러리 공식 홈페이지에서 꼭 확인하시기 바랍니다.</p>
+<h3 id="1-Retrofit"><a href="#1-Retrofit" class="headerlink" title="(1) Retrofit"></a>(1) Retrofit</h3><p><code>Retrofit</code>은 HTTP 통신 라이브러리입니다. <code>Retrofit</code>을 사용하기 위해 프로가드에 추가 설정이 필요합니다. <a target="_blank" rel="noopener" href="https://square.github.io/retrofit/">Retrofit 공식 홈페이지</a>에서 <a target="_blank" rel="noopener" href="https://github.com/square/retrofit/blob/master/retrofit/src/main/resources/META-INF/proguard/retrofit2.pro">프로가드 설정 파일</a>을 제공하고 있습니다. 해당 파일을 <code>proguard-rules.pro</code>에 복사해줍니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"># Retrofit does reflection on generic parameters. InnerClasses is required to use Signature and</span><br><span class="line"># EnclosingMethod is required to use InnerClasses.</span><br><span class="line">-keepattributes Signature, InnerClasses, EnclosingMethod</span><br><span class="line"></span><br><span class="line"># Retrofit does reflection on method and parameter annotations.</span><br><span class="line">-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations</span><br><span class="line"></span><br><span class="line"># Keep annotation default values (e.g., retrofit2.http.Field.encoded).</span><br><span class="line">-keepattributes AnnotationDefault</span><br><span class="line"></span><br><span class="line"># Retain service method parameters when optimizing.</span><br><span class="line">-keepclassmembers,allowshrinking,allowobfuscation interface * &#123;</span><br><span class="line">    @retrofit2.http.* &lt;methods&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># Ignore annotation used for build tooling.</span><br><span class="line">-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement</span><br><span class="line"></span><br><span class="line"># Ignore JSR 305 annotations for embedding nullability information.</span><br><span class="line">-dontwarn javax.annotation.**</span><br><span class="line"></span><br><span class="line"># Guarded by a NoClassDefFoundError try/catch and only used when on the classpath.</span><br><span class="line">-dontwarn kotlin.Unit</span><br><span class="line"></span><br><span class="line"># Top-level functions that can only be used by Kotlin.</span><br><span class="line">-dontwarn retrofit2.KotlinExtensions</span><br><span class="line">-dontwarn retrofit2.KotlinExtensions$*</span><br><span class="line"></span><br><span class="line"># With R8 full mode, it sees no subtypes of Retrofit interfaces since they are created with a Proxy</span><br><span class="line"># and replaces all potential values with null. Explicitly keeping the interfaces prevents this.</span><br><span class="line">-if interface * &#123; @retrofit2.http.* &lt;methods&gt;; &#125;</span><br><span class="line">-keep,allowobfuscation interface &lt;1&gt;</span><br><span class="line"></span><br><span class="line"># Keep generic signature of Call (R8 full mode strips signatures from non-kept items).</span><br><span class="line">-keep,allowobfuscation,allowshrinking interface retrofit2.Call</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-OkHttp"><a href="#2-OkHttp" class="headerlink" title="(2) OkHttp"></a>(2) OkHttp</h3><p><a target="_blank" rel="noopener" href="https://github.com/square/okhttp/blob/master/okhttp/src/main/resources/META-INF/proguard/okhttp3.pro">OkHttp의 GitHub 저장소</a>에서 확인할 수 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># JSR 305 annotations are for embedding nullability information.</span><br><span class="line">-dontwarn javax.annotation.**</span><br><span class="line"></span><br><span class="line"># A resource is loaded with a relative path so the package of this class must be preserved.</span><br><span class="line">-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase</span><br><span class="line"></span><br><span class="line"># Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.</span><br><span class="line">-dontwarn org.codehaus.mojo.animal_sniffer.*</span><br><span class="line"></span><br><span class="line"># OkHttp platform used only on JVM and when Conscrypt dependency is available.</span><br><span class="line">-dontwarn okhttp3.internal.platform.ConscryptPlatform</span><br><span class="line">-dontwarn org.conscrypt.ConscryptHostnameVerifier</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Glide"><a href="#3-Glide" class="headerlink" title="(3) Glide"></a>(3) Glide</h3><p><a target="_blank" rel="noopener" href="https://github.com/bumptech/glide#proguard">Glide의 GitHub 저장소</a>에서 확인할 수 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">-keep public class * implements com.bumptech.glide.module.GlideModule</span><br><span class="line">-keep class * extends com.bumptech.glide.module.AppGlideModule &#123;</span><br><span class="line"> &lt;init&gt;(...);</span><br><span class="line">&#125;</span><br><span class="line">-keep public enum com.bumptech.glide.load.ImageHeaderParser$** &#123;</span><br><span class="line">  **[] $VALUES;</span><br><span class="line">  public *;</span><br><span class="line">&#125;</span><br><span class="line">-keep class com.bumptech.glide.load.data.ParcelFileDescriptorRewinder$InternalRewinder &#123;</span><br><span class="line">  *** rewind();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># for DexGuard only</span><br><span class="line">-keepresourcexmlelements manifest/application/meta-data@value=GlideModule</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Gson"><a href="#4-Gson" class="headerlink" title="(4) Gson"></a>(4) Gson</h3><p><a target="_blank" rel="noopener" href="https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg">Gson의 GitHub 저장소</a>에서 확인할 수 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">##---------------Begin: proguard configuration for Gson  ----------</span><br><span class="line"># Gson uses generic type information stored in a class file when working with fields. Proguard</span><br><span class="line"># removes such information by default, so configure it to keep all of it.</span><br><span class="line">-keepattributes Signature</span><br><span class="line"></span><br><span class="line"># For using GSON @Expose annotation</span><br><span class="line">-keepattributes *Annotation*</span><br><span class="line"></span><br><span class="line"># Gson specific classes</span><br><span class="line">-dontwarn sun.misc.**</span><br><span class="line">#-keep class com.google.gson.stream.** &#123; *; &#125;</span><br><span class="line"></span><br><span class="line"># Application classes that will be serialized/deserialized over Gson</span><br><span class="line">-keep class com.google.gson.examples.android.model.** &#123; &lt;fields&gt;; &#125;</span><br><span class="line"></span><br><span class="line"># Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,</span><br><span class="line"># JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)</span><br><span class="line">-keep class * extends com.google.gson.TypeAdapter</span><br><span class="line">-keep class * implements com.google.gson.TypeAdapterFactory</span><br><span class="line">-keep class * implements com.google.gson.JsonSerializer</span><br><span class="line">-keep class * implements com.google.gson.JsonDeserializer</span><br><span class="line"></span><br><span class="line"># Prevent R8 from leaving Data object members always null</span><br><span class="line">-keepclassmembers,allowobfuscation class * &#123;</span><br><span class="line">  @com.google.gson.annotations.SerializedName &lt;fields&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">##---------------End: proguard configuration for Gson  ----------</span><br></pre></td></tr></table></figure>
+
+<h1 id="프로가드-설정파일-분리하기"><a href="#프로가드-설정파일-분리하기" class="headerlink" title="프로가드 설정파일 분리하기"></a>프로가드 설정파일 분리하기</h1><p>외부 라이브러리에 따라 프로가드 설정파일을 분리하는 것을 권장합니다.</p>
+<p>모듈의 루트 디렉토리에 다음 다섯 개의 프로가드 설정파일을 생성합니다.</p>
+<ul>
+<li>proguard-common.pro</li>
+<li>proguard-retrofit.pro</li>
+<li>proguard-okhttp.pro</li>
+<li>proguard-glide.pro</li>
+<li>proguard-gson.pro</li>
+</ul>
+<p>모듈 수준의 <code>build.gradle</code>에 프로가드 설정파일을 추가합니다.</p>
+<figure class="highlight plaintext"><figcaption><span>수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            proguardFile getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;)</span><br><span class="line">            // 공통</span><br><span class="line">            proguardFile &#x27;proguard-common.pro&#x27;</span><br><span class="line">            // Retrofit을 위한 프로가드 설정파일</span><br><span class="line">            proguardFile &#x27;proguard-retrofit.pro&#x27;</span><br><span class="line">            // OkHttp를 위한 프로가드 설정파일</span><br><span class="line">            proguardFile &#x27;proguard-okhttp.pro&#x27;</span><br><span class="line">            // Glide를 위한 프로가드 설정파일</span><br><span class="line">            proguardFile &#x27;proguard-glide.pro&#x27;</span><br><span class="line">            // Gson 위한 프로가드 설정파일</span><br><span class="line">            proguardFile &#x27;proguard-gson.pro&#x27;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/08/08_android/01_android_platform/190606_dex_compiler/"
+                    data-tooltip="[Android] DEX 컴파일러"
+                    aria-label="이전: [Android] DEX 컴파일러"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/04/08_android/01_android_platform/190604_decompile_apk/"
+                    data-tooltip="[Android] APK 디컴파일 하기 (jadx)"
+                    aria-label="다음: [Android] APK 디컴파일 하기 (jadx)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/08/08_android/01_android_platform/190606_dex_compiler/"
+                    data-tooltip="[Android] DEX 컴파일러"
+                    aria-label="이전: [Android] DEX 컴파일러"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/04/08_android/01_android_platform/190604_decompile_apk/"
+                    data-tooltip="[Android] APK 디컴파일 하기 (jadx)"
+                    aria-label="다음: [Android] APK 디컴파일 하기 (jadx)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/05/08_android/01_android_platform/190605_proguard/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
