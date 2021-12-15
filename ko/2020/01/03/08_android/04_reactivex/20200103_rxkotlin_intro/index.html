@@ -1,0 +1,805 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[RxJava, RxKotlin] RxKotlin이란? - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nRxKotlinRxKotlin은 Kotlin에서 ReactiveX를 구현한 라이브러리입니다. \nRxKotlin을 사용하기 위해서는 의존성을 추가해야합니다. 모듈 수준의 build.gradle에 의존성을 추가합니다.\n모듈 수준의 build.gradle1234dependencies &#123;    // RxKotlin 3    implementation(&quot;io.reactivex.rxjava3:rxkotlin:3.x.y&quot;)&#125;\n\nObservableObservable은 이벤트를 발생시키는 주체입니다. 이벤트를 발생시키는 과정을 방출(Emit)이라고 하며, Observable은 다음과 같이 생성합니다. \n123val observable = Observable.create&lt;T&gt; &#123; emitter: ObservableEmitter&lt;T!&gt; -&gt;    // ..&#125;\n제너릭의 타입 파라미터 T에는 이벤트와 함께 전달할 값의 자료형을 명시합니다. 예를 들어 문자열 타입의 데이터를 함께 전달하는 경우 다음과 같이 작성합니다.\n123val observable = Observable.create&lt;String&gt; &#123; emitter: ObservableEmitter&lt;String!&gt; -&gt;    // ..&#125;\nObservableEmitter클래스에는 이벤트를 방출하기 위한 메소드가 정의되어있습니다. onNext() 메소드를 사용하면 정상적인 이벤트를 방출할 수 있습니다. 또한 onNext() 메소드의 인자로 값을 함께 전달할 수 있습니다.\n123val observable = Observable.create&lt;String&gt; &#123; emitter: ObservableEmitter&lt;String!&gt; -&gt;    emitter.onNext(&quot;Value 1&quot;)&#125;\n위 코드는 아래처럼 단축할 수 있습니다.\n123val observable = Observable.create&lt;String&gt; &#123;     it.onNext(&quot;Value 1&quot;)&#125;\n값 없이 이벤트만 전달하는 경우 Unit을 사용합니다.\n123val observable = Observable.create&lt;Unit&gt; &#123;     it.onNext(Unit)&#125;\n\n이벤트를 여러 번 방출할 수도 있습니다.\n12345val observable = Observable.create&lt;String&gt; &#123;     it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)&#125;\n이벤트 방출을 완료할 때는 onComplete()를 호출합니다.\n123456val observable = Observable.create&lt;String&gt; &#123;     it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)    it.onComplete()&#125;\nonComplete()를 호출한 후 방출하는 이벤트는 실제로 방출되지 않습니다.\n12345678val observable = Observable.create&lt;String&gt; &#123;     it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)    it.onComplete()    it.onNext(&quot;Value 4&quot;)    // 방출되지 않음    it.onNext(&quot;Value 5&quot;)    // 방출되지 않음&#125;\n비정상적인 이벤트는 onError() 메소드를 사용하여 방출할 수 있습니다.\n123val observable = Observable.create&lt;String&gt; &#123;     it.onError(Exception(&quot;This is error&quot;))&#125;\n\nsubscribeBy() / subscribe()Observable은 생성만 한다고 이벤트를 방출하지 않습니다. 누군가 Observable을 구독(Subscribe)해야만 이벤트를 방출하기 시작합니다.\nsubscribeBy()메소드는 Observable이 방출하는 이벤트를 수신할 때 사용합니다. subscribeBy()는 onNext, onError, onComplete라는 세 개의 매개변수에 람다식을 전달받습니다.\n123456789101112val observable = Observable.create&lt;String&gt; &#123;     // ...&#125;observable    .subscribeBy(onNext = &#123; value -&gt;            &#125;, onError = &#123; error -&gt;    &#125;, onComplete = &#123;            &#125;)\n\n각 람다식의 역할은 다음과 같습니다.\n\nonNext로 전달된 람다식: onNext()이벤트가 방출되면 호출\nonError로 전달된 람다식: onError()이벤트가 방출되면 호출\nonComplete로 전달된 람다식: onComplete() 이벤트가 방출\n\n12345678observable    .subscribeBy(onNext = &#123; value -&gt;        // onNext() 이벤트가 방출되면 호출    &#125;, onError = &#123; error -&gt;        // onError() 이벤트가 방출되면 호출    &#125;, onComplete = &#123;        // onComplete() 이벤트가 방출되면 호출    &#125;)\n\nsubscribe()메소드를 사용하면 매개변수의 이름(onNext, onError, onComplete)을 생략할 수도 있습니다.\n12345678observable    .subscribe(&#123; value -&gt;            &#125;, &#123; error -&gt;    &#125;, &#123;            &#125;)\n\n하나의 Observable은 여러 곳에서 구독할 수도 있습니다.\n1234567891011121314151617181920212223val observable = Observable.create&lt;String&gt; &#123;     // ...&#125;// 첫 번째 구독observable    .subscribe(&#123; value -&gt;            &#125;, &#123; error -&gt;    &#125;, &#123;            &#125;)// 두 번째 구독observable    .subscribe(&#123; value -&gt;            &#125;, &#123; error -&gt;    &#125;, &#123;            &#125;)\n이제 예제를 살펴봅시다.\n1234567891011121314val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)&#125;observable    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)\n다음과 같이 출력됩니다.\n123onNext: Value 1onNext: Value 2onNext: Value 3\n\nDisposablesubscribeBy()나 subscribe()는 Disposable클래스의 인스턴스를 반환합니다. \n123val disposable: Disposable = observable.subscribe &#123;    // ...&#125;\n이제 아래와 같이 Observable이 영구적으로 데이터를 발행한다고 가정합시다.\n12345val disposable: Disposable = observable.subscribe &#123;    while(true) &#123;        it.onNext(&quot;Value&quot;)    &#125;&#125;\n이렇게 되면 Observable은 메모리에서 사라지지 않고 영구적으로 데이터를 발행하며, 메모리 누수를 초래합니다. 따라서 반드시 적절한 시점에 자원을 해제해야합니다.\nDisposable클래스의 dispose()메소드를 호출하면 구독이 종료되고 자원이 해제됩니다. \n123456789val disposable: Disposable = observable.subscribe &#123;    while(true) &#123;        it.onNext(&quot;Value&quot;)    &#125;&#125;// ...// 적절한 시점에 호출disposable.dispose()\nObservable클래스의 doOnDispose()메소드를 사용하면 dispose()가 호출될 때 실행될 구문을 등록할 수 있습니다.\n12345678910111213141516171819val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)&#125;observable    .doOnDispose &#123;        println(&quot;onDispose&quot;)    &#125;    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)observable.dispose()\n결과물은 다음과 같이 출력됩니다.\n1234onNext: Value 1onNext: Value 2onNext: Value 3doOnDispose\n\nCompositeDisposable안드로이드 예제를 살펴봅시다. 예제에서는 Observable을 여러 번 구독하고 있습니다.\n12345678910111213141516171819202122232425262728293031323334353637383940class MainActivity : AppCompatActivity() &#123;    lateinit var disposable1: Disposable    lateinit var disposable2: Disposable    lateinit var disposable3: Disposable    lateinit var disposable4: Disposable    override fun onCreate(savedInstanceState: Bundle?) &#123;        val observable = Observable.create&lt;String&gt; &#123;            // ...        &#125;        disposable1 = observable.subscribe &#123;            // ..        &#125;        disposable2 = observable.subscribe &#123;            // ..        &#125;        disposable3 = observable.subscribe &#123;            // ..        &#125;        disposable4 = observable.subscribe &#123;            // ..        &#125;        // ...    &#125;    override fun onDestroy() &#123;        super.onDestroy()        disposable1.dispose()        disposable2.dispose()        disposable3.dispose()        disposable4.dispose()    &#125;&#125;\n이때 각각의 Disposable 인스턴스에서 dispose()를 호출하는 번거로움을 없애기 위해 CompositeDisposable을 사용할 수 있습니다. Disposable클래스의 addto()메소드를 사용하여 CompositeDisposable 인스턴스에 Disposable을 추가하면 됩니다. \n123456789101112131415161718192021222324252627282930class MainActivity : AppCompatActivity() &#123;    // 추가된 부분    val disposables = CompositeDisposable()    override fun onCreate(savedInstanceState: Bundle?) &#123;        val observable = Observable.create&lt;String&gt; &#123;            // ..        &#125;        observable.subscribe &#123;            // ..        &#125;.addTo(disposables)        observable.subscribe &#123;            // ..        &#125;.addTo(disposables)        observable.subscribe &#123;            // ..        &#125;.addTo(disposables)        observable.subscribe &#123;            // ..        &#125;.addTo(disposables)        // ...    &#125;&#125;\n\n이제 Activity.onDestory()처럼 적절한 위치에서 자원을 해제하면 됩니다.CompositeDisposable의 clear()를 호출하면 추가된 모든 Disposable들이 해제됩니다. \n1234567891011class MainActivity : AppCompatActivity() &#123;    // 추가된 부분    val disposables = CompositeDisposable()    override fun onDestroy() &#123;        super.onDestroy()        // CompositeDisposables에 추가된 모든 Disposable을 해제        disposables.clear()    &#125;&#125;\n\n예제이제 이벤트에 따른 결과를 확인하기 위해 몇 가지 예제를 살펴봅시다.\n(예제 1)123456789101112131415161718val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)    // it.onComplete()&#125;val disposable = observable    .doOnDispose &#123;        println(&quot;doOnDispose&quot;)    &#125;    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)\n결과는 다음과 같습니다.\n123onNext: Value 1onNext: Value 2onNext: Value 3\n(예제 2)123456789101112131415161718val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)    it.onComplete()&#125;val disposable = observable    .doOnDispose &#123;        println(&quot;doOnDispose&quot;)    &#125;    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)\n결과는 다음과 같습니다.\n1234onNext: Value 1onNext: Value 2onNext: Value 3onComplete\n(예제 3)123456789101112131415161718192021val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)    it.onComplete()    it.onNext(&quot;Value 4&quot;)    it.onNext(&quot;Value 5&quot;)    it.onNext(&quot;Value 6&quot;)&#125;val disposable = observable    .doOnDispose &#123;        println(&quot;doOnDispose&quot;)    &#125;    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)\n결과는 다음과 같습니다.\n1234onNext: Value 1onNext: Value 2onNext: Value 3onComplete\n\n\n(예제 4)123456789101112131415161718val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)    it.onError(Exception(&quot;This is error&quot;))&#125;val disposable = observable    .doOnDispose &#123;        println(&quot;doOnDispose&quot;)    &#125;    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)\n결과는 다음과 같습니다.\n1234onNext: Value 1onNext: Value 2onNext: Value 3onError: java.lang.Exception: This is error\n\n(예제 5)12345678910111213141516171819val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)&#125;val disposable = observable    .doOnDispose &#123;        println(&quot;doOnDispose&quot;)    &#125;    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)// disposable.dispose()\n결과는 다음과 같습니다.\n123onNext: Value 1onNext: Value 2onNext: Value 3\n\n(예제 6)12345678910111213141516171819val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)&#125;val disposable = observable    .doOnDispose &#123;        println(&quot;doOnDispose&quot;)    &#125;    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)disposable.dispose()\n결과는 다음과 같습니다.\n1234onNext: Value 1onNext: Value 2onNext: Value 3doOnDispose\n\n(예제 7)1234567891011121314151617181920val observable = Observable.create&lt;String&gt; &#123;    it.onNext(&quot;Value 1&quot;)    it.onNext(&quot;Value 2&quot;)    it.onNext(&quot;Value 3&quot;)    it.onComplete()&#125;val disposable = observable    .doOnDispose &#123;        println(&quot;doOnDispose&quot;)    &#125;    .subscribeBy( onNext = &#123; value -&gt;        println(&quot;onNext: $&#123;value&#125;&quot;)    &#125;, onError =&#123; error -&gt;        println(&quot;onError: $&#123;error&#125;&quot;)    &#125;, onComplete = &#123;        println(&quot;onComplete&quot;)    &#125;)disposable.dispose()\n결과는 다음과 같습니다.\n1234onNext: Value 1onNext: Value 2onNext: Value 3onComplete\n\n스트림위 예제들에서 살펴본 것 처럼 Observable은 구독하고 있는 대상에게 데이터를 연속적, 순차적으로 흘려줍니다. 이러한 동작을 프로그래밍 언어에서 데이터 흐름(Flow of data) 또는 스트림(Stream)이라고 합니다.\n비동기 프로그래밍사용자와 지속적으로 상호작용하는 시스템은 시간이 오래 걸리는 작업을 별도의 스레드에서 비동기적으로 처리해야합니다.\nRxKotlin은 비동기 작업을 처리하는데도 효과적입니다. 간단한 예제를 살펴봅시다. 서버에 데이터를 요청하고 있습니다.\n1234567891011121314151617181920212223val observable = Observable.create&lt;Response&gt; &#123;    // 별도의 스레드에서 실행되어야 함.        // 서버에 데이터 요청    val result = requestData()    if (result.isSuccess) &#123;        it.onNext(response)    &#125; else  &#123;        it.onError(ServerException(&quot;Network error.&quot;))    &#125;&#125;observable    .subscribeBy(onNext = &#123; response: String -&gt;        // 매인 스레드에서 실행되어야 함.        handleResponse(response)    &#125;, onError = &#123; error -&gt;        // 매인 스레드에서 실행되어야 함.        handleError(error)    &#125;, onComplete = &#123;        // ..    &#125;)\nRxKotlin과 RxAndroid를 함께 사용하면 멀티스레드를 통한 비동기 처리를 쉽게 구현할 수 있습니다. RxAndroid가 제공하는 다양한 Schedulers를 사용하면 코드가 실행되는 스레드를 지정할 수 있습니다.\n123456789101112131415161718192021222324val observable = Observable.create&lt;Response&gt; &#123;    // 별도의 스레드에서 수행됨.        val result = requestData()    if (result.isSuccess) &#123;        it.onNext(response)    &#125; else  &#123;        it.onError(ServerException(&quot;Network error.&quot;))    &#125;&#125;observable    .subscribeOn(Schedulers.io())    .observeOn(AndroidSchedulers.mainThread())    .subscribeBy(onNext = &#123; response: String -&gt;        // 매인 스레드에서 실행됨.        handleResponse(response)    &#125;, onError = &#123; error -&gt;        // 매인 스레드에서 실행됨.        handleError(error)    &#125;, onComplete = &#123;        ..    &#125;)\nRxAndroid는 다른 포스트에서 자세히 다루겠습니다.\n","dateCreated":"2020-01-03T01:00:00+09:00","dateModified":"2021-12-15T19:55:47+09:00","datePublished":"2020-01-03T01:00:00+09:00","description":"","headline":"[RxJava, RxKotlin] RxKotlin이란?","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/","keywords":"RxJava, RxKotlin"}</script>
+    <meta name="description" content="RxKotlinRxKotlin은 Kotlin에서 ReactiveX를 구현한 라이브러리입니다.  RxKotlin을 사용하기 위해서는 의존성을 추가해야합니다. 모듈 수준의 build.gradle에 의존성을 추가합니다. 모듈 수준의 build.gradle1234dependencies &amp;#123;    &#x2F;&#x2F; RxKotlin 3    implementation(&amp;">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[RxJava, RxKotlin] RxKotlin이란?">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="RxKotlinRxKotlin은 Kotlin에서 ReactiveX를 구현한 라이브러리입니다.  RxKotlin을 사용하기 위해서는 의존성을 추가해야합니다. 모듈 수준의 build.gradle에 의존성을 추가합니다. 모듈 수준의 build.gradle1234dependencies &amp;#123;    &#x2F;&#x2F; RxKotlin 3    implementation(&amp;">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-01-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T10:55:47.340Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="RxJava, RxKotlin">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [RxJava, RxKotlin] RxKotlin이란?
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-01-03T01:00:00+09:00">
+	
+		    2020/01/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/RxJava-RxKotlin/">RxJava, RxKotlin</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="RxKotlin"><a href="#RxKotlin" class="headerlink" title="RxKotlin"></a>RxKotlin</h1><p><a target="_blank" rel="noopener" href="https://github.com/ReactiveX/RxKotlin"><code>RxKotlin</code></a>은 Kotlin에서 ReactiveX를 구현한 라이브러리입니다. </p>
+<p><code>RxKotlin</code>을 사용하기 위해서는 의존성을 추가해야합니다. 모듈 수준의 <code>build.gradle</code>에 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// RxKotlin 3</span></span><br><span class="line">    implementation(<span class="string">&quot;io.reactivex.rxjava3:rxkotlin:3.x.y&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Observable"><a href="#Observable" class="headerlink" title="Observable"></a>Observable</h1><p><code>Observable</code>은 이벤트를 발생시키는 주체입니다. 이벤트를 발생시키는 과정을 <code>방출(Emit)</code>이라고 하며, <code>Observable</code>은 다음과 같이 생성합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;T&gt; &#123; emitter: ObservableEmitter&lt;T!&gt; -&gt;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>제너릭의 타입 파라미터 <code>T</code>에는 이벤트와 함께 전달할 값의 자료형을 명시합니다. 예를 들어 문자열 타입의 데이터를 함께 전달하는 경우 다음과 같이 작성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; emitter: ObservableEmitter&lt;String!&gt; -&gt;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ObservableEmitter</code>클래스에는 이벤트를 방출하기 위한 메소드가 정의되어있습니다. <code>onNext()</code> 메소드를 사용하면 정상적인 이벤트를 방출할 수 있습니다. 또한 <code>onNext()</code> 메소드의 인자로 값을 함께 전달할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; emitter: ObservableEmitter&lt;String!&gt; -&gt;</span><br><span class="line">    emitter.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드는 아래처럼 단축할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>값 없이 이벤트만 전달하는 경우 <code>Unit</code>을 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;<span class="built_in">Unit</span>&gt; &#123; </span><br><span class="line">    it.onNext(<span class="built_in">Unit</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이벤트를 여러 번 방출할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이벤트 방출을 완료할 때는 <code>onComplete()</code>를 호출합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">    it.onComplete()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>onComplete()</code>를 호출한 후 방출하는 이벤트는 실제로 방출되지 않습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">    it.onComplete()</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 4&quot;</span>)    <span class="comment">// 방출되지 않음</span></span><br><span class="line">    it.onNext(<span class="string">&quot;Value 5&quot;</span>)    <span class="comment">// 방출되지 않음</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>비정상적인 이벤트는 <code>onError()</code> 메소드를 사용하여 방출할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    it.onError(Exception(<span class="string">&quot;This is error&quot;</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="subscribeBy-subscribe"><a href="#subscribeBy-subscribe" class="headerlink" title="subscribeBy() / subscribe()"></a>subscribeBy() / subscribe()</h1><p><code>Observable</code>은 생성만 한다고 이벤트를 방출하지 않습니다. 누군가 <code>Observable</code>을 <code>구독(Subscribe)</code>해야만 이벤트를 방출하기 시작합니다.</p>
+<p><code>subscribeBy()</code>메소드는 <code>Observable</code>이 방출하는 이벤트를 수신할 때 사용합니다. <code>subscribeBy()</code>는 <code>onNext</code>, <code>onError</code>, <code>onComplete</code>라는 세 개의 매개변수에 람다식을 전달받습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">observable</span><br><span class="line">    .subscribeBy(onNext = &#123; value -&gt;</span><br><span class="line">        </span><br><span class="line">    &#125;, onError = &#123; error -&gt;</span><br><span class="line"></span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>각 람다식의 역할은 다음과 같습니다.</p>
+<ul>
+<li><code>onNext</code>로 전달된 람다식: <code>onNext()</code>이벤트가 방출되면 호출</li>
+<li><code>onError</code>로 전달된 람다식: <code>onError()</code>이벤트가 방출되면 호출</li>
+<li><code>onComplete</code>로 전달된 람다식: <code>onComplete()</code> 이벤트가 방출</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">observable</span><br><span class="line">    .subscribeBy(onNext = &#123; value -&gt;</span><br><span class="line">        <span class="comment">// onNext() 이벤트가 방출되면 호출</span></span><br><span class="line">    &#125;, onError = &#123; error -&gt;</span><br><span class="line">        <span class="comment">// onError() 이벤트가 방출되면 호출</span></span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        <span class="comment">// onComplete() 이벤트가 방출되면 호출</span></span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+
+<p><code>subscribe()</code>메소드를 사용하면 매개변수의 이름(<code>onNext</code>, <code>onError</code>, <code>onComplete</code>)을 생략할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">observable</span><br><span class="line">    .subscribe(&#123; value -&gt;</span><br><span class="line">        </span><br><span class="line">    &#125;, &#123; error -&gt;</span><br><span class="line"></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>하나의 <code>Observable</code>은 여러 곳에서 구독할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 첫 번째 구독</span></span><br><span class="line">observable</span><br><span class="line">    .subscribe(&#123; value -&gt;</span><br><span class="line">        </span><br><span class="line">    &#125;, &#123; error -&gt;</span><br><span class="line"></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 두 번째 구독</span></span><br><span class="line">observable</span><br><span class="line">    .subscribe(&#123; value -&gt;</span><br><span class="line">        </span><br><span class="line">    &#125;, &#123; error -&gt;</span><br><span class="line"></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>이제 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">observable</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 출력됩니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br></pre></td></tr></table></figure>
+
+<h1 id="Disposable"><a href="#Disposable" class="headerlink" title="Disposable"></a>Disposable</h1><p><code>subscribeBy()</code>나 <code>subscribe()</code>는 <code>Disposable</code>클래스의 인스턴스를 반환합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> disposable: Disposable = observable.subscribe &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 아래와 같이 <code>Observable</code>이 영구적으로 데이터를 발행한다고 가정합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> disposable: Disposable = observable.subscribe &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">        it.onNext(<span class="string">&quot;Value&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이렇게 되면 <code>Observable</code>은 메모리에서 사라지지 않고 영구적으로 데이터를 발행하며, 메모리 누수를 초래합니다. 따라서 반드시 적절한 시점에 자원을 해제해야합니다.</p>
+<p><code>Disposable</code>클래스의 <code>dispose()</code>메소드를 호출하면 구독이 종료되고 자원이 해제됩니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> disposable: Disposable = observable.subscribe &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">        it.onNext(<span class="string">&quot;Value&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 적절한 시점에 호출</span></span><br><span class="line">disposable.dispose()</span><br></pre></td></tr></table></figure>
+<p><code>Observable</code>클래스의 <code>doOnDispose()</code>메소드를 사용하면 <code>dispose()</code>가 호출될 때 실행될 구문을 등록할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">observable</span><br><span class="line">    .doOnDispose &#123;</span><br><span class="line">        println(<span class="string">&quot;onDispose&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">observable.dispose()</span><br></pre></td></tr></table></figure>
+<p>결과물은 다음과 같이 출력됩니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br><span class="line">doOnDispose</span><br></pre></td></tr></table></figure>
+
+<h1 id="CompositeDisposable"><a href="#CompositeDisposable" class="headerlink" title="CompositeDisposable"></a>CompositeDisposable</h1><p>안드로이드 예제를 살펴봅시다. 예제에서는 <code>Observable</code>을 여러 번 구독하고 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> disposable1: Disposable</span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> disposable2: Disposable</span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> disposable3: Disposable</span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> disposable4: Disposable</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        disposable1 = observable.subscribe &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        disposable2 = observable.subscribe &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        disposable3 = observable.subscribe &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        disposable4 = observable.subscribe &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy()</span><br><span class="line">        disposable1.dispose()</span><br><span class="line">        disposable2.dispose()</span><br><span class="line">        disposable3.dispose()</span><br><span class="line">        disposable4.dispose()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이때 각각의 <code>Disposable</code> 인스턴스에서 <code>dispose()</code>를 호출하는 번거로움을 없애기 위해 <code>CompositeDisposable</code>을 사용할 수 있습니다. <code>Disposable</code>클래스의 <code>addto()</code>메소드를 사용하여 <code>CompositeDisposable</code> 인스턴스에 <code>Disposable</code>을 추가하면 됩니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 추가된 부분</span></span><br><span class="line">    <span class="keyword">val</span> disposables = CompositeDisposable()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        observable.subscribe &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;.addTo(disposables)</span><br><span class="line"></span><br><span class="line">        observable.subscribe &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;.addTo(disposables)</span><br><span class="line"></span><br><span class="line">        observable.subscribe &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;.addTo(disposables)</span><br><span class="line"></span><br><span class="line">        observable.subscribe &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;.addTo(disposables)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>Activity.onDestory()</code>처럼 적절한 위치에서 자원을 해제하면 됩니다.<code>CompositeDisposable</code>의 <code>clear()</code>를 호출하면 추가된 모든 <code>Disposable</code>들이 해제됩니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 추가된 부분</span></span><br><span class="line">    <span class="keyword">val</span> disposables = CompositeDisposable()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy()</span><br><span class="line">        <span class="comment">// CompositeDisposables에 추가된 모든 Disposable을 해제</span></span><br><span class="line">        disposables.clear()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>이제 이벤트에 따른 결과를 확인하기 위해 몇 가지 예제를 살펴봅시다.</p>
+<h3 id="예제-1"><a href="#예제-1" class="headerlink" title="(예제 1)"></a>(예제 1)</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">    <span class="comment">// it.onComplete()</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> disposable = observable</span><br><span class="line">    .doOnDispose &#123;</span><br><span class="line">        println(<span class="string">&quot;doOnDispose&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br></pre></td></tr></table></figure>
+<h3 id="예제-2"><a href="#예제-2" class="headerlink" title="(예제 2)"></a>(예제 2)</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">    it.onComplete()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> disposable = observable</span><br><span class="line">    .doOnDispose &#123;</span><br><span class="line">        println(<span class="string">&quot;doOnDispose&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br><span class="line">onComplete</span><br></pre></td></tr></table></figure>
+<h3 id="예제-3"><a href="#예제-3" class="headerlink" title="(예제 3)"></a>(예제 3)</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">    it.onComplete()</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 4&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 5&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 6&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> disposable = observable</span><br><span class="line">    .doOnDispose &#123;</span><br><span class="line">        println(<span class="string">&quot;doOnDispose&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br><span class="line">onComplete</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="예제-4"><a href="#예제-4" class="headerlink" title="(예제 4)"></a>(예제 4)</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">    it.onError(Exception(<span class="string">&quot;This is error&quot;</span>))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> disposable = observable</span><br><span class="line">    .doOnDispose &#123;</span><br><span class="line">        println(<span class="string">&quot;doOnDispose&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br><span class="line">onError: java.lang.Exception: This is error</span><br></pre></td></tr></table></figure>
+
+<h3 id="예제-5"><a href="#예제-5" class="headerlink" title="(예제 5)"></a>(예제 5)</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> disposable = observable</span><br><span class="line">    .doOnDispose &#123;</span><br><span class="line">        println(<span class="string">&quot;doOnDispose&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// disposable.dispose()</span></span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br></pre></td></tr></table></figure>
+
+<h3 id="예제-6"><a href="#예제-6" class="headerlink" title="(예제 6)"></a>(예제 6)</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> disposable = observable</span><br><span class="line">    .doOnDispose &#123;</span><br><span class="line">        println(<span class="string">&quot;doOnDispose&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">disposable.dispose()</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br><span class="line">doOnDispose</span><br></pre></td></tr></table></figure>
+
+<h3 id="예제-7"><a href="#예제-7" class="headerlink" title="(예제 7)"></a>(예제 7)</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123;</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Value 3&quot;</span>)</span><br><span class="line">    it.onComplete()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> disposable = observable</span><br><span class="line">    .doOnDispose &#123;</span><br><span class="line">        println(<span class="string">&quot;doOnDispose&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribeBy( onNext = &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;onNext: <span class="subst">$&#123;value&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onError =&#123; error -&gt;</span><br><span class="line">        println(<span class="string">&quot;onError: <span class="subst">$&#123;error&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        println(<span class="string">&quot;onComplete&quot;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">disposable.dispose()</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">onNext: Value 1</span><br><span class="line">onNext: Value 2</span><br><span class="line">onNext: Value 3</span><br><span class="line">onComplete</span><br></pre></td></tr></table></figure>
+
+<h1 id="스트림"><a href="#스트림" class="headerlink" title="스트림"></a>스트림</h1><p>위 예제들에서 살펴본 것 처럼 <code>Observable</code>은 구독하고 있는 대상에게 데이터를 연속적, 순차적으로 흘려줍니다. 이러한 동작을 프로그래밍 언어에서 <code>데이터 흐름(Flow of data)</code> 또는 <code>스트림(Stream)</code>이라고 합니다.</p>
+<h1 id="비동기-프로그래밍"><a href="#비동기-프로그래밍" class="headerlink" title="비동기 프로그래밍"></a>비동기 프로그래밍</h1><p>사용자와 지속적으로 상호작용하는 시스템은 시간이 오래 걸리는 작업을 별도의 스레드에서 비동기적으로 처리해야합니다.</p>
+<p><code>RxKotlin</code>은 비동기 작업을 처리하는데도 효과적입니다. 간단한 예제를 살펴봅시다. 서버에 데이터를 요청하고 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;Response&gt; &#123;</span><br><span class="line">    <span class="comment">// 별도의 스레드에서 실행되어야 함.</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 서버에 데이터 요청</span></span><br><span class="line">    <span class="keyword">val</span> result = requestData()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (result.isSuccess) &#123;</span><br><span class="line">        it.onNext(response)</span><br><span class="line">    &#125; <span class="keyword">else</span>  &#123;</span><br><span class="line">        it.onError(ServerException(<span class="string">&quot;Network error.&quot;</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">observable</span><br><span class="line">    .subscribeBy(onNext = &#123; response: String -&gt;</span><br><span class="line">        <span class="comment">// 매인 스레드에서 실행되어야 함.</span></span><br><span class="line">        handleResponse(response)</span><br><span class="line">    &#125;, onError = &#123; error -&gt;</span><br><span class="line">        <span class="comment">// 매인 스레드에서 실행되어야 함.</span></span><br><span class="line">        handleError(error)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        <span class="comment">// ..</span></span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p><code>RxKotlin</code>과 <code>RxAndroid</code>를 함께 사용하면 멀티스레드를 통한 비동기 처리를 쉽게 구현할 수 있습니다. <code>RxAndroid</code>가 제공하는 다양한 <code>Schedulers</code>를 사용하면 코드가 실행되는 스레드를 지정할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;Response&gt; &#123;</span><br><span class="line">    <span class="comment">// 별도의 스레드에서 수행됨.</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">val</span> result = requestData()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (result.isSuccess) &#123;</span><br><span class="line">        it.onNext(response)</span><br><span class="line">    &#125; <span class="keyword">else</span>  &#123;</span><br><span class="line">        it.onError(ServerException(<span class="string">&quot;Network error.&quot;</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">observable</span><br><span class="line">    .subscribeOn(Schedulers.io())</span><br><span class="line">    .observeOn(AndroidSchedulers.mainThread())</span><br><span class="line">    .subscribeBy(onNext = &#123; response: String -&gt;</span><br><span class="line">        <span class="comment">// 매인 스레드에서 실행됨.</span></span><br><span class="line">        handleResponse(response)</span><br><span class="line">    &#125;, onError = &#123; error -&gt;</span><br><span class="line">        <span class="comment">// 매인 스레드에서 실행됨.</span></span><br><span class="line">        handleError(error)</span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        ..</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p><code>RxAndroid</code>는 다른 포스트에서 자세히 다루겠습니다.</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/RxJava-RxKotlin/" rel="tag">RxJava, RxKotlin</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/01/04/08_android/04_reactivex/20200104_create_observable/"
+                    data-tooltip="[RxJava, RxKotlin] Observable 생성하기 - just(), empty(), never(), error(), fromArray(), fromIterable()"
+                    aria-label="이전: [RxJava, RxKotlin] Observable 생성하기 - just(), empty(), never(), error(), fromArray(), fromIterable()"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/01/02/08_android/04_reactivex/20200102_rxjava_intro/"
+                    data-tooltip="[RxJava, RxKotlin] RxJava란?"
+                    aria-label="다음: [RxJava, RxKotlin] RxJava란?"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/01/04/08_android/04_reactivex/20200104_create_observable/"
+                    data-tooltip="[RxJava, RxKotlin] Observable 생성하기 - just(), empty(), never(), error(), fromArray(), fromIterable()"
+                    aria-label="이전: [RxJava, RxKotlin] Observable 생성하기 - just(), empty(), never(), error(), fromArray(), fromIterable()"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/01/02/08_android/04_reactivex/20200102_rxjava_intro/"
+                    data-tooltip="[RxJava, RxKotlin] RxJava란?"
+                    aria-label="다음: [RxJava, RxKotlin] RxJava란?"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/01/03/08_android/04_reactivex/20200103_rxkotlin_intro/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
