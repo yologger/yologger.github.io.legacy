@@ -1,0 +1,730 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 명시적 인텐트(Explicit Intent)와 화면 전환 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n인텐트(Intent)란?인텐트(Intent)는 안드로이드 시스템에 특정 작업을 요청하는데 사용됩니다. 크게 다섯 가지 용도로 사용됩니다.\n\n같은 어플리케이션의 다른 액티비티 실행\n다른 어플리케이션의 액티비티 실행\n데이터 전송\n브로드캐스트\n서비스 실행\n\n인텐트에는 크게 명시적 인텐트와 암시적 인텐트 두 종류가 있습니다.\n명시적 인텐트와 화면 전환명시적 인텐트(Explicit Intent)는 실행할 액티비티의 자바 클래스 이름을 참조하여 특정 액티비티를 실행하는데 사용합니다. 아래 코드는 버튼을 눌렀을 때 SubActivity로 화면을 전환하는 예제입니다.\n1234567891011121314151617class MainActivity : AppCompatActivity() &#123;    val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_contact)        button.setOnClickListener &#123;            // 실행할 액티비티의 자바 클래스 이름을 참조하여 인텐트 생성            val intent = Intent(this, SubActivity::class.java)            // 액티비티 실행            startActivity(intent)        &#125;    &#125;&#125;\n화면전환을 할 때는 아래와 같이 startActivity() 메소드를 사용합니다. 이때 인텐트를 인자로 전달하면 됩니다.\n데이터 전달인텐트는 액티비티 사이에서 데이터를 전송하는데 사용할 수도 있습니다. Intent클래스의 putExtra()메소드를 사용하면 데이터를 추가할 수 있습니다.\n데이터를 보내는 액티비티의 코드는 다음과 같습니다.\nMainActivity.kt123456789101112131415161718class MainActivity : AppCompatActivity() &#123;    val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_contact)        button.setOnClickListener &#123;            val intent = Intent(this, SubActivity::class.java)            // 인텐트에 키-값 형태도 데이터 추가            intent.putExtra(&quot;name&quot;, &quot;Paul&quot;)            startActivity(intent)        &#125;    &#125;&#125;\n\n데이터를 수신하는 액티비티의 코드는 다음과 같습니다.\nSubActivity.kt1234567891011121314class SubActivity : AppCompatActivity() &#123;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_contact)        // 인텐트에서 데이터 추출        var extras = intent.extras        extras?.getString(&quot;name&quot;)?.run &#123;            Toast.makeText(this@SubActivity, this, Toast.LENGTH_SHORT).show()        &#125;    &#125;&#125;\n\n데이터 반환SubActivity는 MainActivity로 데이터를 반환할 수 있습니다. 이때는 startActivity() 대신 startActivityForResult()메소드를 사용하여 SubActivity를 실행합니다.\nMainActivity.kt12345678910111213141516class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;    private val REQUEST_CODE = 1    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;            val intent = Intent(this, SubActivity::class.java)            intent.putExtra(&quot;name&quot;, &quot;Paul&quot;)            // startActivity(intent)            startActivityForResult(intent, REQUEST_CODE)        &#125;    &#125;&#125;\n\nSubActivity에서는 버튼을 누르면 데이터를 반환하고 액티비티를 종료합니다. 이 때 setResult()메소드와 finish()메소드를 사용합니다.\nSubActivity.kt123456789101112131415161718192021class SubActivity : AppCompatActivity() &#123;    val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_sub_button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_sub)        var extras = intent.extras        extras?.getString(&quot;name&quot;)?.run &#123;            Toast.makeText(this@SubActivity, this, Toast.LENGTH_SHORT).show()        &#125;        button.setOnClickListener &#123;            val intent = Intent()            intent.putExtra(&quot;nation&quot;, &quot;England&quot;)            setResult(Activity.RESULT_OK, intent)            finish()        &#125;    &#125;&#125;\n\n이제 SubActivity가 반환한 데이터를 받으려면 onActivityResult()를 다음과 같이 구현해야합니다.\nMainActivity.kt12345678910111213141516171819202122232425class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;    private val REQUEST_CODE = 1    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;            val intent = Intent(this, SubActivity::class.java)            intent.putExtra(&quot;name&quot;, &quot;Paul&quot;)            startActivityForResult(intent, REQUEST_CODE)        &#125;    &#125;    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) &#123;        super.onActivityResult(requestCode, resultCode, data)        if (requestCode == REQUEST_CODE) &#123;            if (resultCode != Activity.RESULT_OK) &#123; return &#125;            data?.extras?.getString(&quot;nation&quot;)?.run &#123;                Toast.makeText(this@MainActivity, this, Toast.LENGTH_SHORT).show()            &#125;        &#125;    &#125;&#125;","dateCreated":"2019-06-18T01:00:00+09:00","dateModified":"2021-12-16T05:45:26+09:00","datePublished":"2019-06-18T01:00:00+09:00","description":"","headline":"[Android] 명시적 인텐트(Explicit Intent)와 화면 전환","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/","keywords":"Android"}</script>
+    <meta name="description" content="인텐트(Intent)란?인텐트(Intent)는 안드로이드 시스템에 특정 작업을 요청하는데 사용됩니다. 크게 다섯 가지 용도로 사용됩니다.  같은 어플리케이션의 다른 액티비티 실행 다른 어플리케이션의 액티비티 실행 데이터 전송 브로드캐스트 서비스 실행  인텐트에는 크게 명시적 인텐트와 암시적 인텐트 두 종류가 있습니다. 명시적 인텐트와 화면 전환명시적 인텐">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 명시적 인텐트(Explicit Intent)와 화면 전환">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="인텐트(Intent)란?인텐트(Intent)는 안드로이드 시스템에 특정 작업을 요청하는데 사용됩니다. 크게 다섯 가지 용도로 사용됩니다.  같은 어플리케이션의 다른 액티비티 실행 다른 어플리케이션의 액티비티 실행 데이터 전송 브로드캐스트 서비스 실행  인텐트에는 크게 명시적 인텐트와 암시적 인텐트 두 종류가 있습니다. 명시적 인텐트와 화면 전환명시적 인텐">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2019-06-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T20:45:26.428Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 명시적 인텐트(Explicit Intent)와 화면 전환
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-06-18T01:00:00+09:00">
+	
+		    2019/06/18
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="인텐트-Intent-란"><a href="#인텐트-Intent-란" class="headerlink" title="인텐트(Intent)란?"></a>인텐트(Intent)란?</h1><p><code>인텐트(Intent)</code>는 안드로이드 시스템에 특정 작업을 요청하는데 사용됩니다. 크게 다섯 가지 용도로 사용됩니다.</p>
+<ul>
+<li>같은 어플리케이션의 다른 액티비티 실행</li>
+<li>다른 어플리케이션의 액티비티 실행</li>
+<li>데이터 전송</li>
+<li>브로드캐스트</li>
+<li>서비스 실행</li>
+</ul>
+<p>인텐트에는 크게 <code>명시적 인텐트</code>와 <a href="/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"><code>암시적 인텐트</code></a> 두 종류가 있습니다.</p>
+<h1 id="명시적-인텐트와-화면-전환"><a href="#명시적-인텐트와-화면-전환" class="headerlink" title="명시적 인텐트와 화면 전환"></a>명시적 인텐트와 화면 전환</h1><p><code>명시적 인텐트(Explicit Intent)</code>는 실행할 액티비티의 자바 클래스 이름을 참조하여 특정 액티비티를 실행하는데 사용합니다. 아래 코드는 버튼을 눌렀을 때 SubActivity로 화면을 전환하는 예제입니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_contact)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 실행할 액티비티의 자바 클래스 이름을 참조하여 인텐트 생성</span></span><br><span class="line">            <span class="keyword">val</span> intent = Intent(<span class="keyword">this</span>, SubActivity::<span class="keyword">class</span>.java)</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 액티비티 실행</span></span><br><span class="line">            startActivity(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>화면전환을 할 때는 아래와 같이 <code>startActivity()</code> 메소드를 사용합니다. 이때 인텐트를 인자로 전달하면 됩니다.</p>
+<h1 id="데이터-전달"><a href="#데이터-전달" class="headerlink" title="데이터 전달"></a>데이터 전달</h1><p>인텐트는 액티비티 사이에서 데이터를 전송하는데 사용할 수도 있습니다. <code>Intent</code>클래스의 <code>putExtra()</code>메소드를 사용하면 데이터를 추가할 수 있습니다.</p>
+<p>데이터를 보내는 액티비티의 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_contact)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> intent = Intent(<span class="keyword">this</span>, SubActivity::<span class="keyword">class</span>.java)</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 인텐트에 키-값 형태도 데이터 추가</span></span><br><span class="line">            intent.putExtra(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;Paul&quot;</span>)</span><br><span class="line"></span><br><span class="line">            startActivity(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>데이터를 수신하는 액티비티의 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>SubActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SubActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_contact)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 인텐트에서 데이터 추출</span></span><br><span class="line">        <span class="keyword">var</span> extras = intent.extras</span><br><span class="line"></span><br><span class="line">        extras?.getString(<span class="string">&quot;name&quot;</span>)?.run &#123;</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span><span class="symbol">@SubActivity</span>, <span class="keyword">this</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="데이터-반환"><a href="#데이터-반환" class="headerlink" title="데이터 반환"></a>데이터 반환</h1><p>SubActivity는 MainActivity로 데이터를 반환할 수 있습니다. 이때는 <code>startActivity()</code> 대신 <code>startActivityForResult()</code>메소드를 사용하여 SubActivity를 실행합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> REQUEST_CODE = <span class="number">1</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> intent = Intent(<span class="keyword">this</span>, SubActivity::<span class="keyword">class</span>.java)</span><br><span class="line">            intent.putExtra(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;Paul&quot;</span>)</span><br><span class="line">            <span class="comment">// startActivity(intent)</span></span><br><span class="line">            startActivityForResult(intent, REQUEST_CODE)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>SubActivity에서는 버튼을 누르면 데이터를 반환하고 액티비티를 종료합니다. 이 때 <code>setResult()</code>메소드와 <code>finish()</code>메소드를 사용합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>SubActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SubActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_sub_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_sub)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> extras = intent.extras</span><br><span class="line">        extras?.getString(<span class="string">&quot;name&quot;</span>)?.run &#123;</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span><span class="symbol">@SubActivity</span>, <span class="keyword">this</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> intent = Intent()</span><br><span class="line">            intent.putExtra(<span class="string">&quot;nation&quot;</span>, <span class="string">&quot;England&quot;</span>)</span><br><span class="line">            setResult(Activity.RESULT_OK, intent)</span><br><span class="line">            finish()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 SubActivity가 반환한 데이터를 받으려면 <code>onActivityResult()</code>를 다음과 같이 구현해야합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> REQUEST_CODE = <span class="number">1</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> intent = Intent(<span class="keyword">this</span>, SubActivity::<span class="keyword">class</span>.java)</span><br><span class="line">            intent.putExtra(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;Paul&quot;</span>)</span><br><span class="line">            startActivityForResult(intent, REQUEST_CODE)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onActivityResult</span><span class="params">(requestCode: <span class="type">Int</span>, resultCode: <span class="type">Int</span>, <span class="keyword">data</span>: <span class="type">Intent</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onActivityResult(requestCode, resultCode, <span class="keyword">data</span>)</span><br><span class="line">        <span class="keyword">if</span> (requestCode == REQUEST_CODE) &#123;</span><br><span class="line">            <span class="keyword">if</span> (resultCode != Activity.RESULT_OK) &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">            <span class="keyword">data</span>?.extras?.getString(<span class="string">&quot;nation&quot;</span>)?.run &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="keyword">this</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/19/08_android/01_android_platform/190619_Task_ActivityStack/"
+                    data-tooltip="[Android] 태스크(Task)와 액티비티 스택(Activity Stack)"
+                    aria-label="이전: [Android] 태스크(Task)와 액티비티 스택(Activity Stack)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/17/08_android/01_android_platform/190617_activity_lifecycle/"
+                    data-tooltip="[Android] 액티비티의 생명주기(Lifecycle)"
+                    aria-label="다음: [Android] 액티비티의 생명주기(Lifecycle)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/19/08_android/01_android_platform/190619_Task_ActivityStack/"
+                    data-tooltip="[Android] 태스크(Task)와 액티비티 스택(Activity Stack)"
+                    aria-label="이전: [Android] 태스크(Task)와 액티비티 스택(Activity Stack)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/17/08_android/01_android_platform/190617_activity_lifecycle/"
+                    data-tooltip="[Android] 액티비티의 생명주기(Lifecycle)"
+                    aria-label="다음: [Android] 액티비티의 생명주기(Lifecycle)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/18/08_android/01_android_platform/190618_explicit_intent/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

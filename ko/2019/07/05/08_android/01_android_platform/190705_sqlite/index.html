@@ -1,0 +1,749 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] SQLite란 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nSQLiteSQLite는 관계형 데이터베이스 입니다. 크기가 작고 가벼워 안드로이드나 애플 iOS처럼 모바일용 데이터베이스로 많이 사용합니다.\nSQLite는 안드로이드 SDK에 포함되어있습니다. 따라서 별도의 설치가 필요없습니다.\n123456$ pwd/Users/[user_name]/Library/Android/sdk/platform-tools$ lssqlite3...\n\n예제상품을 데이터베이스에 저장하는 예제를 만들어보겠습니다.\n(1) 데이터 모델 설계하기우선 데이터 모델인 Product클래스를 정의합니다. Product클래스는 상품을 식별하는 _id, 상품 이름인 _productName, 수량인 _quantity를 속성으로 가지고 있습니다.\n12345data class Product(    var _id: Int = 0,    var _productName: String,    var _quantity: Int)\n\n데이터 핸들러 구현하기데이터 핸들러는 데이터의 추가, 삭제, 변경, 조회를 담당하는 클래스입니다. SQLiteOpenHelper클래스의 서브 클래스로 구현됩니다. \n1234567891011121314class DBHelper constructor(    // ..): SQLiteOpenHelper(    // .. ) &#123;    override fun onCreate(db: SQLiteDatabase?) &#123;        TODO(&quot;Not yet implemented&quot;)    &#125;    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) &#123;        TODO(&quot;Not yet implemented&quot;)    &#125;&#125;\n데이터베이스 이름, 데이터베이스 버전, 테이블 이름, 컬럼 이름을 선언합니다.\n1234567891011121314151617class DBHelper constructor(    // ..): SQLiteOpenHelper(    // .. ) &#123;    companion object &#123;        const val DATABASE_NAME = &quot;productDB.db&quot;        const val DATABASE_VERSION = 1        const val TABLE_PRODUCTS = &quot;products&quot;        const val COLUMN_ID = &quot;id&quot;        const val COLUMN_PRODUCT_NAME = &quot;product_name&quot;        const val COLUMN_QUANTITY = &quot;quantity&quot;    &#125;    // ...&#125;\n이제 생성자를 다음과 같이 구현합니다. \n123456789101112131415161718class DBHelper constructor(    context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int) : SQLiteOpenHelper(    context, DATABASE_NAME, factory, DATABASE_VERSION) &#123;    companion object &#123;        const val DATABASE_NAME = &quot;productDB.db&quot;        const val DATABASE_VERSION = 1        const val TABLE_PRODUCTS = &quot;products&quot;        const val COLUMN_ID = &quot;id&quot;        const val COLUMN_PRODUCT_NAME = &quot;product_name&quot;        const val COLUMN_QUANTITY = &quot;quantity&quot;    &#125;    // ...&#125;\nonCreate()는 데이터베이스가 최초로 초기화될 때 호출됩니다. 여기서 product 테이블을 생성합시다.\n1234567891011121314151617181920class DBHelper constructor(    context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: Int) : SQLiteOpenHelper(    context, DATABASE_NAME, factory, DATABASE_VERSION) &#123;    // ...    override fun onCreate(db: SQLiteDatabase?) &#123;        val query = &quot;CREATE TABLE $&#123;TABLE_PRODUCTS&#125; &quot; +                &quot;(&quot; +                &quot;$COLUMN_ID INTEGER PRIMARY KEY, &quot; +                &quot;$COLUMN_PRODUCT_NAME TEXT,&quot; +                &quot;$COLUMN_QUANTITY INTEGER&quot; +                &quot;)&quot;        db?.execSQL(query)    &#125;    // ...&#125;\n이전에 사용된 것보다 더 높은 데이터베이스 버전을 가지고 핸들러가 실행될 때 onUpgrade()가 호출됩니다. \n여기서 말하는 데이터베이스 버전은 SQLite의 버전이 아닙니다. 테이블의 열이 추가되거나 데이터베이스 스키마가 변경되었을 때 버전 번호를 올려서 핸들러를 실행하면 onUpgrade()가 자동으로 호출됩니다. 이 때 onUpgrade() 안에서 원하는 SQL 작업을 수행합니다.\n\n\n\n12345678910111213class DBHelper constructor(    context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: Int) : SQLiteOpenHelper(    context, DATABASE_NAME, factory, DATABASE_VERSION) &#123;    // ...    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) &#123;        val query = &quot;DROP TABLE IF EXISTS $&#123;TABLE_PRODUCTS&#125;&quot;        db?.execSQL(query)        onCreate(db)    &#125;&#125;\n이제 데이터를 추가하는 메서드를 구현합시다. 메서드의 이름은 addProduct() 입니다.\n123456789101112131415161718class DBHelper constructor(    context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: Int) : SQLiteOpenHelper(    context, DATABASE_NAME, factory, DATABASE_VERSION) &#123;    // ...    fun addProduct(product: Product) &#123;        val values = ContentValues()        values.put(COLUMN_PRODUCT_NAME, product._productName)        values.put(COLUMN_QUANTITY, product._quantity)        var db = writableDatabase        db.insert(TABLE_PRODUCTS, null, values)        db.close()    &#125;&#125;\n데이터를 검색하는 메서드는 findProduct()입니다.\n123456789101112131415161718192021222324252627282930class DBHelper constructor(    context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: Int) : SQLiteOpenHelper(    context, DATABASE_NAME, factory, DATABASE_VERSION) &#123;    // ...    fun findProduct(productName: String): Product? &#123;        val query = &quot;SELECT * FROM $&#123;TABLE_PRODUCTS&#125; WHERE $&#123;COLUMN_PRODUCT_NAME&#125; = \\&quot;$&#123;productName&#125;\\&quot;&quot;        val db = writableDatabase        val cursor = db.rawQuery(query, null)        var product: Product? = null        if (cursor.moveToFirst()) &#123;           product = Product(               _id = Integer.parseInt(cursor.getString(0)),               _productName = cursor.getString(1),               _quantity =  Integer.parseInt(cursor.getString(2))           )            cursor.close()        &#125; else &#123;            product = null        &#125;        db.close()        return product    &#125;&#125;\n데이터를 삭제하는 메서드는 deleteProduct()입니다.\n12345678910111213141516171819202122232425class DBHelper constructor(    context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int) : SQLiteOpenHelper(    context, DATABASE_NAME, factory, DATABASE_VERSION) &#123;    fun deleteProduct(productName: String): Boolean &#123;        var result = false        val query = &quot;SELECT * FROM $&#123;TABLE_PRODUCTS&#125; WHERE $&#123;COLUMN_PRODUCT_NAME&#125; = \\&quot;$&#123;productName&#125;\\&quot;&quot;        val db = writableDatabase        var cursor = db.rawQuery(query, null)        if (cursor.moveToFirst()) &#123;            val productId = Integer.parseInt(cursor.getString(0))            db.delete(TABLE_PRODUCTS, &quot;$COLUMN_ID = $&#123;productId&#125;&quot;, null)            cursor.close()            result = true        &#125;        db.close()        return result    &#125;&#125;\n전체 코드는 다음과 같습니다.\n123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687class DBHelper constructor(    context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int) : SQLiteOpenHelper(    context, DATABASE_NAME, factory, DATABASE_VERSION) &#123;    companion object &#123;        const val DATABASE_NAME = &quot;productDB.db&quot;        const val DATABASE_VERSION = 1        const val TABLE_PRODUCTS = &quot;products&quot;        const val COLUMN_ID = &quot;id&quot;        const val COLUMN_PRODUCT_NAME = &quot;product_name&quot;        const val COLUMN_QUANTITY = &quot;quantity&quot;    &#125;    override fun onCreate(db: SQLiteDatabase?) &#123;        val query = &quot;CREATE TABLE $&#123;TABLE_PRODUCTS&#125; &quot; +                &quot;(&quot; +                &quot;$COLUMN_ID INTEGER PRIMARY KEY, &quot; +                &quot;$COLUMN_PRODUCT_NAME TEXT,&quot; +                &quot;$COLUMN_QUANTITY INTEGER&quot; +                &quot;)&quot;        db?.execSQL(query)    &#125;    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) &#123;        val query = &quot;DROP TABLE IF EXISTS $&#123;TABLE_PRODUCTS&#125;&quot;        db?.execSQL(query)        onCreate(db)    &#125;    fun addProduct(product: Product) &#123;        val values = ContentValues()        values.put(COLUMN_PRODUCT_NAME, product._productName)        values.put(COLUMN_QUANTITY, product._quantity)        var db = writableDatabase        db.insert(TABLE_PRODUCTS, null, values)        db.close()    &#125;    fun findProduct(productName: String): Product? &#123;        val query = &quot;SELECT * FROM $&#123;TABLE_PRODUCTS&#125; WHERE $&#123;COLUMN_PRODUCT_NAME&#125; = \\&quot;$&#123;productName&#125;\\&quot;&quot;        val db = writableDatabase        val cursor = db.rawQuery(query, null)        var product: Product? = null        if (cursor.moveToFirst()) &#123;           product = Product(               _id = Integer.parseInt(cursor.getString(0)),               _productName = cursor.getString(1),               _quantity =  Integer.parseInt(cursor.getString(2))           )            cursor.close()        &#125; else &#123;            product = null        &#125;        db.close()        return product    &#125;    fun deleteProduct(productName: String): Boolean &#123;        var result = false        val query = &quot;SELECT * FROM $&#123;TABLE_PRODUCTS&#125; WHERE $&#123;COLUMN_PRODUCT_NAME&#125; = \\&quot;$&#123;productName&#125;\\&quot;&quot;        val db = writableDatabase        var cursor = db.rawQuery(query, null)        if (cursor.moveToFirst()) &#123;            val productId = Integer.parseInt(cursor.getString(0))            Log.d(&quot;TEST&quot;, &quot;productId: $&#123;productId&#125;&quot;)            db.delete(TABLE_PRODUCTS, &quot;$COLUMN_ID = $&#123;productId&#125;&quot;, null)            cursor.close()            result = true        &#125;        db.close()        return result    &#125;&#125;\n이제 MainActivity에서 버튼을 누르면 추가, 검색, 삭제를 하겠습니다.레이아웃은 다음과 같습니다\nactivity_main.xmlxml12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;&lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"    xmlns:app=\"http://schemas.android.com/apk/res-auto\"    xmlns:tools=\"http://schemas.android.com/tools\"    android:layout_width=\"match_parent\"    android:layout_height=\"match_parent\"    tools:context=\".MainActivity\"&gt;    &lt;LinearLayout        android:padding=\"36dp\"        android:id=\"@+id/activity_main_ll_top\"        android:layout_width=\"match_parent\"        android:layout_height=\"wrap_content\"        android:orientation=\"vertical\"        app:layout_constraintTop_toTopOf=\"parent\"        app:layout_constraintStart_toStartOf=\"parent\"        app:layout_constraintEnd_toEndOf=\"parent\"        app:layout_constraintBottom_toBottomOf=\"parent\"&gt;        &lt;EditText            android:id=\"@+id/activity_main_tv_product_name\"            android:layout_width=\"match_parent\"            android:layout_height=\"wrap_content\"            android:hint=\"Product Name\"/&gt;        &lt;EditText            android:id=\"@+id/activity_main_tv_quantity\"            android:layout_width=\"match_parent\"            android:layout_height=\"wrap_content\"            android:hint=\"Quantity\"/&gt;        &lt;Button            android:id=\"@+id/activity_main_btn_add\"            android:layout_width=\"match_parent\"            android:layout_height=\"wrap_content\"            android:text=\"Add\" /&gt;        &lt;Button            android:id=\"@+id/activity_main_btn_find\"            android:layout_width=\"match_parent\"            android:layout_height=\"wrap_content\"            android:text=\"Find\" /&gt;        &lt;Button            android:id=\"@+id/activity_main_btn_remove\"            android:layout_width=\"match_parent\"            android:layout_height=\"wrap_content\"            android:text=\"Remove\" /&gt;    &lt;/LinearLayout&gt;    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n\n코드는 다음과 같습니다.\n12345678910111213141516171819202122232425262728293031323334353637383940414243class MainActivity : AppCompatActivity() &#123;    val buttonAdd: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_add) &#125;    val buttonFind: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_find) &#125;    val buttonRemove: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_remove) &#125;    val editTextProductName: EditText by lazy &#123; findViewById&lt;EditText&gt;(R.id.activity_main_tv_product_name) &#125;    val editTextQuantity: EditText by lazy &#123; findViewById&lt;EditText&gt;(R.id.activity_main_tv_quantity) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        buttonAdd.setOnClickListener &#123;            val dbHelper = DBHelper(this, null, null, 1)            var productName = editTextProductName.text.toString()            val quantity = Integer.parseInt(editTextQuantity.text.toString())            val product = Product(_productName = productName, _quantity = quantity)            dbHelper.addProduct(product)            Toast.makeText(this, &quot;Added.&quot;, Toast.LENGTH_SHORT).show()        &#125;        buttonFind.setOnClickListener &#123;            val dbHelper = DBHelper(this, null, null, 1)            var productName = editTextProductName.text.toString()            val product = dbHelper.findProduct(productName)            if (product != null) &#123;                Toast.makeText(this, &quot;$&#123;product.toString()&#125;&quot;, Toast.LENGTH_SHORT).show()            &#125; else &#123;                Toast.makeText(this, &quot;No Such Item.&quot;, Toast.LENGTH_SHORT).show()            &#125;        &#125;        buttonRemove.setOnClickListener &#123;            val dbHelper = DBHelper(this, null, null, 1)            var result = dbHelper.deleteProduct(&quot;iPhone&quot;)            if (result) &#123;                Toast.makeText(this, &quot;Deleted.&quot;, Toast.LENGTH_SHORT).show()            &#125; else &#123;                Toast.makeText(this, &quot;Not Deleted. No Such Item.&quot;, Toast.LENGTH_SHORT).show()            &#125;        &#125;    &#125;&#125;\n이제 앱을 실행하고 상품명과 수량을 입력합니다. Find 버튼을 누르면 다음과 같은 토스트 메시지가 나옵니다. 아직 추가된 데이터가 없기 때문입니다. 이제 ADD 버튼을 눌러 데이터를 추가합니다. 데이터가 정상적으로 추가되면 다음과 같이 토스트 메시지가 나옵니다.다시 Find 버튼을 눌러봅니다. 입력한 데이터가 토스트 메시지에 출력됩니다.이제 REMOVE 버튼을 누릅니다. 데이터가 삭제되고 다음과 같은 메시지가 출력됩니다.다시 한번 REMOVE 버튼을 누릅니다. 데이터가 이미 삭제됐으므로 다음과 같은 메시지가 출력됩니다.\n","dateCreated":"2019-07-05T01:00:00+09:00","dateModified":"2021-12-16T06:37:35+09:00","datePublished":"2019-07-05T01:00:00+09:00","description":"","headline":"[Android] SQLite란","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/","keywords":"Android"}</script>
+    <meta name="description" content="SQLiteSQLite는 관계형 데이터베이스 입니다. 크기가 작고 가벼워 안드로이드나 애플 iOS처럼 모바일용 데이터베이스로 많이 사용합니다. SQLite는 안드로이드 SDK에 포함되어있습니다. 따라서 별도의 설치가 필요없습니다. 123456$ pwd&#x2F;Users&#x2F;[user_name]&#x2F;Library&#x2F;Android&#x2F;sdk&#x2F;platform-tools$ lssq">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] SQLite란">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="SQLiteSQLite는 관계형 데이터베이스 입니다. 크기가 작고 가벼워 안드로이드나 애플 iOS처럼 모바일용 데이터베이스로 많이 사용합니다. SQLite는 안드로이드 SDK에 포함되어있습니다. 따라서 별도의 설치가 필요없습니다. 123456$ pwd&#x2F;Users&#x2F;[user_name]&#x2F;Library&#x2F;Android&#x2F;sdk&#x2F;platform-tools$ lssq">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/0.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/0.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/3.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/4.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/5.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/6.png">
+<meta property="article:published_time" content="2019-07-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T21:37:35.349Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/0.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] SQLite란
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-07-05T01:00:00+09:00">
+	
+		    2019/07/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="SQLite"><a href="#SQLite" class="headerlink" title="SQLite"></a>SQLite</h1><p><code>SQLite</code>는 관계형 데이터베이스 입니다. 크기가 작고 가벼워 안드로이드나 애플 iOS처럼 모바일용 데이터베이스로 많이 사용합니다.</p>
+<p><code>SQLite</code>는 안드로이드 SDK에 포함되어있습니다. 따라서 별도의 설치가 필요없습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">pwd</span></span></span><br><span class="line">/Users/[user_name]/Library/Android/sdk/platform-tools</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">sqlite3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>상품을 데이터베이스에 저장하는 예제를 만들어보겠습니다.<br><img src="0.png"></p>
+<h3 id="1-데이터-모델-설계하기"><a href="#1-데이터-모델-설계하기" class="headerlink" title="(1) 데이터 모델 설계하기"></a>(1) 데이터 모델 설계하기</h3><p>우선 데이터 모델인 <code>Product</code>클래스를 정의합니다. <code>Product</code>클래스는 상품을 식별하는 <code>_id</code>, 상품 이름인 <code>_productName</code>, 수량인 <code>_quantity</code>를 속성으로 가지고 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Product</span></span>(</span><br><span class="line">    <span class="keyword">var</span> _id: <span class="built_in">Int</span> = <span class="number">0</span>,</span><br><span class="line">    <span class="keyword">var</span> _productName: String,</span><br><span class="line">    <span class="keyword">var</span> _quantity: <span class="built_in">Int</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="데이터-핸들러-구현하기"><a href="#데이터-핸들러-구현하기" class="headerlink" title="데이터 핸들러 구현하기"></a>데이터 핸들러 구현하기</h3><p>데이터 핸들러는 데이터의 추가, 삭제, 변경, 조회를 담당하는 클래스입니다. <code>SQLiteOpenHelper</code>클래스의 서브 클래스로 구현됩니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">): SQLiteOpenHelper(</span><br><span class="line">    <span class="comment">// .. </span></span><br><span class="line">) &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SQLiteDatabase</span>?)</span></span> &#123;</span><br><span class="line">        TODO(<span class="string">&quot;Not yet implemented&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onUpgrade</span><span class="params">(db: <span class="type">SQLiteDatabase</span>?, oldVersion: <span class="type">Int</span>, newVersion: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        TODO(<span class="string">&quot;Not yet implemented&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>데이터베이스 이름</code>, <code>데이터베이스 버전</code>, <code>테이블 이름</code>, <code>컬럼 이름</code>을 선언합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">): SQLiteOpenHelper(</span><br><span class="line">    <span class="comment">// .. </span></span><br><span class="line">) &#123;</span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> DATABASE_NAME = <span class="string">&quot;productDB.db&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> DATABASE_VERSION = <span class="number">1</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TABLE_PRODUCTS = <span class="string">&quot;products&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_ID = <span class="string">&quot;id&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_PRODUCT_NAME = <span class="string">&quot;product_name&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_QUANTITY = <span class="string">&quot;quantity&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>생성자</code>를 다음과 같이 구현합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: <span class="built_in">Int</span></span><br><span class="line">) : SQLiteOpenHelper(</span><br><span class="line">    context, DATABASE_NAME, factory, DATABASE_VERSION</span><br><span class="line">) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> DATABASE_NAME = <span class="string">&quot;productDB.db&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> DATABASE_VERSION = <span class="number">1</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TABLE_PRODUCTS = <span class="string">&quot;products&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_ID = <span class="string">&quot;id&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_PRODUCT_NAME = <span class="string">&quot;product_name&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_QUANTITY = <span class="string">&quot;quantity&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>onCreate()</code>는 데이터베이스가 최초로 초기화될 때 호출됩니다. 여기서 product 테이블을 생성합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: <span class="built_in">Int</span></span><br><span class="line">) : SQLiteOpenHelper(</span><br><span class="line">    context, DATABASE_NAME, factory, DATABASE_VERSION</span><br><span class="line">) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SQLiteDatabase</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> query = <span class="string">&quot;CREATE TABLE <span class="subst">$&#123;TABLE_PRODUCTS&#125;</span> &quot;</span> +</span><br><span class="line">                <span class="string">&quot;(&quot;</span> +</span><br><span class="line">                <span class="string">&quot;<span class="variable">$COLUMN_ID</span> INTEGER PRIMARY KEY, &quot;</span> +</span><br><span class="line">                <span class="string">&quot;<span class="variable">$COLUMN_PRODUCT_NAME</span> TEXT,&quot;</span> +</span><br><span class="line">                <span class="string">&quot;<span class="variable">$COLUMN_QUANTITY</span> INTEGER&quot;</span> +</span><br><span class="line">                <span class="string">&quot;)&quot;</span></span><br><span class="line">        db?.execSQL(query)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이전에 사용된 것보다 더 높은 데이터베이스 버전을 가지고 핸들러가 실행될 때 <code>onUpgrade()</code>가 호출됩니다. </p>
+<div class="alert warning icon"><p>여기서 말하는 <b>데이터베이스 버전</b>은 SQLite의 버전이 아닙니다. 테이블의 열이 추가되거나 데이터베이스 스키마가 변경되었을 때 버전 번호를 올려서 핸들러를 실행하면 <b>onUpgrade()</b>가 자동으로 호출됩니다. 이 때 <b>onUpgrade()</b> 안에서 원하는 SQL 작업을 수행합니다.</p>
+</div>
+
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: <span class="built_in">Int</span></span><br><span class="line">) : SQLiteOpenHelper(</span><br><span class="line">    context, DATABASE_NAME, factory, DATABASE_VERSION</span><br><span class="line">) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onUpgrade</span><span class="params">(db: <span class="type">SQLiteDatabase</span>?, oldVersion: <span class="type">Int</span>, newVersion: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> query = <span class="string">&quot;DROP TABLE IF EXISTS <span class="subst">$&#123;TABLE_PRODUCTS&#125;</span>&quot;</span></span><br><span class="line">        db?.execSQL(query)</span><br><span class="line">        onCreate(db)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 데이터를 추가하는 메서드를 구현합시다. 메서드의 이름은 <code>addProduct()</code> 입니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: <span class="built_in">Int</span></span><br><span class="line">) : SQLiteOpenHelper(</span><br><span class="line">    context, DATABASE_NAME, factory, DATABASE_VERSION</span><br><span class="line">) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">addProduct</span><span class="params">(product: <span class="type">Product</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> values = ContentValues()</span><br><span class="line"></span><br><span class="line">        values.put(COLUMN_PRODUCT_NAME, product._productName)</span><br><span class="line">        values.put(COLUMN_QUANTITY, product._quantity)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> db = writableDatabase</span><br><span class="line">        db.insert(TABLE_PRODUCTS, <span class="literal">null</span>, values)</span><br><span class="line">        db.close()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>데이터를 검색하는 메서드는 <code>findProduct()</code>입니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: <span class="built_in">Int</span></span><br><span class="line">) : SQLiteOpenHelper(</span><br><span class="line">    context, DATABASE_NAME, factory, DATABASE_VERSION</span><br><span class="line">) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">findProduct</span><span class="params">(productName: <span class="type">String</span>)</span></span>: Product? &#123;</span><br><span class="line">        <span class="keyword">val</span> query = <span class="string">&quot;SELECT * FROM <span class="subst">$&#123;TABLE_PRODUCTS&#125;</span> WHERE <span class="subst">$&#123;COLUMN_PRODUCT_NAME&#125;</span> = \&quot;<span class="subst">$&#123;productName&#125;</span>\&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> db = writableDatabase</span><br><span class="line">        <span class="keyword">val</span> cursor = db.rawQuery(query, <span class="literal">null</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> product: Product? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (cursor.moveToFirst()) &#123;</span><br><span class="line">           product = Product(</span><br><span class="line">               _id = Integer.parseInt(cursor.getString(<span class="number">0</span>)),</span><br><span class="line">               _productName = cursor.getString(<span class="number">1</span>),</span><br><span class="line">               _quantity =  Integer.parseInt(cursor.getString(<span class="number">2</span>))</span><br><span class="line">           )</span><br><span class="line">            cursor.close()</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            product = <span class="literal">null</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        db.close()</span><br><span class="line">        <span class="keyword">return</span> product</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>데이터를 삭제하는 메서드는 <code>deleteProduct()</code>입니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: <span class="built_in">Int</span></span><br><span class="line">) : SQLiteOpenHelper(</span><br><span class="line">    context, DATABASE_NAME, factory, DATABASE_VERSION</span><br><span class="line">) &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">deleteProduct</span><span class="params">(productName: <span class="type">String</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> result = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> query = <span class="string">&quot;SELECT * FROM <span class="subst">$&#123;TABLE_PRODUCTS&#125;</span> WHERE <span class="subst">$&#123;COLUMN_PRODUCT_NAME&#125;</span> = \&quot;<span class="subst">$&#123;productName&#125;</span>\&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> db = writableDatabase</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> cursor = db.rawQuery(query, <span class="literal">null</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (cursor.moveToFirst()) &#123;</span><br><span class="line">            <span class="keyword">val</span> productId = Integer.parseInt(cursor.getString(<span class="number">0</span>))</span><br><span class="line">            db.delete(TABLE_PRODUCTS, <span class="string">&quot;<span class="variable">$COLUMN_ID</span> = <span class="subst">$&#123;productId&#125;</span>&quot;</span>, <span class="literal">null</span>)</span><br><span class="line">            cursor.close()</span><br><span class="line">            result = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        db.close()</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>전체 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DBHelper</span> <span class="keyword">constructor</span></span>(</span><br><span class="line">    context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: <span class="built_in">Int</span></span><br><span class="line">) : SQLiteOpenHelper(</span><br><span class="line">    context, DATABASE_NAME, factory, DATABASE_VERSION</span><br><span class="line">) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> DATABASE_NAME = <span class="string">&quot;productDB.db&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> DATABASE_VERSION = <span class="number">1</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TABLE_PRODUCTS = <span class="string">&quot;products&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_ID = <span class="string">&quot;id&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_PRODUCT_NAME = <span class="string">&quot;product_name&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> COLUMN_QUANTITY = <span class="string">&quot;quantity&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SQLiteDatabase</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> query = <span class="string">&quot;CREATE TABLE <span class="subst">$&#123;TABLE_PRODUCTS&#125;</span> &quot;</span> +</span><br><span class="line">                <span class="string">&quot;(&quot;</span> +</span><br><span class="line">                <span class="string">&quot;<span class="variable">$COLUMN_ID</span> INTEGER PRIMARY KEY, &quot;</span> +</span><br><span class="line">                <span class="string">&quot;<span class="variable">$COLUMN_PRODUCT_NAME</span> TEXT,&quot;</span> +</span><br><span class="line">                <span class="string">&quot;<span class="variable">$COLUMN_QUANTITY</span> INTEGER&quot;</span> +</span><br><span class="line">                <span class="string">&quot;)&quot;</span></span><br><span class="line">        db?.execSQL(query)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onUpgrade</span><span class="params">(db: <span class="type">SQLiteDatabase</span>?, oldVersion: <span class="type">Int</span>, newVersion: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> query = <span class="string">&quot;DROP TABLE IF EXISTS <span class="subst">$&#123;TABLE_PRODUCTS&#125;</span>&quot;</span></span><br><span class="line">        db?.execSQL(query)</span><br><span class="line">        onCreate(db)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">addProduct</span><span class="params">(product: <span class="type">Product</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> values = ContentValues()</span><br><span class="line"></span><br><span class="line">        values.put(COLUMN_PRODUCT_NAME, product._productName)</span><br><span class="line">        values.put(COLUMN_QUANTITY, product._quantity)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> db = writableDatabase</span><br><span class="line">        db.insert(TABLE_PRODUCTS, <span class="literal">null</span>, values)</span><br><span class="line">        db.close()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">findProduct</span><span class="params">(productName: <span class="type">String</span>)</span></span>: Product? &#123;</span><br><span class="line">        <span class="keyword">val</span> query = <span class="string">&quot;SELECT * FROM <span class="subst">$&#123;TABLE_PRODUCTS&#125;</span> WHERE <span class="subst">$&#123;COLUMN_PRODUCT_NAME&#125;</span> = \&quot;<span class="subst">$&#123;productName&#125;</span>\&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> db = writableDatabase</span><br><span class="line">        <span class="keyword">val</span> cursor = db.rawQuery(query, <span class="literal">null</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> product: Product? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (cursor.moveToFirst()) &#123;</span><br><span class="line">           product = Product(</span><br><span class="line">               _id = Integer.parseInt(cursor.getString(<span class="number">0</span>)),</span><br><span class="line">               _productName = cursor.getString(<span class="number">1</span>),</span><br><span class="line">               _quantity =  Integer.parseInt(cursor.getString(<span class="number">2</span>))</span><br><span class="line">           )</span><br><span class="line">            cursor.close()</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            product = <span class="literal">null</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        db.close()</span><br><span class="line">        <span class="keyword">return</span> product</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">deleteProduct</span><span class="params">(productName: <span class="type">String</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> result = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> query = <span class="string">&quot;SELECT * FROM <span class="subst">$&#123;TABLE_PRODUCTS&#125;</span> WHERE <span class="subst">$&#123;COLUMN_PRODUCT_NAME&#125;</span> = \&quot;<span class="subst">$&#123;productName&#125;</span>\&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> db = writableDatabase</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> cursor = db.rawQuery(query, <span class="literal">null</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (cursor.moveToFirst()) &#123;</span><br><span class="line">            <span class="keyword">val</span> productId = Integer.parseInt(cursor.getString(<span class="number">0</span>))</span><br><span class="line">            Log.d(<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;productId: <span class="subst">$&#123;productId&#125;</span>&quot;</span>)</span><br><span class="line">            db.delete(TABLE_PRODUCTS, <span class="string">&quot;<span class="variable">$COLUMN_ID</span> = <span class="subst">$&#123;productId&#125;</span>&quot;</span>, <span class="literal">null</span>)</span><br><span class="line">            cursor.close()</span><br><span class="line">            result = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        db.close()</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>MainActivity</code>에서 버튼을 누르면 추가, 검색, 삭제를 하겠습니다.<br><img src="0.png"><br>레이아웃은 다음과 같습니다</p>
+<figure class="codeblock codeblock--tabbed"><figcaption><span>activity_main.xml</span><ul class="tabs"><li class="tab active">xml</li></ul></figcaption><div class="tabs-content"><figure class="highlight xml" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">".MainActivity"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">LinearLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:padding</span>=<span class="string">"36dp"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_ll_top"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:orientation</span>=<span class="string">"vertical"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">"parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">EditText</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_tv_product_name"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:hint</span>=<span class="string">"Product Name"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">EditText</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_tv_quantity"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:hint</span>=<span class="string">"Quantity"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_btn_add"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">"Add"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_btn_find"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">"Find"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_btn_remove"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">"Remove"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line">    </span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure></div></figure>
+
+<p>코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> buttonAdd: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_add) &#125;</span><br><span class="line">    <span class="keyword">val</span> buttonFind: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_find) &#125;</span><br><span class="line">    <span class="keyword">val</span> buttonRemove: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_remove) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> editTextProductName: EditText <span class="keyword">by</span> lazy &#123; findViewById&lt;EditText&gt;(R.id.activity_main_tv_product_name) &#125;</span><br><span class="line">    <span class="keyword">val</span> editTextQuantity: EditText <span class="keyword">by</span> lazy &#123; findViewById&lt;EditText&gt;(R.id.activity_main_tv_quantity) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        buttonAdd.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> dbHelper = DBHelper(<span class="keyword">this</span>, <span class="literal">null</span>, <span class="literal">null</span>, <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">var</span> productName = editTextProductName.text.toString()</span><br><span class="line">            <span class="keyword">val</span> quantity = Integer.parseInt(editTextQuantity.text.toString())</span><br><span class="line">            <span class="keyword">val</span> product = Product(_productName = productName, _quantity = quantity)</span><br><span class="line">            dbHelper.addProduct(product)</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span>, <span class="string">&quot;Added.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line">        buttonFind.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> dbHelper = DBHelper(<span class="keyword">this</span>, <span class="literal">null</span>, <span class="literal">null</span>, <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">var</span> productName = editTextProductName.text.toString()</span><br><span class="line">            <span class="keyword">val</span> product = dbHelper.findProduct(productName)</span><br><span class="line">            <span class="keyword">if</span> (product != <span class="literal">null</span>) &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span>, <span class="string">&quot;<span class="subst">$&#123;product.toString()&#125;</span>&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span>, <span class="string">&quot;No Such Item.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        buttonRemove.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> dbHelper = DBHelper(<span class="keyword">this</span>, <span class="literal">null</span>, <span class="literal">null</span>, <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">var</span> result = dbHelper.deleteProduct(<span class="string">&quot;iPhone&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> (result) &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span>, <span class="string">&quot;Deleted.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span>, <span class="string">&quot;Not Deleted. No Such Item.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행하고 상품명과 수량을 입력합니다.<br><img src="1.png"><br> <code>Find 버튼</code>을 누르면 다음과 같은 토스트 메시지가 나옵니다. 아직 추가된 데이터가 없기 때문입니다.<br><img src="2.png"><br> 이제 <code>ADD 버튼</code>을 눌러 데이터를 추가합니다. 데이터가 정상적으로 추가되면 다음과 같이 토스트 메시지가 나옵니다.<br><img src="3.png"><br>다시 <code>Find 버튼</code>을 눌러봅니다. 입력한 데이터가 토스트 메시지에 출력됩니다.<br><img src="4.png"><br>이제 <code>REMOVE 버튼</code>을 누릅니다. 데이터가 삭제되고 다음과 같은 메시지가 출력됩니다.<br><img src="5.png"><br>다시 한번 <code>REMOVE 버튼</code>을 누릅니다. 데이터가 이미 삭제됐으므로 다음과 같은 메시지가 출력됩니다.<br><img src="6.png"></p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/06/08_android/01_android_platform/190706_content_provider/"
+                    data-tooltip="[Android] 컨텐트 프로바이더(Content Provider)와 컨텐트 리솔버(Content Resolver)"
+                    aria-label="이전: [Android] 컨텐트 프로바이더(Content Provider)와 컨텐트 리솔버(Content Resolver)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/04/08_android/01_android_platform/190704_service_lifecycle/"
+                    data-tooltip="[Android] 서비스 - (4) 서비스의 생명주기"
+                    aria-label="다음: [Android] 서비스 - (4) 서비스의 생명주기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/06/08_android/01_android_platform/190706_content_provider/"
+                    data-tooltip="[Android] 컨텐트 프로바이더(Content Provider)와 컨텐트 리솔버(Content Resolver)"
+                    aria-label="이전: [Android] 컨텐트 프로바이더(Content Provider)와 컨텐트 리솔버(Content Resolver)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/04/08_android/01_android_platform/190704_service_lifecycle/"
+                    data-tooltip="[Android] 서비스 - (4) 서비스의 생명주기"
+                    aria-label="다음: [Android] 서비스 - (4) 서비스의 생명주기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/05/08_android/01_android_platform/190705_sqlite/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

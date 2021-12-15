@@ -1,0 +1,748 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android]  Fragment - (2) 프래그먼트 매니저(Fragment Manager) - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n프래그먼트 매니저프래그먼트 매니저(Fragment Manager)는 프래그먼트의 추가, 삭제, 교체 등을 담당하는 객체입니다. Activity클래스의 supportFragmentManager속성값으로 프래그먼트 매니저에 접근할 수 있습니다.\n12345678910class MainActivity : AppCompatActivity() &#123;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        // 프래그먼트 매니저        val fragmentMananger = supportFragmentManager    &#125;&#125;\n\n프래그먼트 트랜잭션프래그먼트 트랜잭션(Fragment Transaction)은 프래그먼트 연산들의 한 단위를 나타내는 클래스입니다. 트랜잭션은 프래그먼트 매니저의 beginTransaction()메소드를 호출하여 시작할 수 있습니다.\n123val fragmentMananger = supportFragmentManagerval transaction = fragmentMananger.beginTransaction()// ...\n프래그먼트 트랜잭션에는 프래그먼트 연산을 위한 다양한 메소드가 존재합니다.\n(1) add()컨테이너 뷰에 프래그먼트를 추가합니다. \n123456val fragmentA = FragmentA()val fragmentMananger = supportFragmentManagerval transaction = fragmentMananger.beginTransaction()transaction.add(R.id.activity_main_container, fragmentA)transaction.commit()\n다음과 같이 생명주기 메소드가 호출됩니다.\n123456[FragmentA] onAttach[FragmentA] onCreate[FragmentA] onCreateView[FragmentA] onViewCreated[FragmentA] onStart[FragmentA] onResume\n만약 컨테이너 뷰에 이전 프래그먼트가 있으면 이를 삭제하지 않고 위에 추가합니다.\n123val fragmentB = FragmentB()transaction.add(R.id.activity_main_container, fragmentB)transaction.commit()\n다음과 같이 생명주기 메소드가 호출됩니다.\n123456[FragmentB] onAttach[FragmentB] onCreate[FragmentB] onCreateView[FragmentB] onViewCreated[FragmentB] onStart[FragmentB] onResume\n(2) remove()컨테이너에서 프래그먼트를 삭제합니다. \n1234567val fragmentA = FragmentA()// ...val transaction = supportFragmentManager.beginTransaction()transaction.remove(fragmentA)transaction.commit()\n다음과 같이 생명주기 메소드가 호출됩니다.\n12345[FragmentA] onPause[FragmentA] onStop[FragmentA] onDestroyView[FragmentA] onDestroy[FragmentA] onDetach\n\n(3) replace()기존 프래그먼트를 삭제하고 새로운 프래그먼트를 추가합니다. remove() 후 add()를 호출한다고 생각하면 됩니다.\n컨테이너에 FragmentA가 이미 있다고 가정합시다. 이제 다음과 같이 FragmentB로 대체할 수 있습니다.\n12transaction.replace(R.id.activity_main_fl, fragmentB)transaction.commit()\n생명주기 메소드는 다음과 같이 호출됩니다.\n1234567891011[FragmentA] onPause[FragmentA] onStop[FragmentB] onAttach[FragmentB] onCreate[FragmentB] onCreateView[FragmentB] onViewCreated[FragmentB] onStart[FragmentA] onDestroyView[FragmentA] onDestroy[FragmentA] onDetach[FragmentB] onResume\n기존에 있던 FragmentA는 onDestroy()까지 호출되어 메모리에서 사라지는 것을 확인할 수 있습니다.\n(4) commit()트랜잭션은 다음과 같이 여러 연산으로 구성될 수 있습니다. 따라서 연산 후 반드시 commit()메소드를 호출해서 변경사항을 적용해야합니다.\n1234567891011val fragmentB = FragmentB()transaction.add(R.id.activity_main_container, fragmentB)transaction.remove(fragmentB)val fragmentC = FragmentC()transaction.add(R.id.activity_main_container, fragmentC)val fragmentD = FragmentD()transaction.replace(R.id.activity_main_container, fragmentD)transaction.commit()\n\n(5) 그 외의 트랜잭션 연산트랜잭션 연산에는 위에서 살펴본 연산 외에도 show(), hide(), attach(), detach(), isEmpty()등이 있습니다.\n\nchildFragmentManager, parentFragmentManager우리는 액티비티에서 프래그먼트를 제어하기위해 supportFragmentManager속성을 사용했습니다.\n12345678class MainActivity : AppCompatActivity() &#123;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        var supportFragmentManager = supportFragmentManager    &#125;&#125;\n이제 프래그먼트를 살펴봅시다. 프래그먼트에는 fragmentManager, childFragmentManager, parentFragmentManager속성이 존재합니다.\n123456789class SubFragment: Fragment() &#123;    override fun onViewCreated(view: View, savedInstanceState: Bundle?) &#123;        super.onViewCreated(view, savedInstanceState)        var fragmentManager = fragmentManager        var parentFragmentMgr = parentFragmentManager        var childFragmentMgr = childFragmentManager    &#125;    &#125;\n(1) fragmentManager (deprecated)더 이상 사용하지 않습니다.\n(2) parentFragmentManager현재 프래그먼트를 제어하는 부모 액티비티나 부모 프래그먼트의 프래그먼트 매니저를 반환합니다.\nparentFragmentManager를 통해서 자신을 다른 프래그먼트로 교체하는데 유용하게 사용할 수 있습니다.\n(3) childFragmentManager현재 프래그먼트는 여러 개의 프래그먼트를 가질 수도 있습니다. 현재 프래그먼트는 childFragmentManager속성을 사용하여 자식 프래그먼트를 제어합니다.\n(4) 예제다음과 같이 액티비티 안에 프래그먼트가 있고, 그 안에 또 프래그먼트가 있고, 그 안에 또 프래그먼트가 있다고 가정합시다.\n이러한 구조에서 supportFragmentManager, parentFragmentManager, childFragmentManager가 가리키는 객체는 다음과 같습니다.\n\n","dateCreated":"2019-07-08T01:00:00+09:00","dateModified":"2021-12-16T06:53:44+09:00","datePublished":"2019-07-08T01:00:00+09:00","description":"","headline":"[Android]  Fragment - (2) 프래그먼트 매니저(Fragment Manager)","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/","keywords":"Android"}</script>
+    <meta name="description" content="프래그먼트 매니저프래그먼트 매니저(Fragment Manager)는 프래그먼트의 추가, 삭제, 교체 등을 담당하는 객체입니다. Activity클래스의 supportFragmentManager속성값으로 프래그먼트 매니저에 접근할 수 있습니다. 12345678910class MainActivity : AppCompatActivity() &amp;#123;    ov">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android]  Fragment - (2) 프래그먼트 매니저(Fragment Manager)">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="프래그먼트 매니저프래그먼트 매니저(Fragment Manager)는 프래그먼트의 추가, 삭제, 교체 등을 담당하는 객체입니다. Activity클래스의 supportFragmentManager속성값으로 프래그먼트 매니저에 접근할 수 있습니다. 12345678910class MainActivity : AppCompatActivity() &amp;#123;    ov">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/0.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/1.png">
+<meta property="article:published_time" content="2019-07-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T21:53:44.731Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/0.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android]  Fragment - (2) 프래그먼트 매니저(Fragment Manager)
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-07-08T01:00:00+09:00">
+	
+		    2019/07/08
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="프래그먼트-매니저"><a href="#프래그먼트-매니저" class="headerlink" title="프래그먼트 매니저"></a>프래그먼트 매니저</h1><p><code>프래그먼트 매니저(Fragment Manager)</code>는 프래그먼트의 추가, 삭제, 교체 등을 담당하는 객체입니다. <code>Activity</code>클래스의 <code>supportFragmentManager</code>속성값으로 프래그먼트 매니저에 접근할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 프래그먼트 매니저</span></span><br><span class="line">        <span class="keyword">val</span> fragmentMananger = supportFragmentManager</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="프래그먼트-트랜잭션"><a href="#프래그먼트-트랜잭션" class="headerlink" title="프래그먼트 트랜잭션"></a>프래그먼트 트랜잭션</h1><p><code>프래그먼트 트랜잭션(Fragment Transaction)</code>은 프래그먼트 연산들의 한 단위를 나타내는 클래스입니다. 트랜잭션은 프래그먼트 매니저의 <code>beginTransaction()</code>메소드를 호출하여 시작할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentMananger = supportFragmentManager</span><br><span class="line"><span class="keyword">val</span> transaction = fragmentMananger.beginTransaction()</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>프래그먼트 트랜잭션에는 프래그먼트 연산을 위한 다양한 메소드가 존재합니다.</p>
+<h3 id="1-add"><a href="#1-add" class="headerlink" title="(1) add()"></a>(1) add()</h3><p>컨테이너 뷰에 프래그먼트를 추가합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentA = FragmentA()</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fragmentMananger = supportFragmentManager</span><br><span class="line"><span class="keyword">val</span> transaction = fragmentMananger.beginTransaction()</span><br><span class="line">transaction.add(R.id.activity_main_container, fragmentA)</span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 생명주기 메소드가 호출됩니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[FragmentA] onAttach</span><br><span class="line">[FragmentA] onCreate</span><br><span class="line">[FragmentA] onCreateView</span><br><span class="line">[FragmentA] onViewCreated</span><br><span class="line">[FragmentA] onStart</span><br><span class="line">[FragmentA] onResume</span><br></pre></td></tr></table></figure>
+<p>만약 컨테이너 뷰에 이전 프래그먼트가 있으면 이를 삭제하지 않고 위에 추가합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentB = FragmentB()</span><br><span class="line">transaction.add(R.id.activity_main_container, fragmentB)</span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 생명주기 메소드가 호출됩니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[FragmentB] onAttach</span><br><span class="line">[FragmentB] onCreate</span><br><span class="line">[FragmentB] onCreateView</span><br><span class="line">[FragmentB] onViewCreated</span><br><span class="line">[FragmentB] onStart</span><br><span class="line">[FragmentB] onResume</span><br></pre></td></tr></table></figure>
+<h3 id="2-remove"><a href="#2-remove" class="headerlink" title="(2) remove()"></a>(2) remove()</h3><p>컨테이너에서 프래그먼트를 삭제합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentA = FragmentA()</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> transaction = supportFragmentManager.beginTransaction()</span><br><span class="line">transaction.remove(fragmentA)</span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 생명주기 메소드가 호출됩니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[FragmentA] onPause</span><br><span class="line">[FragmentA] onStop</span><br><span class="line">[FragmentA] onDestroyView</span><br><span class="line">[FragmentA] onDestroy</span><br><span class="line">[FragmentA] onDetach</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-replace"><a href="#3-replace" class="headerlink" title="(3) replace()"></a>(3) replace()</h3><p>기존 프래그먼트를 삭제하고 새로운 프래그먼트를 추가합니다. <code>remove()</code> 후 <code>add()</code>를 호출한다고 생각하면 됩니다.</p>
+<p>컨테이너에 <code>FragmentA</code>가 이미 있다고 가정합시다. 이제 다음과 같이 <code>FragmentB</code>로 대체할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">transaction.replace(R.id.activity_main_fl, fragmentB)</span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+<p>생명주기 메소드는 다음과 같이 호출됩니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[FragmentA] onPause</span><br><span class="line">[FragmentA] onStop</span><br><span class="line">[FragmentB] onAttach</span><br><span class="line">[FragmentB] onCreate</span><br><span class="line">[FragmentB] onCreateView</span><br><span class="line">[FragmentB] onViewCreated</span><br><span class="line">[FragmentB] onStart</span><br><span class="line">[FragmentA] onDestroyView</span><br><span class="line">[FragmentA] onDestroy</span><br><span class="line">[FragmentA] onDetach</span><br><span class="line">[FragmentB] onResume</span><br></pre></td></tr></table></figure>
+<p>기존에 있던 <code>FragmentA</code>는 <code>onDestroy()</code>까지 호출되어 메모리에서 사라지는 것을 확인할 수 있습니다.</p>
+<h3 id="4-commit"><a href="#4-commit" class="headerlink" title="(4) commit()"></a>(4) commit()</h3><p>트랜잭션은 다음과 같이 여러 연산으로 구성될 수 있습니다. 따라서 연산 후 반드시 <code>commit()</code>메소드를 호출해서 변경사항을 적용해야합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentB = FragmentB()</span><br><span class="line">transaction.add(R.id.activity_main_container, fragmentB)</span><br><span class="line">transaction.remove(fragmentB)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fragmentC = FragmentC()</span><br><span class="line">transaction.add(R.id.activity_main_container, fragmentC)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fragmentD = FragmentD()</span><br><span class="line">transaction.replace(R.id.activity_main_container, fragmentD)</span><br><span class="line"></span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-그-외의-트랜잭션-연산"><a href="#5-그-외의-트랜잭션-연산" class="headerlink" title="(5) 그 외의 트랜잭션 연산"></a>(5) 그 외의 트랜잭션 연산</h3><p>트랜잭션 연산에는 위에서 살펴본 연산 외에도 <code>show()</code>, <code>hide()</code>, <code>attach()</code>, <code>detach()</code>, <code>isEmpty()</code>등이 있습니다.</p>
+<hr>
+<h2 id="childFragmentManager-parentFragmentManager"><a href="#childFragmentManager-parentFragmentManager" class="headerlink" title="childFragmentManager, parentFragmentManager"></a>childFragmentManager, parentFragmentManager</h2><p>우리는 액티비티에서 프래그먼트를 제어하기위해 <code>supportFragmentManager</code>속성을 사용했습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> supportFragmentManager = supportFragmentManager</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 프래그먼트를 살펴봅시다. 프래그먼트에는 <code>fragmentManager</code>, <code>childFragmentManager</code>, <code>parentFragmentManager</code>속성이 존재합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SubFragment</span>: <span class="type">Fragment</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onViewCreated</span><span class="params">(view: <span class="type">View</span>, savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onViewCreated(view, savedInstanceState)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> fragmentManager = fragmentManager</span><br><span class="line">        <span class="keyword">var</span> parentFragmentMgr = parentFragmentManager</span><br><span class="line">        <span class="keyword">var</span> childFragmentMgr = childFragmentManager</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="1-fragmentManager-deprecated"><a href="#1-fragmentManager-deprecated" class="headerlink" title="(1) fragmentManager (deprecated)"></a>(1) fragmentManager (deprecated)</h4><p>더 이상 사용하지 않습니다.</p>
+<h4 id="2-parentFragmentManager"><a href="#2-parentFragmentManager" class="headerlink" title="(2) parentFragmentManager"></a>(2) parentFragmentManager</h4><p>현재 프래그먼트를 제어하는 부모 액티비티나 부모 프래그먼트의 프래그먼트 매니저를 반환합니다.</p>
+<p><code>parentFragmentManager</code>를 통해서 자신을 다른 프래그먼트로 교체하는데 유용하게 사용할 수 있습니다.</p>
+<h4 id="3-childFragmentManager"><a href="#3-childFragmentManager" class="headerlink" title="(3) childFragmentManager"></a>(3) childFragmentManager</h4><p>현재 프래그먼트는 여러 개의 프래그먼트를 가질 수도 있습니다. 현재 프래그먼트는 <code>childFragmentManager</code>속성을 사용하여 자식 프래그먼트를 제어합니다.</p>
+<h4 id="4-예제"><a href="#4-예제" class="headerlink" title="(4) 예제"></a>(4) 예제</h4><p>다음과 같이 액티비티 안에 프래그먼트가 있고, 그 안에 또 프래그먼트가 있고, 그 안에 또 프래그먼트가 있다고 가정합시다.</p>
+<p><img src="0.png"><br>이러한 구조에서 <code>supportFragmentManager</code>, <code>parentFragmentManager</code>, <code>childFragmentManager</code>가 가리키는 객체는 다음과 같습니다.</p>
+<p><img src="1.png"></p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/09/08_android/01_android_platform/190709_fragment_backstack/"
+                    data-tooltip="[Android] Fragment - (3) 프래그먼트 백 스택(Fragment Back Stack)"
+                    aria-label="이전: [Android] Fragment - (3) 프래그먼트 백 스택(Fragment Back Stack)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/07/08_android/01_android_platform/190707_fragment/"
+                    data-tooltip="[Android]  Fragment - (1) 프래그먼트"
+                    aria-label="다음: [Android]  Fragment - (1) 프래그먼트"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/09/08_android/01_android_platform/190709_fragment_backstack/"
+                    data-tooltip="[Android] Fragment - (3) 프래그먼트 백 스택(Fragment Back Stack)"
+                    aria-label="이전: [Android] Fragment - (3) 프래그먼트 백 스택(Fragment Back Stack)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/07/08_android/01_android_platform/190707_fragment/"
+                    data-tooltip="[Android]  Fragment - (1) 프래그먼트"
+                    aria-label="다음: [Android]  Fragment - (1) 프래그먼트"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

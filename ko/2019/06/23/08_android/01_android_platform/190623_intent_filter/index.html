@@ -1,0 +1,757 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 인텐트 필터(Intent Filter) - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n인텐트 필터우리는 이전 포스트에서 음악 플레이어 앱을 실행하기 위해 암시적 인텐트를 전송했습니다. 그렇다면 음악 플레이어 앱에서는 암시적 인텐트가 자신과 관련되었는지 어떻게 식별할까요? 이는 음악 플레이어 앱 안에 인텐트 필터(Intent Filter)가 정의되어있기 때문입니다.\n예제우리는 세 개의 앱을 만들 것입니다. \n\nintent_sender\nintent_receiver\nintent_acceptor\n\nintent_sender는 암시적 인텐트를 생성하여 안드로이드 시스템에 발송합니다. intent_receiver와 intent_acceptor에는 인텐트 필터를 등록합니다.\n(1) intent_sender우선 intent_sender라는 프로젝트를 생성합시다. 이 프로젝트는 버튼을 클릭하면 인텐트를 생성하여 안드로이드 시스템에 전달합니다. 레이아웃 코드는 다음과 같습니다.\nactivity_main.xml1234567891011121314151617181920&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;Button        android:id=&quot;@+id/button&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;Send Intent&quot;        app:layout_constraintBottom_toBottomOf=&quot;parent&quot;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;        app:layout_constraintStart_toStartOf=&quot;parent&quot;        app:layout_constraintTop_toTopOf=&quot;parent&quot;        app:layout_constraintVertical_bias=&quot;0.48&quot; /&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n\n\n화면은 다음과 같습니다.\nMainActivity.kt1234567891011121314151617class MainActivity : AppCompatActivity() &#123;    val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;            // 인텐트 생성            var intent = Intent()            // 액션 추가            intent.action = &quot;my_action&quot;            // 액티비티 시작            startActivity(intent)        &#125;    &#125;&#125;\n\n(2) intent_receiverintent_receiver라는 프로젝트를 생성합시다. 이 앱에 IntentReceiverActivity액티비티를 생성하고 레이아웃을 다음과 같이 구성합니다.\nactivity_main.xml12345678910111213141516171819&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.IntentReceiverActivity&quot;&gt;    &lt;TextView        android:id=&quot;@+id/textView&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;Intent Receiver Activity&quot;        app:layout_constraintBottom_toBottomOf=&quot;parent&quot;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;        app:layout_constraintStart_toStartOf=&quot;parent&quot;        app:layout_constraintTop_toTopOf=&quot;parent&quot; /&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n\n화면은 다음과 같습니다.\nintent_receiver프로젝트의 AndroidManifest.xml에 다음과 같이 인텐트 필터를 등록합니다.\nAndroidManifest.xml1234567891011121314151617181920212223&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    package=&quot;com.yologger.intent_receiver&quot;&gt;    &lt;application        android:allowBackup=&quot;true&quot;        android:icon=&quot;@mipmap/ic_launcher&quot;        android:label=&quot;@string/app_name&quot;        android:roundIcon=&quot;@mipmap/ic_launcher_round&quot;        android:supportsRtl=&quot;true&quot;        android:theme=&quot;@style/Theme.Intent_receiver&quot;&gt;        &lt;activity android:name=&quot;.IntentReceiverActivity&quot;&gt;            &lt;intent-filter&gt;                &lt;action android:name=&quot;my_action&quot; /&gt;                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;            &lt;/intent-filter&gt;        &lt;/activity&gt;        &lt;activity android:name=&quot;.MainActivity&quot;&gt;            &lt;!-- ... --&gt;        &lt;/activity&gt;    &lt;/application&gt;&lt;/manifest&gt;\n\n인텐트 필터를 등록할 때는 &lt;intent-filter&gt;태그를 사용합니다. 그 안에 &lt;action&gt;태그를 사용해서 액션을 등록합니다. &lt;category&gt;태그는 카테고리라고 하는데 뒤에서 다시 설명하겠습니다.\n(3) intent_acceptorintent_acceptor라는 프로젝트를 생성합시다. 이 앱에 IntentAcceptorActivity액티비티를 생성하고 레이아웃을 다음과 같이 구성합니다.\nactivity_main.xml12345678910111213141516171819&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.IntentAcceptorActivity&quot;&gt;    &lt;TextView        android:id=&quot;@+id/textView&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;Intent Acceptor Activity&quot;        app:layout_constraintBottom_toBottomOf=&quot;parent&quot;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;        app:layout_constraintStart_toStartOf=&quot;parent&quot;        app:layout_constraintTop_toTopOf=&quot;parent&quot; /&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n\n화면은 다음과 같습니다.\nintent_acceptor프로젝트의 AndroidManifest.xml에 다음과 같이 인텐트 필터를 등록합니다.\nAndroidManifest.xml1234567891011121314151617181920212223&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    package=&quot;com.yologger.intent_accepter&quot;&gt;    &lt;application        android:allowBackup=&quot;true&quot;        android:icon=&quot;@mipmap/ic_launcher&quot;        android:label=&quot;@string/app_name&quot;        android:roundIcon=&quot;@mipmap/ic_launcher_round&quot;        android:supportsRtl=&quot;true&quot;        android:theme=&quot;@style/Theme.Intent_accepter&quot;&gt;        &lt;activity android:name=&quot;.IntentAcceptorActivity&quot;&gt;            &lt;intent-filter&gt;                &lt;action android:name=&quot;my_action&quot; /&gt;                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;            &lt;/intent-filter&gt;        &lt;/activity&gt;        &lt;activity android:name=&quot;.MainActivity&quot;&gt;            &lt;!-- ... --&gt;        &lt;/activity&gt;    &lt;/application&gt;&lt;/manifest&gt;\n\n(4) 암시적 인텐트 보내기이제 세 개의 앱을 안드로이드 시스템에 설치합니다. 그리고 intent_sender 앱을 실행합니다.\n이제 버튼을 클릭하면 다음과 같이 my_action을 처리할 수 있는 앱을 보여줍니다.\n\n카테고리우리는 암시적 인텐트를 식별하기 위해 인텐트 필터에 액션을 등록했습니다. \n1234&lt;intent-filter&gt;    &lt;action android:name=&quot;my_action&quot; /&gt;    &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;&lt;/intent-filter&gt;\n그렇다면 카테고리는 무엇일까요? 카테고리(Category)는 인텐트를 더욱 정교하게 필터링하고 식별하는데 사용합니다. 예제로 돌아와봅시다.\n우선 intent_sender 프로젝트에서 인텐트에 카테고리를 추가합니다. 카테고리를 추가할 때는 addCategory()메소드를 사용합니다.\nMainActivity.kt12345678910111213141516class MainActivity : AppCompatActivity() &#123;    val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;            var intent = Intent()            intent.action = &quot;my_action&quot;            // 카테고리 추가             intent.addCategory(&quot;my_category&quot;)            startActivity(intent)        &#125;    &#125;&#125;\nintent_receiver의 AndroidManifest.xml에 카테고리를 추가합니다. intent_acceptor 프로젝트에는 카테고리를 추가하지 않습니다.\nAndroidManifest.xml12345678910111213141516171819202122232425&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    package=&quot;com.yologger.intent_receiver&quot;&gt;    &lt;application        android:allowBackup=&quot;true&quot;        android:icon=&quot;@mipmap/ic_launcher&quot;        android:label=&quot;@string/app_name&quot;        android:roundIcon=&quot;@mipmap/ic_launcher_round&quot;        android:supportsRtl=&quot;true&quot;        android:theme=&quot;@style/Theme.Intent_receiver&quot;&gt;        &lt;activity android:name=&quot;.IntentReceiverActivity&quot;&gt;            &lt;intent-filter&gt;                &lt;action android:name=&quot;custom_action&quot;/&gt;                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot;/&gt;                &lt;!-- 카테고리 추가 --&gt;                &lt;category android:name=&quot;my_category&quot; /&gt;            &lt;/intent-filter&gt;        &lt;/activity&gt;        &lt;activity android:name=&quot;.MainActivity&quot;&gt;            &lt;!-- ... --&gt;        &lt;/activity&gt;    &lt;/application&gt;&lt;/manifest&gt;\n\n이제 intent_sender를 실행하고 버튼을 누르면 intent_receiver 앱만 실행됩니다. 이처럼 카테고리는 인텐트를 더욱 정교하게 필터링하고 식별하는데 사용할 수 있습니다. \nandroid.intent.category.DEFAULT암시적 인텐트를 생성할 때 카테고리를 추가하지 않아도 자동으로 android.intent.category.DEFAULT 카테고리가 추가됩니다. 따라서 인텐트 필터에서 반드시 &lt;category android:name=&quot;android.intent.category.DEFAULT&quot;/&gt;를 추가해야합니다.\nandroid.intent.action.Main안드로이드 스튜디오에서 프로젝트를 생성하면 MainActivity.kt가 기본으로 생성됩니다. 이 액티비티의 인텐트 필터도 다음과 같이 자동으로 생성됩니다.\nAndroidManifest.xml1234567891011121314151617181920&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    package=&quot;com.yologger.intent_receiver&quot;&gt;    &lt;application        android:allowBackup=&quot;true&quot;        android:icon=&quot;@mipmap/ic_launcher&quot;        android:label=&quot;@string/app_name&quot;        android:roundIcon=&quot;@mipmap/ic_launcher_round&quot;        android:supportsRtl=&quot;true&quot;        android:theme=&quot;@style/Theme.Intent_receiver&quot;&gt;        &lt;activity android:name=&quot;.MainActivity&quot;&gt;            &lt;intent-filter&gt;                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;            &lt;/intent-filter&gt;        &lt;/activity&gt;    &lt;/application&gt;&lt;/manifest&gt;\nandroid.intent.action.MAIN 액션과 android.intent.category.LAUNCHER 카테고리는 앱을 실행했을 때 처음 실행할 액티비티를 지정하는데 사용됩니다. 앱 아이콘을 클릭하여 앱을 실행하면 안드로이드 시스템이 android.intent.action.MAIN 액션과 android.intent.category.LAUNCHER 카테고리가 등록된 액티비티를 실행합니다. 만약 위의 액션과 카테고리를 등록한 액티비티가 없다면 오류가 발생합니다.\n","dateCreated":"2019-06-23T01:00:00+09:00","dateModified":"2021-12-16T05:53:55+09:00","datePublished":"2019-06-23T01:00:00+09:00","description":"","headline":"[Android] 인텐트 필터(Intent Filter)","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/","keywords":"Android"}</script>
+    <meta name="description" content="인텐트 필터우리는 이전 포스트에서 음악 플레이어 앱을 실행하기 위해 암시적 인텐트를 전송했습니다. 그렇다면 음악 플레이어 앱에서는 암시적 인텐트가 자신과 관련되었는지 어떻게 식별할까요? 이는 음악 플레이어 앱 안에 인텐트 필터(Intent Filter)가 정의되어있기 때문입니다. 예제우리는 세 개의 앱을 만들 것입니다.   intent_sender int">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 인텐트 필터(Intent Filter)">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="인텐트 필터우리는 이전 포스트에서 음악 플레이어 앱을 실행하기 위해 암시적 인텐트를 전송했습니다. 그렇다면 음악 플레이어 앱에서는 암시적 인텐트가 자신과 관련되었는지 어떻게 식별할까요? 이는 음악 플레이어 앱 안에 인텐트 필터(Intent Filter)가 정의되어있기 때문입니다. 예제우리는 세 개의 앱을 만들 것입니다.   intent_sender int">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/3.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/4.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/5.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/6.png">
+<meta property="article:published_time" content="2019-06-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T20:53:55.868Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 인텐트 필터(Intent Filter)
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-06-23T01:00:00+09:00">
+	
+		    2019/06/23
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="인텐트-필터"><a href="#인텐트-필터" class="headerlink" title="인텐트 필터"></a>인텐트 필터</h1><p>우리는 이전 포스트에서 음악 플레이어 앱을 실행하기 위해 암시적 인텐트를 전송했습니다. 그렇다면 음악 플레이어 앱에서는 암시적 인텐트가 자신과 관련되었는지 어떻게 식별할까요? 이는 음악 플레이어 앱 안에 <code>인텐트 필터(Intent Filter)</code>가 정의되어있기 때문입니다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>우리는 세 개의 앱을 만들 것입니다. </p>
+<ol>
+<li>intent_sender</li>
+<li>intent_receiver</li>
+<li>intent_acceptor</li>
+</ol>
+<p><code>intent_sender</code>는 암시적 인텐트를 생성하여 안드로이드 시스템에 발송합니다. <code>intent_receiver</code>와 <code>intent_acceptor</code>에는 인텐트 필터를 등록합니다.<br><img src="1.png"></p>
+<h3 id="1-intent-sender"><a href="#1-intent-sender" class="headerlink" title="(1) intent_sender"></a>(1) intent_sender</h3><p>우선 <code>intent_sender</code>라는 프로젝트를 생성합시다. 이 프로젝트는 버튼을 클릭하면 인텐트를 생성하여 안드로이드 시스템에 전달합니다. 레이아웃 코드는 다음과 같습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/button&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Send Intent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintVertical_bias</span>=<span class="string">&quot;0.48&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<p>화면은 다음과 같습니다.<br><img src="2.png"></p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 인텐트 생성</span></span><br><span class="line">            <span class="keyword">var</span> intent = Intent()</span><br><span class="line">            <span class="comment">// 액션 추가</span></span><br><span class="line">            intent.action = <span class="string">&quot;my_action&quot;</span></span><br><span class="line">            <span class="comment">// 액티비티 시작</span></span><br><span class="line">            startActivity(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-intent-receiver"><a href="#2-intent-receiver" class="headerlink" title="(2) intent_receiver"></a>(2) intent_receiver</h3><p><code>intent_receiver</code>라는 프로젝트를 생성합시다. 이 앱에 <code>IntentReceiverActivity</code>액티비티를 생성하고 레이아웃을 다음과 같이 구성합니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.IntentReceiverActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/textView&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Intent Receiver Activity&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>화면은 다음과 같습니다.<br><img src="3.png"></p>
+<p><code>intent_receiver</code>프로젝트의 <code>AndroidManifest.xml</code>에 다음과 같이 인텐트 필터를 등록합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.intent_receiver&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Intent_receiver&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.IntentReceiverActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;my_action&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>인텐트 필터를 등록할 때는 <code>&lt;intent-filter&gt;</code>태그를 사용합니다. 그 안에 <code>&lt;action&gt;</code>태그를 사용해서 액션을 등록합니다. <code>&lt;category&gt;</code>태그는 카테고리라고 하는데 뒤에서 다시 설명하겠습니다.</p>
+<h3 id="3-intent-acceptor"><a href="#3-intent-acceptor" class="headerlink" title="(3) intent_acceptor"></a>(3) intent_acceptor</h3><p><code>intent_acceptor</code>라는 프로젝트를 생성합시다. 이 앱에 <code>IntentAcceptorActivity</code>액티비티를 생성하고 레이아웃을 다음과 같이 구성합니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.IntentAcceptorActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/textView&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Intent Acceptor Activity&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>화면은 다음과 같습니다.<br><img src="4.png"></p>
+<p><code>intent_acceptor</code>프로젝트의 <code>AndroidManifest.xml</code>에 다음과 같이 인텐트 필터를 등록합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.intent_accepter&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Intent_accepter&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.IntentAcceptorActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;my_action&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-암시적-인텐트-보내기"><a href="#4-암시적-인텐트-보내기" class="headerlink" title="(4) 암시적 인텐트 보내기"></a>(4) 암시적 인텐트 보내기</h3><p>이제 세 개의 앱을 안드로이드 시스템에 설치합니다. 그리고 <code>intent_sender</code> 앱을 실행합니다.<br><img src="5.png"></p>
+<p>이제 버튼을 클릭하면 다음과 같이 my_action을 처리할 수 있는 앱을 보여줍니다.<br><img src="6.png"></p>
+<hr>
+<h1 id="카테고리"><a href="#카테고리" class="headerlink" title="카테고리"></a>카테고리</h1><p>우리는 암시적 인텐트를 식별하기 위해 인텐트 필터에 액션을 등록했습니다. </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;my_action&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>그렇다면 카테고리는 무엇일까요? <code>카테고리(Category)</code>는 인텐트를 더욱 정교하게 필터링하고 식별하는데 사용합니다. 예제로 돌아와봅시다.</p>
+<p>우선 intent_sender 프로젝트에서 인텐트에 카테고리를 추가합니다. 카테고리를 추가할 때는 <code>addCategory()</code>메소드를 사용합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">var</span> intent = Intent()</span><br><span class="line">            intent.action = <span class="string">&quot;my_action&quot;</span></span><br><span class="line">            <span class="comment">// 카테고리 추가 </span></span><br><span class="line">            intent.addCategory(<span class="string">&quot;my_category&quot;</span>)</span><br><span class="line">            startActivity(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>intent_receiver의 <code>AndroidManifest.xml</code>에 카테고리를 추가합니다. intent_acceptor 프로젝트에는 카테고리를 추가하지 않습니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.intent_receiver&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Intent_receiver&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.IntentReceiverActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;custom_action&quot;</span>/&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span>/&gt;</span></span><br><span class="line">                <span class="comment">&lt;!-- 카테고리 추가 --&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;my_category&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>이제 intent_sender를 실행하고 버튼을 누르면 intent_receiver 앱만 실행됩니다. 이처럼 카테고리는 인텐트를 더욱 정교하게 필터링하고 식별하는데 사용할 수 있습니다. </p>
+<h1 id="android-intent-category-DEFAULT"><a href="#android-intent-category-DEFAULT" class="headerlink" title="android.intent.category.DEFAULT"></a>android.intent.category.DEFAULT</h1><p>암시적 인텐트를 생성할 때 카테고리를 추가하지 않아도 자동으로 <code>android.intent.category.DEFAULT</code> 카테고리가 추가됩니다. 따라서 인텐트 필터에서 반드시 <code>&lt;category android:name=&quot;android.intent.category.DEFAULT&quot;/&gt;</code>를 추가해야합니다.</p>
+<h1 id="android-intent-action-Main"><a href="#android-intent-action-Main" class="headerlink" title="android.intent.action.Main"></a>android.intent.action.Main</h1><p>안드로이드 스튜디오에서 프로젝트를 생성하면 <code>MainActivity.kt</code>가 기본으로 생성됩니다. 이 액티비티의 인텐트 필터도 다음과 같이 자동으로 생성됩니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.intent_receiver&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Intent_receiver&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.MAIN&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.LAUNCHER&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>android.intent.action.MAIN</code> 액션과 <code>android.intent.category.LAUNCHER</code> 카테고리는 앱을 실행했을 때 처음 실행할 액티비티를 지정하는데 사용됩니다. 앱 아이콘을 클릭하여 앱을 실행하면 안드로이드 시스템이 <code>android.intent.action.MAIN</code> 액션과 <code>android.intent.category.LAUNCHER</code> 카테고리가 등록된 액티비티를 실행합니다. 만약 위의 액션과 카테고리를 등록한 액티비티가 없다면 오류가 발생합니다.</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/24/08_android/01_android_platform/190624_BroadcastIntent_BroadcastReceiver/"
+                    data-tooltip="[Android] 브로드캐스트 인텐트와 브로드케스트 리시버"
+                    aria-label="이전: [Android] 브로드캐스트 인텐트와 브로드케스트 리시버"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/22/08_android/01_android_platform/190622_implicit_intent/"
+                    data-tooltip="[Android] 암시적 인텐트(Implicit Intent)"
+                    aria-label="다음: [Android] 암시적 인텐트(Implicit Intent)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/24/08_android/01_android_platform/190624_BroadcastIntent_BroadcastReceiver/"
+                    data-tooltip="[Android] 브로드캐스트 인텐트와 브로드케스트 리시버"
+                    aria-label="이전: [Android] 브로드캐스트 인텐트와 브로드케스트 리시버"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/22/08_android/01_android_platform/190622_implicit_intent/"
+                    data-tooltip="[Android] 암시적 인텐트(Implicit Intent)"
+                    aria-label="다음: [Android] 암시적 인텐트(Implicit Intent)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

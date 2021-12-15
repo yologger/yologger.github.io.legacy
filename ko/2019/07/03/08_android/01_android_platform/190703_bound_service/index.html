@@ -1,0 +1,773 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 서비스 - (3) 바운드 서비스(Bound Service) - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n서비스란?서비스(Service)는 앱에서 백그라운드 작업을 수행하기 위해 등장했습니다. 액티비티와는 다르게 서비스는 별도의 레이아웃 파일이 존재하지 않습니다. 사용자에게 음악을 스트리밍 서비스하거나 파일을 다운로드하는 것은 백그라운드에서 처리하기 적절한 작업입니다.\n서비스에는 세 가지가 있습니다.\n\nStart Service\nIntent Service\nBound Service\n\n바운드 서비스서비스는 자신을 실행시킨 액티비티와 상호작용할 수 있습니다. 이러한 서비스를 바운드 서비스(Bound Service)라고 합니다. \n예를 들어 음악 앱은 서비스를 사용하여 백그라운드에서 음악을 실행합니다. 이때 액티비티는 음악을 일시 중지하거나 다음 트랙으로 건너뛰기 위하여 서비스와 상호작용을 합니다. 이러한 경우 바운드 서비스를 사용할 수 있습니다.\n바인딩액티비티가 바운드 서비스에 연결되는 작업을 바인딩(Binding)이라고 합니다. 바운드 서비스에서는 onBind()메소드를 구현합니다. 이 메소드는 서비스가 최초 생성될 때, 그리고 이후 다른 액티비티가 바운드 서비스에 바인딩할 때마다 호출됩니다. 이 메소드는 IBinder를 구현한 객체를 반환하며, 액티비티는 이 객체를 통해 바운드 서비스와 통신할 수 있습니다.\n추가적으로 하나의 바운드 서비스에는 여러 컴포넌트가 바인딩할 수 있습니다.\n\n(1) 로컬 바운드 서비스(Local Bound Service)액티비티와 서비스가 같은 프로세스에서 실행될 때, 이 서비스를 로컬 바운드 서비스(Local Bound Service)라고합니다.\n우선 로컬 바운드 서비스를 이해하기 위해 다음과 같은 예제를 만들겠습니다.\n\n\n액티비티에서 버튼을 클릭하면 서비스에 현재 시간을 요청합니다. \n서비스는 현재 시간을 계산해서 액티비티에 전달합니다. \n액티비티는 현재 시간을 전달받아 화면에 보여줍니다.\n\n\n액티비티의 레이아웃은 다음과 같습니다.\n123456789101112131415161718192021222324252627&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.LocalBoundServiceActivity&quot;&gt;    &lt;Button android:id=&quot;@+id/activity_local_bound_service_btn&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;CURRENT TIME&quot;        app:layout_constraintTop_toTopOf=&quot;parent&quot;        app:layout_constraintStart_toStartOf=&quot;parent&quot;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;        app:layout_constraintBottom_toTopOf=&quot;@+id/activity_local_bound_service_tv&quot;/&gt;    &lt;TextView android:id=&quot;@+id/activity_local_bound_service_tv&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;TextView&quot;        app:layout_constraintTop_toBottomOf=&quot;@+id/activity_local_bound_service_btn&quot;        app:layout_constraintStart_toStartOf=&quot;parent&quot;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;        app:layout_constraintBottom_toBottomOf=&quot;parent&quot;/&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n\nService클래스를 구현하는 LocalBoundService 클래스를 생성합니다.\n123456class LocalBoundService : Service() &#123;    override fun onBind(intent: Intent): IBinder &#123;        // ...    &#125;&#125;\n이제 Binder클래스를 구현한 사용자 정의 클래스를 만들어야 합니다. Binder객체는 액티비티와 서비스가 통신하는데 사용됩니다. \nBinder클래스를 상속하는 LocalBinder를 내부 클래스 형태로 정의합시다. \n123456class LocalBoundService : Service() &#123;    inner class LocalBinder : Binder() &#123;        // ...    &#125;&#125;\nLocalBinder클래스 안에 LocalBoundService의 참조를 반환하는 getService()를 구현합니다.\n123456class LocalBoundService : Service() &#123;    inner class LocalBinder : Binder() &#123;        fun getService(): LocalBoundService = this@LocalBoundService    &#125;&#125;\n변수를 만들고 LocalBinder클래스의 인스턴스로 초기화합니다. 또한 onBind()함수에서 이 변수를  반환합니다.\n123456789101112class LocalBoundService : Service() &#123;    private val binder = LocalBinder()    override fun onBind(intent: Intent): IBinder &#123;        return binder    &#125;    inner class LocalBinder : Binder() &#123;        fun getService(): LocalBoundService = this@LocalBoundService    &#125;&#125;\n서비스에 현재 시간을 반환하는 함수를 정의합니다.\n123456789101112131415161718class LocalBoundService : Service() &#123;    private val binder = LocalBinder()    override fun onBind(intent: Intent): IBinder &#123;        return binder    &#125;    // 현재 시간을 반환하는 함수    fun getCurrentTime(): String &#123;        var dateFormat = SimpleDateFormat(&quot;HH:mm:ss MM/dd/yyyy&quot;, Locale.US)        return dateFormat.format(Date())    &#125;    inner class LocalBinder : Binder() &#123;        fun getService(): LocalBoundService = this@LocalBoundService    &#125;&#125;\n이제 액티비티에서 로컬 바운드 서비스를 사용하겠습니다. \n액티비티는 bindService()를 호출하여 서비스에 바인딩합니다. 바인딩이 되면 서비스의 onBind()가 호출됩니다. onBind() 메소드는 IBinder클래스를 구현한 객체를 반환하는데, 액티비티에서 ServiceConnection클래스를 사용하여 IBinder를 구현한 객체를 전달받을 수 있습니다. 이후 IBinder클래스를 구현한 객체를 사용하여 통신을 합니다.\n액티비티에서 ServiceConnection클래스의 인스턴스를 생성하고 onServiceConnected()메서드와 onServiceDisconnected()메서드를 오버라이딩 합시다.\n12345678910111213141516171819202122232425class MainActivity : AppCompatActivity() &#123;    private lateinit var service: LocalBoundService    private var isBound = false        private val connection = object : ServiceConnection &#123;        // 서비스가 바인딩 되었을 때 호출        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) &#123;            var binder = service as LocalBoundService.LocalBinder            service = binder.getService()            isBound = true        &#125;        // 서비스가 끊겼을 때 호출        override fun onServiceDisconnected(name: ComponentName?) &#123;            isBound = false        &#125;    &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_local_bound_service)    &#125;&#125;\n이제 액티비티에서 서비스에 바인딩하겠습니다. 이때 bindService()메소드를 사용합니다.\n1234567891011121314151617181920212223242526272829class MainActivity : AppCompatActivity() &#123;    private lateinit var service: LocalBoundService    private var isBound = false    private val connection = object : ServiceConnection &#123;        // 서비스가 연결되었을 때 호출        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) &#123;            var binder = service as LocalBoundService.LocalBinder            service = binder.getService()            isBound = true        &#125;        // 서비스가 끊겼을 때 호출        override fun onServiceDisconnected(name: ComponentName?) &#123;            isBound = false        &#125;    &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_local_bound_service)        // 바인딩        var intent = Intent(this, LocalBoundService::class.java)        bindService(intent, connection, Context.BIND_AUTO_CREATE)    &#125;&#125;\n이제 서비스를 사용할 수 있습니다. 버튼을 누르면 서비스의 getCurrentTime()메소드를 호출할 수 있습니다.\n12345678910111213141516class LocalBoundServiceActivity : AppCompatActivity() &#123;    private lateinit var service: LocalBoundService    // ...    override fun onCreate(savedInstanceState: Bundle?) &#123;        // ...        button.setOnClickListener &#123;            // 서비스와 통신            var currentTime = service.getCurrentTime()            textView.text = currentTime        &#125;    &#125;&#125;\n액티비티가 종료되었을 때 서비스와 바인드를 끊어주는 코드도 작성합니다.\n12345678910class LocalBoundServiceActivity : AppCompatActivity() &#123;    // ...    override fun onStop() &#123;        super.onStop()        unbindService(connection)        isBound = false    &#125;&#125;\n\n\n(2) 원격 바운드 서비스(Remote Bound Service)액티비티와 서비스가 다른 프로세스에서 실행될 때, 이 서비스를 원격 바운드 서비스라고 합니다.\n원격 바운드 서비스를 이해하기 위해 다음과 같은 예제를 생성합시다.\n\n\n액티비티에서 택스트를 입력하고 버튼을 누르면 원격 바운드 서비스에 메세지가 전달됩니다. \n서비스는 이 메세지를 로그에 출력합니다.\n\n\n우선 다음과 같이 레이아웃을 구성합니다.\n123456789101112131415161718192021222324252627282930&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;EditText android:id=&quot;@+id/activity_main_et&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:ems=&quot;10&quot;        android:inputType=&quot;textPersonName&quot;        android:hint=&quot;Put your message&quot;        app:layout_constraintTop_toTopOf=&quot;parent&quot;        app:layout_constraintStart_toStartOf=&quot;parent&quot;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;        app:layout_constraintBottom_toTopOf=&quot;@+id/activity_main_btn&quot;/&gt;    &lt;Button android:id=&quot;@+id/activity_main_btn&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;Send Message&quot;        android:textAllCaps=&quot;false&quot;        app:layout_constraintTop_toBottomOf=&quot;@+id/activity_main_et&quot;        app:layout_constraintStart_toStartOf=&quot;parent&quot;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;        app:layout_constraintBottom_toBottomOf=&quot;parent&quot;/&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n이제 Service클래스를 구현하는 클래스를 정의합니다. \n123class RemoteBoundService : Service() &#123;    // ...&#125;\n그리고 전달받은 메세지를 처리하는 클래스를 내부 클래스 형태로 정의합니다. 이 클래스는 android.os.Handler.Handler클래스를 구현하고 handleMessage()를 오버라이딩 합니다.\n12345678910111213141516import android.os.Handlerclass RemoteBoundService : Service() &#123;    // ...    class MessageHandler: Handler() &#123;        override fun handleMessage(message: Message) &#123;            val data = message.data            val value = data.getString(&quot;name&quot;)            value?.run &#123;                Log.d(&quot;TEST&quot;, &quot;value&quot;)            &#125;        &#125;    &#125;&#125;\n이제 Messenger클래스의 인스턴스를 지역변수에 생성합니다. 이때 위에서 정의한 핸들러 클래스의 인스턴스를 생성자로 전달합니다. 또한 onBind()도 다음과 같이 구현합니다.\n1234567891011121314151617181920import android.os.Handlerclass RemoteBoundService : Service() &#123;    val messenger = Messenger(MessageHandler())    override fun onBind(intent: Intent): IBinder &#123;        return messenger.binder    &#125;    class MessageHandler: Handler() &#123;        override fun handleMessage(message: Message) &#123;            val data = message.data            val value = data.getString(&quot;message&quot;)            value?.run &#123;                println(value)            &#125;        &#125;    &#125;&#125;\n이제 AndroidManifest.xml에서 서비스가 다른 프로세스에서 수행되도록 코드를 추가합니다. android:process속성을 사용합니다.\n123456789101112131415161718192021222324&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    package=&quot;com.yologger.remote_bound_servicee&quot;&gt;    &lt;application android:allowBackup=&quot;true&quot;        android:icon=&quot;@mipmap/ic_launcher&quot;        android:label=&quot;@string/app_name&quot;        android:roundIcon=&quot;@mipmap/ic_launcher_round&quot;        android:supportsRtl=&quot;true&quot;        android:theme=&quot;@style/Theme.Remote_bound_servicee&quot;&gt;        &lt;service android:name=&quot;.RemoteBoundService&quot;            android:enabled=&quot;true&quot;            android:exported=&quot;true&quot;            android:process=&quot;:another_process&quot;&gt;        &lt;/service&gt;        &lt;activity android:name=&quot;.MainActivity&quot;&gt;            &lt;intent-filter&gt;                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;            &lt;/intent-filter&gt;        &lt;/activity&gt;    &lt;/application&gt;&lt;/manifest&gt;\n이제 액티비티에서 서비스와 바인딩합니다.\n12345678910111213141516171819202122232425262728class MainActivity : AppCompatActivity() &#123;    val editText: EditText by lazy &#123; findViewById&lt;EditText&gt;(R.id.activity_main_et) &#125;    val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn) &#125;    var messenger: Messenger? = null    var isBound = false    var connection = object: ServiceConnection &#123;        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) &#123;            messenger = Messenger(binder)            isBound = true        &#125;        override fun onServiceDisconnected(name: ComponentName?) &#123;            messenger = null            isBound = false        &#125;    &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        val intent = Intent(applicationContext, RemoteBoundService::class.java)        bindService(intent, connection, Context.BIND_AUTO_CREATE)    &#125;&#125;\n마지막으로 버튼을 눌렀을 때 서비스로 메시지를 전송합니다.\n1234567891011121314151617181920class MainActivity : AppCompatActivity() &#123;    val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn) &#125;    // ...    override fun onCreate(savedInstanceState: Bundle?) &#123;        // ...        button.setOnClickListener &#123;            if (!isBound) return@setOnClickListener            var message = Message.obtain()            var bundle = Bundle()            bundle.putString(&quot;message&quot;, editText.text.toString())            message.data = bundle            // 서비스로 메시지 전송            messenger?.send(message)        &#125;    &#125;&#125; \n","dateCreated":"2019-07-03T01:00:00+09:00","dateModified":"2021-12-16T06:31:41+09:00","datePublished":"2019-07-03T01:00:00+09:00","description":"","headline":"[Android] 서비스 - (3) 바운드 서비스(Bound Service)","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/","keywords":"Android"}</script>
+    <meta name="description" content="서비스란?서비스(Service)는 앱에서 백그라운드 작업을 수행하기 위해 등장했습니다. 액티비티와는 다르게 서비스는 별도의 레이아웃 파일이 존재하지 않습니다. 사용자에게 음악을 스트리밍 서비스하거나 파일을 다운로드하는 것은 백그라운드에서 처리하기 적절한 작업입니다. 서비스에는 세 가지가 있습니다.  Start Service Intent Service Bo">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 서비스 - (3) 바운드 서비스(Bound Service)">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="서비스란?서비스(Service)는 앱에서 백그라운드 작업을 수행하기 위해 등장했습니다. 액티비티와는 다르게 서비스는 별도의 레이아웃 파일이 존재하지 않습니다. 사용자에게 음악을 스트리밍 서비스하거나 파일을 다운로드하는 것은 백그라운드에서 처리하기 적절한 작업입니다. 서비스에는 세 가지가 있습니다.  Start Service Intent Service Bo">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2019-07-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T21:31:41.694Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 서비스 - (3) 바운드 서비스(Bound Service)
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-07-03T01:00:00+09:00">
+	
+		    2019/07/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="서비스란"><a href="#서비스란" class="headerlink" title="서비스란?"></a>서비스란?</h1><p><code>서비스(Service)</code>는 앱에서 백그라운드 작업을 수행하기 위해 등장했습니다. 액티비티와는 다르게 서비스는 별도의 레이아웃 파일이 존재하지 않습니다. 사용자에게 음악을 스트리밍 서비스하거나 파일을 다운로드하는 것은 백그라운드에서 처리하기 적절한 작업입니다.</p>
+<p>서비스에는 세 가지가 있습니다.</p>
+<ul>
+<li>Start Service</li>
+<li>Intent Service</li>
+<li>Bound Service</li>
+</ul>
+<h1 id="바운드-서비스"><a href="#바운드-서비스" class="headerlink" title="바운드 서비스"></a>바운드 서비스</h1><p>서비스는 자신을 실행시킨 액티비티와 상호작용할 수 있습니다. 이러한 서비스를 <code>바운드 서비스(Bound Service)</code>라고 합니다. </p>
+<p>예를 들어 음악 앱은 서비스를 사용하여 백그라운드에서 음악을 실행합니다. 이때 액티비티는 음악을 일시 중지하거나 다음 트랙으로 건너뛰기 위하여 서비스와 상호작용을 합니다. 이러한 경우 바운드 서비스를 사용할 수 있습니다.</p>
+<h1 id="바인딩"><a href="#바인딩" class="headerlink" title="바인딩"></a>바인딩</h1><p><u>액티비티가 바운드 서비스에 연결되는 작업</u>을 <code>바인딩(Binding)</code>이라고 합니다. 바운드 서비스에서는 <code>onBind()</code>메소드를 구현합니다. 이 메소드는 서비스가 최초 생성될 때, 그리고 이후 다른 액티비티가 바운드 서비스에 바인딩할 때마다 호출됩니다. 이 메소드는 <code>IBinder</code>를 구현한 객체를 반환하며, 액티비티는 이 객체를 통해 바운드 서비스와 통신할 수 있습니다.</p>
+<p>추가적으로 하나의 바운드 서비스에는 여러 컴포넌트가 바인딩할 수 있습니다.</p>
+<hr>
+<h1 id="1-로컬-바운드-서비스-Local-Bound-Service"><a href="#1-로컬-바운드-서비스-Local-Bound-Service" class="headerlink" title="(1) 로컬 바운드 서비스(Local Bound Service)"></a>(1) 로컬 바운드 서비스(Local Bound Service)</h1><p>액티비티와 서비스가 같은 프로세스에서 실행될 때, 이 서비스를 <code>로컬 바운드 서비스(Local Bound Service)</code>라고합니다.</p>
+<p>우선 로컬 바운드 서비스를 이해하기 위해 다음과 같은 예제를 만들겠습니다.</p>
+<blockquote>
+<ol>
+<li>액티비티에서 버튼을 클릭하면 서비스에 현재 시간을 요청합니다. </li>
+<li>서비스는 현재 시간을 계산해서 액티비티에 전달합니다. </li>
+<li>액티비티는 현재 시간을 전달받아 화면에 보여줍니다.</li>
+</ol>
+</blockquote>
+<p>액티비티의 레이아웃은 다음과 같습니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.LocalBoundServiceActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_local_bound_service_btn&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;CURRENT TIME&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toTopOf</span>=<span class="string">&quot;@+id/activity_local_bound_service_tv&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_local_bound_service_tv&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;TextView&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">&quot;@+id/activity_local_bound_service_btn&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Service</code>클래스를 구현하는 <code>LocalBoundService</code> 클래스를 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalBoundService</span> : <span class="type">Service</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onBind</span><span class="params">(intent: <span class="type">Intent</span>)</span></span>: IBinder &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>Binder</code>클래스를 구현한 사용자 정의 클래스를 만들어야 합니다. <code>Binder</code>객체는 액티비티와 서비스가 통신하는데 사용됩니다. </p>
+<p><code>Binder</code>클래스를 상속하는 <code>LocalBinder</code>를 내부 클래스 형태로 정의합시다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalBoundService</span> : <span class="type">Service</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">inner</span> <span class="class"><span class="keyword">class</span> <span class="title">LocalBinder</span> : <span class="type">Binder</span></span>() &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>LocalBinder</code>클래스 안에 <code>LocalBoundService</code>의 참조를 반환하는 <code>getService()</code>를 구현합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalBoundService</span> : <span class="type">Service</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">inner</span> <span class="class"><span class="keyword">class</span> <span class="title">LocalBinder</span> : <span class="type">Binder</span></span>() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">getService</span><span class="params">()</span></span>: LocalBoundService = <span class="keyword">this</span><span class="symbol">@LocalBoundService</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>변수를 만들고 <code>LocalBinder</code>클래스의 인스턴스로 초기화합니다. 또한 <code>onBind()</code>함수에서 이 변수를  반환합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalBoundService</span> : <span class="type">Service</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> binder = LocalBinder()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onBind</span><span class="params">(intent: <span class="type">Intent</span>)</span></span>: IBinder &#123;</span><br><span class="line">        <span class="keyword">return</span> binder</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">inner</span> <span class="class"><span class="keyword">class</span> <span class="title">LocalBinder</span> : <span class="type">Binder</span></span>() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">getService</span><span class="params">()</span></span>: LocalBoundService = <span class="keyword">this</span><span class="symbol">@LocalBoundService</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>서비스에 현재 시간을 반환하는 함수를 정의합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalBoundService</span> : <span class="type">Service</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> binder = LocalBinder()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onBind</span><span class="params">(intent: <span class="type">Intent</span>)</span></span>: IBinder &#123;</span><br><span class="line">        <span class="keyword">return</span> binder</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 현재 시간을 반환하는 함수</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getCurrentTime</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">        <span class="keyword">var</span> dateFormat = SimpleDateFormat(<span class="string">&quot;HH:mm:ss MM/dd/yyyy&quot;</span>, Locale.US)</span><br><span class="line">        <span class="keyword">return</span> dateFormat.format(Date())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">inner</span> <span class="class"><span class="keyword">class</span> <span class="title">LocalBinder</span> : <span class="type">Binder</span></span>() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">getService</span><span class="params">()</span></span>: LocalBoundService = <span class="keyword">this</span><span class="symbol">@LocalBoundService</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 액티비티에서 로컬 바운드 서비스를 사용하겠습니다. </p>
+<p>액티비티는 <code>bindService()</code>를 호출하여 서비스에 바인딩합니다. 바인딩이 되면 서비스의 <code>onBind()</code>가 호출됩니다. <code>onBind()</code> 메소드는 <code>IBinder</code>클래스를 구현한 객체를 반환하는데, 액티비티에서 <code>ServiceConnection</code>클래스를 사용하여 <code>IBinder</code>를 구현한 객체를 전달받을 수 있습니다. 이후 <code>IBinder</code>클래스를 구현한 객체를 사용하여 통신을 합니다.</p>
+<p>액티비티에서 <code>ServiceConnection</code>클래스의 인스턴스를 생성하고 <code>onServiceConnected()</code>메서드와 <code>onServiceDisconnected()</code>메서드를 오버라이딩 합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> service: LocalBoundService</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> isBound = <span class="literal">false</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> connection = <span class="keyword">object</span> : ServiceConnection &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 서비스가 바인딩 되었을 때 호출</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onServiceConnected</span><span class="params">(name: <span class="type">ComponentName</span>?, binder: <span class="type">IBinder</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">var</span> binder = service <span class="keyword">as</span> LocalBoundService.LocalBinder</span><br><span class="line">            service = binder.getService()</span><br><span class="line">            isBound = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 서비스가 끊겼을 때 호출</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onServiceDisconnected</span><span class="params">(name: <span class="type">ComponentName</span>?)</span></span> &#123;</span><br><span class="line">            isBound = <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_local_bound_service)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 액티비티에서 서비스에 바인딩하겠습니다. 이때 <code>bindService()</code>메소드를 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> service: LocalBoundService</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> isBound = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> connection = <span class="keyword">object</span> : ServiceConnection &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 서비스가 연결되었을 때 호출</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onServiceConnected</span><span class="params">(name: <span class="type">ComponentName</span>?, binder: <span class="type">IBinder</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">var</span> binder = service <span class="keyword">as</span> LocalBoundService.LocalBinder</span><br><span class="line">            service = binder.getService()</span><br><span class="line">            isBound = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 서비스가 끊겼을 때 호출</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onServiceDisconnected</span><span class="params">(name: <span class="type">ComponentName</span>?)</span></span> &#123;</span><br><span class="line">            isBound = <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_local_bound_service)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 바인딩</span></span><br><span class="line">        <span class="keyword">var</span> intent = Intent(<span class="keyword">this</span>, LocalBoundService::<span class="keyword">class</span>.java)</span><br><span class="line">        bindService(intent, connection, Context.BIND_AUTO_CREATE)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 서비스를 사용할 수 있습니다. 버튼을 누르면 서비스의 <code>getCurrentTime()</code>메소드를 호출할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalBoundServiceActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> service: LocalBoundService</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 서비스와 통신</span></span><br><span class="line">            <span class="keyword">var</span> currentTime = service.getCurrentTime()</span><br><span class="line">            textView.text = currentTime</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>액티비티가 종료되었을 때 서비스와 바인드를 끊어주는 코드도 작성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalBoundServiceActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onStop</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onStop()</span><br><span class="line">        unbindService(connection)</span><br><span class="line">        isBound = <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="2-원격-바운드-서비스-Remote-Bound-Service"><a href="#2-원격-바운드-서비스-Remote-Bound-Service" class="headerlink" title="(2) 원격 바운드 서비스(Remote Bound Service)"></a>(2) 원격 바운드 서비스(Remote Bound Service)</h1><p>액티비티와 서비스가 다른 프로세스에서 실행될 때, 이 서비스를 <code>원격 바운드 서비스</code>라고 합니다.</p>
+<p>원격 바운드 서비스를 이해하기 위해 다음과 같은 예제를 생성합시다.</p>
+<blockquote>
+<ol>
+<li>액티비티에서 택스트를 입력하고 버튼을 누르면 원격 바운드 서비스에 메세지가 전달됩니다. </li>
+<li>서비스는 이 메세지를 로그에 출력합니다.</li>
+</ol>
+</blockquote>
+<p>우선 다음과 같이 레이아웃을 구성합니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">EditText</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_et&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:ems</span>=<span class="string">&quot;10&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:inputType</span>=<span class="string">&quot;textPersonName&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:hint</span>=<span class="string">&quot;Put your message&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toTopOf</span>=<span class="string">&quot;@+id/activity_main_btn&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_btn&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Send Message&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textAllCaps</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">&quot;@+id/activity_main_et&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 <code>Service</code>클래스를 구현하는 클래스를 정의합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RemoteBoundService</span> : <span class="type">Service</span></span>() &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>그리고 전달받은 메세지를 처리하는 클래스를 내부 클래스 형태로 정의합니다. 이 클래스는 <code>android.os.Handler.Handler</code>클래스를 구현하고 <code>handleMessage()</code>를 오버라이딩 합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.os.Handler</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RemoteBoundService</span> : <span class="type">Service</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">MessageHandler</span>: <span class="type">Handler</span></span>() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">handleMessage</span><span class="params">(message: <span class="type">Message</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">val</span> <span class="keyword">data</span> = message.<span class="keyword">data</span></span><br><span class="line">            <span class="keyword">val</span> value = <span class="keyword">data</span>.getString(<span class="string">&quot;name&quot;</span>)</span><br><span class="line">            value?.run &#123;</span><br><span class="line">                Log.d(<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;value&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>Messenger</code>클래스의 인스턴스를 지역변수에 생성합니다. 이때 위에서 정의한 핸들러 클래스의 인스턴스를 생성자로 전달합니다. 또한 <code>onBind()</code>도 다음과 같이 구현합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.os.Handler</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RemoteBoundService</span> : <span class="type">Service</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> messenger = Messenger(MessageHandler())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onBind</span><span class="params">(intent: <span class="type">Intent</span>)</span></span>: IBinder &#123;</span><br><span class="line">        <span class="keyword">return</span> messenger.binder</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">MessageHandler</span>: <span class="type">Handler</span></span>() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">handleMessage</span><span class="params">(message: <span class="type">Message</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">val</span> <span class="keyword">data</span> = message.<span class="keyword">data</span></span><br><span class="line">            <span class="keyword">val</span> value = <span class="keyword">data</span>.getString(<span class="string">&quot;message&quot;</span>)</span><br><span class="line">            value?.run &#123;</span><br><span class="line">                println(value)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>AndroidManifest.xml</code>에서 서비스가 다른 프로세스에서 수행되도록 코드를 추가합니다. <code>android:process</code>속성을 사용합니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.remote_bound_servicee&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Remote_bound_servicee&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">service</span> <span class="attr">android:name</span>=<span class="string">&quot;.RemoteBoundService&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:enabled</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:exported</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;:another_process&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.MAIN&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.LAUNCHER&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 액티비티에서 서비스와 바인딩합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> editText: EditText <span class="keyword">by</span> lazy &#123; findViewById&lt;EditText&gt;(R.id.activity_main_et) &#125;</span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> messenger: Messenger? = <span class="literal">null</span></span><br><span class="line">    <span class="keyword">var</span> isBound = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> connection = <span class="keyword">object</span>: ServiceConnection &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onServiceConnected</span><span class="params">(name: <span class="type">ComponentName</span>?, binder: <span class="type">IBinder</span>?)</span></span> &#123;</span><br><span class="line">            messenger = Messenger(binder)</span><br><span class="line">            isBound = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onServiceDisconnected</span><span class="params">(name: <span class="type">ComponentName</span>?)</span></span> &#123;</span><br><span class="line">            messenger = <span class="literal">null</span></span><br><span class="line">            isBound = <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> intent = Intent(applicationContext, RemoteBoundService::<span class="keyword">class</span>.java)</span><br><span class="line">        bindService(intent, connection, Context.BIND_AUTO_CREATE)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>마지막으로 버튼을 눌렀을 때 서비스로 메시지를 전송합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn) &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">if</span> (!isBound) <span class="keyword">return</span><span class="symbol">@setOnClickListener</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> message = Message.obtain()</span><br><span class="line">            <span class="keyword">var</span> bundle = Bundle()</span><br><span class="line">            bundle.putString(<span class="string">&quot;message&quot;</span>, editText.text.toString())</span><br><span class="line">            message.<span class="keyword">data</span> = bundle</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 서비스로 메시지 전송</span></span><br><span class="line">            messenger?.send(message)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/04/08_android/01_android_platform/190704_service_lifecycle/"
+                    data-tooltip="[Android] 서비스 - (4) 서비스의 생명주기"
+                    aria-label="이전: [Android] 서비스 - (4) 서비스의 생명주기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/02/08_android/01_android_platform/190702_intent_service/"
+                    data-tooltip="[Android] 서비스 - (2) 인텐트 서비스(Intent Service)"
+                    aria-label="다음: [Android] 서비스 - (2) 인텐트 서비스(Intent Service)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/04/08_android/01_android_platform/190704_service_lifecycle/"
+                    data-tooltip="[Android] 서비스 - (4) 서비스의 생명주기"
+                    aria-label="이전: [Android] 서비스 - (4) 서비스의 생명주기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/07/02/08_android/01_android_platform/190702_intent_service/"
+                    data-tooltip="[Android] 서비스 - (2) 인텐트 서비스(Intent Service)"
+                    aria-label="다음: [Android] 서비스 - (2) 인텐트 서비스(Intent Service)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/07/03/08_android/01_android_platform/190703_bound_service/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
