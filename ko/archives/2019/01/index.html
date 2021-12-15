@@ -1067,23 +1067,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2019/01/04/06_spring/01_servlet_jsp/20190104_server_webserver_was/"
-                            aria-label=": [Servlet, JSP] Server, Web Server, WAS 차이점"
+                            href="/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                            aria-label=": [Android] Gradle - (6) 빌드 변형(Build Variant) - ProductFlavor"
                         >
-                            [Servlet, JSP] Server, Web Server, WAS 차이점
+                            [Android] Gradle - (6) 빌드 변형(Build Variant) - ProductFlavor
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2019-01-04T00:00:00+09:00">
+    <time datetime="2019-01-06T01:00:00+09:00">
 	
-		    2019/01/04
+		    2019/01/06
     	
     </time>
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
 
 
     
@@ -1093,31 +1093,52 @@
             
                 <div class="postShorten-content">
                     <hr>
-<h1 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h1><p><code>Server</code>는 Client에 정보나 서비스를 제공하는 컴퓨터 시스템이다. 서버에는 보통 Linux, Unix, Windows 운영체제가 탑재된다.<br><img src="1.png"></p>
-<h1 id="Web-Server"><a href="#Web-Server" class="headerlink" title="Web Server"></a>Web Server</h1><ul>
-<li><code>Web Server</code>는 웹 브라우저 같은 클라이언트로부터 HTTP 요청을 받아들이고 HTML 문서와 같은 웹 페이지를 반환하는 프로그램이다. </li>
-<li>Web Server의 대표적인 제품군에는 Apache, Nginx, IIS가 있다. </li>
-<li><code>Web Server</code>는 파일 시스템에 저장된 파일(HTML, CSS, JavaScript, 이미지, 파일 등)을 단순히 클라이언트에게 전달한다. 이를 <u>정적 컨텐츠</u>를 제공한다고 한다.</li>
-</ul>
-<p><img src="2.png"></p>
-<h1 id="WAS-Web-Application-Server"><a href="#WAS-Web-Application-Server" class="headerlink" title="WAS(Web Application Server)"></a>WAS(Web Application Server)</h1><p><code>WAS</code>는 데이터베이스, 파일 시스템, 네트워크 등에서 데이터를 읽어와 다양한 로직을 수행한 후 적절한 HTML 파일을 생성하여 클라이언트에게 전달한다. 이를 <u>동적 컨텐츠</u>를 제공한다고 한다.<br><img src="3.png"></p>
-<p>WAS의 대표적인 제품군에는 Apache Tomcat, Oracle WebLogic, IBM Websphere, Tmax JEUS, Red Hat Jboss가 있다. 제품군에 따라 다르지만 WAS는 크게 세 가지 요소로 구성된다.</p>
+<h1 id="Product-Flavor"><a href="#Product-Flavor" class="headerlink" title="Product Flavor"></a>Product Flavor</h1><p>스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 레이아웃만 약간 다르고 기능적으로는 차이가 없습니다. 이러한 경우 <code>프로덕트 플래이버(Product Flavor)</code>를 사용할 수 있습니다.</p>
+<h1 id="build-gradle에-프로덕트-플래이버-추가하기"><a href="#build-gradle에-프로덕트-플래이버-추가하기" class="headerlink" title="build.gradle에 프로덕트 플래이버 추가하기"></a>build.gradle에 프로덕트 플래이버 추가하기</h1><p>모듈 수준의 <code>build.gradle</code>에 두 개의 프로덕트 플래이버를 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line"></span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    flavorDimensions <span class="string">&quot;mode&quot;</span></span><br><span class="line"></span><br><span class="line">    productFlavors &#123;</span><br><span class="line">        phone &#123;</span><br><span class="line">            dimension <span class="string">&quot;mode&quot;</span></span><br><span class="line">            versionCode <span class="number">101</span></span><br><span class="line">            versionName <span class="string">&quot;1.0.1&quot;</span></span><br><span class="line">            applicationIdSuffix <span class="string">&quot;.phone&quot;</span></span><br><span class="line">            versionNameSuffix <span class="string">&quot;-phone&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">        tablet &#123;</span><br><span class="line">            dimension <span class="string">&quot;mode&quot;</span></span><br><span class="line">            versionCode <span class="number">213</span></span><br><span class="line">            versionName <span class="string">&quot;2.1.3&quot;</span></span><br><span class="line">            applicationIdSuffix <span class="string">&quot;.tablet&quot;</span></span><br><span class="line">            versionNameSuffix <span class="string">&quot;-tablet&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>Sync Now</code>를 클릭하여 동기화 후 왼쪽 하단의 <code>Build Variant</code>탭을 확인해봅시다.<br><img src="1.png"></p>
+<p>총 네 개의 빌드 변형이 추가되었습니다. 그래들은 <code>Build Type</code>과 <code>Product Flavor</code>에 따라 자동으로 빌드 변형을 생성하고 <code>&lt;product-flavor&gt;&lt;Build-Type&gt;</code>로 빌드 변형의 이름을 지정합니다.</p>
+<h4 id="1-applicationIdSuffix"><a href="#1-applicationIdSuffix" class="headerlink" title="(1) applicationIdSuffix"></a>(1) applicationIdSuffix</h4><p><code>applicationId</code>에 추가되는 접미사입니다. <code>applicationId</code>가 <code>com.yologger.example</code>고 <code>applicationIdSuffix</code>가 <code>.phone</code>이면 이 빌드 변형의 <code>applicationId</code>는 <code>com.yologger.example.phone</code>이 됩니다.</p>
+<h4 id="2-versionNameSuffix"><a href="#2-versionNameSuffix" class="headerlink" title="(2) versionNameSuffix"></a>(2) versionNameSuffix</h4><p><code>versionName</code>에 추가되는 접미사입니다. <code>versionName</code>이 <code>2.1.3</code>고 <code>versionNameSuffix</code>가 <code>-tablet</code>이면 이 빌드 변형의 <code>versionName</code>은 <code>2.1.3-tablet</code>이 됩니다.</p>
+<h1 id="빌드-플레이버에-따라-다른-리소스-사용하기"><a href="#빌드-플레이버에-따라-다른-리소스-사용하기" class="headerlink" title="빌드 플레이버에 따라 다른 리소스 사용하기"></a>빌드 플레이버에 따라 다른 리소스 사용하기</h1><p>프로젝트 도구 창을 <code>Android 뷰</code>에서 <code>Project 뷰</code>로 변경합니다.<br><img src="2.png"><br><code>your_project &gt; app &gt; src</code>에 네 개의 디렉토리를 생성합니다</p>
 <ul>
-<li><code>Web Container</code><ol>
-<li>JSP파일을 Servlet으로 변환한다.</li>
-<li>Servlet의 생성, 소멸 등의 생명주기를 관리한다.</li>
-<li>HttpServletRequest, HttpServletResponse의 생성, 소멸 등의 생명주기를 관리한다.</li>
-<li>Web Container는 <code>Servlet Container</code>라고도 불린다.</li>
-</ol>
-</li>
-<li><code>Web Server</code>: Web Container가 동적으로 생성한 웹 페이지를 Client에게 제공한다.</li>
-<li><code>EJB Container</code>: <ol>
-<li>EJB(Enterprise Java Bean)의 생명주기를 관리한다.</li>
-<li>EJB는 한국에서는 Spring Framework에 밀려서 잘 사용되지 않는다.</li>
-</ol>
-</li>
+<li>phone/res/values</li>
+<li>phone/res/layout</li>
+<li>tablet/res/values</li>
+<li>tablet/res/layout</li>
 </ul>
-<p>Oracle WebLogic, Red Hat Jboss 같은 제품군은 세 가지 요소를 모두 포함한다. 그러나 Apache Tomcat은 Web Server와 Web Container만을 포함한다.</p>
+<p><img src="3.png"><br><code>main/res/values/strings.xml</code>과 <code>main/res/layout/activity_main.xml</code>을 위 디렉토리로 복사합니다.<br><img src="4.png"><br>코드를 변경합니다.</p>
+<figure class="highlight xml"><figcaption><span>phone/res/values/string.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>flavor for phone<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;title&quot;</span>&gt;</span>flavor for phone<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><figcaption><span>phone/res/layout/activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;@string/title&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><figcaption><span>tablet/res/values/string.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>flavor for tablet<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;title&quot;</span>&gt;</span>flavor for tablet<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight xml"><figcaption><span>tablet/res/values/activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;@string/title&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 빌드 변형를 <code>debugPhone</code>으로 변경하고 실행하면 다음과 같습니다.</p>
+<p><img src="6.png"></p>
+<p>빌드 변형를 <code>debugTablet</code>으로 변경하고 실행하면 다음과 같습니다.</p>
+<p><img src="7.png"><br>두 개의 빌드 변형이 설치되었음을 확인할 수 있습니다.</p>
+<p><img src="8.png"></p>
+<h1 id="프로덕트-플레이버에-따라-다른-소스파일-사용하기"><a href="#프로덕트-플레이버에-따라-다른-소스파일-사용하기" class="headerlink" title="프로덕트 플레이버에 따라 다른 소스파일 사용하기"></a>프로덕트 플레이버에 따라 다른 소스파일 사용하기</h1><p>리소스뿐만 아니라 프로덕트 플레이버에 따라 다른 소스파일을 사용할 수도 있습니다. </p>
+<p>두 개의 디렉토리를 생성합니다.</p>
+<ul>
+<li>phone/java</li>
+<li>tablet/java</li>
+</ul>
+<p><img src="9.png"></p>
+<p>각각의 폴더에 동일한 패키지를 생성합니다.<br><img src="10.png"></p>
+<p><code>main/java/com/yologger/example</code>의 <code>MainActivity.kt</code>파일을 <code>phone/java/com/yologger/example</code>과 <code>tablet/java/com/yologger/example</code>에 복사합니다. 복사 후 <code>main/java/com/yologger/example/MainActivity.kt</code>는 삭제합니다. 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>phone/java/com/yologger/example/MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> container: ConstraintLayout</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        container = findViewById(R.id.activity_main_container)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 배경화면 빨간색</span></span><br><span class="line">        container.setBackgroundColor(Color.RED)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight kotlin"><figcaption><span>tablet/java/com/yologger/example/MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> container: ConstraintLayout</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        container = findViewById(R.id.activity_main_container)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 배경화면 파란색</span></span><br><span class="line">        container.setBackgroundColor(Color.BLUE)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 빌드 변형을 <code>phoneDebug</code>로 실행하면 다음과 같습니다.</p>
+<p><img src="11.png"></p>
+<p>빌드 변형을 <code>tabletDebug</code>로 실행하면 다음과 같습니다.</p>
+<p><img src="12.png"></p>
+<p>이처럼 <code>프로덕트 플래이버</code>를 사용하면 빌드 변형에 따라 다른 <code>리소스 파일</code>과 <code>소스 파일</code>을 사용할 수 있습니다.</p>
 
                     
                         
@@ -1127,7 +1148,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2019/01/04/06_spring/01_servlet_jsp/20190104_server_webserver_was/#post-footer"
+                                href="/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1150,23 +1171,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
-                            aria-label=": [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                            href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/"
+                            aria-label=": [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType"
                         >
-                            [Servlet, JSP] Eclipse로 Java Web Application 구성하기
+                            [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2019-01-02T00:00:00+09:00">
+    <time datetime="2019-01-05T01:00:00+09:00">
 	
-		    2019/01/02
+		    2019/01/05
     	
     </time>
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
 
 
     
@@ -1176,25 +1197,26 @@
             
                 <div class="postShorten-content">
                     <hr>
-<p>Eclipse를 실행하고 <code>File &gt; Project</code>를 선택한 후 <code>Dynamic Web Project</code>를 선택한다.<br><img src="1.png"><br><code>Project name</code>, <code>Project Location</code>, <code>Target runtime</code>을 적절히 입력하고 <code>Next &gt;</code> 버튼을 누른다.<br><img src="2.png"><br><code>Source folders on build path</code>는 Java 파일이 위치할 경로다. <code>Default output folder</code>는 빌드된 파일이 위치할 경로다. 확인 후 <code>Next &gt;</code>버튼을 누른다.<br><img src="3.png"><br><code>Context root</code>와 <code>Content directory</code>은 기본값으로 두고 <code>Generate web.xml deployment descriptor</code>를 선택하고 <code>Next &gt;</code>버튼을 누른다.<br><img src="4.png"></p>
+<h1 id="왜-빌드-변형이-필요할까"><a href="#왜-빌드-변형이-필요할까" class="headerlink" title="왜 빌드 변형이 필요할까?"></a>왜 빌드 변형이 필요할까?</h1><p>안드로이드에서는 하나의 프로젝트를 여러 버전의 앱으로 빌드할 수 있습니다. 그렇다면 왜 여러 버전의 앱으로 빌드를 해야할까요? </p>
+<h4 id="1-스마트폰-앱-vs-태블릿-앱"><a href="#1-스마트폰-앱-vs-태블릿-앱" class="headerlink" title="(1) 스마트폰 앱 vs. 태블릿 앱"></a>(1) 스마트폰 앱 vs. 태블릿 앱</h4><p>스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 기능은 동일하고 레이아웃만 약간 다릅니다. 이러한 경우 두 개의 프로젝트를 생성하여 각각 관리한다면 매우 비효율적일 것입니다.</p>
+<h4 id="2-무료-앱-vs-유료-앱"><a href="#2-무료-앱-vs-유료-앱" class="headerlink" title="(2) 무료 앱 vs. 유료 앱"></a>(2) 무료 앱 vs. 유료 앱</h4><p>이번엔 무료 앱과 유료 앱을 출시한다고 가정합시다. 두 앱은 레이아웃은 동일하며, 기능만 약간 다릅니다. 이러한 경우에도 두 개의 프로젝트를 생성하는 것은 비효율적입니다.</p>
+<h4 id="3-개발용-앱-vs-출시용-앱"><a href="#3-개발용-앱-vs-출시용-앱" class="headerlink" title="(3) 개발용 앱 vs 출시용 앱"></a>(3) 개발용 앱 vs 출시용 앱</h4><p>마지막으로 개발용 앱과 출시용 앱이 있다고 가정합시다. <code>프로가드(ProGuard)</code>는 앱 용량을 축소하고 코드를 난독화합니다. 다만 프로가드를 적용하면 빌드 시간이 길어지는데 굳이 디버그용 앱에 적용할 필요가 있을까요? 이러한 경우 출시용 앱에만 적용되도록 할 수 있습니다.</p>
+<h1 id="빌드-변형"><a href="#빌드-변형" class="headerlink" title="빌드 변형"></a>빌드 변형</h1><p>하나의 프로젝트가 여러 버전으로 빌드되면 각각의 앱을 <code>빌드 변형(Build Variant)</code>이라고 합니다. 빌드 변형을 만드는 방법에는 두 가지가 있습니다.</p>
 <ul>
-<li><code>Context root</code>: WAS(Tomcat)에는 여러 개의 Web Application이 구동될 수 있다. Context root는 WAS위의 Web Application을 구분하는데 사용된다. 예를 들어 Web Appication의 URL이 <code>http://yourcompany.com/my_project</code>라면 <code>my_project</code>가 context root를 의미한다.</li>
-<li><code>Content directory</code>: JSP파일이 저장되는 경로다. JSP파일 외에도 <code>META-INF</code>폴더, <code>WEB-INF</code>폴더, <code>web.xml</code>파일 등이 위치한다.</li>
-<li><code>enerate web.xml deployment descriptor</code>: WEB.xml 파일을 생성한다.</li>
+<li><code>빌드 타입(Build Type)</code></li>
+<li><code>프로덕트 플래이버(Product Flavor)</code></li>
 </ul>
-<p>생성된 프로젝트의 구조는 다음과 같다.<br><img src="5.png"></p>
-<p>이제 JSP 파일을 생성해보자. <code>src &gt; main &gt; webapp</code>에 JSP 파일을 생성한다.</p>
-<figure class="highlight html"><figcaption><span>HelloWorld.jsp</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;UTF-8&quot;%&gt;</span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>Tomcat에서 프로젝트를 실행하기 위해 <code>Run on Server</code>를 선택한다.<br><img src="6.png"><br>Tomcat을 선택하고 <code>Next &gt;</code>를 선택한다.<br><img src="7.png"><br><code>Configured</code>항목으로 프로젝트를 이동시키고 <code>Finish</code> 버튼을 누른다.<br><img src="8.png"></p>
-<ul>
-<li><code>Available</code>: 아직 Tomcat에 배포하지 않은 프로젝트</li>
-<li><code>Configured</code>: 이미 Toccat에 배포한 프로젝트</li>
-</ul>
-<p>이제 웹 브라우저에서 접속할 수 있다.<br><img src="9.png"></p>
-<h1 id="참고"><a href="#참고" class="headerlink" title="참고"></a>참고</h1><p>Eclipse에 Tomcat 서버를 추가하면 <code>Project Explorer</code>에 서버의 디렉토리가 추가된다.<br><img src="10.png"><br><code>server.xml</code>에서는 Tomcat 서버의 설정 파일이다.<br><img src="11.png"><br>Tomcat 서버에는 여러 개의 Web Application을 배포할 수 있다. 배포된 Web Application은 <code>server.xml</code>에서 <code>&lt;context&gt;</code>태그로 등록된다.</p>
-<figure class="highlight xml"><figcaption><span>server.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Server</span> <span class="attr">port</span>=<span class="string">&quot;8005&quot;</span> <span class="attr">shutdown</span>=<span class="string">&quot;SHUTDOWN&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Service</span> <span class="attr">name</span>=<span class="string">&quot;Catalina&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Host</span> <span class="attr">appBase</span>=<span class="string">&quot;webapps&quot;</span> <span class="attr">autoDeploy</span>=<span class="string">&quot;true&quot;</span> <span class="attr">name</span>=<span class="string">&quot;localhost&quot;</span> <span class="attr">unpackWARs</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line">      <span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">&quot;project1&quot;</span> <span class="attr">path</span>=<span class="string">&quot;/project1&quot;</span> <span class="attr">reloadable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">source</span>=<span class="string">&quot;org.eclipse.jst.jee.server:project1&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">&quot;project2&quot;</span> <span class="attr">path</span>=<span class="string">&quot;/project2&quot;</span> <span class="attr">reloadable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">source</span>=<span class="string">&quot;org.eclipse.jst.jee.server:project2&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Host</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">Service</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Server</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><code>&lt;Context&gt;</code>태그의 <code>docBase</code>속성은 프로젝트의 이름이다. 또한 <code>path</code>속성을 통해 <code>Context root</code>를 변경할 수 있다.</p>
+<hr>
+<h1 id="빌드-타입"><a href="#빌드-타입" class="headerlink" title="빌드 타입"></a>빌드 타입</h1><p>안드로이드 스튜디오 프로젝트를 생성하면 <code>debug</code>, <code>release</code>라는 두 개의 <code>빌드 타입(BuildType)</code>이 자동으로 생성됩니다.</p>
+<p><code>안드로이드 스튜디오 &gt; 왼쪽 하단의 Build Variant</code> 탭에서 빌드 타입을 확인할 수 있습니다.<br><img src="1.png"></p>
+<p>각 빌드 타입에 대한 설정은 <code>모듈 수준의 build.gradle</code>의 <code>buildTypes 섹션</code>에서 할 수 있습니다. 프로젝트를 처음 생성하면 아마 아래와 같은 모습일 것입니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>release 섹션</code>만 있고 <code>debug 색션</code>은 없습니다. 따라서 <code>debug</code>모드로 빌드하면 기본값이 적용됩니다. 물론 다음과 같이 <code>debug</code>모드의 설정을 직접 할 수도 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>직접 빌드 타입을 추가할 수도 있습니다. <code>alpha</code>, <code>beta</code>를 추가하고 그래들의 <code>Sync Now</code>버튼을 클릭합시다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        alpha &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        beta &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>alpha</code>와 <code>beta</code>가 추가된 것을 확인할 수 있습니다.<br><img src="2.png"></p>
+<p>이처럼 빌드 타입을 사용하면 빌드 타입에 따라 다른 빌드 방식을 설정할 수 있습니다.</p>
 
                     
                         
@@ -1204,7 +1226,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/#post-footer"
+                                href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

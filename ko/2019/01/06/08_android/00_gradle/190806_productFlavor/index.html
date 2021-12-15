@@ -1,0 +1,763 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] Gradle - (6) 빌드 변형(Build Variant) - ProductFlavor - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nProduct Flavor스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 레이아웃만 약간 다르고 기능적으로는 차이가 없습니다. 이러한 경우 프로덕트 플래이버(Product Flavor)를 사용할 수 있습니다.\nbuild.gradle에 프로덕트 플래이버 추가하기모듈 수준의 build.gradle에 두 개의 프로덕트 플래이버를 추가합니다.\nbuild.gradle1234567891011121314151617181920212223242526272829303132android &#123;    buildTypes &#123;        debug &#123;            // ...        &#125;        release &#123;            // ...        &#125;    &#125;    flavorDimensions &quot;mode&quot;    productFlavors &#123;        phone &#123;            dimension &quot;mode&quot;            versionCode 101            versionName &quot;1.0.1&quot;            applicationIdSuffix &quot;.phone&quot;            versionNameSuffix &quot;-phone&quot;        &#125;        tablet &#123;            dimension &quot;mode&quot;            versionCode 213            versionName &quot;2.1.3&quot;            applicationIdSuffix &quot;.tablet&quot;            versionNameSuffix &quot;-tablet&quot;        &#125;    &#125;    // ... &#125;\n\n이제 Sync Now를 클릭하여 동기화 후 왼쪽 하단의 Build Variant탭을 확인해봅시다.\n총 네 개의 빌드 변형이 추가되었습니다. 그래들은 Build Type과 Product Flavor에 따라 자동으로 빌드 변형을 생성하고 &lt;product-flavor&gt;&lt;Build-Type&gt;로 빌드 변형의 이름을 지정합니다.\n(1) applicationIdSuffixapplicationId에 추가되는 접미사입니다. applicationId가 com.yologger.example고 applicationIdSuffix가 .phone이면 이 빌드 변형의 applicationId는 com.yologger.example.phone이 됩니다.\n(2) versionNameSuffixversionName에 추가되는 접미사입니다. versionName이 2.1.3고 versionNameSuffix가 -tablet이면 이 빌드 변형의 versionName은 2.1.3-tablet이 됩니다.\n빌드 플레이버에 따라 다른 리소스 사용하기프로젝트 도구 창을 Android 뷰에서 Project 뷰로 변경합니다.your_project &gt; app &gt; src에 네 개의 디렉토리를 생성합니다\n\nphone/res/values\nphone/res/layout\ntablet/res/values\ntablet/res/layout\n\nmain/res/values/strings.xml과 main/res/layout/activity_main.xml을 위 디렉토리로 복사합니다.코드를 변경합니다.\nphone/res/values/string.xml1234&lt;resources&gt;    &lt;string name=&quot;app_name&quot;&gt;flavor for phone&lt;/string&gt;    &lt;string name=&quot;title&quot;&gt;flavor for phone&lt;/string&gt;&lt;/resources&gt;\nphone/res/layout/activity_main.xml123456789101112131415161718&lt;androidx.constraintlayout.widget.ConstraintLayout     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;TextView        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;@string/title&quot;        app:layout_constraintBottom_toBottomOf=&quot;parent&quot;        app:layout_constraintLeft_toLeftOf=&quot;parent&quot;        app:layout_constraintRight_toRightOf=&quot;parent&quot;        app:layout_constraintTop_toTopOf=&quot;parent&quot; /&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n\ntablet/res/values/string.xml1234&lt;resources&gt;    &lt;string name=&quot;app_name&quot;&gt;flavor for tablet&lt;/string&gt;    &lt;string name=&quot;title&quot;&gt;flavor for tablet&lt;/string&gt;&lt;/resources&gt;\n\n\ntablet/res/values/activity_main.xml123456789101112131415161718&lt;androidx.constraintlayout.widget.ConstraintLayout     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;TextView        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;@string/title&quot;        app:layout_constraintBottom_toBottomOf=&quot;parent&quot;        app:layout_constraintLeft_toLeftOf=&quot;parent&quot;        app:layout_constraintRight_toRightOf=&quot;parent&quot;        app:layout_constraintTop_toTopOf=&quot;parent&quot; /&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n이제 빌드 변형를 debugPhone으로 변경하고 실행하면 다음과 같습니다.\n\n빌드 변형를 debugTablet으로 변경하고 실행하면 다음과 같습니다.\n두 개의 빌드 변형이 설치되었음을 확인할 수 있습니다.\n\n프로덕트 플레이버에 따라 다른 소스파일 사용하기리소스뿐만 아니라 프로덕트 플레이버에 따라 다른 소스파일을 사용할 수도 있습니다. \n두 개의 디렉토리를 생성합니다.\n\nphone/java\ntablet/java\n\n\n각각의 폴더에 동일한 패키지를 생성합니다.\nmain/java/com/yologger/example의 MainActivity.kt파일을 phone/java/com/yologger/example과 tablet/java/com/yologger/example에 복사합니다. 복사 후 main/java/com/yologger/example/MainActivity.kt는 삭제합니다. 코드는 다음과 같습니다.\nphone/java/com/yologger/example/MainActivity.kt1234567891011121314class MainActivity : AppCompatActivity() &#123;    lateinit var container: ConstraintLayout    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        container = findViewById(R.id.activity_main_container)        // 배경화면 빨간색        container.setBackgroundColor(Color.RED)    &#125;&#125;\n\ntablet/java/com/yologger/example/MainActivity.kt1234567891011121314class MainActivity : AppCompatActivity() &#123;    lateinit var container: ConstraintLayout    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        container = findViewById(R.id.activity_main_container)        // 배경화면 파란색        container.setBackgroundColor(Color.BLUE)    &#125;&#125;\n\n이제 빌드 변형을 phoneDebug로 실행하면 다음과 같습니다.\n\n빌드 변형을 tabletDebug로 실행하면 다음과 같습니다.\n\n이처럼 프로덕트 플래이버를 사용하면 빌드 변형에 따라 다른 리소스 파일과 소스 파일을 사용할 수 있습니다.\n","dateCreated":"2019-01-06T01:00:00+09:00","dateModified":"2021-12-15T22:16:18+09:00","datePublished":"2019-01-06T01:00:00+09:00","description":"","headline":"[Android] Gradle - (6) 빌드 변형(Build Variant) - ProductFlavor","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/","keywords":"Android, Gradle"}</script>
+    <meta name="description" content="Product Flavor스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 레이아웃만 약간 다르고 기능적으로는 차이가 없습니다. 이러한 경우 프로덕트 플래이버(Product Flavor)를 사용할 수 있습니다. build.gradle에 프로덕트 플래이버 추가하기모듈 수준의 build.gradle에 두 개의 프로덕트 플래이버를 추가합니다. bu">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] Gradle - (6) 빌드 변형(Build Variant) - ProductFlavor">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="Product Flavor스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 레이아웃만 약간 다르고 기능적으로는 차이가 없습니다. 이러한 경우 프로덕트 플래이버(Product Flavor)를 사용할 수 있습니다. build.gradle에 프로덕트 플래이버 추가하기모듈 수준의 build.gradle에 두 개의 프로덕트 플래이버를 추가합니다. bu">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/3.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/4.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/6.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/7.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/8.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/9.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/10.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/11.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/12.png">
+<meta property="article:published_time" content="2019-01-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T13:16:18.958Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Gradle">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] Gradle - (6) 빌드 변형(Build Variant) - ProductFlavor
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-01-06T01:00:00+09:00">
+	
+		    2019/01/06
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="Product-Flavor"><a href="#Product-Flavor" class="headerlink" title="Product Flavor"></a>Product Flavor</h1><p>스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 레이아웃만 약간 다르고 기능적으로는 차이가 없습니다. 이러한 경우 <code>프로덕트 플래이버(Product Flavor)</code>를 사용할 수 있습니다.</p>
+<h1 id="build-gradle에-프로덕트-플래이버-추가하기"><a href="#build-gradle에-프로덕트-플래이버-추가하기" class="headerlink" title="build.gradle에 프로덕트 플래이버 추가하기"></a>build.gradle에 프로덕트 플래이버 추가하기</h1><p>모듈 수준의 <code>build.gradle</code>에 두 개의 프로덕트 플래이버를 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line"></span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    flavorDimensions <span class="string">&quot;mode&quot;</span></span><br><span class="line"></span><br><span class="line">    productFlavors &#123;</span><br><span class="line">        phone &#123;</span><br><span class="line">            dimension <span class="string">&quot;mode&quot;</span></span><br><span class="line">            versionCode <span class="number">101</span></span><br><span class="line">            versionName <span class="string">&quot;1.0.1&quot;</span></span><br><span class="line">            applicationIdSuffix <span class="string">&quot;.phone&quot;</span></span><br><span class="line">            versionNameSuffix <span class="string">&quot;-phone&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">        tablet &#123;</span><br><span class="line">            dimension <span class="string">&quot;mode&quot;</span></span><br><span class="line">            versionCode <span class="number">213</span></span><br><span class="line">            versionName <span class="string">&quot;2.1.3&quot;</span></span><br><span class="line">            applicationIdSuffix <span class="string">&quot;.tablet&quot;</span></span><br><span class="line">            versionNameSuffix <span class="string">&quot;-tablet&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>Sync Now</code>를 클릭하여 동기화 후 왼쪽 하단의 <code>Build Variant</code>탭을 확인해봅시다.<br><img src="1.png"></p>
+<p>총 네 개의 빌드 변형이 추가되었습니다. 그래들은 <code>Build Type</code>과 <code>Product Flavor</code>에 따라 자동으로 빌드 변형을 생성하고 <code>&lt;product-flavor&gt;&lt;Build-Type&gt;</code>로 빌드 변형의 이름을 지정합니다.</p>
+<h4 id="1-applicationIdSuffix"><a href="#1-applicationIdSuffix" class="headerlink" title="(1) applicationIdSuffix"></a>(1) applicationIdSuffix</h4><p><code>applicationId</code>에 추가되는 접미사입니다. <code>applicationId</code>가 <code>com.yologger.example</code>고 <code>applicationIdSuffix</code>가 <code>.phone</code>이면 이 빌드 변형의 <code>applicationId</code>는 <code>com.yologger.example.phone</code>이 됩니다.</p>
+<h4 id="2-versionNameSuffix"><a href="#2-versionNameSuffix" class="headerlink" title="(2) versionNameSuffix"></a>(2) versionNameSuffix</h4><p><code>versionName</code>에 추가되는 접미사입니다. <code>versionName</code>이 <code>2.1.3</code>고 <code>versionNameSuffix</code>가 <code>-tablet</code>이면 이 빌드 변형의 <code>versionName</code>은 <code>2.1.3-tablet</code>이 됩니다.</p>
+<h1 id="빌드-플레이버에-따라-다른-리소스-사용하기"><a href="#빌드-플레이버에-따라-다른-리소스-사용하기" class="headerlink" title="빌드 플레이버에 따라 다른 리소스 사용하기"></a>빌드 플레이버에 따라 다른 리소스 사용하기</h1><p>프로젝트 도구 창을 <code>Android 뷰</code>에서 <code>Project 뷰</code>로 변경합니다.<br><img src="2.png"><br><code>your_project &gt; app &gt; src</code>에 네 개의 디렉토리를 생성합니다</p>
+<ul>
+<li>phone/res/values</li>
+<li>phone/res/layout</li>
+<li>tablet/res/values</li>
+<li>tablet/res/layout</li>
+</ul>
+<p><img src="3.png"><br><code>main/res/values/strings.xml</code>과 <code>main/res/layout/activity_main.xml</code>을 위 디렉토리로 복사합니다.<br><img src="4.png"><br>코드를 변경합니다.</p>
+<figure class="highlight xml"><figcaption><span>phone/res/values/string.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>flavor for phone<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;title&quot;</span>&gt;</span>flavor for phone<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><figcaption><span>phone/res/layout/activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;@string/title&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><figcaption><span>tablet/res/values/string.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>flavor for tablet<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;title&quot;</span>&gt;</span>flavor for tablet<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight xml"><figcaption><span>tablet/res/values/activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;@string/title&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 빌드 변형를 <code>debugPhone</code>으로 변경하고 실행하면 다음과 같습니다.</p>
+<p><img src="6.png"></p>
+<p>빌드 변형를 <code>debugTablet</code>으로 변경하고 실행하면 다음과 같습니다.</p>
+<p><img src="7.png"><br>두 개의 빌드 변형이 설치되었음을 확인할 수 있습니다.</p>
+<p><img src="8.png"></p>
+<h1 id="프로덕트-플레이버에-따라-다른-소스파일-사용하기"><a href="#프로덕트-플레이버에-따라-다른-소스파일-사용하기" class="headerlink" title="프로덕트 플레이버에 따라 다른 소스파일 사용하기"></a>프로덕트 플레이버에 따라 다른 소스파일 사용하기</h1><p>리소스뿐만 아니라 프로덕트 플레이버에 따라 다른 소스파일을 사용할 수도 있습니다. </p>
+<p>두 개의 디렉토리를 생성합니다.</p>
+<ul>
+<li>phone/java</li>
+<li>tablet/java</li>
+</ul>
+<p><img src="9.png"></p>
+<p>각각의 폴더에 동일한 패키지를 생성합니다.<br><img src="10.png"></p>
+<p><code>main/java/com/yologger/example</code>의 <code>MainActivity.kt</code>파일을 <code>phone/java/com/yologger/example</code>과 <code>tablet/java/com/yologger/example</code>에 복사합니다. 복사 후 <code>main/java/com/yologger/example/MainActivity.kt</code>는 삭제합니다. 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>phone/java/com/yologger/example/MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> container: ConstraintLayout</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        container = findViewById(R.id.activity_main_container)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 배경화면 빨간색</span></span><br><span class="line">        container.setBackgroundColor(Color.RED)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight kotlin"><figcaption><span>tablet/java/com/yologger/example/MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> container: ConstraintLayout</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        container = findViewById(R.id.activity_main_container)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 배경화면 파란색</span></span><br><span class="line">        container.setBackgroundColor(Color.BLUE)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 빌드 변형을 <code>phoneDebug</code>로 실행하면 다음과 같습니다.</p>
+<p><img src="11.png"></p>
+<p>빌드 변형을 <code>tabletDebug</code>로 실행하면 다음과 같습니다.</p>
+<p><img src="12.png"></p>
+<p>이처럼 <code>프로덕트 플래이버</code>를 사용하면 빌드 변형에 따라 다른 <code>리소스 파일</code>과 <code>소스 파일</code>을 사용할 수 있습니다.</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Gradle/" rel="tag">Gradle</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/08/06_spring/01_servlet_jsp/20190108_servlet/"
+                    data-tooltip="[Servlet, JSP] Servlet 이란?"
+                    aria-label="이전: [Servlet, JSP] Servlet 이란?"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/"
+                    data-tooltip="[Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType"
+                    aria-label="다음: [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/08/06_spring/01_servlet_jsp/20190108_servlet/"
+                    data-tooltip="[Servlet, JSP] Servlet 이란?"
+                    aria-label="이전: [Servlet, JSP] Servlet 이란?"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/"
+                    data-tooltip="[Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType"
+                    aria-label="다음: [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

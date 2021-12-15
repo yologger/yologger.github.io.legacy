@@ -354,6 +354,307 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/01/11/08_android/04_reactivex/20200111_transform_observable/"
+                            aria-label=": [RxJava, RxKotlin] Observable 변형하기 - map(), flatMap(), switchMap(), concatMap()"
+                        >
+                            [RxJava, RxKotlin] Observable 변형하기 - map(), flatMap(), switchMap(), concatMap()
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-01-11T01:00:00+09:00">
+	
+		    2020/01/11
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/RxJava-RxKotlin/">RxJava, RxKotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p><code>Observable</code>은 Observable이 방출하는 데이터를 변형하는 다양한 메소드를 제공합니다.</p>
+<h1 id="map"><a href="#map" class="headerlink" title="map()"></a>map()</h1><p><code>map()</code>을 사용하면 <code>Observable</code>이 방출하는 이벤트를 변형할 수 있습니다.<br><img src="map.png"><br>예제 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create &#123;</span><br><span class="line">    it.onNext(<span class="number">1</span>)</span><br><span class="line">    it.onNext(<span class="number">2</span>)</span><br><span class="line">    it.onNext(<span class="number">3</span>)</span><br><span class="line">    it.onNext(<span class="number">4</span>)</span><br><span class="line">    it.onNext(<span class="number">5</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">observable</span><br><span class="line">    .map &#123; </span><br><span class="line">        <span class="string">&quot;Value: <span class="subst">$&#123;it&#125;</span>&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(it)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Value: 1</span><br><span class="line">Value: 2</span><br><span class="line">Value: 3</span><br><span class="line">Value: 4</span><br><span class="line">Value: 5</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="flatMap"><a href="#flatMap" class="headerlink" title="flatMap()"></a>flatMap()</h1><p><code>flatMap()</code>는 <code>Observable</code>에서 방출하는 이벤트 각각을 <code>Observable</code>로 변형합니다. 그리고 각각의 <code>Observable</code>을 합쳐 하나의 <code>Observable</code>을 생성합니다.<br><img src="flatMap.png"></p>
+<p>예제 코드를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.fromArray(<span class="string">&quot;Monica&quot;</span>, <span class="string">&quot;Rachel&quot;</span>, <span class="string">&quot;Phoebe&quot;</span>)</span><br><span class="line"></span><br><span class="line">observable</span><br><span class="line">    .flatMap &#123;</span><br><span class="line">        Observable.create&lt;String&gt; &#123; emitter -&gt;</span><br><span class="line">            emitter.onNext(<span class="string">&quot;Her name is <span class="subst">$&#123;it&#125;</span>&quot;</span>)</span><br><span class="line">            emitter.onNext(<span class="string">&quot;<span class="subst">$&#123;it&#125;</span> lives in New York.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(it)</span><br><span class="line">    &#125;.addTo(disposables)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Her name is Monica</span><br><span class="line">Monica lives in New York.</span><br><span class="line">Her name is Rachel</span><br><span class="line">Rachel lives in New York.</span><br><span class="line">Her name is Phoebe</span><br><span class="line">Phoebe lives in New York.</span><br></pre></td></tr></table></figure>
+
+<h1 id="switchMap"><a href="#switchMap" class="headerlink" title="switchMap"></a>switchMap</h1><p><code>switchMap()</code>은 <code>flatMap()</code>과 유사합니다. 다만 아직 진행 중인 이전 이벤트가 있다면 이를 취소합니다.<br><img src="switchMap.png"></p>
+<h1 id="concatMap"><a href="#concatMap" class="headerlink" title="concatMap"></a>concatMap</h1><p><code>switchMap()</code>도 <code>flatMap()</code>과 유사합니다. 다만 아직 진행 중인 이전 이벤트가 있다면 이를 취소하지않고 끝날 때 까지 기다린 후 방출합니다.<br><img src="concatMap.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/01/11/08_android/04_reactivex/20200111_transform_observable/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/01/10/08_android/04_reactivex/20200110_combine_observable/"
+                            aria-label=": [RxJava, RxKotlin] Observable 결합하기 - merge(), combineLatest(), withLatestFrom()"
+                        >
+                            [RxJava, RxKotlin] Observable 결합하기 - merge(), combineLatest(), withLatestFrom()
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-01-10T01:00:00+09:00">
+	
+		    2020/01/10
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/RxJava-RxKotlin/">RxJava, RxKotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p><code>Observable</code>은 여러 Observable을 결합하는 다양한 메소드를 제공합니다.</p>
+<h1 id="merge"><a href="#merge" class="headerlink" title="merge()"></a>merge()</h1><p><code>merge()</code>을 사용하면 여러 개의 <code>Observable</code>을 하나의 <code>Observable</code>로 병합할 수 있습니다.<br><img src="merge.png"></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> subject1 = BehaviorSubject.createDefault(<span class="string">&quot;A&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> subject2 = BehaviorSubject.createDefault(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">Observable</span><br><span class="line">    .merge(subject1, subject2)</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(it)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">subject1.onNext(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">subject2.onNext(<span class="number">2</span>)</span><br><span class="line">subject1.onNext(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">subject2.onNext(<span class="number">3</span>)</span><br><span class="line">subject1.onNext(<span class="string">&quot;D&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">A</span><br><span class="line">1</span><br><span class="line">B</span><br><span class="line">2</span><br><span class="line">C</span><br><span class="line">3</span><br><span class="line">D</span><br></pre></td></tr></table></figure>
+
+<h1 id="combineLatest"><a href="#combineLatest" class="headerlink" title="combineLatest()"></a>combineLatest()</h1><p><code>combineLatest()</code>는 두 개 이상의 <code>Observable</code> 각각에서 이벤트가 발생했을 때 이를 갱신해주는 함수입니다.<br><img src="combineLatest.png"><br>예제는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> subject1 = BehaviorSubject.createDefault(<span class="string">&quot;Paul&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> subject2 = BehaviorSubject.createDefault(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">Observable</span><br><span class="line">    .combineLatest(subject1, subject2) &#123; a, b -&gt;</span><br><span class="line">        <span class="string">&quot;<span class="subst">$&#123;a&#125;</span>, <span class="subst">$&#123;b&#125;</span>&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(it)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">subject1.onNext(<span class="string">&quot;Joey&quot;</span>)   </span><br><span class="line"></span><br><span class="line">subject2.onNext(<span class="number">2</span>)</span><br><span class="line">subject1.onNext(<span class="string">&quot;Chandler&quot;</span>)    </span><br><span class="line">subject2.onNext(<span class="number">3</span>)</span><br><span class="line">subject1.onNext(<span class="string">&quot;Ross&quot;</span>) </span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Paul, 1</span><br><span class="line">Joey, 1</span><br><span class="line">Joey, 2</span><br><span class="line">Chandler, 2</span><br><span class="line">Chandler, 3</span><br><span class="line">Ross, 3</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="withLatestFrom"><a href="#withLatestFrom" class="headerlink" title="withLatestFrom()"></a>withLatestFrom()</h1><p><code>withLatestFrom()</code>는 두 개의 <code>Observable</code>을 결합하는데 사용합니다. 이 때 첫 번째 <code>Observable</code>에서 이벤트를 방출할 때 마다 두 번째 <code>Observable</code>의 최신 값을 함께 방출합니다.<br><img src="withLatestFrom.png"><br>예제는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> subject1 = BehaviorSubject.createDefault(<span class="string">&quot;Paul&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> subject2 = BehaviorSubject.createDefault(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">subject1</span><br><span class="line">    .withLatestFrom(subject2) &#123; name, number -&gt;</span><br><span class="line">        <span class="string">&quot;<span class="subst">$&#123;name&#125;</span>: <span class="subst">$&#123;number&#125;</span>&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(it)</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Paul: 1</span></span><br><span class="line"></span><br><span class="line">subject1.onNext(<span class="string">&quot;Joey&quot;</span>)     <span class="comment">// Joey: 1</span></span><br><span class="line"></span><br><span class="line">subject2.onNext(<span class="number">2</span>)</span><br><span class="line">subject1.onNext(<span class="string">&quot;Chandler&quot;</span>)     <span class="comment">// Chandler: 2</span></span><br><span class="line"></span><br><span class="line">subject2.onNext(<span class="number">3</span>)</span><br><span class="line">subject1.onNext(<span class="string">&quot;Ross&quot;</span>)     <span class="comment">// Chandler: 3</span></span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Paul: 1</span><br><span class="line">Joey: 1</span><br><span class="line">Chandler: 2</span><br><span class="line">Ross: 3</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/01/10/08_android/04_reactivex/20200110_combine_observable/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/01/09/08_android/04_reactivex/20200109_stream_dataflow/"
+                            aria-label=": [RxJava, RxKotlin] 스트림(Stream)과 데이터 흐름(Flow of Data)"
+                        >
+                            [RxJava, RxKotlin] 스트림(Stream)과 데이터 흐름(Flow of Data)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-01-09T01:00:00+09:00">
+	
+		    2020/01/09
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/RxJava-RxKotlin/">RxJava, RxKotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="스트림"><a href="#스트림" class="headerlink" title="스트림"></a>스트림</h1><p>이전 포스트에서 살펴본 것 처럼 <code>Observable</code>은 구독하고 있는 대상에게 데이터를 연속적, 순차적으로 흘려줍니다. 이러한 동작을 프로그래밍 언어에서 <code>스트림(Stream)</code> 또는 <code>데이터 흐름(Flow of data)</code>이라고 합니다. </p>
+<h1 id="콜드-스트림"><a href="#콜드-스트림" class="headerlink" title="콜드 스트림"></a>콜드 스트림</h1><p><code>콜드 스트림(Cold Stream)</code>은 누군가 관찰하기 전까지 데이터를 방출하지 않습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    it.onNext(<span class="string">&quot;Data 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Data 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Data 3&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>콜드 스트림(Cold Stream)</code>을 관찰하면 데이터가 방출됩니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> observable = Observable.create&lt;String&gt; &#123; </span><br><span class="line">    it.onNext(<span class="string">&quot;Data 1&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Data 2&quot;</span>)</span><br><span class="line">    it.onNext(<span class="string">&quot;Data 3&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 데이터 관찰</span></span><br><span class="line">observable</span><br><span class="line">    .subscribeBy(onNext = &#123; value -&gt;</span><br><span class="line">        println(value)</span><br><span class="line">    &#125;, onError = &#123; error -&gt;</span><br><span class="line"></span><br><span class="line">    &#125;, onComplete = &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>출력 결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Data 1</span><br><span class="line">Data 2</span><br><span class="line">Data 3</span><br></pre></td></tr></table></figure>
+
+<h1 id="핫-스트림"><a href="#핫-스트림" class="headerlink" title="핫 스트림"></a>핫 스트림</h1><p><code>핫 스트림(Hot Stream)</code>은 구독자의 관찰와 상관없이 데이터를 방출합니다. 이전 포스트에서 살펴본 <code>Reactive X</code>의 <code>Subject</code>가 대표적인 <code>핫 스트림</code>입니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> publishSubject = PublishSubject.create&lt;<span class="built_in">Int</span>&gt;()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 구독 전 이벤트 방출</span></span><br><span class="line">publishSubject.onNext(<span class="number">1</span>)</span><br><span class="line">publishSubject.onNext(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 구독</span></span><br><span class="line">publishSubject</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(it)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 구독 후 이벤트 방출</span></span><br><span class="line">publishSubject.onNext(<span class="number">3</span>)</span><br><span class="line">publishSubject.onNext(<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">3</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/01/09/08_android/04_reactivex/20200109_stream_dataflow/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/01/08/08_android/04_reactivex/20200108_subject/"
+                            aria-label=": [RxJava, RxKotlin] Subject"
+                        >
+                            [RxJava, RxKotlin] Subject
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-01-08T01:00:00+09:00">
+	
+		    2020/01/08
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/RxJava-RxKotlin/">RxJava, RxKotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Subject"><a href="#Subject" class="headerlink" title="Subject"></a>Subject</h1><p><code>Subject</code>는 <u>이벤트 방출</u>과 <u>이벤트 수신</u>을 모두 할 수 있는 객체입니다. </p>
+<p>예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Subject 생성</span></span><br><span class="line"><span class="keyword">val</span> publishSubject = PublishSubject.create&lt;<span class="built_in">Int</span>&gt;()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 구독</span></span><br><span class="line">publishSubject</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        <span class="comment">// 이벤트 수신</span></span><br><span class="line">        println(it)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 이벤트 방출</span></span><br><span class="line">publishSubject.onNext(<span class="number">1</span>)</span><br><span class="line">publishSubject.onNext(<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<p>결과물은 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td></tr></table></figure>
+<p><code>Subject</code>에는 크게 네 가지가 있습니다.</p>
+<ul>
+<li><code>PublishSubject</code></li>
+<li><code>BehaviorSubject</code></li>
+<li><code>AsyncSubject</code></li>
+<li><code>RelaySubject</code></li>
+</ul>
+<p>이번 포스트에서는 자주 사용하는 <code>PublishSubject</code>, <code>BehaviorSubject</code>에 대해 알아보겠습니다.</p>
+<h1 id="PublishSubject"><a href="#PublishSubject" class="headerlink" title="PublishSubject"></a>PublishSubject</h1><p><code>PublishSubject</code>는 다음과 같이 동작합니다.<br><img src="1.png"></p>
+<p><code>PublishSubject</code>는 다음과 같이 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> publishSubject = PublishSubject.create&lt;<span class="built_in">Int</span>&gt;()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 구독 전 이벤트 방출</span></span><br><span class="line">publishSubject.onNext(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 구독</span></span><br><span class="line">publishSubject</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(it)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 구독 후 이벤트 방출</span></span><br><span class="line">publishSubject.onNext(<span class="number">2</span>)</span><br><span class="line">publishSubject.onNext(<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+<p>주의할 점이 있습니다. <code>PublishSubject</code>는 구독하기 전 발생한 이벤트는 수신하지 못한다는 것입니다.</p>
+<h1 id="BehaviorSubject"><a href="#BehaviorSubject" class="headerlink" title="BehaviorSubject"></a>BehaviorSubject</h1><p><code>BehaviorSubject</code>는 초기값을 설정할 수 있습니다.<br><img src="2.png"></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BehaviorSubject 생성</span></span><br><span class="line"><span class="keyword">val</span> behaviorSubject = BehaviorSubject.createDefault(<span class="number">1</span>)  <span class="comment">// 초기값 설정</span></span><br><span class="line"></span><br><span class="line">behaviorSubject</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(<span class="string">&quot;A: <span class="subst">$&#123;it&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">behaviorSubject.onNext(<span class="number">2</span>)</span><br><span class="line">behaviorSubject.onNext(<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다. <code>PublishSubject</code>와는 다르게 구독하기 전 방출된 초기값도 수신하고 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A: 1    // 초기값</span><br><span class="line">A: 2</span><br><span class="line">A: 3</span><br></pre></td></tr></table></figure>
+<p>이제 두 번째 구독을 해봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BehaviorSubject 생성</span></span><br><span class="line"><span class="keyword">val</span> behaviorSubject = BehaviorSubject.createDefault(<span class="number">1</span>)  <span class="comment">// 초기값 설정</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 첫 번째 구독</span></span><br><span class="line">behaviorSubject</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(<span class="string">&quot;A: <span class="subst">$&#123;it&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">behaviorSubject.onNext(<span class="number">2</span>)</span><br><span class="line">behaviorSubject.onNext(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 두 번째 구독</span></span><br><span class="line">behaviorSubject</span><br><span class="line">    .subscribe &#123;</span><br><span class="line">        println(<span class="string">&quot;B: <span class="subst">$&#123;it&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">behaviorSubject.onNext(<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">A: 1</span><br><span class="line">A: 2</span><br><span class="line">A: 3</span><br><span class="line">B: 3</span><br><span class="line">A: 4</span><br><span class="line">B: 4</span><br></pre></td></tr></table></figure>
+<p>두 번째 구독부터는 가장 마지막으로 방출된 값을 전달받습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">A: 1</span><br><span class="line">A: 2</span><br><span class="line">A: 3    // 첫 번째 구독의 마지막 방출값</span><br><span class="line">B: 3    // 두 번째 구독이 마지막으로 방출된 값을 전달받아 출력</span><br><span class="line">A: 4</span><br><span class="line">B: 4</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/01/08/08_android/04_reactivex/20200108_subject/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/01/07/08_android/04_reactivex/20200107_transform_observable/"
                             aria-label=": [RxJava, RxKotlin] Observable 변형하기 - throttle(), throttleFisrt(), throttleLast(), debounce()"
                         >
@@ -923,91 +1224,22 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/01/01/08_android/04_reactivex/20200101_reactive_programming/"
-                            aria-label=": [RxJava, RxKotlin] 반응형 프로그래밍(Reactive Programming)과 ReactiveX"
-                        >
-                            [RxJava, RxKotlin] 반응형 프로그래밍(Reactive Programming)과 ReactiveX
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-01-01T01:00:00+09:00">
-	
-		    2020/01/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/RxJava-RxKotlin/">RxJava, RxKotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="반응형-프로그래밍"><a href="#반응형-프로그래밍" class="headerlink" title="반응형 프로그래밍"></a>반응형 프로그래밍</h1><p>우리는 상대방의 말이나 행동에 잘 반응하는 사람을 <code>리액션(Reaction)</code>이 좋다고 합니다. <code>반응형(Reactive)</code>는 이 리액션의 형용사 형태입니다.<br><img src="1.gif"></p>
-</br>
-
-
-<p><code>반응형 프로그래밍(Reactive Programming)</code>은 <u>어떤 <b>이벤트</b>나 <b>상태 변화</b>에 반응하는 것</u>에 초점을 둔 프로그래밍 패러다임입니다. </p>
-<h1 id="이벤트-Event-기반의-반응형-프로그래밍"><a href="#이벤트-Event-기반의-반응형-프로그래밍" class="headerlink" title="이벤트(Event) 기반의 반응형 프로그래밍"></a>이벤트(Event) 기반의 반응형 프로그래밍</h1><p>반응형 프로그래밍은 프로그래밍 언어나 라이브러리에 따라 구현하는 방법이 조금씩 다릅니다. 그러나 기본 구조는 비슷하며, 크게 두 가지 요소가 필요합니다.</p>
-<ul>
-<li>이벤트를 발생시키는 주체</li>
-<li>이벤트에 반응하는 주체</li>
-</ul>
-<p><img src="2.png"></p>
-<p>또한 이벤트에 반응하는 주체가 이벤트에 반응하겠다고 선언하는 작업이 필요합니다. 이를 보통 <code>구독(Subscribe)</code> 또는 <code>관찰(Observe)</code>이라고 합니다.</p>
-<p><img src="3.png"></p>
-<p>이제 이벤트를 발생시키는 주체가 이벤트를 발생하면 이에 반응하게 됩니다.<br><img src="4.png"><br>이벤트에 반응하는 주체는 이벤트가 발생할 때 마다 특정 작업을 수행하게 됩니다.<br><img src="5.png"></p>
-<h1 id="상태-State-기반의-반응형-프로그래밍"><a href="#상태-State-기반의-반응형-프로그래밍" class="headerlink" title="상태(State) 기반의 반응형 프로그래밍"></a>상태(State) 기반의 반응형 프로그래밍</h1><p>반응형 프로그래밍은 <code>이벤트(Event)</code>가 아니라 <code>상태(State)의 변화</code>에 반응하도록 구현하기도 합니다.<br><img src="6.png"><br>상태를 가지고 있는 주체의 <code>상태(State)</code>가 변하면 이에 반응하게 됩니다.<br><img src="7.png"><br>또한 <code>상태(State)</code>가 변할 때 마다 이에 반응합니다.<br><img src="8.png"></p>
-<h1 id="ReactiveX"><a href="#ReactiveX" class="headerlink" title="ReactiveX"></a>ReactiveX</h1><p><a target="_blank" rel="noopener" href="http://reactivex.io/"><code>ReactiveX</code></a>는 이벤트 기반의 반응형 프로그래밍을 지원하는 라이브러리입니다. <code>ReactiveX</code>는 프로그래밍 언어에 따른 이름을 가지고 있습니다.</p>
-<ul>
-<li><code>RxJava</code>: Java의 ReactiveX 라이브러리</li>
-<li><code>RxKotlin</code>: Kotlin의 ReactiveX 라이브러리</li>
-<li><code>RxSwift</code>: Swift의 ReactiveX 라이브러리</li>
-<li><code>RxJS</code>: JavaScript의 ReactiveX 라이브러리</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/01/01/08_android/04_reactivex/20200101_reactive_programming/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
         
-        <li class="pagination-number">page 1 of 1</li>
+          <li class="pagination-next">
+            <a
+                class="btn btn--default btn--small"
+                href="/ko/archives/2020/page/2/"
+                aria-label="이전 포스트"
+            >
+              <span>이전 포스트</span>
+              <i class="fa fa-angle-right text-base icon-ml"></i>
+            </a>
+          </li>
+        
+        <li class="pagination-number">page 1 of 2</li>
     </ul>
 </div>
 

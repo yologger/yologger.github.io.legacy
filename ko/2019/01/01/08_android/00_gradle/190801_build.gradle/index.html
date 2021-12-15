@@ -1,0 +1,728 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] Gradle - (1) build.gradle 파일 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nbuild.gradle 파일build.gradle은 Gradle 설정 파일입니다. 이 파일에 어떤 식으로 앱을 빌드할 지를 명시합니다. Gradle은 이 파일을 참조하여 프로젝트를 빌드합니다.\n안드로이드 프로젝트를 생성하면 기본적으로 두 개의 build.gradle가 생성됩니다.\n(1) 프로젝트 수준의 build.gradle하나의 프로젝트는 여러 개의 모듈(Module)로 구성될 수 있습니다. 프로젝트 수준의 build.gradle은 프로젝트 전체에, 다시 말해 모든 모듈에 적용되는 설정 파일입니다.\n프로젝트를 생성하면 자동으로 생성되는 프로젝트 수준의 build.gradle파일은 다음과 같습니다.\n프로젝트 수준의 build.gradle123456789101112131415161718192021222324252627282930313233buildscript &#123;    // 그래들에서 사용할 변수    ext &#123;        kotlin_version = &quot;1.3.72&quot;    &#125;    // 라이브러리를 다운 받을 원격 저장소    repositories &#123;        google()        jcenter()    &#125;    dependencies &#123;        // 안드로이드 그래들 플러그인        classpath &quot;com.android.tools.build:gradle:4.1.2&quot;        // 코틀린 그래들 플러그인        classpath &quot;org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version&quot;    &#125;&#125;allprojects &#123;    repositories &#123;        google()        jcenter()    &#125;&#125;// Task, 앱을 새로 빌드할 때 이전에 빌드했던 컴파일된 코드를 삭제task clean(type: Delete) &#123;    delete rootProject.buildDir&#125;\n여기서는 설정 파일에서 사용할 변수, 원격 라이브러리를 다운받을 저장소, 안드로이드 그래들 플러그인, 코틀린 그래들 플러그인 등이 선언되어있습니다.\n(2) 모듈 수준의 build.gradle모듈 수준의 build.gradle은 특정 모듈에만 적용되는 설정 파일입니다.\n모듈 수준의 build.gradle1234567891011121314151617181920212223242526272829303132333435363738394041424344454647plugins &#123;    id &#x27;com.android.application&#x27;    id &#x27;kotlin-android&#x27;&#125;android &#123;    compileSdkVersion 30    buildToolsVersion &quot;30.0.3&quot;    defaultConfig &#123;        applicationId &quot;com.yologger.app&quot;        minSdkVersion 21        targetSdkVersion 30        versionCode 1        versionName &quot;1.0&quot;        testInstrumentationRunner &quot;androidx.test.runner.AndroidJUnitRunner&quot;    &#125;    buildTypes &#123;        release &#123;            applicationIdSuffix &#x27;.prod&#x27;            minifyEnabled false            proguardFiles getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;), &#x27;proguard-rules.pro&#x27;            buildConfigField &quot;boolean&quot;, &quot;IS_DEBUG&quot;, &quot;true&quot;        &#125;    &#125;    compileOptions &#123;        sourceCompatibility JavaVersion.VERSION_1_8        targetCompatibility JavaVersion.VERSION_1_8    &#125;    kotlinOptions &#123;        jvmTarget = &#x27;1.8&#x27;    &#125;&#125;// 의존성dependencies &#123;    implementation &quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version&quot;    implementation &#x27;androidx.core:core-ktx:1.5.0&#x27;    implementation &#x27;androidx.appcompat:appcompat:1.3.0&#x27;    implementation &#x27;com.google.android.material:material:1.3.0&#x27;    implementation &#x27;androidx.constraintlayout:constraintlayout:2.0.4&#x27;    testImplementation &#x27;junit:junit:4.+&#x27;    androidTestImplementation &#x27;androidx.test.ext:junit:1.1.2&#x27;    androidTestImplementation &#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;&#125;\nplugins섹션에는 적용할 Gradle 플러그인을 나열합니다. 위 코드에서는 안드로이드 플러그인과 코틀린 플러그인의 적용하고 있습니다.\n1234plugins &#123;    id &#x27;com.android.application&#x27;    id &#x27;kotlin-android&#x27;&#125;\nandroid섹션에서는 빌드할 때 사용할 SDK와 빌드 도구의 버전을 정의하고 있습니다.\n12345android &#123;    compileSdkVersion 30    buildToolsVersion &quot;30.0.3&quot;    // ...&#125;\ndefaultConfig섹션에 선언된 항목들은 빌드하는 동안 해당 모듈의 AndroidManifest.xml파일로 생성되는 요소를 정의합니다.\n123456789defaultConfig &#123;    applicationId &quot;com.yologger.build_variant&quot;    minSdkVersion 21    targetSdkVersion 30    versionCode 1    versionName &quot;1.0&quot;    testInstrumentationRunner &quot;androidx.test.runner.AndroidJUnitRunner&quot;&#125;\nbuildType섹션에는 어플리케이션을 어떻게 빌드할 지를 명시합니다.\n1234567buildTypes &#123;    release &#123;        applicationIdSuffix &#x27;.prod&#x27;        minifyEnabled true        proguardFiles getDefaultProguardFile(&#x27;proguard-android-optimize.txt&#x27;), &#x27;proguard-rules.pro&#x27;    &#125;&#125;\n\ndependencies 섹션은 외부 모듈이나 라이브러리를 사용할 때 정의합니다. 같은 프로젝트 내 다른 모듈, jar 파일, 다른 개발자가 만든 라이브러리 등을 사용하려면 이 섹션에 명시해야합니다.\n12345678910dependencies &#123;    implementation &quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version&quot;    implementation &#x27;androidx.core:core-ktx:1.5.0&#x27;    implementation &#x27;androidx.appcompat:appcompat:1.3.0&#x27;    implementation &#x27;com.google.android.material:material:1.3.0&#x27;    implementation &#x27;androidx.constraintlayout:constraintlayout:2.0.4&#x27;    testImplementation &#x27;junit:junit:4.+&#x27;    androidTestImplementation &#x27;androidx.test.ext:junit:1.1.2&#x27;    androidTestImplementation &#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;&#125;\n\nCoC그래들은 설정보다는 관례(CoC, Convention over Configuration)라는 개념을 구현하고 있습니다. 즉, 그래들은 사전에 정의된 합리적인 기본 설정값을 가지고 있습니다. 따라서 모든 설정을 설정하지 않아도 기본 설정값이 적용됩니다. 이 덕분에 개발자는 모든 설정을 모두 설정할 필요가 없어집니다. 자신의 요구 사항에 맞지 않는 설정만 빌드 설정 파일에서 변경하면 됩니다.\n","dateCreated":"2019-01-01T01:00:00+09:00","dateModified":"2021-12-15T21:55:23+09:00","datePublished":"2019-01-01T01:00:00+09:00","description":"","headline":"[Android] Gradle - (1) build.gradle 파일","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/","keywords":"Android, Gradle"}</script>
+    <meta name="description" content="build.gradle 파일build.gradle은 Gradle 설정 파일입니다. 이 파일에 어떤 식으로 앱을 빌드할 지를 명시합니다. Gradle은 이 파일을 참조하여 프로젝트를 빌드합니다. 안드로이드 프로젝트를 생성하면 기본적으로 두 개의 build.gradle가 생성됩니다. (1) 프로젝트 수준의 build.gradle하나의 프로젝트는 여러 개의 모">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] Gradle - (1) build.gradle 파일">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="build.gradle 파일build.gradle은 Gradle 설정 파일입니다. 이 파일에 어떤 식으로 앱을 빌드할 지를 명시합니다. Gradle은 이 파일을 참조하여 프로젝트를 빌드합니다. 안드로이드 프로젝트를 생성하면 기본적으로 두 개의 build.gradle가 생성됩니다. (1) 프로젝트 수준의 build.gradle하나의 프로젝트는 여러 개의 모">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/1.png">
+<meta property="article:published_time" content="2018-12-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T12:55:23.528Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Gradle">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] Gradle - (1) build.gradle 파일
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-01-01T01:00:00+09:00">
+	
+		    2019/01/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="build-gradle-파일"><a href="#build-gradle-파일" class="headerlink" title="build.gradle 파일"></a>build.gradle 파일</h1><p><code>build.gradle</code>은 <u>Gradle 설정 파일</u>입니다. 이 파일에 어떤 식으로 앱을 빌드할 지를 명시합니다. Gradle은 이 파일을 참조하여 프로젝트를 빌드합니다.</p>
+<p>안드로이드 프로젝트를 생성하면 기본적으로 두 개의 <code>build.gradle</code>가 생성됩니다.<br><img src="1.png"></p>
+<h1 id="1-프로젝트-수준의-build-gradle"><a href="#1-프로젝트-수준의-build-gradle" class="headerlink" title="(1) 프로젝트 수준의 build.gradle"></a>(1) 프로젝트 수준의 build.gradle</h1><p>하나의 프로젝트는 여러 개의 <code>모듈(Module)</code>로 구성될 수 있습니다. 프로젝트 수준의 <code>build.gradle</code>은 프로젝트 전체에, 다시 말해 모든 모듈에 적용되는 설정 파일입니다.</p>
+<p>프로젝트를 생성하면 자동으로 생성되는 프로젝트 수준의 <code>build.gradle</code>파일은 다음과 같습니다.</p>
+<figure class="highlight groovy"><figcaption><span>프로젝트 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 그래들에서 사용할 변수</span></span><br><span class="line">    ext &#123;</span><br><span class="line">        kotlin_version = <span class="string">&quot;1.3.72&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 라이브러리를 다운 받을 원격 저장소</span></span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dependencies &#123;</span><br><span class="line">        <span class="comment">// 안드로이드 그래들 플러그인</span></span><br><span class="line">        classpath <span class="string">&quot;com.android.tools.build:gradle:4.1.2&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 코틀린 그래들 플러그인</span></span><br><span class="line">        classpath <span class="string">&quot;org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">allprojects &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Task, 앱을 새로 빌드할 때 이전에 빌드했던 컴파일된 코드를 삭제</span></span><br><span class="line">task clean(<span class="attr">type:</span> Delete) &#123;</span><br><span class="line">    delete rootProject.buildDir</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>여기서는 설정 파일에서 사용할 변수, 원격 라이브러리를 다운받을 저장소, 안드로이드 그래들 플러그인, 코틀린 그래들 플러그인 등이 선언되어있습니다.</p>
+<h1 id="2-모듈-수준의-build-gradle"><a href="#2-모듈-수준의-build-gradle" class="headerlink" title="(2) 모듈 수준의 build.gradle"></a>(2) 모듈 수준의 build.gradle</h1><p>모듈 수준의 <code>build.gradle</code>은 특정 모듈에만 적용되는 설정 파일입니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">    id <span class="string">&#x27;kotlin-android&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    buildToolsVersion <span class="string">&quot;30.0.3&quot;</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.app&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line"></span><br><span class="line">        testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            applicationIdSuffix <span class="string">&#x27;.prod&#x27;</span></span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">            buildConfigField <span class="string">&quot;boolean&quot;</span>, <span class="string">&quot;IS_DEBUG&quot;</span>, <span class="string">&quot;true&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    compileOptions &#123;</span><br><span class="line">        sourceCompatibility JavaVersion.VERSION_1_8</span><br><span class="line">        targetCompatibility JavaVersion.VERSION_1_8</span><br><span class="line">    &#125;</span><br><span class="line">    kotlinOptions &#123;</span><br><span class="line">        jvmTarget = <span class="string">&#x27;1.8&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 의존성</span></span><br><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version&quot;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.core:core-ktx:1.5.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.appcompat:appcompat:1.3.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.material:material:1.3.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.constraintlayout:constraintlayout:2.0.4&#x27;</span></span><br><span class="line">    testImplementation <span class="string">&#x27;junit:junit:4.+&#x27;</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.ext:junit:1.1.2&#x27;</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>plugins</code>섹션에는 적용할 Gradle 플러그인을 나열합니다. 위 코드에서는 안드로이드 플러그인과 코틀린 플러그인의 적용하고 있습니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">    id <span class="string">&#x27;kotlin-android&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>android</code>섹션에서는 빌드할 때 사용할 SDK와 빌드 도구의 버전을 정의하고 있습니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    buildToolsVersion <span class="string">&quot;30.0.3&quot;</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>defaultConfig</code>섹션에 선언된 항목들은 빌드하는 동안 해당 모듈의 <code>AndroidManifest.xml</code>파일로 생성되는 요소를 정의합니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">defaultConfig &#123;</span><br><span class="line">    applicationId <span class="string">&quot;com.yologger.build_variant&quot;</span></span><br><span class="line">    minSdkVersion <span class="number">21</span></span><br><span class="line">    targetSdkVersion <span class="number">30</span></span><br><span class="line">    versionCode <span class="number">1</span></span><br><span class="line">    versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line"></span><br><span class="line">    testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>buildType</code>섹션에는 어플리케이션을 어떻게 빌드할 지를 명시합니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">buildTypes &#123;</span><br><span class="line">    release &#123;</span><br><span class="line">        applicationIdSuffix <span class="string">&#x27;.prod&#x27;</span></span><br><span class="line">        minifyEnabled <span class="literal">true</span></span><br><span class="line">        proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>dependencies 섹션</code>은 외부 모듈이나 라이브러리를 사용할 때 정의합니다. 같은 프로젝트 내 다른 모듈, jar 파일, 다른 개발자가 만든 라이브러리 등을 사용하려면 이 섹션에 명시해야합니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version&quot;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.core:core-ktx:1.5.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.appcompat:appcompat:1.3.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.material:material:1.3.0&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;androidx.constraintlayout:constraintlayout:2.0.4&#x27;</span></span><br><span class="line">    testImplementation <span class="string">&#x27;junit:junit:4.+&#x27;</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.ext:junit:1.1.2&#x27;</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="CoC"><a href="#CoC" class="headerlink" title="CoC"></a>CoC</h1><p>그래들은 <code>설정보다는 관례(CoC, Convention over Configuration)</code>라는 개념을 구현하고 있습니다. 즉, 그래들은 사전에 정의된 합리적인 기본 설정값을 가지고 있습니다. 따라서 모든 설정을 설정하지 않아도 기본 설정값이 적용됩니다. 이 덕분에 개발자는 모든 설정을 모두 설정할 필요가 없어집니다. 자신의 요구 사항에 맞지 않는 설정만 빌드 설정 파일에서 변경하면 됩니다.</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Gradle/" rel="tag">Gradle</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                    aria-label="이전: [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/01/06_spring/01_servlet_jsp/20190101_maven_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Maven으로 Java Web Application 구성하기"
+                    aria-label="다음: [Servlet, JSP] Maven으로 Java Web Application 구성하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                    aria-label="이전: [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/01/06_spring/01_servlet_jsp/20190101_maven_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Maven으로 Java Web Application 구성하기"
+                    aria-label="다음: [Servlet, JSP] Maven으로 Java Web Application 구성하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/01/08_android/00_gradle/190801_build.gradle/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

@@ -833,6 +833,264 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/"
+                            aria-label=": [Android] Gradle - (6) 빌드 변형(Build Variant) - ProductFlavor"
+                        >
+                            [Android] Gradle - (6) 빌드 변형(Build Variant) - ProductFlavor
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-06T01:00:00+09:00">
+	
+		    2019/01/06
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Product-Flavor"><a href="#Product-Flavor" class="headerlink" title="Product Flavor"></a>Product Flavor</h1><p>스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 레이아웃만 약간 다르고 기능적으로는 차이가 없습니다. 이러한 경우 <code>프로덕트 플래이버(Product Flavor)</code>를 사용할 수 있습니다.</p>
+<h1 id="build-gradle에-프로덕트-플래이버-추가하기"><a href="#build-gradle에-프로덕트-플래이버-추가하기" class="headerlink" title="build.gradle에 프로덕트 플래이버 추가하기"></a>build.gradle에 프로덕트 플래이버 추가하기</h1><p>모듈 수준의 <code>build.gradle</code>에 두 개의 프로덕트 플래이버를 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line"></span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    flavorDimensions <span class="string">&quot;mode&quot;</span></span><br><span class="line"></span><br><span class="line">    productFlavors &#123;</span><br><span class="line">        phone &#123;</span><br><span class="line">            dimension <span class="string">&quot;mode&quot;</span></span><br><span class="line">            versionCode <span class="number">101</span></span><br><span class="line">            versionName <span class="string">&quot;1.0.1&quot;</span></span><br><span class="line">            applicationIdSuffix <span class="string">&quot;.phone&quot;</span></span><br><span class="line">            versionNameSuffix <span class="string">&quot;-phone&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">        tablet &#123;</span><br><span class="line">            dimension <span class="string">&quot;mode&quot;</span></span><br><span class="line">            versionCode <span class="number">213</span></span><br><span class="line">            versionName <span class="string">&quot;2.1.3&quot;</span></span><br><span class="line">            applicationIdSuffix <span class="string">&quot;.tablet&quot;</span></span><br><span class="line">            versionNameSuffix <span class="string">&quot;-tablet&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>Sync Now</code>를 클릭하여 동기화 후 왼쪽 하단의 <code>Build Variant</code>탭을 확인해봅시다.<br><img src="1.png"></p>
+<p>총 네 개의 빌드 변형이 추가되었습니다. 그래들은 <code>Build Type</code>과 <code>Product Flavor</code>에 따라 자동으로 빌드 변형을 생성하고 <code>&lt;product-flavor&gt;&lt;Build-Type&gt;</code>로 빌드 변형의 이름을 지정합니다.</p>
+<h4 id="1-applicationIdSuffix"><a href="#1-applicationIdSuffix" class="headerlink" title="(1) applicationIdSuffix"></a>(1) applicationIdSuffix</h4><p><code>applicationId</code>에 추가되는 접미사입니다. <code>applicationId</code>가 <code>com.yologger.example</code>고 <code>applicationIdSuffix</code>가 <code>.phone</code>이면 이 빌드 변형의 <code>applicationId</code>는 <code>com.yologger.example.phone</code>이 됩니다.</p>
+<h4 id="2-versionNameSuffix"><a href="#2-versionNameSuffix" class="headerlink" title="(2) versionNameSuffix"></a>(2) versionNameSuffix</h4><p><code>versionName</code>에 추가되는 접미사입니다. <code>versionName</code>이 <code>2.1.3</code>고 <code>versionNameSuffix</code>가 <code>-tablet</code>이면 이 빌드 변형의 <code>versionName</code>은 <code>2.1.3-tablet</code>이 됩니다.</p>
+<h1 id="빌드-플레이버에-따라-다른-리소스-사용하기"><a href="#빌드-플레이버에-따라-다른-리소스-사용하기" class="headerlink" title="빌드 플레이버에 따라 다른 리소스 사용하기"></a>빌드 플레이버에 따라 다른 리소스 사용하기</h1><p>프로젝트 도구 창을 <code>Android 뷰</code>에서 <code>Project 뷰</code>로 변경합니다.<br><img src="2.png"><br><code>your_project &gt; app &gt; src</code>에 네 개의 디렉토리를 생성합니다</p>
+<ul>
+<li>phone/res/values</li>
+<li>phone/res/layout</li>
+<li>tablet/res/values</li>
+<li>tablet/res/layout</li>
+</ul>
+<p><img src="3.png"><br><code>main/res/values/strings.xml</code>과 <code>main/res/layout/activity_main.xml</code>을 위 디렉토리로 복사합니다.<br><img src="4.png"><br>코드를 변경합니다.</p>
+<figure class="highlight xml"><figcaption><span>phone/res/values/string.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>flavor for phone<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;title&quot;</span>&gt;</span>flavor for phone<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><figcaption><span>phone/res/layout/activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;@string/title&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><figcaption><span>tablet/res/values/string.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>flavor for tablet<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;title&quot;</span>&gt;</span>flavor for tablet<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight xml"><figcaption><span>tablet/res/values/activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;@string/title&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 빌드 변형를 <code>debugPhone</code>으로 변경하고 실행하면 다음과 같습니다.</p>
+<p><img src="6.png"></p>
+<p>빌드 변형를 <code>debugTablet</code>으로 변경하고 실행하면 다음과 같습니다.</p>
+<p><img src="7.png"><br>두 개의 빌드 변형이 설치되었음을 확인할 수 있습니다.</p>
+<p><img src="8.png"></p>
+<h1 id="프로덕트-플레이버에-따라-다른-소스파일-사용하기"><a href="#프로덕트-플레이버에-따라-다른-소스파일-사용하기" class="headerlink" title="프로덕트 플레이버에 따라 다른 소스파일 사용하기"></a>프로덕트 플레이버에 따라 다른 소스파일 사용하기</h1><p>리소스뿐만 아니라 프로덕트 플레이버에 따라 다른 소스파일을 사용할 수도 있습니다. </p>
+<p>두 개의 디렉토리를 생성합니다.</p>
+<ul>
+<li>phone/java</li>
+<li>tablet/java</li>
+</ul>
+<p><img src="9.png"></p>
+<p>각각의 폴더에 동일한 패키지를 생성합니다.<br><img src="10.png"></p>
+<p><code>main/java/com/yologger/example</code>의 <code>MainActivity.kt</code>파일을 <code>phone/java/com/yologger/example</code>과 <code>tablet/java/com/yologger/example</code>에 복사합니다. 복사 후 <code>main/java/com/yologger/example/MainActivity.kt</code>는 삭제합니다. 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>phone/java/com/yologger/example/MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> container: ConstraintLayout</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        container = findViewById(R.id.activity_main_container)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 배경화면 빨간색</span></span><br><span class="line">        container.setBackgroundColor(Color.RED)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight kotlin"><figcaption><span>tablet/java/com/yologger/example/MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> container: ConstraintLayout</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        container = findViewById(R.id.activity_main_container)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 배경화면 파란색</span></span><br><span class="line">        container.setBackgroundColor(Color.BLUE)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 빌드 변형을 <code>phoneDebug</code>로 실행하면 다음과 같습니다.</p>
+<p><img src="11.png"></p>
+<p>빌드 변형을 <code>tabletDebug</code>로 실행하면 다음과 같습니다.</p>
+<p><img src="12.png"></p>
+<p>이처럼 <code>프로덕트 플래이버</code>를 사용하면 빌드 변형에 따라 다른 <code>리소스 파일</code>과 <code>소스 파일</code>을 사용할 수 있습니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/"
+                            aria-label=": [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType"
+                        >
+                            [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-05T01:00:00+09:00">
+	
+		    2019/01/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="왜-빌드-변형이-필요할까"><a href="#왜-빌드-변형이-필요할까" class="headerlink" title="왜 빌드 변형이 필요할까?"></a>왜 빌드 변형이 필요할까?</h1><p>안드로이드에서는 하나의 프로젝트를 여러 버전의 앱으로 빌드할 수 있습니다. 그렇다면 왜 여러 버전의 앱으로 빌드를 해야할까요? </p>
+<h4 id="1-스마트폰-앱-vs-태블릿-앱"><a href="#1-스마트폰-앱-vs-태블릿-앱" class="headerlink" title="(1) 스마트폰 앱 vs. 태블릿 앱"></a>(1) 스마트폰 앱 vs. 태블릿 앱</h4><p>스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 기능은 동일하고 레이아웃만 약간 다릅니다. 이러한 경우 두 개의 프로젝트를 생성하여 각각 관리한다면 매우 비효율적일 것입니다.</p>
+<h4 id="2-무료-앱-vs-유료-앱"><a href="#2-무료-앱-vs-유료-앱" class="headerlink" title="(2) 무료 앱 vs. 유료 앱"></a>(2) 무료 앱 vs. 유료 앱</h4><p>이번엔 무료 앱과 유료 앱을 출시한다고 가정합시다. 두 앱은 레이아웃은 동일하며, 기능만 약간 다릅니다. 이러한 경우에도 두 개의 프로젝트를 생성하는 것은 비효율적입니다.</p>
+<h4 id="3-개발용-앱-vs-출시용-앱"><a href="#3-개발용-앱-vs-출시용-앱" class="headerlink" title="(3) 개발용 앱 vs 출시용 앱"></a>(3) 개발용 앱 vs 출시용 앱</h4><p>마지막으로 개발용 앱과 출시용 앱이 있다고 가정합시다. <code>프로가드(ProGuard)</code>는 앱 용량을 축소하고 코드를 난독화합니다. 다만 프로가드를 적용하면 빌드 시간이 길어지는데 굳이 디버그용 앱에 적용할 필요가 있을까요? 이러한 경우 출시용 앱에만 적용되도록 할 수 있습니다.</p>
+<h1 id="빌드-변형"><a href="#빌드-변형" class="headerlink" title="빌드 변형"></a>빌드 변형</h1><p>하나의 프로젝트가 여러 버전으로 빌드되면 각각의 앱을 <code>빌드 변형(Build Variant)</code>이라고 합니다. 빌드 변형을 만드는 방법에는 두 가지가 있습니다.</p>
+<ul>
+<li><code>빌드 타입(Build Type)</code></li>
+<li><code>프로덕트 플래이버(Product Flavor)</code></li>
+</ul>
+<hr>
+<h1 id="빌드-타입"><a href="#빌드-타입" class="headerlink" title="빌드 타입"></a>빌드 타입</h1><p>안드로이드 스튜디오 프로젝트를 생성하면 <code>debug</code>, <code>release</code>라는 두 개의 <code>빌드 타입(BuildType)</code>이 자동으로 생성됩니다.</p>
+<p><code>안드로이드 스튜디오 &gt; 왼쪽 하단의 Build Variant</code> 탭에서 빌드 타입을 확인할 수 있습니다.<br><img src="1.png"></p>
+<p>각 빌드 타입에 대한 설정은 <code>모듈 수준의 build.gradle</code>의 <code>buildTypes 섹션</code>에서 할 수 있습니다. 프로젝트를 처음 생성하면 아마 아래와 같은 모습일 것입니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>release 섹션</code>만 있고 <code>debug 색션</code>은 없습니다. 따라서 <code>debug</code>모드로 빌드하면 기본값이 적용됩니다. 물론 다음과 같이 <code>debug</code>모드의 설정을 직접 할 수도 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>직접 빌드 타입을 추가할 수도 있습니다. <code>alpha</code>, <code>beta</code>를 추가하고 그래들의 <code>Sync Now</code>버튼을 클릭합시다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        alpha &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        beta &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>alpha</code>와 <code>beta</code>가 추가된 것을 확인할 수 있습니다.<br><img src="2.png"></p>
+<p>이처럼 빌드 타입을 사용하면 빌드 타입에 따라 다른 빌드 방식을 설정할 수 있습니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/04/08_android/00_gradle/190804_properties/"
+                            aria-label=": [Android] Gradle - (4) 코드에서 환경변수 분리하기 - properties 파일"
+                        >
+                            [Android] Gradle - (4) 코드에서 환경변수 분리하기 - properties 파일
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-04T01:00:00+09:00">
+	
+		    2019/01/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="왜-환경변수를-코드에서-분리해야할까"><a href="#왜-환경변수를-코드에서-분리해야할까" class="headerlink" title="왜 환경변수를 코드에서 분리해야할까?"></a>왜 환경변수를 코드에서 분리해야할까?</h1><p>많은 어플리케이션이 Google, Facebook과 같은 SNS 계정을 통한 로그인을 지원합니다. 개발자는 SNS 로그인 API를 사용하기 위해 <code>키(Key)</code>를 발급받는데, 이를 소스코드에 포함시키면 여러 보안 이슈가 발생할 수 있습니다. </p>
+<p><code>properties 파일</code>을 사용하면 민감한 데이터를 코드에서 분리하여 이 파일에 저장할 수 있습니다.</p>
+<h1 id="properties-파일-만들기"><a href="#properties-파일-만들기" class="headerlink" title=".properties 파일 만들기"></a>.properties 파일 만들기</h1><p>프로젝트의 루트 디렉토리에 <code>config.properties</code>파일을 생성합니다.<br><img src="1.png"></p>
+<figure class="highlight groovy"><figcaption><span>config.properties</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CLIENT_ID=<span class="string">&quot;your_client_id&quot;</span></span><br><span class="line">CLIENT_SECRET=<span class="string">&quot;your_client_secret&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="모듈-수준의-build-gradle-설정하기"><a href="#모듈-수준의-build-gradle-설정하기" class="headerlink" title="모듈 수준의 build.gradle 설정하기"></a>모듈 수준의 build.gradle 설정하기</h1><p><code>build.gradle</code>에서 다음과 같이 <code>config.properties</code>파일을 읽어올 수 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> configPropertiesFile = rootProject.file(<span class="string">&quot;config.properties&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> configProperties = <span class="keyword">new</span> Properties()</span><br><span class="line">configProperties.load(<span class="keyword">new</span> FileInputStream(configPropertiesFile))</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>configProperties[&#39;your_key&#39;]</code>형태로 값을 읽어올 수 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> configPropertiesFile = rootProject.file(<span class="string">&quot;config.properties&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> configProperties = <span class="keyword">new</span> Properties()</span><br><span class="line">configProperties.load(<span class="keyword">new</span> FileInputStream(configPropertiesFile))</span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.example.simple_memo&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">        testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// for xml file</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_ID&#x27;</span>]</span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_SECRET&#x27;</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment">// for source file</span></span><br><span class="line">        buildConfigField(<span class="string">&quot;String&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_ID&#x27;</span>])</span><br><span class="line">        buildConfigField(<span class="string">&quot;String&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_SECRET&#x27;</span>])</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="소스코드에서-값을-사용하기"><a href="#소스코드에서-값을-사용하기" class="headerlink" title="소스코드에서 값을 사용하기"></a>소스코드에서 값을 사용하기</h1><p>이제 <code>소스 코드</code>에서 사용할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> clientId = BuildConfig.CLIENT_ID            <span class="comment">// your_client_id</span></span><br><span class="line">        <span class="keyword">val</span> clientSecret = BuildConfig.CLIENT_SECRET    <span class="comment">// your_client_secret</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="xml-파일에서-값을-사용하기"><a href="#xml-파일에서-값을-사용하기" class="headerlink" title="xml 파일에서 값을 사용하기"></a>xml 파일에서 값을 사용하기</h1><p><code>xml 파일</code>에서도 접근할 수 있습니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_ID&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_SECRET&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="gitignore파일에-추가하기"><a href="#gitignore파일에-추가하기" class="headerlink" title=".gitignore파일에 추가하기"></a>.gitignore파일에 추가하기</h1><p>보통 <code>.properties</code>파일처럼 민감한 데이터가 포함된 파일은 원격 저장소에 업로드하지 않습니다. <code>.gitignore</code>에 <code>config.properties</code>파일을 추가합시다.</p>
+<figure class="highlight groovy"><figcaption><span>.gitignore</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config.properties</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/04/08_android/00_gradle/190804_properties/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/01/04/06_spring/01_servlet_jsp/20190104_server_webserver_was/"
                             aria-label=": [Servlet, JSP] Server, Web Server, WAS 차이점"
                         >
@@ -916,23 +1174,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
-                            aria-label=": [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                            href="/ko/2019/01/03/08_android/00_gradle/190803_buildConfig/"
+                            aria-label=": [Android] Gradle - (3) 코드에서 환경변수 분리하기 - BuildConfig"
                         >
-                            [Servlet, JSP] Eclipse로 Java Web Application 구성하기
+                            [Android] Gradle - (3) 코드에서 환경변수 분리하기 - BuildConfig
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2019-01-02T00:00:00+09:00">
+    <time datetime="2019-01-03T01:00:00+09:00">
 	
-		    2019/01/02
+		    2019/01/03
     	
     </time>
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
 
 
     
@@ -942,99 +1200,37 @@
             
                 <div class="postShorten-content">
                     <hr>
-<p>Eclipse를 실행하고 <code>File &gt; Project</code>를 선택한 후 <code>Dynamic Web Project</code>를 선택한다.<br><img src="1.png"><br><code>Project name</code>, <code>Project Location</code>, <code>Target runtime</code>을 적절히 입력하고 <code>Next &gt;</code> 버튼을 누른다.<br><img src="2.png"><br><code>Source folders on build path</code>는 Java 파일이 위치할 경로다. <code>Default output folder</code>는 빌드된 파일이 위치할 경로다. 확인 후 <code>Next &gt;</code>버튼을 누른다.<br><img src="3.png"><br><code>Context root</code>와 <code>Content directory</code>은 기본값으로 두고 <code>Generate web.xml deployment descriptor</code>를 선택하고 <code>Next &gt;</code>버튼을 누른다.<br><img src="4.png"></p>
-<ul>
-<li><code>Context root</code>: WAS(Tomcat)에는 여러 개의 Web Application이 구동될 수 있다. Context root는 WAS위의 Web Application을 구분하는데 사용된다. 예를 들어 Web Appication의 URL이 <code>http://yourcompany.com/my_project</code>라면 <code>my_project</code>가 context root를 의미한다.</li>
-<li><code>Content directory</code>: JSP파일이 저장되는 경로다. JSP파일 외에도 <code>META-INF</code>폴더, <code>WEB-INF</code>폴더, <code>web.xml</code>파일 등이 위치한다.</li>
-<li><code>enerate web.xml deployment descriptor</code>: WEB.xml 파일을 생성한다.</li>
-</ul>
-<p>생성된 프로젝트의 구조는 다음과 같다.<br><img src="5.png"></p>
-<p>이제 JSP 파일을 생성해보자. <code>src &gt; main &gt; webapp</code>에 JSP 파일을 생성한다.</p>
-<figure class="highlight html"><figcaption><span>HelloWorld.jsp</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;UTF-8&quot;%&gt;</span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="BuildConfig"><a href="#BuildConfig" class="headerlink" title="BuildConfig"></a>BuildConfig</h1><p>안드로이드 시스템은 앱을 빌드할 때 여러가지 파일을 자동으로 생성합니다. 그 중 하나가 <code>BuildConfig</code>클래스입니다. 이 클래스에는 현재 빌드와 관련된 정보가 상수 형태로 정의되어 있으며, 코드에서도 직접 참조할 수 있습니다.</p>
+<h1 id="코드에서-BuildConfig에-접근하기"><a href="#코드에서-BuildConfig에-접근하기" class="headerlink" title="코드에서 BuildConfig에 접근하기"></a>코드에서 BuildConfig에 접근하기</h1><p>자동으로 생성된 <code>BuildConfig</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight java"><figcaption><span>BuildConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Automatically generated file. DO NOT MODIFY</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BuildConfig</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> DEBUG = Boolean.parseBoolean(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String APPLICATION_ID = <span class="string">&quot;com.yologger.example&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String BUILD_TYPE = <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VERSION_CODE = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String VERSION_NAME = <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>Tomcat에서 프로젝트를 실행하기 위해 <code>Run on Server</code>를 선택한다.<br><img src="6.png"><br>Tomcat을 선택하고 <code>Next &gt;</code>를 선택한다.<br><img src="7.png"><br><code>Configured</code>항목으로 프로젝트를 이동시키고 <code>Finish</code> 버튼을 누른다.<br><img src="8.png"></p>
-<ul>
-<li><code>Available</code>: 아직 Tomcat에 배포하지 않은 프로젝트</li>
-<li><code>Configured</code>: 이미 Toccat에 배포한 프로젝트</li>
-</ul>
-<p>이제 웹 브라우저에서 접속할 수 있다.<br><img src="9.png"></p>
-<h1 id="참고"><a href="#참고" class="headerlink" title="참고"></a>참고</h1><p>Eclipse에 Tomcat 서버를 추가하면 <code>Project Explorer</code>에 서버의 디렉토리가 추가된다.<br><img src="10.png"><br><code>server.xml</code>에서는 Tomcat 서버의 설정 파일이다.<br><img src="11.png"><br>Tomcat 서버에는 여러 개의 Web Application을 배포할 수 있다. 배포된 Web Application은 <code>server.xml</code>에서 <code>&lt;context&gt;</code>태그로 등록된다.</p>
-<figure class="highlight xml"><figcaption><span>server.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Server</span> <span class="attr">port</span>=<span class="string">&quot;8005&quot;</span> <span class="attr">shutdown</span>=<span class="string">&quot;SHUTDOWN&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Service</span> <span class="attr">name</span>=<span class="string">&quot;Catalina&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Host</span> <span class="attr">appBase</span>=<span class="string">&quot;webapps&quot;</span> <span class="attr">autoDeploy</span>=<span class="string">&quot;true&quot;</span> <span class="attr">name</span>=<span class="string">&quot;localhost&quot;</span> <span class="attr">unpackWARs</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line">      <span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">&quot;project1&quot;</span> <span class="attr">path</span>=<span class="string">&quot;/project1&quot;</span> <span class="attr">reloadable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">source</span>=<span class="string">&quot;org.eclipse.jst.jee.server:project1&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">&quot;project2&quot;</span> <span class="attr">path</span>=<span class="string">&quot;/project2&quot;</span> <span class="attr">reloadable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">source</span>=<span class="string">&quot;org.eclipse.jst.jee.server:project2&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Host</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">Service</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Server</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><code>&lt;Context&gt;</code>태그의 <code>docBase</code>속성은 프로젝트의 이름이다. 또한 <code>path</code>속성을 통해 <code>Context root</code>를 변경할 수 있다.</p>
+<p><code>BuildConfig</code>클래스에 정의된 상수는 코드에서 다음과 같이 접근할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> applicationId = BuildConfig.APPLICATION_ID  <span class="comment">// &quot;com.yologger.example&quot;</span></span><br><span class="line">        <span class="keyword">val</span> versionCode = BuildConfig.VERSION_CODE      <span class="comment">// 1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-                    
-                        
+<p>그렇다면 이 상수는 어디에 정의되어 있을까요? 바로 모듈 수준의 <code>build.gradle</code>입니다. 이 파일의 <code>defaultConfig 섹션</code>에 상수가 정의되어 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.example&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/01/01/06_spring/01_servlet_jsp/20190101_maven_java_web_app/"
-                            aria-label=": [Servlet, JSP] Maven으로 Java Web Application 구성하기"
-                        >
-                            [Servlet, JSP] Maven으로 Java Web Application 구성하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-01-01T00:00:00+09:00">
-	
-		    2019/01/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+<h1 id="상수를-직접-정의하고-사용하기"><a href="#상수를-직접-정의하고-사용하기" class="headerlink" title="상수를 직접 정의하고 사용하기"></a>상수를 직접 정의하고 사용하기</h1><p><code>buildConfigField</code>를 사용하면 상수를 직접 정의하고 코드에서 참조할 수도 있습니다. 모듈 수준의 <code>build.gradle</code>에 <code>buildConfigField (&quot;DATA_TYPE&quot;, &quot;KEY&quot;, &quot;VALUE&quot;)</code> 형태로 선언하면 됩니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.example&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">        </span><br><span class="line">        buildConfigField (<span class="string">&quot;String&quot;</span>, <span class="string">&quot;AUTH_API_KEY&quot;</span>, <span class="string">&#x27;&quot;your_auth_api_key&quot;&#x27;</span>)</span><br><span class="line">        buildConfigField (<span class="string">&quot;String&quot;</span>, <span class="string">&quot;AUTH_API_URL&quot;</span>, <span class="string">&#x27;&quot;your_auth_api_url&quot;&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
-    
+<div class="alert warning icon"><p>추가 후 <code>Gradle Sync</code>를 해야만 BuildConfig 클래스가 생성됩니다.</p>
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p><code>Java Web Application</code>은 일반적인 <code>Java Application</code>과는 여러가지 차이점이 있다. Eclipse나 InteliJ 같은 IDE를 사용하면 Java Web Application 프로젝트를 쉽게 생성할 수 있다. 그러나 이번 포스트에서는 <code>Maven</code>으로 Java Web Application을 구성하면서 Java Application과의 차이점, 그리고 프로젝트의 구조에 대해 알아본다.</p>
-<h1 id="1-프로젝트-구조"><a href="#1-프로젝트-구조" class="headerlink" title="1. 프로젝트 구조"></a>1. 프로젝트 구조</h1><p><code>Java Web Application</code>은 외부로 공개하는 디렉토리를 구성하고 그 안에 JSP 파일을 배치한다. 또한 <code>WEB-INF</code> 디렉토리를 생성하고 그 안에 <code>web.xml</code>파일을 배치해야한다.</p>
-<p><code>maven</code>과 maven에서 제공하는 <code>maven-archtype-webapp</code> 탬플릿을 사용하면 Java Web Application을 위한 디렉토리를 쉽게 구성할 수 있다.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp</span><br><span class="line"></span><br><span class="line">....</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;groupId&#x27;</span>: com.yologger</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;artifactId&#x27;</span>: web_app</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;version&#x27;</span> 1.0-SNAPSHOT: : 0.0.1</span><br><span class="line">Define value <span class="keyword">for</span> property <span class="string">&#x27;package&#x27;</span> com.yologger: : com.yologger</span><br><span class="line">Confirm properties configuration:</span><br><span class="line">groupId: com.yologger</span><br><span class="line">artifactId: web_app</span><br><span class="line">version: 0.0.1</span><br><span class="line">package: com.yologger</span><br><span class="line"> Y: : y</span><br><span class="line">....</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] BUILD SUCCESS</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Total time:  20.264 s</span><br><span class="line">[INFO] Finished at: 2021-12-07T17:31:11+09:00</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
-<p>생성된 프로젝트의 구조는 다음과 같다.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$  tree</span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── resources</span><br><span class="line">        └── webapp</span><br><span class="line">            ├── WEB-INF</span><br><span class="line">            │   └── web.xml</span><br><span class="line">            └── index.jsp</span><br></pre></td></tr></table></figure>
-<p><code>webapp</code>폴더에는 JSP 파일과 WEB-INF 폴더가 위치한다. 이 <code>webapp</code>폴더가 외부로 공개되며, 웹 브라우저에서 다음과 같이 접근할 수 있다.<br><img src="1.png"></p>
-<h1 id="2-Java-파일은-어디에-작성해야할까"><a href="#2-Java-파일은-어디에-작성해야할까" class="headerlink" title="2. Java 파일은 어디에 작성해야할까?"></a>2. Java 파일은 어디에 작성해야할까?</h1><p>지금까지 생성한 프로젝트는 Java 프로젝트인데 <code>java</code>폴더가 없다. 이때는 main폴더에 java폴더를 생성한 후, 그 안에 패키지와 소스 코드 파일을 배치하면 된다.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$  tree</span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── java</span><br><span class="line">        │   └── com</span><br><span class="line">        │       └── yologger</span><br><span class="line">        │           └── app</span><br><span class="line">        │               └── Controller.java    </span><br><span class="line">        ├── resources</span><br><span class="line">        └── webapp</span><br><span class="line">            ├── WEB-INF</span><br><span class="line">            │   └── web.xml</span><br><span class="line">            └── index.jsp</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Controller.java</span></span><br><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Controller</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Controller</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        response.getWriter().append(<span class="string">&quot;Served at: &quot;</span>).append(request.getContextPath());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doPost</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">        doGet(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="alert warning icon"><p>문자열의 경우 작은 따옴표로 감싸주어야 합니다.</p>
+</div>
 
-<h1 id="3-의존성-추가"><a href="#3-의존성-추가" class="headerlink" title="3. 의존성 추가"></a>3. 의존성 추가</h1><p><code>JSP</code>, <code>Servlet</code> 등 Java Web Application의 핵심 요소들을 사용하려면 의존성을 추가해야한다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- pom.xml --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- .... --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.servlet<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.servlet-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>새로 생성된 <code>BuildConfig</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight java"><figcaption><span>BuildConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.simple_memo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BuildConfig</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> DEBUG = Boolean.parseBoolean(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String APPLICATION_ID = <span class="string">&quot;com.yologger.example&quot;</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String BUILD_TYPE = <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VERSION_CODE = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String VERSION_NAME = <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">  <span class="comment">// Field from default config.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTH_API_KEY = <span class="string">&quot;your_auth_api_key&quot;</span>;</span><br><span class="line">  <span class="comment">// Field from default config.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTH_API_URL = <span class="string">&quot;your_auth_api_url&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="4-Web-Application-Server-준비"><a href="#4-Web-Application-Server-준비" class="headerlink" title="4. Web Application Server 준비"></a>4. Web Application Server 준비</h1><p>일반적인 Java Application은 JDK만 준비되면 쉽게 실행할 수 있다. 그러나 Java Web Application은 JDK 외에도 <code>WAS(Web Application Server)</code>가 필요하다. <code>Apache Tomcat</code>이 대표적인 WAS다.</p>
+<p>생성된 상수에 접근해봅시다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> apiKey = BuildConfig.AUTH_API_KEY       <span class="comment">// your_auth_api_key</span></span><br><span class="line">        <span class="keyword">val</span> apiUrl = BuildConfig.AUTH_API_URL       <span class="comment">// your_auth_api_url</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<h1 id="상수를-xml-파일에서-사용하기"><a href="#상수를-xml-파일에서-사용하기" class="headerlink" title="상수를 xml 파일에서 사용하기"></a>상수를 xml 파일에서 사용하기</h1><p><code>xml 파일</code>에서 사용할 상수는 <code>resValue</code>를 사용하여 선언합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="comment">// buildConfigField (&quot;String&quot;, &quot;AUTH_API_KEY&quot;, &#x27;&quot;your_auth_api_key&quot;&#x27;)</span></span><br><span class="line">        <span class="comment">// buildConfigField (&quot;String&quot;, &quot;AUTH_API_URL&quot;, &#x27;&quot;your_auth_api_url&quot;&#x27;)</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, <span class="string">&quot;your_client_id&quot;</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, <span class="string">&quot;your_client_secret&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 사용할 수 있습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_ID&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_SECRET&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
                     
                         
 
@@ -1043,7 +1239,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2019/01/01/06_spring/01_servlet_jsp/20190101_maven_java_web_app/#post-footer"
+                                href="/ko/2019/01/03/08_android/00_gradle/190803_buildConfig/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1072,7 +1268,18 @@
           </li>
         
         
-        <li class="pagination-number">page 3 of 3</li>
+          <li class="pagination-next">
+            <a
+                class="btn btn--default btn--small"
+                href="/ko/archives/2019/page/4/"
+                aria-label="이전 포스트"
+            >
+              <span>이전 포스트</span>
+              <i class="fa fa-angle-right text-base icon-ml"></i>
+            </a>
+          </li>
+        
+        <li class="pagination-number">page 3 of 4</li>
     </ul>
 </div>
 
