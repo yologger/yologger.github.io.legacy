@@ -1,0 +1,839 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 커스텀 위젯 만들기 - (2) View의 생명주기와 Custom View - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nView의 생명주기Activity와 Fragment처럼 View도 생명주기가 있습니다. Custom View를 만드려면 View의 생명주기를 이해해야합니다.생명주기 함수에서 중요한 것은 onMeasure(), onLayout(), onDraw() 입니다.\n(1) measure(), onMeasure()LinearLayout, ConstraintLayout 같은 ViewGroup은 자식 뷰를 가질 수 있으며, 보통 두 가지 방법으로 자식 뷰를 추가합니다.\n\n코드에서 자식 뷰 추가12val button = Button(this)addView(button)\n레이아웃 XML 파일에서 추가1234567891011121314&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.MainActivity&quot;&gt;        &lt;Button        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;Button&quot;/&gt;&lt;/LinearLayout&gt;\n\n이때 부모 뷰는 내부적으로 자식 뷰의 measure()를 호출합니다.  이때 부모 뷰는 자식 뷰의 대략적인 크기 정보를 함께 전달해야합니다. 자식 뷰의 크기는 부모 뷰에 따라 달라질 수 있기 때문입니다.\n1button.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)\nMeasureSpec가 가질 수 있는 값은 다음과 같습니다. \n\nMeasureSpec.AT_MOST: 자식 뷰의 크기를 wrap_content로 설정했을 때\nMeasureSpec.EXACTLY: 자식 뷰의 크기를 match_parent로 설정했을 때\nMeasureSpec.UNSPECIFIED: 자식 뷰의 크기를 30dp 등으로 직접 설정했을 때\n\n부모 뷰가 measure()를 호출하면 자식 뷰의 onMeasure() 메소드가 호출됩니다. onMeasure()에서는 setMeasuredDimension()를 호출하여 자식 뷰의 크기를 결정하게 됩니다.\n12345678910class ChildView: View &#123;    // ..    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;        super.onMeasure(widthMeasureSpec, heightMeasureSpec)        // 자식 뷰의 크기를 가로 500, 세로 500으로 설정        setMeasuredDimension(500, 500)    &#125;&#125;\n요약하자면 measure()와 onMeasure()는 자식 뷰의 크기를 결정하는데 사용됩니다.\n(2) layout(), onLayout()이제 자식 뷰가 부모 뷰의 어디에 위치할지를 결정해야합니다. 이때 부모 뷰는 내부적으로 자식 뷰의 layout()을 호출합니다. 또한 자식 뷰의 위치를 매개변수로 함께 전달합니다.\n1childView.layout(left: 100, top: 100, right: 100, bottom: 100)\n부모 뷰가 자식 뷰의 layout()을 호출하면 자식 뷰의 onLayout()이 호출됩니다.\n1234567class ChildView: View &#123;    // ..    protected void onLayout(boolean changed, int left, int top, int right, int bottom) &#123;        // ..    &#125;&#125;\n만약 뷰를 다시 그렸다면 첫 번째 인자인 changed를 통해 변화를 확인할 수 있습니다.\n(3) draw(), onDraw()자식 뷰의 크기와 위치가 결정되면 부모 뷰는 내부적으로 자식 뷰의 draw()를 호출합니다.\n1childView.draw(canvas)\n이제 자식 뷰의 onDraw()가 호출되며, 이 안에서 Canvas를 통해 뷰를 그릴 수 있습니다.\n123456class ChildView: View &#123;    override fun onDraw(canvas: Canvas?) &#123;        super.onDraw(canvas)        // 그리기     &#125;&#125;\n\nCustom View 구현하기이제 Custom View를 직접 구현해보겠습니다. CircleView라는 뷰를 정의합시다. 이 뷰는 원을 그려줍니다.\n12345678910class CircleView: View &#123;    constructor(context: Context): super(context) &#123;    &#125;    constructor(context: Context, attrs: AttributeSet): super(context, attrs) &#123;    &#125;&#125;\nCustom View를 구현할 때는 두 개의 생성자를 반드시 선언해야합니다. 첫 번째 생성자는 Context객체를 인자로 받으며, 코드에서 뷰를 생성할 때 사용됩니다.\n123constructor(context: Context): super(context) &#123;    // ..&#125;\n두 번째 생성자는 Context객체 외에도 AttributeSet을 인자로 받으며, 레이아웃 파일에서 뷰를 생성할 때 사용합니다.\n123constructor(context: Context, attrs: AttributeSet): super(context, attrs) &#123;    // ..&#125;\n이제 onDraw()와 onMeasure()를 구현합니다.\n1234567891011121314151617181920212223242526272829class CircleView: View &#123;    private val paint = Paint()    constructor(context: Context): super(context) &#123;    &#125;    constructor(context: Context, attrs: AttributeSet): super(context, attrs) &#123;    &#125;    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;        super.onMeasure(widthMeasureSpec, heightMeasureSpec)        // 뷰의 크기를 가로 400, 세로 400으로 지정        setMeasuredDimension(400, 400);    &#125;    override fun onDraw(canvas: Canvas?) &#123;        super.onDraw(canvas)        // Canvas의 배경을 회색으로 설정        canvas?.drawColor(Color.GRAY)        // 중심 좌표가 (200, 200)이고 반지름이 200인 원을 그린다.        paint.color = Color.BLUE        canvas?.drawCircle(200F, 200F, 200F, paint)    &#125;&#125;\n부모 뷰의 레이아웃 파일에 FigureView를 추가합니다.\n12345678910111213&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    android:orientation=&quot;vertical&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;com.yologger.project.CircleView        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;/&gt;&lt;/LinearLayout&gt;\n앱을 실행하면 다음과 같습니다. Canvas는 회색, 원은 파란색입니다.\n커스텀 속성 추가하기원의 색상과 크기를 설정할 수 있도록 커스텀 속성을 추가하겠습니다. 우선 res &gt; values에 attrs.xml 파일을 생성합니다.\nattrs.xml1234567&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;resources&gt;    &lt;declare-styleable name=&quot;FigureView&quot;&gt;        &lt;attr name=&quot;radius&quot; format=&quot;dimension&quot;/&gt;        &lt;attr name=&quot;figureColor&quot; format=&quot;color&quot;/&gt;    &lt;/declare-styleable&gt;&lt;/resources&gt;\n액티비티의 레이아웃 파일을 수정합니다.\nactivity_main.xml12345678910111213141516171819202122&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    android:orientation=&quot;vertical&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;com.yologger.project.CircleView        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        app:figureColor=&quot;#FF0000&quot;        app:radius=&quot;100dp&quot;/&gt;    &lt;com.yologger.project.CircleView        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        app:figureColor=&quot;#FFC107&quot;        app:radius=&quot;50dp&quot;/&gt;&lt;/LinearLayout&gt;\n\nCircleView 파일을 수정합니다.\nFigureView.kt1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950package com.yologger.projectimport android.content.Contextimport android.content.res.TypedArrayimport android.graphics.Canvasimport android.graphics.Colorimport android.graphics.Paintimport android.util.AttributeSetimport android.view.Viewclass CircleView: View &#123;    private val paint = Paint()    private var color: Int = Color.TRANSPARENT    private var radius: Float = 0F    private var centerX: Float = 0.0f        get() &#123;            return radius        &#125;    private var centerY: Float = 0.0f        get() &#123;            return radius        &#125;    constructor(context: Context): super(context) &#123;    &#125;    constructor(context: Context, attrs: AttributeSet): super(context, attrs) &#123;        val typedArray: TypedArray = context.obtainStyledAttributes(attrs, R.styleable.FigureView)        color = typedArray.getColor(R.styleable.FigureView_figureColor, Color.TRANSPARENT)        radius = typedArray.getDimension(R.styleable.FigureView_radius, 0.0f)        typedArray.recycle()    &#125;    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) &#123;        super.onMeasure(widthMeasureSpec, heightMeasureSpec)        setMeasuredDimension((centerX*2).toInt(), (centerY*2).toInt());    &#125;    override fun onDraw(canvas: Canvas?) &#123;        super.onDraw(canvas)        paint.color = color        canvas?.drawColor(Color.GRAY)        canvas?.drawCircle(centerX, centerX, radius, paint)    &#125;&#125;\n이제 앱을 실행합니다.\n안드로이드 공식문서에 가시면 커스텀 뷰에 대한 더 자세한 내용을 확인하실 수 있습니다.\n","dateCreated":"2019-05-13T01:00:00+09:00","dateModified":"2021-12-15T16:11:20+09:00","datePublished":"2019-05-13T01:00:00+09:00","description":"","headline":"[Android] 커스텀 위젯 만들기 - (2) View의 생명주기와 Custom View","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/","keywords":"Android"}</script>
+    <meta name="description" content="View의 생명주기Activity와 Fragment처럼 View도 생명주기가 있습니다. Custom View를 만드려면 View의 생명주기를 이해해야합니다.생명주기 함수에서 중요한 것은 onMeasure(), onLayout(), onDraw() 입니다. (1) measure(), onMeasure()LinearLayout, ConstraintLayout">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 커스텀 위젯 만들기 - (2) View의 생명주기와 Custom View">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="View의 생명주기Activity와 Fragment처럼 View도 생명주기가 있습니다. Custom View를 만드려면 View의 생명주기를 이해해야합니다.생명주기 함수에서 중요한 것은 onMeasure(), onLayout(), onDraw() 입니다. (1) measure(), onMeasure()LinearLayout, ConstraintLayout">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/images/08_android/02_ui/190513_custom_view/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/images/08_android/02_ui/190513_custom_view/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/images/08_android/02_ui/190513_custom_view/3.png">
+<meta property="article:published_time" content="2019-05-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-15T07:11:20.982Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/images/08_android/02_ui/190513_custom_view/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/html"
+                            
+                            rel="noopener"
+                            title="HTML"
+                        >
+                        <i class="sidebar-button-icon fab fa-html5" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">HTML</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/css"
+                            
+                            rel="noopener"
+                            title="CSS"
+                        >
+                        <i class="sidebar-button-icon fab fa-css3" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">CSS</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/javascript"
+                            
+                            rel="noopener"
+                            title="JavaScript"
+                        >
+                        <i class="sidebar-button-icon fab fa-js-square" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">JavaScript</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/nodejs"
+                            
+                            rel="noopener"
+                            title="Node.js"
+                        >
+                        <i class="sidebar-button-icon fab fa-node" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Node.js</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/database"
+                            
+                            rel="noopener"
+                            title="Database"
+                        >
+                        <i class="sidebar-button-icon fa fa-database" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Database</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infrastructure"
+                            
+                            rel="noopener"
+                            title="Infrastructure"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infrastructure</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 커스텀 위젯 만들기 - (2) View의 생명주기와 Custom View
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-05-13T01:00:00+09:00">
+	
+		    2019/05/13
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/UI/">UI</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="View의-생명주기"><a href="#View의-생명주기" class="headerlink" title="View의 생명주기"></a>View의 생명주기</h1><p><code>Activity</code>와 <code>Fragment</code>처럼 <code>View</code>도 생명주기가 있습니다. <code>Custom View</code>를 만드려면 <code>View</code>의 생명주기를 이해해야합니다.<br><img src="/ko/images/08_android/02_ui/190513_custom_view/1.png"><br>생명주기 함수에서 중요한 것은 <code>onMeasure()</code>, <code>onLayout()</code>, <code>onDraw()</code> 입니다.</p>
+<h3 id="1-measure-onMeasure"><a href="#1-measure-onMeasure" class="headerlink" title="(1) measure(), onMeasure()"></a>(1) measure(), onMeasure()</h3><p><code>LinearLayout</code>, <code>ConstraintLayout</code> 같은 <code>ViewGroup</code>은 자식 뷰를 가질 수 있으며, 보통 두 가지 방법으로 자식 뷰를 추가합니다.</p>
+<ul>
+<li>코드에서 자식 뷰 추가<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> button = Button(<span class="keyword">this</span>)</span><br><span class="line">addView(button)</span><br></pre></td></tr></table></figure></li>
+<li>레이아웃 XML 파일에서 추가<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>이때 부모 뷰는 내부적으로 자식 뷰의 <code>measure()</code>를 호출합니다.  이때 부모 뷰는 자식 뷰의 대략적인 크기 정보를 함께 전달해야합니다. 자식 뷰의 크기는 부모 뷰에 따라 달라질 수 있기 때문입니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">button.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)</span><br></pre></td></tr></table></figure>
+<p><code>MeasureSpec</code>가 가질 수 있는 값은 다음과 같습니다. </p>
+<ul>
+<li><code>MeasureSpec.AT_MOST</code>: 자식 뷰의 크기를 <code>wrap_content</code>로 설정했을 때</li>
+<li><code>MeasureSpec.EXACTLY</code>: 자식 뷰의 크기를 <code>match_parent</code>로 설정했을 때</li>
+<li><code>MeasureSpec.UNSPECIFIED</code>: 자식 뷰의 크기를 <code>30dp</code> 등으로 직접 설정했을 때</li>
+</ul>
+<p>부모 뷰가 <code>measure()</code>를 호출하면 자식 뷰의 <code>onMeasure()</code> 메소드가 호출됩니다. <code>onMeasure()</code>에서는 <code>setMeasuredDimension()</code>를 호출하여 자식 뷰의 크기를 결정하게 됩니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChildView</span>: <span class="type">View &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line">        <span class="comment">// 자식 뷰의 크기를 가로 500, 세로 500으로 설정</span></span><br><span class="line">        setMeasuredDimension(<span class="number">500</span>, <span class="number">500</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>요약하자면 <code>measure()</code>와 <code>onMeasure()</code>는 자식 뷰의 <u>크기</u>를 결정하는데 사용됩니다.</p>
+<h3 id="2-layout-onLayout"><a href="#2-layout-onLayout" class="headerlink" title="(2) layout(), onLayout()"></a>(2) layout(), onLayout()</h3><p>이제 자식 뷰가 부모 뷰의 어디에 <u>위치</u>할지를 결정해야합니다. 이때 부모 뷰는 내부적으로 자식 뷰의 <code>layout()</code>을 호출합니다. 또한 자식 뷰의 위치를 매개변수로 함께 전달합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">childView.layout(left: <span class="number">100</span>, top: <span class="number">100</span>, right: <span class="number">100</span>, bottom: <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
+<p>부모 뷰가 자식 뷰의 <code>layout()</code>을 호출하면 자식 뷰의 <code>onLayout()</code>이 호출됩니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChildView</span>: <span class="type">View &#123;</span></span></span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> void onLayout(boolean changed, int left, int top, int right, int bottom) &#123;</span><br><span class="line">        <span class="comment">// ..</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>만약 뷰를 다시 그렸다면 첫 번째 인자인 <code>changed</code>를 통해 변화를 확인할 수 있습니다.</p>
+<h3 id="3-draw-onDraw"><a href="#3-draw-onDraw" class="headerlink" title="(3) draw(), onDraw()"></a>(3) draw(), onDraw()</h3><p>자식 뷰의 크기와 위치가 결정되면 부모 뷰는 내부적으로 자식 뷰의 <code>draw()</code>를 호출합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">childView.draw(canvas)</span><br></pre></td></tr></table></figure>
+<p>이제 자식 뷰의 <code>onDraw()</code>가 호출되며, 이 안에서 <code>Canvas</code>를 통해 뷰를 그릴 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChildView</span>: <span class="type">View &#123;</span></span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">        <span class="comment">// 그리기 </span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Custom-View-구현하기"><a href="#Custom-View-구현하기" class="headerlink" title="Custom View 구현하기"></a>Custom View 구현하기</h1><p>이제 <code>Custom View</code>를 직접 구현해보겠습니다. <code>CircleView</code>라는 뷰를 정의합시다. 이 뷰는 원을 그려줍니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CircleView</span>: <span class="type">View &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Custom View</code>를 구현할 때는 두 개의 생성자를 반드시 선언해야합니다. 첫 번째 생성자는 <code>Context</code>객체를 인자로 받으며, 코드에서 뷰를 생성할 때 사용됩니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>두 번째 생성자는 <code>Context</code>객체 외에도 <code>AttributeSet</code>을 인자로 받으며, 레이아웃 파일에서 뷰를 생성할 때 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>onDraw()</code>와 <code>onMeasure()</code>를 구현합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CircleView</span>: <span class="type">View &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line">        <span class="comment">// 뷰의 크기를 가로 400, 세로 400으로 지정</span></span><br><span class="line">        setMeasuredDimension(<span class="number">400</span>, <span class="number">400</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Canvas의 배경을 회색으로 설정</span></span><br><span class="line">        canvas?.drawColor(Color.GRAY)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 중심 좌표가 (200, 200)이고 반지름이 200인 원을 그린다.</span></span><br><span class="line">        paint.color = Color.BLUE</span><br><span class="line">        canvas?.drawCircle(<span class="number">200F</span>, <span class="number">200F</span>, <span class="number">200F</span>, paint)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>부모 뷰의 레이아웃 파일에 <code>FigureView</code>를 추가합니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.yologger.project.CircleView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>앱을 실행하면 다음과 같습니다. <code>Canvas</code>는 회색, 원은 파란색입니다.<br><img src="/ko/images/08_android/02_ui/190513_custom_view/2.png"></p>
+<h1 id="커스텀-속성-추가하기"><a href="#커스텀-속성-추가하기" class="headerlink" title="커스텀 속성 추가하기"></a>커스텀 속성 추가하기</h1><p>원의 색상과 크기를 설정할 수 있도록 커스텀 속성을 추가하겠습니다. 우선 <code>res &gt; values</code>에 <code>attrs.xml</code> 파일을 생성합니다.</p>
+<figure class="highlight xml"><figcaption><span>attrs.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">declare-styleable</span> <span class="attr">name</span>=<span class="string">&quot;FigureView&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">&quot;radius&quot;</span> <span class="attr">format</span>=<span class="string">&quot;dimension&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">attr</span> <span class="attr">name</span>=<span class="string">&quot;figureColor&quot;</span> <span class="attr">format</span>=<span class="string">&quot;color&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">declare-styleable</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>액티비티의 레이아웃 파일을 수정합니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.yologger.project.CircleView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:figureColor</span>=<span class="string">&quot;#FF0000&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:radius</span>=<span class="string">&quot;100dp&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.yologger.project.CircleView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:figureColor</span>=<span class="string">&quot;#FFC107&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:radius</span>=<span class="string">&quot;50dp&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>CircleView</code> 파일을 수정합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>FigureView.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.project</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.content.Context</span><br><span class="line"><span class="keyword">import</span> android.content.res.TypedArray</span><br><span class="line"><span class="keyword">import</span> android.graphics.Canvas</span><br><span class="line"><span class="keyword">import</span> android.graphics.Color</span><br><span class="line"><span class="keyword">import</span> android.graphics.Paint</span><br><span class="line"><span class="keyword">import</span> android.util.AttributeSet</span><br><span class="line"><span class="keyword">import</span> android.view.View</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CircleView</span>: <span class="type">View &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> color: <span class="built_in">Int</span> = Color.TRANSPARENT</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> radius: <span class="built_in">Float</span> = <span class="number">0F</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> centerX: <span class="built_in">Float</span> = <span class="number">0.0f</span></span><br><span class="line">        <span class="keyword">get</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> radius</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> centerY: <span class="built_in">Float</span> = <span class="number">0.0f</span></span><br><span class="line">        <span class="keyword">get</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> radius</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(context: Context, attrs: AttributeSet): <span class="keyword">super</span>(context, attrs) &#123;</span><br><span class="line">        <span class="keyword">val</span> typedArray: TypedArray = context.obtainStyledAttributes(attrs, R.styleable.FigureView)</span><br><span class="line">        color = typedArray.getColor(R.styleable.FigureView_figureColor, Color.TRANSPARENT)</span><br><span class="line">        radius = typedArray.getDimension(R.styleable.FigureView_radius, <span class="number">0.0f</span>)</span><br><span class="line">        typedArray.recycle()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line">        setMeasuredDimension((centerX*<span class="number">2</span>).toInt(), (centerY*<span class="number">2</span>).toInt());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">        paint.color = color</span><br><span class="line">        canvas?.drawColor(Color.GRAY)</span><br><span class="line">        canvas?.drawCircle(centerX, centerX, radius, paint)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행합니다.<br><img src="/ko/images/08_android/02_ui/190513_custom_view/3.png"></p>
+<p><a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/ui/custom-components">안드로이드 공식문서</a>에 가시면 <code>커스텀 뷰</code>에 대한 더 자세한 내용을 확인하실 수 있습니다.</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/01/08_android/01_android_platform/190601_apk/"
+                    data-tooltip="[Android] APK 파일이란?"
+                    aria-label="이전: [Android] APK 파일이란?"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/05/12/08_android/02_ui/190512_compound_view/"
+                    data-tooltip="[Android] 커스텀 위젯 만들기 - (1) Compound View"
+                    aria-label="다음: [Android] 커스텀 위젯 만들기 - (1) Compound View"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/06/01/08_android/01_android_platform/190601_apk/"
+                    data-tooltip="[Android] APK 파일이란?"
+                    aria-label="이전: [Android] APK 파일이란?"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/05/12/08_android/02_ui/190512_compound_view/"
+                    data-tooltip="[Android] 커스텀 위젯 만들기 - (1) Compound View"
+                    aria-label="다음: [Android] 커스텀 위젯 만들기 - (1) Compound View"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/05/13/08_android/02_ui/190513_custom_view/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
