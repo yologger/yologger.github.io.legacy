@@ -354,6 +354,94 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/01/03/08_android/00_gradle/190803_buildConfig/"
+                            aria-label=": [Android] Gradle - (3) 코드에서 환경변수 분리하기 - BuildConfig"
+                        >
+                            [Android] Gradle - (3) 코드에서 환경변수 분리하기 - BuildConfig
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-03T01:00:00+09:00">
+	
+		    2019/01/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="BuildConfig"><a href="#BuildConfig" class="headerlink" title="BuildConfig"></a>BuildConfig</h1><p>안드로이드 시스템은 앱을 빌드할 때 여러가지 파일을 자동으로 생성합니다. 그 중 하나가 <code>BuildConfig</code>클래스입니다. 이 클래스에는 현재 빌드와 관련된 정보가 상수 형태로 정의되어 있으며, 코드에서도 직접 참조할 수 있습니다.</p>
+<h1 id="코드에서-BuildConfig에-접근하기"><a href="#코드에서-BuildConfig에-접근하기" class="headerlink" title="코드에서 BuildConfig에 접근하기"></a>코드에서 BuildConfig에 접근하기</h1><p>자동으로 생성된 <code>BuildConfig</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight java"><figcaption><span>BuildConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Automatically generated file. DO NOT MODIFY</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BuildConfig</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> DEBUG = Boolean.parseBoolean(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String APPLICATION_ID = <span class="string">&quot;com.yologger.example&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String BUILD_TYPE = <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VERSION_CODE = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String VERSION_NAME = <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>BuildConfig</code>클래스에 정의된 상수는 코드에서 다음과 같이 접근할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> applicationId = BuildConfig.APPLICATION_ID  <span class="comment">// &quot;com.yologger.example&quot;</span></span><br><span class="line">        <span class="keyword">val</span> versionCode = BuildConfig.VERSION_CODE      <span class="comment">// 1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>그렇다면 이 상수는 어디에 정의되어 있을까요? 바로 모듈 수준의 <code>build.gradle</code>입니다. 이 파일의 <code>defaultConfig 섹션</code>에 상수가 정의되어 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.example&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="상수를-직접-정의하고-사용하기"><a href="#상수를-직접-정의하고-사용하기" class="headerlink" title="상수를 직접 정의하고 사용하기"></a>상수를 직접 정의하고 사용하기</h1><p><code>buildConfigField</code>를 사용하면 상수를 직접 정의하고 코드에서 참조할 수도 있습니다. 모듈 수준의 <code>build.gradle</code>에 <code>buildConfigField (&quot;DATA_TYPE&quot;, &quot;KEY&quot;, &quot;VALUE&quot;)</code> 형태로 선언하면 됩니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.example&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">        </span><br><span class="line">        buildConfigField (<span class="string">&quot;String&quot;</span>, <span class="string">&quot;AUTH_API_KEY&quot;</span>, <span class="string">&#x27;&quot;your_auth_api_key&quot;&#x27;</span>)</span><br><span class="line">        buildConfigField (<span class="string">&quot;String&quot;</span>, <span class="string">&quot;AUTH_API_URL&quot;</span>, <span class="string">&#x27;&quot;your_auth_api_url&quot;&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<div class="alert warning icon"><p>추가 후 <code>Gradle Sync</code>를 해야만 BuildConfig 클래스가 생성됩니다.</p>
+</div>
+
+<div class="alert warning icon"><p>문자열의 경우 작은 따옴표로 감싸주어야 합니다.</p>
+</div>
+
+<p>새로 생성된 <code>BuildConfig</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight java"><figcaption><span>BuildConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.simple_memo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BuildConfig</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> DEBUG = Boolean.parseBoolean(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String APPLICATION_ID = <span class="string">&quot;com.yologger.example&quot;</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String BUILD_TYPE = <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VERSION_CODE = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String VERSION_NAME = <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">  <span class="comment">// Field from default config.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTH_API_KEY = <span class="string">&quot;your_auth_api_key&quot;</span>;</span><br><span class="line">  <span class="comment">// Field from default config.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTH_API_URL = <span class="string">&quot;your_auth_api_url&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>생성된 상수에 접근해봅시다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> apiKey = BuildConfig.AUTH_API_KEY       <span class="comment">// your_auth_api_key</span></span><br><span class="line">        <span class="keyword">val</span> apiUrl = BuildConfig.AUTH_API_URL       <span class="comment">// your_auth_api_url</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="상수를-xml-파일에서-사용하기"><a href="#상수를-xml-파일에서-사용하기" class="headerlink" title="상수를 xml 파일에서 사용하기"></a>상수를 xml 파일에서 사용하기</h1><p><code>xml 파일</code>에서 사용할 상수는 <code>resValue</code>를 사용하여 선언합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="comment">// buildConfigField (&quot;String&quot;, &quot;AUTH_API_KEY&quot;, &#x27;&quot;your_auth_api_key&quot;&#x27;)</span></span><br><span class="line">        <span class="comment">// buildConfigField (&quot;String&quot;, &quot;AUTH_API_URL&quot;, &#x27;&quot;your_auth_api_url&quot;&#x27;)</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, <span class="string">&quot;your_client_id&quot;</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, <span class="string">&quot;your_client_secret&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 사용할 수 있습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_ID&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_SECRET&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/03/08_android/00_gradle/190803_buildConfig/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/01/02/08_android/00_gradle/190802_module/"
                             aria-label=": [Android] Gradle - (2) 모듈(Module)"
                         >

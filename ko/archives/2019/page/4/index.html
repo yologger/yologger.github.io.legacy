@@ -354,6 +354,130 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/"
+                            aria-label=": [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기"
+                        >
+                            [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-14T01:00:00+09:00">
+	
+		    2019/06/14
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="ADB-Android-Debug-Bridge"><a href="#ADB-Android-Debug-Bridge" class="headerlink" title="ADB(Android Debug Bridge)"></a>ADB(Android Debug Bridge)</h1><p><code>ADB(Android Debug Bridge)</code>는 안드로이드 기기와 통신할 수 있는 명령어 도구입니다. ADB를 사용하면 윈도우의 계열 <u>명령 프롬프트</u>나 리눅스 계열의 <u>터미널</u>처럼 연결된 기기에 접근할 수 있습니다.</p>
+<p>ADB는 <code>안드로이드 SDK</code>의 <code>Platform Tools</code>에 포함되어 있습니다. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/Users/[your_username]/Library/Android/sdk/platform-tools</span><br><span class="line"></span><br><span class="line">$ ls</span><br><span class="line">adb</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>어느 위치에서든 ADB 명령어를 사용하려면 아래와 같이 경로 설정을 해야합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cd ~ </span><br><span class="line"></span><br><span class="line">$ echo &#x27;/Users/[your_username]/Library/Android/sdk/platform-tools&#x27; &gt;&gt; ~/.bash_profile</span><br><span class="line"></span><br><span class="line">$ source ~/.bash_profile</span><br></pre></td></tr></table></figure>
+
+
+<p>이제 <code>adb --help</code> 명령어를 입력하면 ADB와 관련된 옵션들을 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb --<span class="built_in">help</span></span></span><br><span class="line">Android Debug Bridge version 1.0.41</span><br><span class="line">Version 31.0.0-7110759</span><br><span class="line">Installed as /usr/local/bin/adb</span><br><span class="line"></span><br><span class="line">global options:</span><br><span class="line"> -a         listen on all network interfaces, not just localhost</span><br><span class="line"> -d         use USB device (error if multiple devices connected)</span><br><span class="line"> -e         use TCP/IP device (error if multiple TCP/IP devices available)</span><br><span class="line"> -s SERIAL  use device with given serial (overrides $ANDROID_SERIAL)</span><br><span class="line"> -t ID      use device with given transport id</span><br><span class="line"> -H         name of adb server host [default=localhost]</span><br><span class="line"> -P         port of adb server [default=5037]</span><br><span class="line"> -L SOCKET  listen on given socket for adb server [default=tcp:localhost:5037]</span><br><span class="line"></span><br><span class="line">general commands:</span><br><span class="line"> devices [-l]             list connected devices (-l for long output)</span><br><span class="line"> help                     show this help message</span><br><span class="line"> version                  show version num</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>안드로이드는 리눅스 기반의 운영체제입니다. 따라서 연결된 기기의 리눅스 쉘에 접속할 수 있습니다. 이 때는 <code>adb shell</code> 명령어를 사용합니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span></span><br></pre></td></tr></table></figure>
+<p>이제 연결된 기기의 디렉토리 구조를 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">bin</span><br><span class="line">data</span><br><span class="line">sdcard</span><br><span class="line">storage</span><br><span class="line">dev</span><br><span class="line">sys</span><br><span class="line">system</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h1 id="자주-쓰는-adb-명령어"><a href="#자주-쓰는-adb-명령어" class="headerlink" title="자주 쓰는 adb 명령어"></a>자주 쓰는 adb 명령어</h1><p><code>adb devices</code>명령어를 사용하면 실제 기기와 정상적으로 연결되었는지 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb devices</span></span><br><span class="line">List of devices attached</span><br><span class="line">R3CN109JVFK     device</span><br><span class="line">R332AEW32AA     device</span><br><span class="line">R3CN238IKEF     offline</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>offline</td>
+<td>기기가 연결되지 않았거나 비정상인 경우</td>
+</tr>
+<tr>
+<td>device</td>
+<td>정상적으로 기기가 연결된 경우</td>
+</tr>
+<tr>
+<td>no device</td>
+<td>연결된 기기가 없는 경우</td>
+</tr>
+</tbody></table>
+<p><code>adb reboot</code>명령어를 사용하면 기기를 재시작할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb reboot</span></span><br></pre></td></tr></table></figure>
+<p>PC에서 안드로이드 기기로 파일을 복사할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb push &quot;파일 명&quot; &quot;복사할 경로&quot;</span><br><span class="line"></span><br><span class="line">$ adb push backup.zip /sdcard</span><br></pre></td></tr></table></figure>
+<p>안드로이드 기기에서 PC로 파일을 복사할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb pull &quot;파일 명&quot; &quot;복사할 경로&quot;</span><br><span class="line"></span><br><span class="line">$ adb pull /sdcard/log.txt .</span><br></pre></td></tr></table></figure>
+<p>APK 파일을 직접 설치할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb install [app_name].apk</span><br><span class="line"></span><br><span class="line">$ adb install my_app.apk</span><br></pre></td></tr></table></figure>
+<p>앱을 삭제할 수도 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb uninstall [package_name]</span><br><span class="line"></span><br><span class="line">$ adb uninstall com.yologger.package</span><br></pre></td></tr></table></figure>
+<p>연결된 기기의 시스템 정보를 가져올 수 도 있습니다. </p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys</span></span><br></pre></td></tr></table></figure>
+<p>아래와 같이 액티비티와 태스크의 스택을 확인할 때 많이 사용합니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities</span></span><br></pre></td></tr></table></figure>
+
+<p>위 명령어를 입력하면 너무 방대한 정보가 한꺼번에 출력됩니다. 따라서 여러 옵션과 <code>grep</code>을 적절히 활용하여 필요한 정보만 출력할 수 있습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb shell dumpsys activity activities | grep -i [package_name] | grep -i Hist</span><br><span class="line"></span><br><span class="line">$ adb shell dumpsys activity activities | grep -i com.yologger.activity | grep -i Hist</span><br></pre></td></tr></table></figure>
+
+<h1 id="액티비티-스택-확인하기"><a href="#액티비티-스택-확인하기" class="headerlink" title="액티비티 스택 확인하기"></a>액티비티 스택 확인하기</h1><p><code>ADB(Android Debug Bridge)</code>를 사용하면 현재 앱에서 실행 중인 모든 서비스를 확인할 수 있습니다.</p>
+<p><code>adb shell</code> 명령어를 사용하면 연결된 기기에 접속할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span> </span><br></pre></td></tr></table></figure>
+<p><code>dumpsys</code> 명령어를 사용하면 모든 서비스를 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> dumpsys</span> </span><br></pre></td></tr></table></figure>
+<p>다음과 같이 호출할 수도 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys</span> </span><br></pre></td></tr></table></figure>
+
+<p>현재 기기에서 실행 중인 태스크와 액티비티만을 확인할 수 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities</span></span><br></pre></td></tr></table></figure>
+<p>특정 앱의 태스크와 액티비티만 확인할 수도 있습니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities | grep -i [package_name] | grep -i Hist</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities | grep -i com.yologger.myapp | grep -i Hist</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/06/13/08_android/01_android_platform/190613_compileSdkVersion_minSdkVersion_targetSdkVersion/"
                             aria-label=": [Android] compileSdkVersion, minSdkVersion, targetSdkVersion 차이점"
                         >
@@ -1015,66 +1139,6 @@
                         <p>
                             <a
                                 href="/ko/2019/06/03/08_android/01_android_platform/190603_analyze_apk/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/02/08_android/01_android_platform/190602_extract_apk/"
-                            aria-label=": [Android] 앱에서 APK 추출하기 (APK Extractor)"
-                        >
-                            [Android] 앱에서 APK 추출하기 (APK Extractor)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-02T01:00:00+09:00">
-	
-		    2019/06/02
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>구글 플레이스토어에는 설치된 앱에서 <code>APK</code> 파일을 추출하는 앱들이 출시되어있습니다. 이번 포스트에서는 <code>APK Extractor</code> 앱을 사용하여 APK 파일을 추출해보겠습니다.</p>
-<h1 id="APK-Extractor"><a href="#APK-Extractor" class="headerlink" title="APK Extractor"></a>APK Extractor</h1><p>구글 플레이스토어에서 APK Extractor를 설치합니다.<br><img src="1.png"><br>검색창에 추출하려는 앱의 이름을 입력합니다.<br><img src="2.png"><br>앱을 클릭하면 해당 경로에 APK 파일이 추출됩니다.<br><img src="3.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/02/08_android/01_android_platform/190602_extract_apk/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

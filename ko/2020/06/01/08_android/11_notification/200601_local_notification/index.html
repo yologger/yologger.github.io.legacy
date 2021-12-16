@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 알림(Notification) - (1) 로컬 알림 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n알림알림(Notification)은 앱이 실행되고 있지 않거나 백그라운드 상태일 때 메시지를 전달하는 방법을 제공합니다. 문자 앱이나 Gmail 앱이 대표적인 알림입니다.\n알림이 생성되면 화면 위쪽 상태 바에 아이콘으로 나타납니다.\n상태 바를 끌어내리면 알림 패널에서 알림의 자세한 내용을 확인할 수 있습니다.\n알림의 종류알림에는 두 종류가 있습니다.\n\n로컬 알림(Local Notification)\n원격 알림(Remote Notification)\n\n로컬 알림로컬 알림(Local Notification)은 기기에서 실행 중인 앱에서 생성됩니다. 버튼을 누르면 로컬 알림을 전송하는 예제를 만들어봅시다.\nNotificationCompat.Builder객체를 사용하면 알림을 생성할 수 있습니다. 우선 NotificationBuilder객체를 생성합니다.\n1234val notificationBuilder = NotificationCompat.Builder(this)        .setSmallIcon(android.R.drawable.ic_dialog_info)        .setContentTitle(&quot;A Notification&quot;)        .setContentText(&quot;This is a notification&quot;)\nsetSmallIcon()메소드를 사용하면 알림의 아이콘을 설정할 수 있습니다. setContentTitle()메소드를 사용하면 알림의 제목을 설정할 수 있으며, setContentText()메소드를 사용하면 알림의 본문을 설정할 수 있습니다.\n이제 NotificationBuilder객체의 build()메소드를 사용하여 알림을 생성합시다.\n1val notification = notificationBuilder.build()\n알림을 보내기 위해서는 NotificationManager객체가 필요합니다. 시스템 서비스에서 다음과 같이 NotificationManager객체를 가져옵니다.\n1val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager\n마지막으로 NotificationManager객체의 notify()메소드를 사용하여 알람을 전송합니다. 이때 메소드의 첫 번째 인자로 알림의 ID를 나타내는 임의의 정수값을 전달합니다. 알람 ID는 안드로이드 시스템이 알림을 구분하는데 사용합니다.\n1notificationManager.notify(NOTIFICATION_ID, notification)\n완성된 코드는 다음과 같습니다. 버튼을 누르면 알림을 전송합니다.\n1234567891011121314151617181920212223242526class MainActivity : AppCompatActivity() &#123;    lateinit var button: Button    val NOTIFICATION_ID = 1    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)        button.setOnClickListener &#123;            val notificationBuilder = NotificationCompat.Builder(this)                    .setSmallIcon(android.R.drawable.ic_dialog_info)                    .setContentTitle(&quot;A Notification&quot;)                    .setContentText(&quot;This is a notification&quot;)            val notification = notificationBuilder.build()                     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager            notificationManager.notify(NOTIFICATION_ID, notification)        &#125;    &#125;&#125;\n이제 앱을 실행하고 버튼을 눌러봅니다.상단 상태 바에 알림 아이콘이 생성됩니다.상태 바를 아래로 쓸어내리면 알림을 확인할 수 있습니다.\nOreo 버전에서의 알림안드로이드 API 26 (Oreo)부터는 알림을 사용하는 방식이 변경되었습니다. 따라서 버전에 따른 분기처리를 해야합니다.\n1234567891011121314151617if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;    // 오레오 버전 이상    // ...&#125; else &#123;    // 오레오 이전 버전    // 위 코드와 동일    val notificationBuilder = NotificationCompat.Builder(this)            .setSmallIcon(android.R.drawable.ic_dialog_info)            .setContentTitle(&quot;A Notification&quot;)            .setContentText(&quot;This is a notification&quot;)    val notification = notificationBuilder.build()             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager    notificationManager.notify(NOTIFICATION_ID, notification)&#125;\nOreo 이후 버전부터는 알림을 사용할 때 Notification Channel을 지정해야합니다.\nNotification ChannelOreo 이하 버전에서는 모든 알림이 하나의 Notification Channel로 관리됐습니다. 이 때문에 스마트폰에 알림이 쌓이길 원하지 않아 알림을 끄면, 모든 알림을 받을 수 없었습니다.\nOreo 버전부터는 알림을 여러 채널 별로 분리하여 사용자가 확인하고 싶은 알림과 보고싶지 않은 알림을 직접 설정할 수 있습니다. 각 채널별 수신 여부 외에도 잠금화면 표시 여부, 소리 설정, 진동 설정 등 여러 옵션을 세밀하게 설정할 수 있습니다.\n우선 다음과 같이 NotificationChannel 객체를 생성합니다.\n1234567val channelId = &quot;channel_id&quot;val channelName = &quot;channel_name&quot;val channelDescription = &quot;channel_description&quot;val importance = NotificationManager.IMPORTANCE_HIGHval notificationChannel = NotificationChannel(channelId, channelName, importance)notificationChannel.description = channelDescription\nNotificationChannel객체를 생성할 때 사용하는 id, name, importance, description은 다음과 같습니다.\n\nid: 각 채널을 구분할 수 있는 고유한 값\nname: 사용자에게 표시되는 채널의 이름\ndescription: 채널에 대한 설명, 특정 채널 설정 창에서 표시됩니다.\nimportance: 알림에 대한 중요도, 이 값에 따라 알림이 다르게 똥작합니다. importance 값에 따른 동작은 이 곳에서 확인할 수 있습니다.\n\nNotification Manager에 채널을 등록합니다.\n12val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManagernotificationManager.createNotificationChannel(notificationChannel)\nNotificationBuilder를 생성합니다. 이 때 Builer()의 두 번째 인자로 채널의 id를 전달합니다.\n1234val notificationBuilder = NotificationCompat.Builder(this, channelId)    .setSmallIcon(android.R.drawable.ic_dialog_info)    .setContentTitle(&quot;A Notification&quot;)    .setContentText(&quot;This is a notification&quot;)\nNotification을 생성합니다.\n1val notification = notificationBuilder.build()\nNotificationManager의 notify()메소드를 호출하여 알림을 전송합니다.\n1notificationManager.notify(NOTIFICATION_ID, notification)\n전체 코드는 다음과 같습니다.\n1234567891011121314151617181920212223242526272829303132333435363738394041class MainActivity : AppCompatActivity() &#123;    lateinit var button: Button    val NOTIFICATION_ID = 1    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)        button.setOnClickListener &#123;            if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;                val channelId = &quot;channel_id&quot;                val channelName = &quot;channel_name&quot;                val channelDescription = &quot;channel_description&quot;                val importance = NotificationManager.IMPORTANCE_HIGH                val notificationChannel = NotificationChannel(channelId, channelName, importance)                notificationChannel.description = channelDescription                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager                notificationManager.createNotificationChannel(notificationChannel)                val notificationBuilder = NotificationCompat.Builder(this, channelId)                        .setSmallIcon(android.R.drawable.ic_dialog_info)                        .setContentTitle(&quot;A Notification&quot;)                        .setContentText(&quot;This is a notification&quot;)                val notification = notificationBuilder.build()                notificationManager.notify(NOTIFICATION_ID, notification)            &#125; else &#123;                // 오레오 이전 버전            &#125;        &#125;    &#125;&#125;\n이제 앱을 실행하고 버튼을 클릭합시다.다음과 같이 화면에 알림 상자가 나오며, 상태바에 알림 아이콘이 생성됩니다.상태 바를 아래로 쓸어내리면 자세한 내용을 확인할 수 있습니다.\n","dateCreated":"2020-06-01T01:00:00+09:00","dateModified":"2021-12-16T17:32:18+09:00","datePublished":"2020-06-01T01:00:00+09:00","description":"","headline":"[Android] 알림(Notification) - (1) 로컬 알림","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"}</script>
+    <meta name="description" content="알림알림(Notification)은 앱이 실행되고 있지 않거나 백그라운드 상태일 때 메시지를 전달하는 방법을 제공합니다. 문자 앱이나 Gmail 앱이 대표적인 알림입니다. 알림이 생성되면 화면 위쪽 상태 바에 아이콘으로 나타납니다. 상태 바를 끌어내리면 알림 패널에서 알림의 자세한 내용을 확인할 수 있습니다. 알림의 종류알림에는 두 종류가 있습니다.  로">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 알림(Notification) - (1) 로컬 알림">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="알림알림(Notification)은 앱이 실행되고 있지 않거나 백그라운드 상태일 때 메시지를 전달하는 방법을 제공합니다. 문자 앱이나 Gmail 앱이 대표적인 알림입니다. 알림이 생성되면 화면 위쪽 상태 바에 아이콘으로 나타납니다. 상태 바를 끌어내리면 알림 패널에서 알림의 자세한 내용을 확인할 수 있습니다. 알림의 종류알림에는 두 종류가 있습니다.  로">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/3.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/4.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/5.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/6.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/7.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/8.png">
+<meta property="article:published_time" content="2020-05-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-16T08:32:18.662Z">
+<meta property="article:author" content="yologger">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 알림(Notification) - (1) 로컬 알림
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-06-01T01:00:00+09:00">
+	
+		    2020/06/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="알림"><a href="#알림" class="headerlink" title="알림"></a>알림</h1><p><code>알림(Notification)</code>은 앱이 실행되고 있지 않거나 백그라운드 상태일 때 메시지를 전달하는 방법을 제공합니다. 문자 앱이나 Gmail 앱이 대표적인 알림입니다.</p>
+<p>알림이 생성되면 화면 위쪽 <code>상태 바</code>에 아이콘으로 나타납니다.<br><img src="1.png"></p>
+<p>상태 바를 끌어내리면 <code>알림 패널</code>에서 알림의 자세한 내용을 확인할 수 있습니다.<br><img src="2.png"></p>
+<h1 id="알림의-종류"><a href="#알림의-종류" class="headerlink" title="알림의 종류"></a>알림의 종류</h1><p>알림에는 두 종류가 있습니다.</p>
+<ol>
+<li>로컬 알림(Local Notification)</li>
+<li>원격 알림(Remote Notification)</li>
+</ol>
+<h1 id="로컬-알림"><a href="#로컬-알림" class="headerlink" title="로컬 알림"></a>로컬 알림</h1><p><code>로컬 알림(Local Notification)</code>은 기기에서 실행 중인 앱에서 생성됩니다. 버튼을 누르면 로컬 알림을 전송하는 예제를 만들어봅시다.</p>
+<p><code>NotificationCompat.Builder</code>객체를 사용하면 알림을 생성할 수 있습니다. 우선 <code>NotificationBuilder</code>객체를 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p><code>setSmallIcon()</code>메소드를 사용하면 알림의 아이콘을 설정할 수 있습니다. <code>setContentTitle()</code>메소드를 사용하면 알림의 제목을 설정할 수 있으며, <code>setContentText()</code>메소드를 사용하면 알림의 본문을 설정할 수 있습니다.</p>
+<p>이제 <code>NotificationBuilder</code>객체의 <code>build()</code>메소드를 사용하여 알림을 생성합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notification = notificationBuilder.build()</span><br></pre></td></tr></table></figure>
+<p>알림을 보내기 위해서는 <code>NotificationManager</code>객체가 필요합니다. 시스템 서비스에서 다음과 같이 <code>NotificationManager</code>객체를 가져옵니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br></pre></td></tr></table></figure>
+<p>마지막으로 <code>NotificationManager</code>객체의 <code>notify()</code>메소드를 사용하여 알람을 전송합니다. 이때 메소드의 첫 번째 인자로 <code>알림의 ID</code>를 나타내는 임의의 정수값을 전달합니다. <code>알람 ID</code>는 안드로이드 시스템이 알림을 구분하는데 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationManager.notify(NOTIFICATION_ID, notification)</span><br></pre></td></tr></table></figure>
+<p>완성된 코드는 다음과 같습니다. 버튼을 누르면 알림을 전송합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">                    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">val</span> notification = notificationBuilder.build()         </span><br><span class="line"></span><br><span class="line">            <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line"></span><br><span class="line">            notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행하고 버튼을 눌러봅니다.<br><img src="3.png"><br>상단 상태 바에 알림 아이콘이 생성됩니다.<br><img src="4.png"><br>상태 바를 아래로 쓸어내리면 알림을 확인할 수 있습니다.<br><img src="5.png"></p>
+<h1 id="Oreo-버전에서의-알림"><a href="#Oreo-버전에서의-알림" class="headerlink" title="Oreo 버전에서의 알림"></a>Oreo 버전에서의 알림</h1><p><code>안드로이드 API 26 (Oreo)</code>부터는 알림을 사용하는 방식이 변경되었습니다. 따라서 버전에 따른 분기처리를 해야합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line">    <span class="comment">// 오레오 버전 이상</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 오레오 이전 버전</span></span><br><span class="line">    <span class="comment">// 위 코드와 동일</span></span><br><span class="line">    <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">            .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">            .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">            .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification = notificationBuilder.build()         </span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line"></span><br><span class="line">    notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Oreo</code> 이후 버전부터는 알림을 사용할 때 <code>Notification Channel</code>을 지정해야합니다.</p>
+<h1 id="Notification-Channel"><a href="#Notification-Channel" class="headerlink" title="Notification Channel"></a>Notification Channel</h1><p><code>Oreo</code> 이하 버전에서는 모든 알림이 하나의 <code>Notification Channel</code>로 관리됐습니다. 이 때문에 스마트폰에 알림이 쌓이길 원하지 않아 알림을 끄면, 모든 알림을 받을 수 없었습니다.</p>
+<p><code>Oreo</code> 버전부터는 알림을 여러 채널 별로 분리하여 사용자가 <code>확인하고 싶은 알림</code>과 <code>보고싶지 않은 알림</code>을 직접 설정할 수 있습니다. 각 채널별 수신 여부 외에도 잠금화면 표시 여부, 소리 설정, 진동 설정 등 여러 옵션을 세밀하게 설정할 수 있습니다.</p>
+<p>우선 다음과 같이 <code>NotificationChannel</code> 객체를 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line"><span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line"><span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line"><span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">notificationChannel.description = channelDescription</span><br></pre></td></tr></table></figure>
+<p><code>NotificationChannel</code>객체를 생성할 때 사용하는 <code>id</code>, <code>name</code>, <code>importance</code>, <code>description</code>은 다음과 같습니다.</p>
+<ul>
+<li>id: 각 채널을 구분할 수 있는 고유한 값</li>
+<li>name: 사용자에게 표시되는 채널의 이름</li>
+<li>description: 채널에 대한 설명, 특정 채널 설정 창에서 표시됩니다.</li>
+<li>importance: 알림에 대한 중요도, 이 값에 따라 알림이 다르게 똥작합니다. importance 값에 따른 동작은 <a target="_blank" rel="noopener" href="https://developer.android.com/training/notify-user/channels#importance">이 곳</a>에서 확인할 수 있습니다.</li>
+</ul>
+<p><code>Notification Manager</code>에 채널을 등록합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">notificationManager.createNotificationChannel(notificationChannel)</span><br></pre></td></tr></table></figure>
+<p><code>NotificationBuilder</code>를 생성합니다. 이 때 <code>Builer()</code>의 두 번째 인자로 채널의 <code>id</code>를 전달합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p><code>Notification</code>을 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notification = notificationBuilder.build()</span><br></pre></td></tr></table></figure>
+<p><code>NotificationManager</code>의 <code>notify()</code>메소드를 호출하여 알림을 전송합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationManager.notify(NOTIFICATION_ID, notification)</span><br></pre></td></tr></table></figure>
+<p>전체 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line">                <span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">                notificationChannel.description = channelDescription</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">                notificationManager.createNotificationChannel(notificationChannel)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                        .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                        .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification = notificationBuilder.build()</span><br><span class="line"></span><br><span class="line">                notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 오레오 이전 버전</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행하고 버튼을 클릭합시다.<br><img src="6.png"><br>다음과 같이 화면에 알림 상자가 나오며, 상태바에 알림 아이콘이 생성됩니다.<br><img src="7.png"><br>상태 바를 아래로 쓸어내리면 자세한 내용을 확인할 수 있습니다.<br><img src="8.png"></p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/02/08_android/11_notification/200602_notification_start_activity/"
+                    data-tooltip="[Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                    aria-label="이전: [Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/05/15/08_android/09_google_admob/200515_google_admob/"
+                    data-tooltip="[구글 애드몹(Google AdMob)] 앱에 광고 넣기"
+                    aria-label="다음: [구글 애드몹(Google AdMob)] 앱에 광고 넣기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/02/08_android/11_notification/200602_notification_start_activity/"
+                    data-tooltip="[Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                    aria-label="이전: [Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/05/15/08_android/09_google_admob/200515_google_admob/"
+                    data-tooltip="[구글 애드몹(Google AdMob)] 앱에 광고 넣기"
+                    aria-label="다음: [구글 애드몹(Google AdMob)] 앱에 광고 넣기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

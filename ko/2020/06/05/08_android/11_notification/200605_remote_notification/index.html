@@ -1,0 +1,734 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 알림(Notification) - (5) 원격 알림 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n원격 알림구글 파이어베이스의 클라우드 메시징(Cloud Messaging)서비스를 사용하면 원격 알림(Remote Notification)을 구현할 수 있습니다.\n1. 파이어베이스 프로젝트 만들기우선 파이어베이스에 접속하여 로그인합니다. 계정이 없다면 회원가입을 먼저 합니다. 이후 오른쪽 상단의 Go to console을 클릭합니다.Add Project를 클릭하여 파이어베이스 프로젝트를 생성합니다.\n프로젝트 이름을 입력하고 계속을 누릅니다.구글 에널리틱스를 사용할 것인지를 물어봅니다. 이때는 구글 에널리틱스 계정이 필요합니다. 일단 사용하지 않음을 선택하고 프로젝트를 생성합시다.프로젝트가 정상적으로 생성되면 다음과 같은 화면이 나옵니다.\n2. 안드로이드 스튜디오 프로젝트와 파이어베이스 프로젝트 연동이제 안드로이드 스튜디오 프로젝트에서 Tool &gt; Firebase를 선택합니다.오른쪽 패널의 Assistant 도구 창에서 Cloud Messaging 항목을 찾습니다. 그리고 Set up Firebase Cloud Messaging을 클릭합니다.Connect to Firebase를 눌러 안드로이드 스튜디오 프로젝트와 파이어베이스 프로젝트를 연결합니다. 다음과 같은 화면이 나오면 정상적으로 연결된 것입니다.두 프로젝트가 연결되면 자동으로 google-services.json파일이 생성됩니다. 이 파일은 Firebase에서 안드로이드 프로젝트를 고유하게 식별하는 정보가 담겨있습니다. 프로젝트 도구창을 Android 뷰에서 Project 뷰로 전환합니다.프로젝트의 app 모듈 아래에서 google-service.json파일을 확인할 수 있습니다.\n3. 파이어베이스 라이브러리 추가이제 파이어베이스 라이브러리를 안드로이드 스튜디오 프로젝트에 추가해야합니다. 다시오른쪽 패널의 Assistant 도구 창에서 Cloud Messaging 항목을 찾습니다. 그리고 Set up Firebase Cloud Messaging을 클릭합니다.Add FCM to your app을 클릭합니다.프로젝트에 추가되는 것들은 다음과 같습니다. 우선 프로젝트 수준의 build.gradle에 구글 서비스 라이브러리가 추가됩니다.\n123456buildscript &#123;    dependencies &#123;        classpath &#x27;com.google.gms:google-services:4.3.8&#x27;        // ...    &#125;&#125;\n모듈 수준의 build.gradle에는 Firebase 메시징 라이브러리와 구글 서비스 라이브러리 플러그인이 추가됩니다.\n123456789plugins &#123;    id &#x27;com.google.gms.google-services&#x27;    // ...&#125;dependencies &#123;    implementation &#x27;com.google.firebase:firebase-messaging:22.0.0&#x27;    // ...&#125;\n4. 알림 보내기앱을 실제 기기나 에뮬레이터에서 실행합니다. 그리고 홈 버튼을 눌러서 앱이 백그라운드에서 실행되도록 합니다. 앱이 실행 중이지 않거나 백그라운드에 있을 때만 원격 알림을 수신하기 때문입니다.\n파이어베이스 콘솔에 접속하여 앞에서 생성한 프로젝트를 선택합니다.왼쪽 사이드 바 메뉴에서 Cloud Messaging을 선택합니다.Send your first message를 클릭합니다.다음과 같이 알림 제목과 알림 텍스트를 입력합니다. 알림 이미지와 알림 이름은 선택사항입니다. 오른 쪽에서 어떻게 알림이 나올 지 확인할 수 있습니다. 이후 Next버튼을 누릅니다.이제 어떤 앱과 어떤 사용자에게 알림을 보낼 지 설정합니다. User segment로 설정하면 앱의 모든 사용자에게 알림이 전송됩니다. 또한 어떤 앱에 알림을 보낼지 앱도 선택하고 Next 버튼을 누릅니다.알림을 언제 보낼지를 설정할 수 있습니다. Now로 설정하고 Next버튼을 누릅니다.Additional options는 선택사항입니다. 일단 비워두고 Review버튼을 누릅니다.이제 검토창에서 게시를 누르면 알림이 발송됩니다.알림을 클릭하면 백그라운드 상태이던 앱이 포그라운드로 실행됩니다.\n4. 알림에 데이터 포함시키기알림을 보낼 때 키-값 형태의 데이터를 추가할 수 있습니다. Additional Option 항목에서 데이터를 추가할 수 있습니다.앱이 백그라운드에 진입하면 onPause()메소드가 호출됩니다. 알림을 클릭하여 앱이 포그라운드 상태로 변하면 onRestart() &gt; onStart() &gt; onResume()메소드가 순서대로 실행됩니다. 이 메소드 중 한 곳에서 데이터를 읽어올 수 있습니다. 데이터를 전달받아 토스트 메시지로 화면에 출력하겠습니다.\n123456789101112131415161718192021class MainActivity : AppCompatActivity() &#123;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)    &#125;    override fun onStart() &#123;        super.onStart()        val extras = intent.extras        extras?.run &#123;            val name = getString(&quot;name&quot;)            val nation = getString(&quot;nation&quot;)            if (name != null &amp;&amp; nation != null) &#123;                Toast.makeText(this@MainActivity, &quot;$&#123;name&#125; comes from $&#123;nation&#125;. &quot;, Toast.LENGTH_SHORT).show()            &#125;        &#125;    &#125;&#125;\n이제 앱을 실행하고 백그라운드 모드로 변경한 후 알림을 전송합시다. 알림을 클릭하면 다음과 같이 토스트 메시지가 나옵니다.\n\n마치며이번 포스트에서는 원격 알림(Remote Notification)에 대해 알아봤습니다. 다음 포스트에서는 포그라운드 상태에서 원격 알림을 받는 방법에 대해 알아보겠습니다.\n","dateCreated":"2020-06-05T01:00:00+09:00","dateModified":"2021-12-16T17:36:32+09:00","datePublished":"2020-06-05T01:00:00+09:00","description":"","headline":"[Android] 알림(Notification) - (5) 원격 알림","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"}</script>
+    <meta name="description" content="원격 알림구글 파이어베이스의 클라우드 메시징(Cloud Messaging)서비스를 사용하면 원격 알림(Remote Notification)을 구현할 수 있습니다. 1. 파이어베이스 프로젝트 만들기우선 파이어베이스에 접속하여 로그인합니다. 계정이 없다면 회원가입을 먼저 합니다. 이후 오른쪽 상단의 Go to console을 클릭합니다.Add Project를">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 알림(Notification) - (5) 원격 알림">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="원격 알림구글 파이어베이스의 클라우드 메시징(Cloud Messaging)서비스를 사용하면 원격 알림(Remote Notification)을 구현할 수 있습니다. 1. 파이어베이스 프로젝트 만들기우선 파이어베이스에 접속하여 로그인합니다. 계정이 없다면 회원가입을 먼저 합니다. 이후 오른쪽 상단의 Go to console을 클릭합니다.Add Project를">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/2-ko.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/3.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/4.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/5.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/6.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/7.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/8.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/9.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/10.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/7.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/11.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/12.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/13.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/14.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/15.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/16.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/17.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/18.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/19.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/20.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/21.png">
+<meta property="article:published_time" content="2020-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-16T08:36:32.223Z">
+<meta property="article:author" content="yologger">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 알림(Notification) - (5) 원격 알림
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-06-05T01:00:00+09:00">
+	
+		    2020/06/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="원격-알림"><a href="#원격-알림" class="headerlink" title="원격 알림"></a>원격 알림</h1><p><code>구글 파이어베이스</code>의 <code>클라우드 메시징(Cloud Messaging)</code>서비스를 사용하면 <code>원격 알림(Remote Notification)</code>을 구현할 수 있습니다.</p>
+<h1 id="1-파이어베이스-프로젝트-만들기"><a href="#1-파이어베이스-프로젝트-만들기" class="headerlink" title="1. 파이어베이스 프로젝트 만들기"></a>1. 파이어베이스 프로젝트 만들기</h1><p>우선 <a target="_blank" rel="noopener" href="https://firebase.google.com/?hl=ko">파이어베이스</a>에 접속하여 로그인합니다. 계정이 없다면 회원가입을 먼저 합니다. 이후 오른쪽 상단의 <code>Go to console</code>을 클릭합니다.<br><img src="1.png"><br><code>Add Project</code>를 클릭하여 <code>파이어베이스 프로젝트</code>를 생성합니다.<br><img src="2-ko.png"></p>
+<p>프로젝트 이름을 입력하고 계속을 누릅니다.<br><img src="3.png"><br>구글 에널리틱스를 사용할 것인지를 물어봅니다. 이때는 구글 에널리틱스 계정이 필요합니다. 일단 사용하지 않음을 선택하고 프로젝트를 생성합시다.<br><img src="4.png"><br>프로젝트가 정상적으로 생성되면 다음과 같은 화면이 나옵니다.<br><img src="5.png"></p>
+<h1 id="2-안드로이드-스튜디오-프로젝트와-파이어베이스-프로젝트-연동"><a href="#2-안드로이드-스튜디오-프로젝트와-파이어베이스-프로젝트-연동" class="headerlink" title="2. 안드로이드 스튜디오 프로젝트와 파이어베이스 프로젝트 연동"></a>2. 안드로이드 스튜디오 프로젝트와 파이어베이스 프로젝트 연동</h1><p>이제 <code>안드로이드 스튜디오 프로젝트</code>에서 <code>Tool &gt; Firebase</code>를 선택합니다.<br><img src="6.png"><br>오른쪽 패널의 <code>Assistant</code> 도구 창에서 <code>Cloud Messaging</code> 항목을 찾습니다. 그리고 <code>Set up Firebase Cloud Messaging</code>을 클릭합니다.<br><img src="7.png"><br><code>Connect to Firebase</code>를 눌러 안드로이드 스튜디오 프로젝트와 파이어베이스 프로젝트를 연결합니다. 다음과 같은 화면이 나오면 정상적으로 연결된 것입니다.<br><img src="8.png"><br>두 프로젝트가 연결되면 자동으로 <code>google-services.json</code>파일이 생성됩니다. 이 파일은 Firebase에서 안드로이드 프로젝트를 고유하게 식별하는 정보가 담겨있습니다. 프로젝트 도구창을 <code>Android 뷰</code>에서 <code>Project 뷰</code>로 전환합니다.<br><img src="9.png"><br>프로젝트의 <code>app 모듈</code> 아래에서 <code>google-service.json</code>파일을 확인할 수 있습니다.<br><img src="10.png"></p>
+<h1 id="3-파이어베이스-라이브러리-추가"><a href="#3-파이어베이스-라이브러리-추가" class="headerlink" title="3. 파이어베이스 라이브러리 추가"></a>3. 파이어베이스 라이브러리 추가</h1><p>이제 <code>파이어베이스 라이브러리</code>를 안드로이드 스튜디오 프로젝트에 추가해야합니다. 다시<br>오른쪽 패널의 <code>Assistant</code> 도구 창에서 <code>Cloud Messaging</code> 항목을 찾습니다. 그리고 <code>Set up Firebase Cloud Messaging</code>을 클릭합니다.<br><img src="7.png"><br><code>Add FCM to your app</code>을 클릭합니다.<br><img src="11.png"><br>프로젝트에 추가되는 것들은 다음과 같습니다. 우선 프로젝트 수준의 <code>build.gradle</code>에 <code>구글 서비스 라이브러리</code>가 추가됩니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath <span class="string">&#x27;com.google.gms:google-services:4.3.8&#x27;</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>모듈 수준의 <code>build.gradle</code>에는 <code>Firebase 메시징 라이브러리</code>와 <code>구글 서비스 라이브러리 플러그인</code>이 추가됩니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.google.gms.google-services&#x27;</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&#x27;com.google.firebase:firebase-messaging:22.0.0&#x27;</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="4-알림-보내기"><a href="#4-알림-보내기" class="headerlink" title="4. 알림 보내기"></a>4. 알림 보내기</h1><p>앱을 실제 기기나 에뮬레이터에서 실행합니다. 그리고 <code>홈 버튼</code>을 눌러서 앱이 <code>백그라운드</code>에서 실행되도록 합니다. 앱이 실행 중이지 않거나 백그라운드에 있을 때만 원격 알림을 수신하기 때문입니다.</p>
+<p>파이어베이스 콘솔에 접속하여 앞에서 생성한 프로젝트를 선택합니다.<br><img src="12.png"><br>왼쪽 사이드 바 메뉴에서 <code>Cloud Messaging</code>을 선택합니다.<br><img src="13.png"><br><code>Send your first message</code>를 클릭합니다.<br><img src="14.png"><br>다음과 같이 <code>알림 제목</code>과 <code>알림 텍스트</code>를 입력합니다. <code>알림 이미지</code>와 <code>알림 이름</code>은 선택사항입니다. 오른 쪽에서 어떻게 알림이 나올 지 확인할 수 있습니다. 이후 <code>Next</code>버튼을 누릅니다.<br><img src="15.png"><br>이제 어떤 앱과 어떤 사용자에게 알림을 보낼 지 설정합니다. <code>User segment</code>로 설정하면 앱의 모든 사용자에게 알림이 전송됩니다. 또한 어떤 앱에 알림을 보낼지 앱도 선택하고 <code>Next</code> 버튼을 누릅니다.<br><img src="16.png"><br>알림을 언제 보낼지를 설정할 수 있습니다. <code>Now</code>로 설정하고 <code>Next</code>버튼을 누릅니다.<br><img src="17.png"><br><code>Additional options</code>는 선택사항입니다. 일단 비워두고 <code>Review</code>버튼을 누릅니다.<br><img src="18.png"><br>이제 검토창에서 게시를 누르면 알림이 발송됩니다.<br><img src="19.png"><br>알림을 클릭하면 백그라운드 상태이던 앱이 포그라운드로 실행됩니다.</p>
+<h1 id="4-알림에-데이터-포함시키기"><a href="#4-알림에-데이터-포함시키기" class="headerlink" title="4. 알림에 데이터 포함시키기"></a>4. 알림에 데이터 포함시키기</h1><p>알림을 보낼 때 <code>키-값</code> 형태의 데이터를 추가할 수 있습니다. <code>Additional Option</code> 항목에서 데이터를 추가할 수 있습니다.<br><img src="20.png"><br>앱이 백그라운드에 진입하면 <code>onPause()</code>메소드가 호출됩니다. 알림을 클릭하여 앱이 포그라운드 상태로 변하면 <code>onRestart() &gt; onStart() &gt; onResume()</code>메소드가 순서대로 실행됩니다. 이 메소드 중 한 곳에서 데이터를 읽어올 수 있습니다. 데이터를 전달받아 토스트 메시지로 화면에 출력하겠습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onStart</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onStart()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> extras = intent.extras</span><br><span class="line"></span><br><span class="line">        extras?.run &#123;</span><br><span class="line">            <span class="keyword">val</span> name = getString(<span class="string">&quot;name&quot;</span>)</span><br><span class="line">            <span class="keyword">val</span> nation = getString(<span class="string">&quot;nation&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> (name != <span class="literal">null</span> &amp;&amp; nation != <span class="literal">null</span>) &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;<span class="subst">$&#123;name&#125;</span> comes from <span class="subst">$&#123;nation&#125;</span>. &quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행하고 백그라운드 모드로 변경한 후 알림을 전송합시다. 알림을 클릭하면 다음과 같이 토스트 메시지가 나옵니다.<br><img src="21.png"></p>
+<hr>
+<h1 id="마치며"><a href="#마치며" class="headerlink" title="마치며"></a>마치며</h1><p>이번 포스트에서는 <code>원격 알림(Remote Notification)</code>에 대해 알아봤습니다. 다음 포스트에서는 <a href="/ko/2020/02/06/android/006_01_notification/200206-remote-notification-foreground/">포그라운드 상태에서 원격 알림을 받는 방법</a>에 대해 알아보겠습니다.</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/"
+                    data-tooltip="[Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기"
+                    aria-label="이전: [Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/04/08_android/11_notification/200604_notification_group/"
+                    data-tooltip="[Android] 알림(Notification) - (4) 알림 메시지 묶기"
+                    aria-label="다음: [Android] 알림(Notification) - (4) 알림 메시지 묶기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/"
+                    data-tooltip="[Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기"
+                    aria-label="이전: [Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/04/08_android/11_notification/200604_notification_group/"
+                    data-tooltip="[Android] 알림(Notification) - (4) 알림 메시지 묶기"
+                    aria-label="다음: [Android] 알림(Notification) - (4) 알림 메시지 묶기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

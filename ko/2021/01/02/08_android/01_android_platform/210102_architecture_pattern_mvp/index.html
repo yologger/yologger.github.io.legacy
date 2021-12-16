@@ -1,0 +1,760 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 아키텍처 패턴 - (2) MVP - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n아키텍처 패턴소프트웨어는 수많은 요소로 구성됩니다. 그러나 대부분의 소프트웨어는 시간이 지날수록 복잡성이 증가합니다. 기능을 추가하거나 변경하는 일이 빈번하기 때문입니다. 이에 따라 기능을 추가하거나 테스트하거나 유지보수하는데 많은 문제가 발생합니다.\n아키텍처 패턴(Architecture Pattern)은 이러한 문제를 해결하기 위해 등장했습니다. 아키텍처 패턴은 소프트웨어를 구성하는 요소를 어떻게 체계적으로 설계하고 구성할지에 대한 방법론입니다.\n안드로이드의 아키텍처 패턴안드로이드에는 무수히 많은 아키텍처 패턴이 존재합니다. 안드로이드에서 자주 사용되는 아키텍처 패턴은 다음과 같습니다.\n\nMVC (Model-View-Controller)\nMVP (Model-View-Presenter)\nMVVM (Model-View-ViewModel)\nMVI (Model-View-Intent))\nClean Architecture\n\n\n예제다음과 같이 카운터 앱을 만들며 아키택처 패턴에 대해 알아보겠습니다. PLUS버튼을 누르면 값이 1만큼 증가합니다. MINUS버튼을 누르면 값이 1만큼 감소합니다.\n\nMVC의 문제점MVC에서 컨트롤러(Controller)의 역할은 크게 세 가지 입니다.\n\n사용자 이벤트 수신\n뷰(View) 업데이트\n모델(Model)과 상호작용\n\n이렇게 컨트롤러의 역할이 많기 때문에 앱이 커질수록 컨트롤러가 비대해집니다. 이처럼 한 모듈에 많은 기능이 들어가는 것은 &quot;소프트웨어의 결합도(Coupling)은 낮추고 응집도(Cohension)은 높인다&quot;라는 소프트웨어 개발 원칙에 위배되며, 유지보수와 테스트를 어렵게 합니다. MVP는 이러한 문제를 해결하기 위해 등장했습니다.\nMVPMVP은 모델(Model), 뷰(View), 프레젠터(Presenter)로 구성되어있습니다.\n(1) 모델(Model)MVC 패턴의 모델과 동일합니다. 데이터, 데이터의 상태, 데이터 조작과 관련된 로직입니다. \n(2) 뷰(View)UI 화면을 담당할 뿐만 아니라 사용자 이벤트 수신과 뷰 업데이트를 담당합니다.\n(3) 프레젠터(Presenter)뷰에게 업데이트를 요청하며, 모델과 상호작용합니다.\nMVP는 다음과 같이 진행됩니다.\n\n뷰는 사용자 이벤트를 수신합니다.\n뷰는 사용자 이벤트를 프레젠터에 전달합니다.\n프레젠트는 비즈니스 로직을 수행합니다.\n프레젠터는 모델을 업데이트할 필요가 있는 경우, 모델을 업데이트 합니다.\n프레젠터는 뷰에게 뷰 업데이트를 요청합니다.\n뷰는 뷰를 업데이트합니다.\n\n프레젠터에서 뷰를 직접 변경하는게 아니라는 것에 주의합시다. 프레젠터는 뷰의 참조를 가지고 있으며 뷰 업데이트는 뷰에 구현합니다.\n안드로이드에서의 MVPMVC에서는 액티비티나 프래그먼트가 컨트롤러에 해당되었습니다. 그러나 MVP에서는 액티비티나 프래그먼트가 뷰에 포함이 됩니다.\nMVP를 구현하는 방법은 여러가지가 있습니다. 우리는 구글 공식 샘플을 참고하여 카운터 앱을 만들어보겠습니다.\n레이아웃 파일은 다음과 같습니다.\nactivity_main.xml123456789101112131415161718192021222324252627282930313233343536373839404142434445464748&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;LinearLayout        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        app:layout_constraintTop_toTopOf=&quot;parent&quot;        app:layout_constraintBottom_toBottomOf=&quot;parent&quot;        app:layout_constraintStart_toStartOf=&quot;parent&quot;        app:layout_constraintEnd_toEndOf=&quot;parent&quot;        android:orientation=&quot;vertical&quot;&gt;        &lt;TextView            android:id=&quot;@+id/activity_main_textView_result&quot;            android:layout_width=&quot;match_parent&quot;            android:layout_height=&quot;wrap_content&quot;            android:textAlignment=&quot;center&quot;            android:layout_margin=&quot;8dp&quot;            android:text=&quot;0&quot; /&gt;        &lt;LinearLayout            android:layout_width=&quot;match_parent&quot;            android:layout_height=&quot;match_parent&quot;            android:orientation=&quot;horizontal&quot;&gt;            &lt;Button                android:id=&quot;@+id/activity_main_button_plus&quot;                android:layout_width=&quot;wrap_content&quot;                android:layout_height=&quot;wrap_content&quot;                android:layout_margin=&quot;8dp&quot;                android:text=&quot;Plus&quot; /&gt;            &lt;Button                android:id=&quot;@+id/activity_main_button_minus&quot;                android:layout_width=&quot;wrap_content&quot;                android:layout_height=&quot;wrap_content&quot;                android:layout_margin=&quot;8dp&quot;                android:text=&quot;Minus&quot; /&gt;        &lt;/LinearLayout&gt;    &lt;/LinearLayout&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n\n모든 뷰가 구현하는 BaseView인터페이스는 다음과 같습니다. BaseView를 구현하는 클래스에서는 변수 present를 프레젠터에 접근할 수 있습니다.\nBaseView.kt12345interface BaseView&lt;T&gt; &#123;    val presenter: T&#125;\n모든 프레젠터가 구현하는 BasePresenter인터페이스는 다음과 같습니다.\nBasePresenter.kt1234interface BasePresenter &#123;    fun start()&#125;\n구글 공식 샘플에서는 Contract인터페이스를 만들어 MVP를 구현하고 있습니다.\nContract.kt1234567891011interface MainContract &#123;    interface View: BaseView&lt;Presenter&gt; &#123;        fun showResult(result: Int)    &#125;    interface Presenter: BasePresenter &#123;        fun plus()        fun minus()    &#125;&#125;\nMainActivity의 프레젠터를 담당할 MainPresenter를 만듭니다. MainPresenter는 MainContract.Presenter를 구현하며, 생성자로 뷰를 전달받습니다.\nMainPresenter.kt12345678910111213141516171819class MainPresenter(private val view: MainContract.View) : MainContract.Presenter &#123;    private val repository = Repository()    override fun start() &#123;        val result = repository.get()        view.showResult(result)    &#125;    override fun plus() &#123;        repository.plus()        view.showResult(repository.get())    &#125;    override fun minus() &#123;        repository.minus()        view.showResult(repository.get())    &#125;&#125;\n이제 MainActivity를 다음과 같이 구현합니다. 핵심은 MainActivity에서 MainContract.View를 구현하는 것입니다.\nMainActivity.kt12345678910111213141516171819202122232425262728293031323334353637class MainActivity : AppCompatActivity(), MainContract.View &#123;    override val presenter: MainContract.Presenter by lazy &#123; MainPresenter(this) &#125;    private lateinit var textViewResult: TextView    private lateinit var buttonPlus: Button    private lateinit var buttonMinus: Button    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        findViewsById()        setup()    &#125;    private fun findViewsById()&#123;        textViewResult = findViewById(R.id.activity_main_textView_result)        buttonPlus = findViewById(R.id.activity_main_button_plus)        buttonMinus = findViewById(R.id.activity_main_button_minus)    &#125;    private fun setup() &#123;        presenter.start()        buttonPlus.setOnClickListener &#123;            presenter.plus()        &#125;        buttonMinus.setOnClickListener &#123;            presenter.minus()        &#125;    &#125;    override fun showResult(result: Int) &#123;        textViewResult.text = result.toString()    &#125;&#125;\n모델은 앱을 어떻게 설계하는지에 따라 달라집니다. 이 앱에서는 모델을 담당하는 Repository클래스를 만들겠습니다. Repository클래스에는 카운터의 값을 더하거나 빼는 로직, 값을 SharedPreferences에 저장하는 로직이 구현되어있습니다.\nRepository.kt1234567891011121314151617181920212223242526272829class Repository &#123;    private val SHARED_PREFERENCE_FILE_KEY = &quot;shared_preference_file_key&quot;    private val SHARED_PREFERENCE_VALUE_COUNTER_KEY = &quot;shared_preference_value_counter_key&quot;    private val sharedPreference = App.newInstance().getSharedPreferences(SHARED_PREFERENCE_FILE_KEY, Context.MODE_PRIVATE)    fun get(): Int &#123;        val value = sharedPreference.getInt(SHARED_PREFERENCE_VALUE_COUNTER_KEY, 0)        return value    &#125;    fun plus() &#123;        val value = sharedPreference.getInt(SHARED_PREFERENCE_VALUE_COUNTER_KEY, 0)        val newValue = value + 1        save(newValue)    &#125;    fun minus() &#123;        val value = sharedPreference.getInt(SHARED_PREFERENCE_VALUE_COUNTER_KEY, 0)        val newValue = value - 1        save(newValue)    &#125;    private fun save(value: Int) &#123;        val editor = sharedPreference.edit()        editor.putInt(SHARED_PREFERENCE_VALUE_COUNTER_KEY, value)        editor.commit()    &#125;&#125;\n뷰(View), 모델(Model), 프레젠터(Presenter)를 담당하는 클래스 파일과 리소스 파일은 다음과 같습니다.\n","dateCreated":"2021-01-02T00:00:00+09:00","dateModified":"2021-12-16T15:39:37+09:00","datePublished":"2021-01-02T00:00:00+09:00","description":"","headline":"[Android] 아키텍처 패턴 - (2) MVP","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/","keywords":"Android"}</script>
+    <meta name="description" content="아키텍처 패턴소프트웨어는 수많은 요소로 구성됩니다. 그러나 대부분의 소프트웨어는 시간이 지날수록 복잡성이 증가합니다. 기능을 추가하거나 변경하는 일이 빈번하기 때문입니다. 이에 따라 기능을 추가하거나 테스트하거나 유지보수하는데 많은 문제가 발생합니다. 아키텍처 패턴(Architecture Pattern)은 이러한 문제를 해결하기 위해 등장했습니다. 아키텍">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 아키텍처 패턴 - (2) MVP">
+<meta property="og:url" content="https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="아키텍처 패턴소프트웨어는 수많은 요소로 구성됩니다. 그러나 대부분의 소프트웨어는 시간이 지날수록 복잡성이 증가합니다. 기능을 추가하거나 변경하는 일이 빈번하기 때문입니다. 이에 따라 기능을 추가하거나 테스트하거나 유지보수하는데 많은 문제가 발생합니다. 아키텍처 패턴(Architecture Pattern)은 이러한 문제를 해결하기 위해 등장했습니다. 아키텍">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/3.png">
+<meta property="article:published_time" content="2021-01-01T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-16T06:39:37.307Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 아키텍처 패턴 - (2) MVP
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-01-02T00:00:00+09:00">
+	
+		    2021/01/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="아키텍처-패턴"><a href="#아키텍처-패턴" class="headerlink" title="아키텍처 패턴"></a>아키텍처 패턴</h1><p>소프트웨어는 수많은 요소로 구성됩니다. 그러나 대부분의 소프트웨어는 시간이 지날수록 복잡성이 증가합니다. 기능을 추가하거나 변경하는 일이 빈번하기 때문입니다. 이에 따라 기능을 추가하거나 테스트하거나 유지보수하는데 많은 문제가 발생합니다.</p>
+<p><code>아키텍처 패턴(Architecture Pattern)</code>은 이러한 문제를 해결하기 위해 등장했습니다. 아키텍처 패턴은 <u>소프트웨어를 구성하는 요소를 어떻게 체계적으로 설계하고 구성할지에 대한 방법론</u>입니다.</p>
+<h1 id="안드로이드의-아키텍처-패턴"><a href="#안드로이드의-아키텍처-패턴" class="headerlink" title="안드로이드의 아키텍처 패턴"></a>안드로이드의 아키텍처 패턴</h1><p>안드로이드에는 무수히 많은 아키텍처 패턴이 존재합니다. 안드로이드에서 자주 사용되는 아키텍처 패턴은 다음과 같습니다.</p>
+<ul>
+<li>MVC (Model-View-Controller)</li>
+<li>MVP (Model-View-Presenter)</li>
+<li>MVVM (Model-View-ViewModel)</li>
+<li>MVI (Model-View-Intent))</li>
+<li>Clean Architecture</li>
+</ul>
+<hr>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>다음과 같이 <code>카운터 앱</code>을 만들며 아키택처 패턴에 대해 알아보겠습니다. <code>PLUS</code>버튼을 누르면 값이 1만큼 증가합니다. <code>MINUS</code>버튼을 누르면 값이 1만큼 감소합니다.<br><img src="1.png"></p>
+<hr>
+<h1 id="MVC의-문제점"><a href="#MVC의-문제점" class="headerlink" title="MVC의 문제점"></a>MVC의 문제점</h1><p>MVC에서 <code>컨트롤러(Controller)</code>의 역할은 크게 세 가지 입니다.</p>
+<ol>
+<li>사용자 이벤트 수신</li>
+<li>뷰(View) 업데이트</li>
+<li>모델(Model)과 상호작용</li>
+</ol>
+<p>이렇게 컨트롤러의 역할이 많기 때문에 앱이 커질수록 컨트롤러가 비대해집니다. 이처럼 한 모듈에 많은 기능이 들어가는 것은 <code>&quot;소프트웨어의 결합도(Coupling)은 낮추고 응집도(Cohension)은 높인다&quot;</code>라는 소프트웨어 개발 원칙에 위배되며, 유지보수와 테스트를 어렵게 합니다. MVP는 이러한 문제를 해결하기 위해 등장했습니다.</p>
+<h1 id="MVP"><a href="#MVP" class="headerlink" title="MVP"></a>MVP</h1><p>MVP은 <code>모델(Model)</code>, <code>뷰(View)</code>, <code>프레젠터(Presenter)</code>로 구성되어있습니다.<br><img src="2.png"></p>
+<h4 id="1-모델-Model"><a href="#1-모델-Model" class="headerlink" title="(1) 모델(Model)"></a>(1) 모델(Model)</h4><p>MVC 패턴의 모델과 동일합니다. 데이터, 데이터의 상태, 데이터 조작과 관련된 로직입니다. </p>
+<h4 id="2-뷰-View"><a href="#2-뷰-View" class="headerlink" title="(2) 뷰(View)"></a>(2) 뷰(View)</h4><p>UI 화면을 담당할 뿐만 아니라 사용자 이벤트 수신과 뷰 업데이트를 담당합니다.</p>
+<h4 id="3-프레젠터-Presenter"><a href="#3-프레젠터-Presenter" class="headerlink" title="(3) 프레젠터(Presenter)"></a>(3) 프레젠터(Presenter)</h4><p>뷰에게 업데이트를 요청하며, 모델과 상호작용합니다.</p>
+<p>MVP는 다음과 같이 진행됩니다.</p>
+<ol>
+<li>뷰는 사용자 이벤트를 수신합니다.</li>
+<li>뷰는 사용자 이벤트를 프레젠터에 전달합니다.</li>
+<li>프레젠트는 비즈니스 로직을 수행합니다.</li>
+<li>프레젠터는 모델을 업데이트할 필요가 있는 경우, 모델을 업데이트 합니다.</li>
+<li>프레젠터는 뷰에게 뷰 업데이트를 요청합니다.</li>
+<li>뷰는 뷰를 업데이트합니다.</li>
+</ol>
+<p>프레젠터에서 뷰를 직접 변경하는게 아니라는 것에 주의합시다. 프레젠터는 뷰의 참조를 가지고 있으며 뷰 업데이트는 뷰에 구현합니다.</p>
+<h1 id="안드로이드에서의-MVP"><a href="#안드로이드에서의-MVP" class="headerlink" title="안드로이드에서의 MVP"></a>안드로이드에서의 MVP</h1><p>MVC에서는 <code>액티비티</code>나 <code>프래그먼트</code>가 <code>컨트롤러</code>에 해당되었습니다. 그러나 MVP에서는 <code>액티비티</code>나 <code>프래그먼트</code>가 <code>뷰</code>에 포함이 됩니다.</p>
+<p>MVP를 구현하는 방법은 여러가지가 있습니다. 우리는 <a target="_blank" rel="noopener" href="https://github.com/android/architecture-samples/tree/todo-mvp-kotlin">구글 공식 샘플</a>을 참고하여 카운터 앱을 만들어보겠습니다.</p>
+<p>레이아웃 파일은 다음과 같습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">LinearLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_textView_result&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:textAlignment</span>=<span class="string">&quot;center&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_margin</span>=<span class="string">&quot;8dp&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">&quot;0&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">LinearLayout</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:orientation</span>=<span class="string">&quot;horizontal&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_button_plus&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:layout_margin</span>=<span class="string">&quot;8dp&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:text</span>=<span class="string">&quot;Plus&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_button_minus&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:layout_margin</span>=<span class="string">&quot;8dp&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:text</span>=<span class="string">&quot;Minus&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>모든 뷰가 구현하는 <code>BaseView</code>인터페이스는 다음과 같습니다. <code>BaseView</code>를 구현하는 클래스에서는 변수 <code>present</code>를 프레젠터에 접근할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>BaseView.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseView</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> presenter: T</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>모든 프레젠터가 구현하는 <code>BasePresenter</code>인터페이스는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>BasePresenter.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BasePresenter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">start</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>구글 공식 샘플에서는 <code>Contract</code>인터페이스를 만들어 MVP를 구현하고 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>Contract.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">MainContract</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">View</span>: <span class="type">BaseView</span>&lt;<span class="type">Presenter</span>&gt; </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">showResult</span><span class="params">(result: <span class="type">Int</span>)</span></span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">Presenter</span>: <span class="type">BasePresenter &#123;</span></span></span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">()</span></span></span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">()</span></span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>MainActivity</code>의 프레젠터를 담당할 <code>MainPresenter</code>를 만듭니다. <code>MainPresenter</code>는 <code>MainContract.Presenter</code>를 구현하며, 생성자로 뷰를 전달받습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainPresenter.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainPresenter</span></span>(<span class="keyword">private</span> <span class="keyword">val</span> view: MainContract.View) : MainContract.Presenter &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> repository = Repository()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">start</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> result = repository.<span class="keyword">get</span>()</span><br><span class="line">        view.showResult(result)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        repository.plus()</span><br><span class="line">        view.showResult(repository.<span class="keyword">get</span>())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        repository.minus()</span><br><span class="line">        view.showResult(repository.<span class="keyword">get</span>())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>MainActivity</code>를 다음과 같이 구현합니다. 핵심은 <code>MainActivity</code>에서 <code>MainContract.View</code>를 구현하는 것입니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), MainContract.View &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">val</span> presenter: MainContract.Presenter <span class="keyword">by</span> lazy &#123; MainPresenter(<span class="keyword">this</span>) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> textViewResult: TextView</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> buttonPlus: Button</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> buttonMinus: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        findViewsById()</span><br><span class="line">        setup()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">findViewsById</span><span class="params">()</span></span>&#123;</span><br><span class="line">        textViewResult = findViewById(R.id.activity_main_textView_result)</span><br><span class="line">        buttonPlus = findViewById(R.id.activity_main_button_plus)</span><br><span class="line">        buttonMinus = findViewById(R.id.activity_main_button_minus)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">setup</span><span class="params">()</span></span> &#123;</span><br><span class="line">        presenter.start()</span><br><span class="line"></span><br><span class="line">        buttonPlus.setOnClickListener &#123;</span><br><span class="line">            presenter.plus()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        buttonMinus.setOnClickListener &#123;</span><br><span class="line">            presenter.minus()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">showResult</span><span class="params">(result: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        textViewResult.text = result.toString()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>모델은 앱을 어떻게 설계하는지에 따라 달라집니다. 이 앱에서는 모델을 담당하는 <code>Repository</code>클래스를 만들겠습니다. <code>Repository</code>클래스에는 카운터의 값을 더하거나 빼는 로직, 값을 <code>SharedPreferences</code>에 저장하는 로직이 구현되어있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>Repository.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Repository</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> SHARED_PREFERENCE_FILE_KEY = <span class="string">&quot;shared_preference_file_key&quot;</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> SHARED_PREFERENCE_VALUE_COUNTER_KEY = <span class="string">&quot;shared_preference_value_counter_key&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> sharedPreference = App.newInstance().getSharedPreferences(SHARED_PREFERENCE_FILE_KEY, Context.MODE_PRIVATE)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">get</span><span class="params">()</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">val</span> value = sharedPreference.getInt(SHARED_PREFERENCE_VALUE_COUNTER_KEY, <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> value</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> value = sharedPreference.getInt(SHARED_PREFERENCE_VALUE_COUNTER_KEY, <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">val</span> newValue = value + <span class="number">1</span></span><br><span class="line">        save(newValue)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> value = sharedPreference.getInt(SHARED_PREFERENCE_VALUE_COUNTER_KEY, <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">val</span> newValue = value - <span class="number">1</span></span><br><span class="line">        save(newValue)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">save</span><span class="params">(value: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> editor = sharedPreference.edit()</span><br><span class="line">        editor.putInt(SHARED_PREFERENCE_VALUE_COUNTER_KEY, value)</span><br><span class="line">        editor.commit()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>뷰(View)</code>, <code>모델(Model)</code>, <code>프레젠터(Presenter)</code>를 담당하는 클래스 파일과 리소스 파일은 다음과 같습니다.<br><img src="3.png"></p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2021/01/03/08_android/01_android_platform/210103_architecture_pattern_mvvm/"
+                    data-tooltip="[Android] 아키텍처 패턴 - (3) MVVM"
+                    aria-label="이전: [Android] 아키텍처 패턴 - (3) MVVM"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2021/01/01/08_android/01_android_platform/210101_architecture_pattern_mvc/"
+                    data-tooltip="[Android] 아키텍처 패턴 - (1) MVC"
+                    aria-label="다음: [Android] 아키텍처 패턴 - (1) MVC"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2021/01/03/08_android/01_android_platform/210103_architecture_pattern_mvvm/"
+                    data-tooltip="[Android] 아키텍처 패턴 - (3) MVVM"
+                    aria-label="이전: [Android] 아키텍처 패턴 - (3) MVVM"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2021/01/01/08_android/01_android_platform/210101_architecture_pattern_mvc/"
+                    data-tooltip="[Android] 아키텍처 패턴 - (1) MVC"
+                    aria-label="다음: [Android] 아키텍처 패턴 - (1) MVC"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2021/01/02/08_android/01_android_platform/210102_architecture_pattern_mvp/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

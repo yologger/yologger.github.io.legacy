@@ -1,0 +1,757 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[구글 지도(Google Maps)] (1) 구글 지도 띄우기 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n들어가며일곱 개의 포스트에 걸쳐 구글 지도(Google Maps)에 대해 알아보고 있습니다.\n\n구글 지도 띄우기\n지도 타입 변경하기\n마커 보여주기\n지도 확대와 축소 (줌-인과 줌-아웃)\n지도에 내 위치 보여주기\n내 위치로 카메라 이동하기\n맵 컨트롤\n\n\n1. SHA-1 인증키 발급Google Cloud Platform, Google Play, Google Firebase 등의 서비스를 사용하다보면 SHA-1 인증키가 필요한 경우가 많습니다. SHA-1 인증키는 안드로이드 스튜디오에서 아래와 같이 발급할 수 있습니다.\n우선 프로젝트를 열고 [Gradle] &gt; [Task] &gt; [android] &gt; [signingReport]를 클릭합니다.\n그럼 하단 로그에 다음과 같이 SHA1 인증키가 출력됩니다.\n2. API Key 발급Google Maps API를 사용하려면 API Key를 발급받아야 합니다. https://cloud.google.com/에서 로그인하고 오른쪽 상단에 있는 콘솔 버튼을 눌러줍니다.\nAPI 및 서비스에 들어갑니다.\n프로젝트를 하나도 추가하지 않았다면 다음과 같은 화면이 나옵니다. 오른쪽 프로젝트 만들기를 클릭합니다.\n프로젝트 이름을 입력하고 만들기를 클릭합니다.\n프로젝트가 생성되었습니다. 왼쪽 사이드 바 메뉴에서 [API 및 서비스] &gt; [대시보드]로 들어갑니다\n상단 중앙의 API 및 서비스 사용 설정을 클릭합니다.\nMaps SDK for Android를 선택합니다.\n사용 버튼을 누릅니다.\n왼쪽 메뉴에서 사용자 인증 정보를 누르고 상단의 사용자 인증 정보 만들기를 클릭한 후 API 키를 선택합니다.\n키 제한을 클릭합니다. 키 제한은 실제 배포되는 앱에서 키가 무단으로 사용되는 것을 방지하기 위함입니다.\n키의 이름은 임의로 설정합니다.\n키를 Android 앱에서만 사용할 수 있도록 제한할 수 있습니다.\nGoogle Cloud Platform은 여러 API를 제공합니다. 이 중에서 안드로이드를 위한 맵 API만 사용하도록 제한할 수도 있습니다.\n아래와 같이 앱의 사용량도 제한할 수 있습니다. 이때 항목 추가를 누르고 위 안드로이드 스튜디오 프로젝트에서 발급한 SHA-1 인증키와 패키지 이름을 입력합니다. 이후 완료 버튼을 누르고 하단의 저장 버튼을 누릅니다.\n3. 안드로이드 스튜디오에서 구글 맵스 설정Google Maps Android API를 사용하려면 Google Play Services 라이브러리를 설치해야합니다. \n안드로이드 스튜디오에서 SDK Manager에 들어가서 SDK Tools를 선택합니다. Google player services를 체크하고 OK 버튼을 눌러 설치합니다.이제 모듈 수준의 build.gradle에 의존성을 추가해줍니다.\n1234dependencies &#123;    implementation &#x27;com.google.android.gms:play-services-maps:17.0.1&#x27;    implementation &#x27;com.google.android.gms:play-services-location:18.0.0&#x27;&#125;\n\n4. 레이아웃에 구글 맵스 추가하기이제 구글 맵스(Google Maps)에서 서울을 표시해보겠습니다. 레이아웃에 다음과 같이 구글 맵스와 관련된 프래그먼트를 추가합니다.\n1234567891011121314151617&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;androidx.constraintlayout.widget.ConstraintLayout     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;fragment xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;        xmlns:tools=&quot;http://schemas.android.com/tools&quot;        tools:context=&quot;.MapsActivity&quot;        android:id=&quot;@+id/activity_main_fragment_map&quot;        android:layout_width=&quot;match_parent&quot;        android:layout_height=&quot;match_parent&quot;        android:name=&quot;com.google.android.gms.maps.SupportMapFragment&quot; /&gt;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;\n다음과 같이 코드를 작성합니다.\n12345678910111213141516class MainActivity : AppCompatActivity() &#123;    private lateinit var mMap: GoogleMap    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        val mapFragment: SuppoortMapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) as SupportMapFragment        mapFragment.getMapAsync(object : OnMapReadyCallback &#123;            override fun onMapReady(googleMap: GoogleMap) &#123;                // ...            &#125;        &#125;)    &#125;&#125;\nSuppoortMapFragment클래스의 getMapAsync()메소드는 구글 맵스와 관련된 프래그먼트를 비동기적으로 준비하고 onMapReady()를 호출합니다. 이때 onMapReady()메소드의 매개변수로 지도 데이터가 전달됩니다. \n위 코드는 다음과 같이 변경할 수도 있습니다. \n12345678910111213141516class MainActivity : AppCompatActivity(), OnMapReadyCallback &#123;    private lateinit var mMap: GoogleMap    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        val mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) as SupportMapFragment        mapFragment.getMapAsync(this)    &#125;    override fun onMapReady(googleMap: GoogleMap) &#123;        // ...    &#125;&#125;\n준비가 되면 실행할 코드를 onMapReady()에 서울의 위치를 보여주는 코드를 작성합니다.\n1234567891011121314151617class MainActivity : AppCompatActivity(), OnMapReadyCallback &#123;    private lateinit var mMap: GoogleMap    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        val mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) as SupportMapFragment        mapFragment.getMapAsync(this)    &#125;    override fun onMapReady(googleMap: GoogleMap) &#123;        mMap = googleMap        val seoul = LatLng(37.5665, 126.9780)        mMap.moveCamera(CameraUpdateFactory.newLatLng(seoul))    &#125;&#125;\n앱을 실행하면 서울 위치가 화면에 나옵니다.\n","dateCreated":"2020-05-01T01:00:00+09:00","dateModified":"2021-12-16T17:06:06+09:00","datePublished":"2020-05-01T01:00:00+09:00","description":"","headline":"[구글 지도(Google Maps)] (1) 구글 지도 띄우기","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"}</script>
+    <meta name="description" content="들어가며일곱 개의 포스트에 걸쳐 구글 지도(Google Maps)에 대해 알아보고 있습니다.  구글 지도 띄우기 지도 타입 변경하기 마커 보여주기 지도 확대와 축소 (줌-인과 줌-아웃) 지도에 내 위치 보여주기 내 위치로 카메라 이동하기 맵 컨트롤   1. SHA-1 인증키 발급Google Cloud Platform, Google Play, Google">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[구글 지도(Google Maps)] (1) 구글 지도 띄우기">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="들어가며일곱 개의 포스트에 걸쳐 구글 지도(Google Maps)에 대해 알아보고 있습니다.  구글 지도 띄우기 지도 타입 변경하기 마커 보여주기 지도 확대와 축소 (줌-인과 줌-아웃) 지도에 내 위치 보여주기 내 위치로 카메라 이동하기 맵 컨트롤   1. SHA-1 인증키 발급Google Cloud Platform, Google Play, Google">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/3.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/4.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/5.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/6.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/7.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/8.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/9.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/10.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/11.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/12.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/13.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/14.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/15.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/16.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/17.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/18.png">
+<meta property="article:published_time" content="2020-04-30T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-16T08:06:06.733Z">
+<meta property="article:author" content="yologger">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [구글 지도(Google Maps)] (1) 구글 지도 띄우기
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-05-01T01:00:00+09:00">
+	
+		    2020/05/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
+<ul>
+<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
+<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
+<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
+<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
+<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
+<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
+<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
+</ul>
+<hr>
+<h1 id="1-SHA-1-인증키-발급"><a href="#1-SHA-1-인증키-발급" class="headerlink" title="1. SHA-1 인증키 발급"></a>1. SHA-1 인증키 발급</h1><p><code>Google Cloud Platform</code>, <code>Google Play</code>, <code>Google Firebase</code> 등의 서비스를 사용하다보면 <code>SHA-1 인증키</code>가 필요한 경우가 많습니다. <code>SHA-1 인증키</code>는 안드로이드 스튜디오에서 아래와 같이 발급할 수 있습니다.</p>
+<p>우선 프로젝트를 열고 <code>[Gradle] &gt; [Task] &gt; [android] &gt; [signingReport]</code>를 클릭합니다.<br><img src="1.png"></p>
+<p>그럼 하단 로그에 다음과 같이 <code>SHA1 인증키</code>가 출력됩니다.<br><img src="2.png"></p>
+<h1 id="2-API-Key-발급"><a href="#2-API-Key-발급" class="headerlink" title="2. API Key 발급"></a>2. API Key 발급</h1><p><code>Google Maps API</code>를 사용하려면 <code>API Key</code>를 발급받아야 합니다. <a target="_blank" rel="noopener" href="https://cloud.google.com/">https://cloud.google.com/</a>에서 로그인하고 오른쪽 상단에 있는 콘솔 버튼을 눌러줍니다.<br><img src="3.png"></p>
+<p><code>API 및 서비스</code>에 들어갑니다.<br><img src="4.png"></p>
+<p>프로젝트를 하나도 추가하지 않았다면 다음과 같은 화면이 나옵니다. 오른쪽 <code>프로젝트 만들기</code>를 클릭합니다.<br><img src="5.png"></p>
+<p><code>프로젝트 이름</code>을 입력하고 <code>만들기</code>를 클릭합니다.<br><img src="6.png"></p>
+<p>프로젝트가 생성되었습니다. 왼쪽 사이드 바 메뉴에서 <code>[API 및 서비스] &gt; [대시보드]</code>로 들어갑니다<br><img src="7.png"></p>
+<p>상단 중앙의 <code>API 및 서비스 사용 설정</code>을 클릭합니다.<br><img src="8.png"></p>
+<p><code>Maps SDK for Android</code>를 선택합니다.<br><img src="9.png"></p>
+<p><code>사용</code> 버튼을 누릅니다.<br><img src="10.png"></p>
+<p>왼쪽 메뉴에서 <code>사용자 인증 정보</code>를 누르고 상단의 <code>사용자 인증 정보 만들기</code>를 클릭한 후 <code>API 키</code>를 선택합니다.<br><img src="11.png"></p>
+<p><code>키 제한</code>을 클릭합니다. <code>키 제한</code>은 실제 배포되는 앱에서 키가 무단으로 사용되는 것을 방지하기 위함입니다.<br><img src="12.png"></p>
+<p>키의 <code>이름</code>은 임의로 설정합니다.<br><img src="13.png"></p>
+<p>키를 <code>Android 앱</code>에서만 사용할 수 있도록 제한할 수 있습니다.<br><img src="14.png"></p>
+<p><code>Google Cloud Platform</code>은 여러 API를 제공합니다. 이 중에서 <code>안드로이드를 위한 맵 API</code>만 사용하도록 제한할 수도 있습니다.<br><img src="15.png"></p>
+<p>아래와 같이 <code>앱의 사용량</code>도 제한할 수 있습니다. 이때 항목 추가를 누르고 위 안드로이드 스튜디오 프로젝트에서 발급한 <code>SHA-1 인증키</code>와 <code>패키지 이름</code>을 입력합니다. 이후 <code>완료</code> 버튼을 누르고 하단의 <code>저장</code> 버튼을 누릅니다.<br><img src="16.png"></p>
+<h1 id="3-안드로이드-스튜디오에서-구글-맵스-설정"><a href="#3-안드로이드-스튜디오에서-구글-맵스-설정" class="headerlink" title="3. 안드로이드 스튜디오에서 구글 맵스 설정"></a>3. 안드로이드 스튜디오에서 구글 맵스 설정</h1><p><code>Google Maps Android API</code>를 사용하려면 <code>Google Play Services</code> 라이브러리를 설치해야합니다. </p>
+<p>안드로이드 스튜디오에서 <code>SDK Manager</code>에 들어가서 <code>SDK Tools</code>를 선택합니다. <code>Google player services</code>를 체크하고 <code>OK</code> 버튼을 눌러 설치합니다.<br><img src="17.png"><br>이제 모듈 수준의 <code>build.gradle</code>에 의존성을 추가해줍니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.gms:play-services-maps:17.0.1&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.gms:play-services-location:18.0.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="4-레이아웃에-구글-맵스-추가하기"><a href="#4-레이아웃에-구글-맵스-추가하기" class="headerlink" title="4. 레이아웃에 구글 맵스 추가하기"></a>4. 레이아웃에 구글 맵스 추가하기</h1><p>이제 <code>구글 맵스(Google Maps)</code>에서 서울을 표시해보겠습니다. 레이아웃에 다음과 같이 구글 맵스와 관련된 프래그먼트를 추가합니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">fragment</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">tools:context</span>=<span class="string">&quot;.MapsActivity&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_fragment_map&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;com.google.android.gms.maps.SupportMapFragment&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>다음과 같이 코드를 작성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment: SuppoortMapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">object</span> : OnMapReadyCallback &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>SuppoortMapFragment</code>클래스의 <code>getMapAsync()</code>메소드는 구글 맵스와 관련된 프래그먼트를 비동기적으로 준비하고 <code>onMapReady()</code>를 호출합니다. 이때 <code>onMapReady()</code>메소드의 매개변수로 지도 데이터가 전달됩니다. </p>
+<p>위 코드는 다음과 같이 변경할 수도 있습니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>준비가 되면 실행할 코드를 <code>onMapReady()</code>에 서울의 위치를 보여주는 코드를 작성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line">        <span class="keyword">val</span> seoul = LatLng(<span class="number">37.5665</span>, <span class="number">126.9780</span>)</span><br><span class="line">        mMap.moveCamera(CameraUpdateFactory.newLatLng(seoul))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>앱을 실행하면 서울 위치가 화면에 나옵니다.<br><img src="18.png"></p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/"
+                    data-tooltip="[구글 지도(Google Maps)] (2) 지도 타입 변경하기"
+                    aria-label="이전: [구글 지도(Google Maps)] (2) 지도 타입 변경하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/04/06/08_android/07_payment/20200406_iamport/"
+                    data-tooltip="[결제(Payment)] (6) PG결제 구현하기(아임포트)"
+                    aria-label="다음: [결제(Payment)] (6) PG결제 구현하기(아임포트)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/"
+                    data-tooltip="[구글 지도(Google Maps)] (2) 지도 타입 변경하기"
+                    aria-label="이전: [구글 지도(Google Maps)] (2) 지도 타입 변경하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/04/06/08_android/07_payment/20200406_iamport/"
+                    data-tooltip="[결제(Payment)] (6) PG결제 구현하기(아임포트)"
+                    aria-label="다음: [결제(Payment)] (6) PG결제 구현하기(아임포트)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
