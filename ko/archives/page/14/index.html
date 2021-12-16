@@ -354,6 +354,253 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/01/04/08_android/00_gradle/190804_properties/"
+                            aria-label=": [Android] Gradle - (4) 코드에서 환경변수 분리하기 - properties 파일"
+                        >
+                            [Android] Gradle - (4) 코드에서 환경변수 분리하기 - properties 파일
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-04T01:00:00+09:00">
+	
+		    2019/01/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="왜-환경변수를-코드에서-분리해야할까"><a href="#왜-환경변수를-코드에서-분리해야할까" class="headerlink" title="왜 환경변수를 코드에서 분리해야할까?"></a>왜 환경변수를 코드에서 분리해야할까?</h1><p>많은 어플리케이션이 Google, Facebook과 같은 SNS 계정을 통한 로그인을 지원합니다. 개발자는 SNS 로그인 API를 사용하기 위해 <code>키(Key)</code>를 발급받는데, 이를 소스코드에 포함시키면 여러 보안 이슈가 발생할 수 있습니다. </p>
+<p><code>properties 파일</code>을 사용하면 민감한 데이터를 코드에서 분리하여 이 파일에 저장할 수 있습니다.</p>
+<h1 id="properties-파일-만들기"><a href="#properties-파일-만들기" class="headerlink" title=".properties 파일 만들기"></a>.properties 파일 만들기</h1><p>프로젝트의 루트 디렉토리에 <code>config.properties</code>파일을 생성합니다.<br><img src="1.png"></p>
+<figure class="highlight groovy"><figcaption><span>config.properties</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CLIENT_ID=<span class="string">&quot;your_client_id&quot;</span></span><br><span class="line">CLIENT_SECRET=<span class="string">&quot;your_client_secret&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="모듈-수준의-build-gradle-설정하기"><a href="#모듈-수준의-build-gradle-설정하기" class="headerlink" title="모듈 수준의 build.gradle 설정하기"></a>모듈 수준의 build.gradle 설정하기</h1><p><code>build.gradle</code>에서 다음과 같이 <code>config.properties</code>파일을 읽어올 수 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> configPropertiesFile = rootProject.file(<span class="string">&quot;config.properties&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> configProperties = <span class="keyword">new</span> Properties()</span><br><span class="line">configProperties.load(<span class="keyword">new</span> FileInputStream(configPropertiesFile))</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>configProperties[&#39;your_key&#39;]</code>형태로 값을 읽어올 수 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> configPropertiesFile = rootProject.file(<span class="string">&quot;config.properties&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> configProperties = <span class="keyword">new</span> Properties()</span><br><span class="line">configProperties.load(<span class="keyword">new</span> FileInputStream(configPropertiesFile))</span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.example.simple_memo&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">        testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// for xml file</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_ID&#x27;</span>]</span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_SECRET&#x27;</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment">// for source file</span></span><br><span class="line">        buildConfigField(<span class="string">&quot;String&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_ID&#x27;</span>])</span><br><span class="line">        buildConfigField(<span class="string">&quot;String&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_SECRET&#x27;</span>])</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="소스코드에서-값을-사용하기"><a href="#소스코드에서-값을-사용하기" class="headerlink" title="소스코드에서 값을 사용하기"></a>소스코드에서 값을 사용하기</h1><p>이제 <code>소스 코드</code>에서 사용할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> clientId = BuildConfig.CLIENT_ID            <span class="comment">// your_client_id</span></span><br><span class="line">        <span class="keyword">val</span> clientSecret = BuildConfig.CLIENT_SECRET    <span class="comment">// your_client_secret</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="xml-파일에서-값을-사용하기"><a href="#xml-파일에서-값을-사용하기" class="headerlink" title="xml 파일에서 값을 사용하기"></a>xml 파일에서 값을 사용하기</h1><p><code>xml 파일</code>에서도 접근할 수 있습니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_ID&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_SECRET&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="gitignore파일에-추가하기"><a href="#gitignore파일에-추가하기" class="headerlink" title=".gitignore파일에 추가하기"></a>.gitignore파일에 추가하기</h1><p>보통 <code>.properties</code>파일처럼 민감한 데이터가 포함된 파일은 원격 저장소에 업로드하지 않습니다. <code>.gitignore</code>에 <code>config.properties</code>파일을 추가합시다.</p>
+<figure class="highlight groovy"><figcaption><span>.gitignore</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config.properties</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/04/08_android/00_gradle/190804_properties/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/04/06_spring/01_servlet_jsp/20190104_server_webserver_was/"
+                            aria-label=": [Servlet, JSP] Server, Web Server, WAS 차이점"
+                        >
+                            [Servlet, JSP] Server, Web Server, WAS 차이점
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-04T00:00:00+09:00">
+	
+		    2019/01/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h1><p><code>Server</code>는 Client에 정보나 서비스를 제공하는 컴퓨터 시스템이다. 서버에는 보통 Linux, Unix, Windows 운영체제가 탑재된다.<br><img src="1.png"></p>
+<h1 id="Web-Server"><a href="#Web-Server" class="headerlink" title="Web Server"></a>Web Server</h1><ul>
+<li><code>Web Server</code>는 웹 브라우저 같은 클라이언트로부터 HTTP 요청을 받아들이고 HTML 문서와 같은 웹 페이지를 반환하는 프로그램이다. </li>
+<li>Web Server의 대표적인 제품군에는 Apache, Nginx, IIS가 있다. </li>
+<li><code>Web Server</code>는 파일 시스템에 저장된 파일(HTML, CSS, JavaScript, 이미지, 파일 등)을 단순히 클라이언트에게 전달한다. 이를 <u>정적 컨텐츠</u>를 제공한다고 한다.</li>
+</ul>
+<p><img src="2.png"></p>
+<h1 id="WAS-Web-Application-Server"><a href="#WAS-Web-Application-Server" class="headerlink" title="WAS(Web Application Server)"></a>WAS(Web Application Server)</h1><p><code>WAS</code>는 데이터베이스, 파일 시스템, 네트워크 등에서 데이터를 읽어와 다양한 로직을 수행한 후 적절한 HTML 파일을 생성하여 클라이언트에게 전달한다. 이를 <u>동적 컨텐츠</u>를 제공한다고 한다.<br><img src="3.png"></p>
+<p>WAS의 대표적인 제품군에는 Apache Tomcat, Oracle WebLogic, IBM Websphere, Tmax JEUS, Red Hat Jboss가 있다. 제품군에 따라 다르지만 WAS는 크게 세 가지 요소로 구성된다.</p>
+<ul>
+<li><code>Web Container</code><ol>
+<li>JSP파일을 Servlet으로 변환한다.</li>
+<li>Servlet의 생성, 소멸 등의 생명주기를 관리한다.</li>
+<li>HttpServletRequest, HttpServletResponse의 생성, 소멸 등의 생명주기를 관리한다.</li>
+<li>Web Container는 <code>Servlet Container</code>라고도 불린다.</li>
+</ol>
+</li>
+<li><code>Web Server</code>: Web Container가 동적으로 생성한 웹 페이지를 Client에게 제공한다.</li>
+<li><code>EJB Container</code>: <ol>
+<li>EJB(Enterprise Java Bean)의 생명주기를 관리한다.</li>
+<li>EJB는 한국에서는 Spring Framework에 밀려서 잘 사용되지 않는다.</li>
+</ol>
+</li>
+</ul>
+<p>Oracle WebLogic, Red Hat Jboss 같은 제품군은 세 가지 요소를 모두 포함한다. 그러나 Apache Tomcat은 Web Server와 Web Container만을 포함한다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/04/06_spring/01_servlet_jsp/20190104_server_webserver_was/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/03/08_android/00_gradle/190803_buildConfig/"
+                            aria-label=": [Android] Gradle - (3) 코드에서 환경변수 분리하기 - BuildConfig"
+                        >
+                            [Android] Gradle - (3) 코드에서 환경변수 분리하기 - BuildConfig
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-03T01:00:00+09:00">
+	
+		    2019/01/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="BuildConfig"><a href="#BuildConfig" class="headerlink" title="BuildConfig"></a>BuildConfig</h1><p>안드로이드 시스템은 앱을 빌드할 때 여러가지 파일을 자동으로 생성합니다. 그 중 하나가 <code>BuildConfig</code>클래스입니다. 이 클래스에는 현재 빌드와 관련된 정보가 상수 형태로 정의되어 있으며, 코드에서도 직접 참조할 수 있습니다.</p>
+<h1 id="코드에서-BuildConfig에-접근하기"><a href="#코드에서-BuildConfig에-접근하기" class="headerlink" title="코드에서 BuildConfig에 접근하기"></a>코드에서 BuildConfig에 접근하기</h1><p>자동으로 생성된 <code>BuildConfig</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight java"><figcaption><span>BuildConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Automatically generated file. DO NOT MODIFY</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BuildConfig</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> DEBUG = Boolean.parseBoolean(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String APPLICATION_ID = <span class="string">&quot;com.yologger.example&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String BUILD_TYPE = <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VERSION_CODE = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String VERSION_NAME = <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>BuildConfig</code>클래스에 정의된 상수는 코드에서 다음과 같이 접근할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> applicationId = BuildConfig.APPLICATION_ID  <span class="comment">// &quot;com.yologger.example&quot;</span></span><br><span class="line">        <span class="keyword">val</span> versionCode = BuildConfig.VERSION_CODE      <span class="comment">// 1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>그렇다면 이 상수는 어디에 정의되어 있을까요? 바로 모듈 수준의 <code>build.gradle</code>입니다. 이 파일의 <code>defaultConfig 섹션</code>에 상수가 정의되어 있습니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.example&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="상수를-직접-정의하고-사용하기"><a href="#상수를-직접-정의하고-사용하기" class="headerlink" title="상수를 직접 정의하고 사용하기"></a>상수를 직접 정의하고 사용하기</h1><p><code>buildConfigField</code>를 사용하면 상수를 직접 정의하고 코드에서 참조할 수도 있습니다. 모듈 수준의 <code>build.gradle</code>에 <code>buildConfigField (&quot;DATA_TYPE&quot;, &quot;KEY&quot;, &quot;VALUE&quot;)</code> 형태로 선언하면 됩니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.yologger.example&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">        </span><br><span class="line">        buildConfigField (<span class="string">&quot;String&quot;</span>, <span class="string">&quot;AUTH_API_KEY&quot;</span>, <span class="string">&#x27;&quot;your_auth_api_key&quot;&#x27;</span>)</span><br><span class="line">        buildConfigField (<span class="string">&quot;String&quot;</span>, <span class="string">&quot;AUTH_API_URL&quot;</span>, <span class="string">&#x27;&quot;your_auth_api_url&quot;&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<div class="alert warning icon"><p>추가 후 <code>Gradle Sync</code>를 해야만 BuildConfig 클래스가 생성됩니다.</p>
+</div>
+
+<div class="alert warning icon"><p>문자열의 경우 작은 따옴표로 감싸주어야 합니다.</p>
+</div>
+
+<p>새로 생성된 <code>BuildConfig</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight java"><figcaption><span>BuildConfig.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.simple_memo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BuildConfig</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> DEBUG = Boolean.parseBoolean(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String APPLICATION_ID = <span class="string">&quot;com.yologger.example&quot;</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String BUILD_TYPE = <span class="string">&quot;debug&quot;</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VERSION_CODE = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String VERSION_NAME = <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">  <span class="comment">// Field from default config.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTH_API_KEY = <span class="string">&quot;your_auth_api_key&quot;</span>;</span><br><span class="line">  <span class="comment">// Field from default config.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTH_API_URL = <span class="string">&quot;your_auth_api_url&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>생성된 상수에 접근해봅시다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> apiKey = BuildConfig.AUTH_API_KEY       <span class="comment">// your_auth_api_key</span></span><br><span class="line">        <span class="keyword">val</span> apiUrl = BuildConfig.AUTH_API_URL       <span class="comment">// your_auth_api_url</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="상수를-xml-파일에서-사용하기"><a href="#상수를-xml-파일에서-사용하기" class="headerlink" title="상수를 xml 파일에서 사용하기"></a>상수를 xml 파일에서 사용하기</h1><p><code>xml 파일</code>에서 사용할 상수는 <code>resValue</code>를 사용하여 선언합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="comment">// buildConfigField (&quot;String&quot;, &quot;AUTH_API_KEY&quot;, &#x27;&quot;your_auth_api_key&quot;&#x27;)</span></span><br><span class="line">        <span class="comment">// buildConfigField (&quot;String&quot;, &quot;AUTH_API_URL&quot;, &#x27;&quot;your_auth_api_url&quot;&#x27;)</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, <span class="string">&quot;your_client_id&quot;</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, <span class="string">&quot;your_client_secret&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 사용할 수 있습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_ID&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_SECRET&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/03/08_android/00_gradle/190803_buildConfig/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/01/02/08_android/00_gradle/190802_module/"
                             aria-label=": [Android] Gradle - (2) 모듈(Module)"
                         >
@@ -874,271 +1121,6 @@
                         <p>
                             <a
                                 href="/ko/2018/09/17/05_kotlin/180917_destructuring_assignment/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/09/16/05_kotlin/180916_type_alias/"
-                            aria-label=": [Kotlin] 타입 별칭(Type Alias)"
-                        >
-                            [Kotlin] 타입 별칭(Type Alias)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-09-16T00:00:00+09:00">
-	
-		    2018/09/16
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="타입-별칭"><a href="#타입-별칭" class="headerlink" title="타입 별칭"></a>타입 별칭</h1><p>타입 별칭을 사용하면 타입의 이름이 길 때 간단한 이름으로 대체할 수 있습니다. 타입 별칭를 정의할 때는 키워드<code>typealias</code>를 사용합니다. </p>
-<p>기본자료형에 타입 별칭를 적용한 예제는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typealias</span> Number = <span class="built_in">Int</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> number: Number = <span class="number">3</span></span><br></pre></td></tr></table></figure>
-<p>클래스에 타입 별칭를 적용한 예제는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">val</span> name: String)</span><br><span class="line"></span><br><span class="line"><span class="keyword">typealias</span> Man = Person</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> man: Man = Person(<span class="string">&quot;Harry&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>타입 별칭은 타입에 제네릭 타입 파라미터가 포함됐을 때 유용하게 사용할 수 있습니다. 아래 코드를 살펴봅시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> users: MutableList&lt;MutableMap&lt;String, String&gt;&gt; = mutableListOf(</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;Paul&quot;</span>),</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;John&quot;</span>),</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;Jenny&quot;</span>),</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;Park&quot;</span>),</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;Lee&quot;</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-<p>변수 user의 데이터 타입은 <code>MutableList&lt;MutableMap&lt;String, String&gt;&gt;</code>입니다. 이를 타입 별칭를 사용하여 <code>User</code>로 축약해보겠습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typealias</span> Users = MutableList&lt;MutableMap&lt;String, String&gt;&gt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> users: Users = mutableListOf(</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;Paul&quot;</span>),</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;John&quot;</span>),</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;Jenny&quot;</span>),</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;Park&quot;</span>),</span><br><span class="line">        mutableMapOf(<span class="string">&quot;name&quot;</span> to <span class="string">&quot;Lee&quot;</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/09/16/05_kotlin/180916_type_alias/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/09/15/05_kotlin/180915_generic/"
-                            aria-label=": [Kotlin] 제너릭(Generic)"
-                        >
-                            [Kotlin] 제너릭(Generic)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-09-15T00:00:00+09:00">
-	
-		    2018/09/15
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="제네릭"><a href="#제네릭" class="headerlink" title="제네릭"></a>제네릭</h1><p><code>제네릭(Generic)</code>은 <u>클래스나 메서드 내부에서 사용할 데이터의 자료형을 외부에서 설정</u>하는 것입니다. 이를 통해 컴파일 단계에서 메서드나 클래스에 사용되는 다양한 데이터의 <code>타입 체크</code>를 가능하게 합니다.</p>
-<h1 id="제네릭-클래스"><a href="#제네릭-클래스" class="headerlink" title="제네릭 클래스"></a>제네릭 클래스</h1><p>제네릭 클래스를 정의할 땐 <code>&lt;&gt;</code>안에 임의의 문자를 명시합니다. 이 문자를 <code>타입 파라미터(Type Parameter)</code>라고 합니다. 타입 파라미터는 관습적으로 대문자 <code>E(Element)</code>, <code>T(Type)</code>, <code>K(Key)</code>, <code>V(Value)</code>를 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Box</span>&lt;<span class="type">T</span>&gt; <span class="keyword">constructor</span></span>(<span class="keyword">val</span> item: T) </span><br></pre></td></tr></table></figure>
-<p>이렇게 정의된 제네릭 클래스는 다음과 같이 사용합니다. 타입 파리미터에는 어떠한 데이터 타입도 들어갈 수 있습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> box1 = Box&lt;<span class="built_in">Int</span>&gt;(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">var</span> box2 = Box&lt;String&gt;(<span class="string">&quot;Hello World.&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> box3 = Box&lt;Person&gt;(Person(<span class="string">&quot;Paul&quot;</span>))</span><br></pre></td></tr></table></figure>
-<p>아래 코드를 살펴봅시다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Box</span>&lt;<span class="type">T</span>&gt; <span class="keyword">constructor</span></span>(<span class="keyword">val</span> item: T)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> box = Box&lt;<span class="built_in">Int</span>&gt;(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<p>이 코드를 컴파일하면 아래와 같은 코드로 변환됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Box</span> <span class="keyword">constructor</span></span>(<span class="keyword">val</span> item: <span class="built_in">Int</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> box = Box(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<p>여러 개의 타입 파라미터를 사용할 수도 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Box</span>&lt;<span class="type">T, U</span>&gt; <span class="keyword">constructor</span></span>(<span class="keyword">val</span> item1: T, <span class="keyword">val</span> item2: U)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> box1 = Box&lt;<span class="built_in">Int</span>, String&gt;(<span class="number">1</span>, <span class="string">&quot;Hello World.&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> box2 = Box&lt;String, <span class="built_in">Double</span>&gt;(<span class="string">&quot;Hello World.&quot;</span>, <span class="number">3.4</span>)</span><br><span class="line"><span class="keyword">var</span> box3 = Box&lt;Person, Phone&gt;(Person(<span class="string">&quot;Paul&quot;</span>), Phone(<span class="string">&quot;Apple&quot;</span>))</span><br></pre></td></tr></table></figure>
-
-
-<h1 id="제네릭-함수"><a href="#제네릭-함수" class="headerlink" title="제네릭 함수"></a>제네릭 함수</h1><p>제네릭은 클래스 뿐만 아니라 함수에도 사용할 수 있습니다. </p>
-<h3 id="1-함수의-파라미터"><a href="#1-함수의-파라미터" class="headerlink" title="(1) 함수의 파라미터"></a>(1) 함수의 파라미터</h3><p>우선 함수에서 제네릭을 사용할 땐 키워드 <strong>fun</strong>과 <strong>함수명</strong> 사이에 <code>타입 파라미터</code>를 명시합니다.  </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">printElement</span><span class="params">(element: <span class="type">T</span>)</span></span> &#123;</span><br><span class="line">    println(<span class="string">&quot;Element: <span class="subst">$&#123;element.toString()&#125;</span>&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">printElement(<span class="number">1</span>)</span><br><span class="line">printElement(<span class="string">&quot;Hello World&quot;</span>)</span><br><span class="line">printElement(Person())</span><br></pre></td></tr></table></figure>
-<h3 id="2-반환-값"><a href="#2-반환-값" class="headerlink" title="(2) 반환 값"></a>(2) 반환 값</h3><p>함수의 반환 값에도 <code>타입 파라미터</code>를 사용할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">getElement</span><span class="params">(element: <span class="type">T</span>)</span></span>: T &#123;</span><br><span class="line">    println(<span class="string">&quot;Element: <span class="subst">$&#123;element.toString()&#125;</span>&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> element1 = getElement(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">var</span> element2 = getElement(<span class="string">&quot;Hello World&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> element3 = getElement(Person())</span><br></pre></td></tr></table></figure>
-
-<h1 id="타입-제한"><a href="#타입-제한" class="headerlink" title="타입 제한"></a>타입 제한</h1><p><code>타입 제한</code>을 사용하면 타입 파라미터에 들어올 실제 값의 자료형을 제한할 수 있습니다. 타입 제한은 <code>&lt;T: Superclass&gt;</code> 형태로 사용합니다. 아래 코드를 살펴봅시다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>&lt;<span class="type">T: Phone</span>&gt; <span class="keyword">constructor</span></span>(<span class="keyword">val</span> phone: T)</span><br></pre></td></tr></table></figure>
-<p><code>&lt;T: Phone&gt;</code>가 바로 타입을 제한하는 코드입니다. 타입 파리미터 <code>T</code>에는 <code>Phone</code>클래스와 <code>Phone</code>클래스를 상속받는 클래스만 올 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">Phone</span></span>()</span><br><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">Galaxy</span></span>(): Phone() &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">Laptop</span></span>()</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person1 = Person&lt;Phone&gt;(Phone())    <span class="comment">// Success</span></span><br><span class="line"><span class="keyword">var</span> person2 = Person&lt;Galaxy&gt;(Galaxy())  <span class="comment">// Success</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> person3 = Person&lt;Laptop&gt;(Laptop())  <span class="comment">// Error</span></span><br></pre></td></tr></table></figure>
-
-<p>키워드 <code>where</code>를 사용해도 <code>타입 파라미터</code>에 실제로 오는 자료형을 제한할 수 있습니다. 아래 코드를 살펴봅시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">getElement</span><span class="params">(element: <span class="type">T</span>)</span></span>: T <span class="keyword">where</span> T: <span class="built_in">Int</span> &#123;</span><br><span class="line">    println(<span class="string">&quot;Element: <span class="subst">$&#123;element.toString()&#125;</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> element1 = getElement(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">var</span> element2 = getElement(<span class="number">3.14</span>) <span class="comment">// Error</span></span><br><span class="line"><span class="keyword">var</span> element3 = getElement(<span class="string">&quot;Hello World&quot;</span>)    <span class="comment">// Error</span></span><br></pre></td></tr></table></figure>
-<p><code>where T: Int</code>를 통해 타입 파라미터 <code>T</code>에 올 수 있는 데이터의 자료형을 <code>Int</code>로 제한하고 있습니다.</p>
-<h1 id="in"><a href="#in" class="headerlink" title="in"></a>in</h1><p>키워드<code>in</code>은 자바 제네릭의 <code>super</code>와 유사합니다. 키워드<code>in</code>은 <u>제네릭의 타입 파라미터를 특정 클래스와 그 클래스의 <strong>조상 클래스</strong>로 제한</u>합니다.</p>
-<p>아래 예제를 살펴봅시다. <code>Programmer</code>클래스는 <code>Person</code>를 상속하고 <code>AppProgrammer</code>는 <code>Programmer</code>를 상속하고 있습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">var</span> name: String)</span><br><span class="line"></span><br><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">Programmer</span> <span class="keyword">constructor</span></span>(name: String, <span class="keyword">var</span> company: String) : Person(name)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AppProgrammer</span> <span class="keyword">constructor</span></span>(name: String, company: String, <span class="keyword">var</span> field: String) : Programmer(name, company)</span><br></pre></td></tr></table></figure>
-<p>이제 아래 코드를 살펴봅시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printArrayList</span><span class="params">(arrayList: <span class="type">ArrayList</span>&lt;<span class="type">in</span> <span class="type">Programmer</span>&gt;)</span></span> &#123;</span><br><span class="line">    println(arrayList.toString())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>&lt;in Programmer&gt;</code>를 통해 <code>Programmer</code>와 그 부모 클래스인 <code>Person</code>클래스만 들어올 수 있도록 하고 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> people = arrayListOf&lt;Person&gt;()</span><br><span class="line">printArrayList(people)          <span class="comment">// Success</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> people = arrayListOf&lt;Programmer&gt;()</span><br><span class="line">printArrayList(programmers)     <span class="comment">// Success</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> people = arrayListOf&lt;AppProgrammer&gt;()</span><br><span class="line">printArrayList(appProgrammer)   <span class="comment">// Error</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="out"><a href="#out" class="headerlink" title="out"></a>out</h1><p>키워드<code>out</code>은 Java 제너릭의 <code>extends</code>와 유사합니다. 키워드<code>out</code>는 <u>타입 파라미터의 실제 타입을 특정 클래스와 특정 클래스의 <strong>자손 클래스</strong></u>로 제한합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">var</span> name: String)</span><br><span class="line"></span><br><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">Programmer</span> <span class="keyword">constructor</span></span>(name: String, <span class="keyword">var</span> company: String) : Person(name)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AppProgrammer</span> <span class="keyword">constructor</span></span>(name: String, company: String, <span class="keyword">var</span> field: String) : Programmer(name, company)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printArrayList</span><span class="params">(arrayList: <span class="type">ArrayList</span>&lt;<span class="type">out</span> <span class="type">Programmer</span>&gt;)</span></span> &#123;</span><br><span class="line">    println(arrayList.toString())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> people = arrayListOf&lt;Person&gt;()</span><br><span class="line">printArrayList(people)          <span class="comment">// Error</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> people = arrayListOf&lt;Prograammer&gt;()</span><br><span class="line">printArrayList(programmers)     <span class="comment">// Success</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> people = arrayListOf&lt;AppProgrammer&gt;()</span><br><span class="line">printArrayList(appProgrammer)   <span class="comment">// Success</span></span><br></pre></td></tr></table></figure>
-
-
-<h1 id="타입-소거"><a href="#타입-소거" class="headerlink" title="타입 소거"></a>타입 소거</h1><p>제너릭의 타입 파라미터는 컴파일 타임에 존재하지만 런타임에는 접근할 수 없습니다. 바로 타입 소거 때문입니다. 다음 예제를 살펴봅시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">printType</span><span class="params">(value: <span class="type">T</span>)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">when</span> (T::<span class="class"><span class="keyword">class</span>) </span>&#123;   <span class="comment">// Error, Cannot use &#x27;T&#x27; as reified type parameter. Use a class instead.</span></span><br><span class="line">        String::<span class="class"><span class="keyword">class</span> -&gt; </span>&#123;</span><br><span class="line">            print(<span class="string">&quot;value is String type.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">Int</span>::<span class="class"><span class="keyword">class</span> -&gt; </span>&#123;</span><br><span class="line">            print(<span class="string">&quot;value is Int type.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> name: String = <span class="string">&quot;Paul&quot;</span></span><br><span class="line">printType&lt;String&gt;(name)</span><br></pre></td></tr></table></figure>
-<p>위 코드는 <code>T:class</code> 형태로 클래스 타입을 읽으려 하고있습니다. 그러나 이 코드를 컴파일하면 에러가 발생합니다. 타입 파라미터인 <code>T</code>는 런타임에 접근할 수 없기 때문입니다. 따라서 보통 다음과 같이 별도의 인자로 클래스 타입을 전달하여 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T: Any&gt;</span> <span class="title">printType</span><span class="params">(value: <span class="type">T</span>, classType: <span class="type">KClass</span>&lt;<span class="type">T</span>&gt;)</span></span> &#123;</span><br><span class="line">    <span class="keyword">when</span> (classType) &#123;</span><br><span class="line">        String::<span class="class"><span class="keyword">class</span> -&gt; </span>&#123;</span><br><span class="line">            print(<span class="string">&quot;value is String type.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">Int</span>::<span class="class"><span class="keyword">class</span> -&gt; </span>&#123;</span><br><span class="line">            print(<span class="string">&quot;value is Int type.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> name: String = <span class="string">&quot;Paul&quot;</span></span><br><span class="line">printType&lt;String&gt;(name, String::<span class="class"><span class="keyword">class</span>)</span></span><br></pre></td></tr></table></figure>
-<p>하지만 키워드 <code>reified</code>를 타입 파라미터 앞에 붙여주고 <code>inline</code>함수 형태로 사용하면 <code>Kclass</code>를 인자로 전달할 필요 없이 런타임에 타입 <code>T</code>에 접근할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T: Any&gt;</span> <span class="title">printType</span><span class="params">(value: <span class="type">T</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">when</span> (T::<span class="class"><span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        String::<span class="class"><span class="keyword">class</span> -&gt; </span>&#123;</span><br><span class="line">            print(<span class="string">&quot;value is String type.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">Int</span>::<span class="class"><span class="keyword">class</span> -&gt; </span>&#123;</span><br><span class="line">            print(<span class="string">&quot;value is Int type.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> name: String = <span class="string">&quot;Paul&quot;</span></span><br><span class="line">printType&lt;String&gt;(name)</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/09/15/05_kotlin/180915_generic/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/09/14/05_kotlin/180914_inline_function/"
-                            aria-label=": [Kotlin] 인라인 함수(Inline Function)와 noinline, crossline"
-                        >
-                            [Kotlin] 인라인 함수(Inline Function)와 noinline, crossline
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-09-14T00:00:00+09:00">
-	
-		    2018/09/14
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="인라인-함수"><a href="#인라인-함수" class="headerlink" title="인라인 함수"></a>인라인 함수</h1><p>인라인 함수를 사용하면 람다를 사용했을 때 무의미한 객체 생성을 막고 성능을 향상시킬 수 있습니다.</p>
-<p>우선 Kotlin 파일을 컴파일하면 Java이 되는데, 함수 앞에 키워드 <code>inline</code>을 붙이면 함수를 호출하는 곳에 함수의 몸체를 그대로 복사합니다. 우선 <code>inline</code>을 사용하지 않은 일반 함수 예문을 보겠습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doSomething</span><span class="params">()</span></span> &#123;</span><br><span class="line">    println(<span class="string">&quot;doSomething start&quot;</span>)</span><br><span class="line">    doSomethingElse()</span><br><span class="line">    println(<span class="string">&quot;doSomething end&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doSomethingElse</span><span class="params">()</span></span> &#123;</span><br><span class="line">    println(<span class="string">&quot;doSomethingElse&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>위 코드를 Java로 변환하면 아래와 같은 코드가 나옵니다. </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   System.out.print(<span class="string">&quot;doSomething start&quot;</span>);</span><br><span class="line">   <span class="comment">// doSomethingElse()를 호출</span></span><br><span class="line">   doSomethingElse();</span><br><span class="line">   System.out.print(<span class="string">&quot;doSomething end&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomethingElse</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   System.out.print(<span class="string">&quot;doSomethingElse&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>그럼 키워드 <code>inline</code>를 붙이면 어떤 일이 발생할까요? </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doSomething</span><span class="params">()</span></span> &#123;</span><br><span class="line">    println(<span class="string">&quot;doSomething start&quot;</span>)</span><br><span class="line">    doSomethingElse()</span><br><span class="line">    println(<span class="string">&quot;doSomething end&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">doSomethingElse</span><span class="params">()</span></span> &#123;</span><br><span class="line">    println(<span class="string">&quot;doSomethingElse&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>아래 코드처럼 <code>doSomething()</code>메소드의 몸체를 그대로 복사하고 있습니다. </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   System.out.print(<span class="string">&quot;doSomething start&quot;</span>);</span><br><span class="line">   <span class="comment">// 그대로 복사</span></span><br><span class="line">   System.out.print(<span class="string">&quot;doSomethingElse&quot;</span>);</span><br><span class="line">   System.out.print(<span class="string">&quot;doSomething end&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomethingElse</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   System.out.print(<span class="string">&quot;doSomethingElse&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>그렇다면 <code>inline 함수</code>는 왜 쓰는걸까요?</p>
-<h1 id="Runtime-Penalties"><a href="#Runtime-Penalties" class="headerlink" title="Runtime Penalties"></a>Runtime Penalties</h1><p>Kotlin에서는 함수를 함수의 인자로 전달할 때 문제가 발생합니다. 함수를 함수의 인자로 전달하면 추가적인 메모리 할당이 발생하기 때문입니다. </p>
-<p>우선 아래 Kotlin 코드를 살펴봅시다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">someMethod</span><span class="params">(a: <span class="type">Int</span>, func: () -&gt; <span class="type">Unit</span>)</span></span>:<span class="built_in">Int</span> &#123;</span><br><span class="line">    func()</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span>*a</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">(args: <span class="type">Array</span>&lt;<span class="type">String</span>&gt;)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> result = someMethod(<span class="number">2</span>, &#123;</span><br><span class="line">        println(<span class="string">&quot;Just some dummy function&quot;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">    println(result)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>위 코드를 아래와 같이 Java로 변환하면 <code>someMethod()</code>메소드를 호출하기 위해 객체를 생성합니다. </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">InlineFunctions</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> InlineFunctions INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">static</span> &#123;</span><br><span class="line">      <span class="comment">// InlineFunctions()라는 객체를 생성</span></span><br><span class="line">      InlineFunctions var0 = <span class="keyword">new</span> InlineFunctions();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">someMethod</span><span class="params">(<span class="keyword">int</span> a, <span class="meta">@NotNull</span> Function0 func)</span> </span>&#123;</span><br><span class="line">      func.invoke();</span><br><span class="line">      <span class="keyword">return</span> <span class="number">2</span> * a;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(<span class="meta">@NotNull</span> String[] args)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// 생성한 객체에서 메소드를 호출</span></span><br><span class="line">      <span class="keyword">int</span> result = INSTANCE.someMethod(<span class="number">2</span>, (Function0)<span class="keyword">null</span>.INSTANCE);</span><br><span class="line">      System.out.println(result);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>객체를 생성한다는 것은 메모리를 그만큼 사용한다는 것입니다. 만약 이 함수를 열 번 호출하면 열 개의 객체가 생성되며, 이러한 부분이 성능을 떨어뜨릴 수 있습니다. </p>
-<p>이제 함수 앞에 키워드<code>inline</code>을 붙여보겠습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">someMethod</span><span class="params">(a: <span class="type">Int</span>, func: () -&gt; <span class="type">Unit</span>)</span></span>:<span class="built_in">Int</span> &#123;</span><br><span class="line">    func()</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span>*a</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>위 코드를 컴파일하면 객체를 생성하지 않고 코드 자체를 호출하는 부분으로 복사합니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">InlineFunctions</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(<span class="meta">@NotNull</span> String[] args)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// 객체를 생성하지 않고 코드 자체를 복사    </span></span><br><span class="line">      <span class="keyword">int</span> a = <span class="number">2</span>;</span><br><span class="line">      <span class="keyword">int</span> var5 = <span class="keyword">false</span>;</span><br><span class="line">      String var6 = <span class="string">&quot;Just some dummy function&quot;</span>;</span><br><span class="line">      System.out.println(var6);</span><br><span class="line">      <span class="keyword">int</span> result = <span class="number">2</span> * a;</span><br><span class="line">      System.out.println(result);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이처럼 <code>inline 함수</code>를 사용하면 메모리 성능을 향상시킬 수 있습니다. 하지만 코드 양이 많은 함수를 <code>inline 함수</code>로 사용하면, 컴파일된 코드의 양도 많아질 수 있습니다. 따라서 <code>inline 함수</code>는 1~3줄 정도의 함수에 사용하는 것을 권장합니다.</p>
-<h1 id="주의할-점"><a href="#주의할-점" class="headerlink" title="주의할 점"></a>주의할 점</h1><p><code>inline 함수</code>는 내부적으로 코드를 복사하기 때문에, 인자로 전달받은 함수를 다른 함수의 인자로 전달하거나 다시 참조할 수 없습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">newMethod</span><span class="params">(a: <span class="type">Int</span>, func1: () -&gt; <span class="type">Unit</span>, func2: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 인자로 전달받은 func1() 함수를 다시 호출</span></span><br><span class="line">    func1()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 인자로 전달받은 func2() 함수를 다른 함수의 인자로 다시 전달</span></span><br><span class="line">    someMethod(<span class="number">10</span>, func2)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">(args: <span class="type">Array</span>&lt;<span class="type">String</span>&gt;)</span></span> &#123;</span><br><span class="line">    newMethod(</span><br><span class="line">        <span class="number">2</span>, </span><br><span class="line">        &#123; println(<span class="string">&quot;Just some dummy function&quot;</span> ) &#125;,</span><br><span class="line">        &#123; println(<span class="string">&quot;can&#x27;t pass function in inline functions&quot;</span>) &#125;</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>위 코드는 다음과 같은 컴파일 에러를 발생시킵니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error:(9, 24) Kotlin: Illegal usage of inline-parameter &#x27;func2&#x27; in &#x27;public final inline fun newMethod(a: Int, func: () -&gt; Unit, func2: () -&gt; Unit): Unit defined in example.InlineFunctions&#x27;. Add &#x27;noinline&#x27; modifier to the parameter declaration</span><br></pre></td></tr></table></figure>
-<h1 id="noinline"><a href="#noinline" class="headerlink" title="noinline"></a>noinline</h1><p>그럼 위 예제에서 <code>func2()</code>만 접근이 가능하고 <code>func2()</code>함수만 다른 함수의 인자로 전달되도록 할 수는 없을까요? 바로 이러한 경우 키워드 <code>noinline</code>를 사용합니다. 키워드 <code>noinline</code>붙은 키워드는 컴파일 시 일반 함수와 동일하게 동작합니다. 따라서 다시 함수에 접근하거나 다른 함수의 인자로 전달할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">newMethod</span><span class="params">(a: <span class="type">Int</span>, func1: () -&gt; <span class="type">Unit</span>, <span class="keyword">noinline</span> func2: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    func1()</span><br><span class="line">    someMethod(<span class="number">10</span>, func2)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@JvmStatic</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">(args: <span class="type">Array</span>&lt;<span class="type">String</span>&gt;)</span></span> &#123;</span><br><span class="line">    newMethod(<span class="number">2</span>, &#123;println(<span class="string">&quot;Just some dummy function&quot;</span>)&#125;,</span><br><span class="line">            &#123;println(<span class="string">&quot;can&#x27;t pass function in inline functions&quot;</span>)&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h1 id="crossline"><a href="#crossline" class="headerlink" title="crossline"></a>crossline</h1><p>키워드 <code>crossline</code>을 이해하려면 우선 <code>non-local returns</code>에 대해 알아야 합니다. 아래 Kotlin 코드를 살펴봅시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doSomething</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="string">&quot;doSomething start&quot;</span>)</span><br><span class="line">    doSomethingElse &#123;</span><br><span class="line">        print(<span class="string">&quot;doSomethingElse&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 함수의 인자로 전달된 함수 내부에서 return문을 호출하고 있습니다. </span></span><br><span class="line">        <span class="keyword">return</span> </span><br><span class="line">    &#125;</span><br><span class="line">    print(<span class="string">&quot;doSomething end&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">doSomethingElse</span><span class="params">(abc: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    abc()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 위 코드를 디컴파일하면 다음과 같은 Java 코드를 확인할 수 있습니다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    System.out.print(<span class="string">&quot;doSomething start&quot;</span>);</span><br><span class="line">    System.out.print(<span class="string">&quot;doSomethingElse&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>디컴파일된 코드에 <code>System.out.print(&quot;doSomething end&quot;)</code>가  포함되지 않았다는 것을 확인할 수 있습니다. 함수의 인자로 전달된 함수 내부에서 <code>return</code>을 호출했으므로 <code>doSomething()</code>함수 자체가 종료된 것입니다. 이러한 현상을 <code>non-local returns</code>라고 합니다.</p>
-<p><code>crossline</code>은 이러한 문제를 해결할 때 사용합니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doSomething</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="string">&quot;doSomething start&quot;</span>)</span><br><span class="line">    doSomethingElse &#123;</span><br><span class="line">        print(<span class="string">&quot;doSomethingElse&quot;</span>)</span><br><span class="line">        <span class="comment">// 이 곳에서 return을 호출할 수 없게 합니다.</span></span><br><span class="line">    &#125;</span><br><span class="line">    print(<span class="string">&quot;doSomething end&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">doSomethingElse</span><span class="params">(<span class="keyword">crossinline</span> abc: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    abc()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/09/14/05_kotlin/180914_inline_function/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

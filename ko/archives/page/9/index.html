@@ -354,6 +354,238 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/06/26/08_android/01_android_platform/190626_thread/"
+                            aria-label=": [Android] 스레드(Thread)"
+                        >
+                            [Android] 스레드(Thread)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-26T01:00:00+09:00">
+	
+		    2019/06/26
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="스레드란"><a href="#스레드란" class="headerlink" title="스레드란?"></a>스레드란?</h1><p><code>스레드(Thread)</code>는 <a href="/ko/2019/06/25/08_android/01_android_platform/190625_process/">프로세스(Process)</a> 내에서 실행되는 흐름을 말합니다. 일반적으로 하나의 프로세스에는 하나의 기본 스레드가 존재합니다. 이를 <code>매인 스레드</code>라고 합니다.<br><img src="1.png"><br>이제 하나의 스레드에서 두 개의 작업을 순차적으로 수행한다고 가정해봅시다.<br><img src="2.png"><br><code>Job #1</code>은 매우 긴 시간이 소요되는 작업입니다. 반면 <code>Job #2</code>는 상대적으로 짧은 시간이 소요되는 작업입니다. 그러나 <code>Job #1</code>이 먼저 실행되었으므로 <code>Job #2</code>는 <code>Job #1</code>이 끝날 때 까지 기다려야합니다. </p>
+<p>이제 스레드를 한 개 더 생성해보겠습니다.</p>
+<p><img src="3.png"><br>이처럼 스레드를 여러 개 추가하여 프로세스를 병렬 처리하는 환경을 <code>멀티 스레드</code> 환경이라고 합니다. </p>
+<h1 id="안드로이드에서의-스레드"><a href="#안드로이드에서의-스레드" class="headerlink" title="안드로이드에서의 스레드"></a>안드로이드에서의 스레드</h1><p>안드로이드 애플리케이션이 처음 시작되면, 안드로이드 운영체제는 하나의 프로세스와 하나의 매인 스레드를 생성합니다. 애플리케이션의 모든 컴포넌트는 매인 스레드 내에서 실행됩니다. </p>
+<h1 id="매인-스레드의-역할"><a href="#매인-스레드의-역할" class="headerlink" title="매인 스레드의 역할"></a>매인 스레드의 역할</h1><p><code>매인 스레드</code>의 주된 역할은 사용자 인터페이스를 처리하는 것입니다. 이러한 이유로 안드로이드에서의 메인 스레드는 <code>UI 스레드</code>라고도 합니다. </p>
+<p>매인 스레드에서 시간이 오래 걸리는 작업을 수행하면, 그 작업이 끝날 때까지 애플리캐이션 전체가 멈춘 것처럼 보이게 됩니다.</p>
+<p>예제를 살펴보겠습니다. <code>TOAST</code>버튼을 누르면 토스트 매시지를 보여줍니다. 예제는 <code>STOP</code>버튼을 누르면 매인 스래드를 10초 동안 정지합니다.<br><img src="4.png"><br>코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> buttonToast: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_toast) &#125;</span><br><span class="line">    <span class="keyword">val</span> buttonStop: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_stop) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        buttonToast.setOnClickListener &#123;</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span>, <span class="string">&quot;Hello World&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        buttonStop.setOnClickListener &#123;</span><br><span class="line">            Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>STOP</code>버튼을 누르면 안드로이드 시스템이 10초 동안 정지합니다. 이 때 <code>TOAST</code>버튼을 누르면 다음과 같은 에러가 발생합니다. 매인 스레드가 10초 동안 정지된 상태에서는 사용자 인터페이스 작업을 처리할 수 없기 때문입니다.<br><img src="5.png"></p>
+<p>따라서 시간이 오래 걸리는 작업은 별도의 스래드에서 실행해야합니다. <code>Runnable</code>클래스와 <code>Thread</code>클래스를 사용하여 별도의 스레드를 생성합시다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">buttonStop.setOnClickListener &#123;</span><br><span class="line">    <span class="keyword">var</span> runnable = Runnable &#123;</span><br><span class="line">        Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> thread = Thread(runnable)</span><br><span class="line">    thread.start()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>STOP</code>버튼을 눌러도 앱이 멈추지 않습니다. 10초 정지 작업을 별도의 스레드에서 실행하기 때문에 매인 스레드는 사용자 인터페이스를 처리할 수 있습니다.</p>
+<h1 id="스레드-핸들러"><a href="#스레드-핸들러" class="headerlink" title="스레드 핸들러"></a>스레드 핸들러</h1><p>스레드와 관련해서 주의할 점이 하나 더 있습니다. 매인 스레드 외의 다른 스레드에서는 <code>사용자 인터페이스(UI) 요소</code>를 변경해서는 안된다는 것입니다. 다른 스레드에서 UI를 변경해야 하는 경우, 메인 스레드에 선언된 <code>핸들러(Handler)</code>로 메시지를 보내야 합니다.</p>
+<p>우선 <code>android.os.Handler</code>클래스를 사용하여 매인 스레드에 핸들러를 정의합니다. <code>handleMessage()</code>는 다른 스레드에서 메시지를 전송했을 때 호출됩니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.os.Handler</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn) &#125;</span><br><span class="line">    <span class="keyword">val</span> textView: TextView <span class="keyword">by</span> lazy &#123; findViewById&lt;TextView&gt;(R.id.activity_main_tv) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> handler = <span class="keyword">object</span>: Handler() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">handleMessage</span><span class="params">(msg: <span class="type">Message</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.handleMessage(msg)</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>새로 생성한 스레드에서는 10초 후에 매인 스레드로 메시지를 전송합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">var</span> runnable = Runnable &#123;</span><br><span class="line">                Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> message = handler.obtainMessage()</span><br><span class="line">                <span class="keyword">val</span> bundle = Bundle()</span><br><span class="line">                bundle.putString(<span class="string">&quot;text&quot;</span>, <span class="string">&quot;Hello World&quot;</span>)</span><br><span class="line">                message.<span class="keyword">data</span> = bundle</span><br><span class="line">                handler.sendMessage(message)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> thread = Thread(runnable)</span><br><span class="line">            thread.start()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Handler</code>클래스의 <code>obtainMessage()</code>를 호출하여 메시지를 생성하비다. 이후 <code>Bundle</code> 객체를 사용하여 전송할 데이터를 추가합니다. 마지막으로 <code>sendMessage()</code>를 호출하면 메시지가 전송됩니다.</p>
+<p>이제 매인 스레드에서 메시지를 수신한 후 UI를 변경하겠습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> handler = <span class="keyword">object</span>: Handler() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">handleMessage</span><span class="params">(msg: <span class="type">Message</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.handleMessage(msg)</span><br><span class="line">            <span class="keyword">val</span> bundle = msg.<span class="keyword">data</span></span><br><span class="line">            <span class="keyword">val</span> string = bundle.getString(<span class="string">&quot;text&quot;</span>)</span><br><span class="line">            string?.let &#123;</span><br><span class="line">                textView.text = it</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>버튼을 클릭하면 10초 후 텍스트 뷰가 변경됩니다.<br><img src="6.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/26/08_android/01_android_platform/190626_thread/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/25/08_android/01_android_platform/190625_process/"
+                            aria-label=": [Android] 프로세스(Process)"
+                        >
+                            [Android] 프로세스(Process)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-25T01:00:00+09:00">
+	
+		    2019/06/25
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="어플리케이션과-프로세스"><a href="#어플리케이션과-프로세스" class="headerlink" title="어플리케이션과 프로세스"></a>어플리케이션과 프로세스</h1><p>리눅스 기반의 운영체제인 안드로이드에서는 어플리케이션이 <code>리눅스 프로세스(Linux Process)</code>로 실행됩니다. 이때 프로세스 이름을 별도로 지정하지 않으면 <code>패키지 이름</code>을 프로세스 이름으로 사용합니다.</p>
+<p>패키지 이름은 <code>AndroidManifest.xml</code>에서 확인할 수 있습니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.your_project_name&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- .. --&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<p>이제 에뮬레이터나 연결된 기기에 앱을 설치합니다. 그리고 ADB를 통해 실제 프로세스 이름을 확인해봅시다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ adb shell</span><br><span class="line"></span><br><span class="line">&gt; ps -ef | grep &quot;com.yologger.your_project_name&quot;</span><br><span class="line">u0_a289   14996   850 0 15:08:05 ?   00:00:01 com.yologger.your_project_name</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p><code>&lt;application&gt;</code>태그 안에서 <code>android:process</code>속성을 사용하여 프로세스 이름을 직접 지정할 수도 있습니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.your_project_name&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:process</span>=<span class="string">&quot;com.yologger.your_process_name&quot;</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<p>다시 프로세스 이름을 확인해봅시다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> ps -ef | grep <span class="string">&quot;com.yologger.your_process_name&quot;</span></span>            </span><br><span class="line">u0_a289   18014   850 1 15:14:50 ?   00:00:01 com.yologger.your_process_name</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h1 id="컴포넌트와-프로세스"><a href="#컴포넌트와-프로세스" class="headerlink" title="컴포넌트와 프로세스"></a>컴포넌트와 프로세스</h1><p>하나의 애플리케이션은 여러 컴포넌트로 구성됩니다. 대부분의 컴포넌트들은 같은 프로세스에서 실행됩니다. 그러나 컴포넌트를 다른 프로세스에서 실행할 수도 있습니다. 이때는 컴포넌트에서 <code>android:process</code>속성을 사용하면 됩니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.your_project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Your_Project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;com.yolo&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.MAIN&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.LAUNCHER&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> </span></span><br><span class="line"><span class="tag">            <span class="attr">android:name</span>=<span class="string">&quot;.ActivityA&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;com.yolo.process1&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span> </span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> </span></span><br><span class="line"><span class="tag">            <span class="attr">android:name</span>=<span class="string">&quot;.ActivityB&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;com.yolo.process2&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span>  </span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">service</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:name</span>=<span class="string">&quot;.MyService&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:enabled</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:exported</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;com.yolo.process3&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/25/08_android/01_android_platform/190625_process/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/24/08_android/01_android_platform/190624_BroadcastIntent_BroadcastReceiver/"
+                            aria-label=": [Android] 브로드캐스트 인텐트와 브로드케스트 리시버"
+                        >
+                            [Android] 브로드캐스트 인텐트와 브로드케스트 리시버
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-24T01:00:00+09:00">
+	
+		    2019/06/24
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="브로드캐스트-인탠트"><a href="#브로드캐스트-인탠트" class="headerlink" title="브로드캐스트 인탠트"></a>브로드캐스트 인탠트</h1><p><code>브로드캐스트 인탠트(Broadcast Intent)</code>를 사용하면 시스템의 다른 컴포넌트들에게 시스템 차원의 메시지를 전송할 수 있습니다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>아래와 같이 두 개의 프로젝트를 생성합니다.</p>
+<ul>
+<li>broadcast_sender</li>
+<li>broadcast_receiver</li>
+</ul>
+<h3 id="1-broadcast-sender"><a href="#1-broadcast-sender" class="headerlink" title="(1) broadcast_sender"></a>(1) broadcast_sender</h3><p>broadcast_sender 프로젝트는 브로드캐스트 인텐트를 생성하여 안드로이드 시스템에 전달합니다. 레이아웃은 다음과 같습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_button&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Send Broadcast&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>화면은 다음과 같습니다.<br><img src="1.png"></p>
+<p>코드는 다음과 같습니다. 버튼을 누르면 브로드캐스트 인텐트를 생성하여 시스템에 전송합니다. 이때 <code>sendBroadcast()</code>메소드를 사용합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 인텐트 생성</span></span><br><span class="line">            <span class="keyword">val</span> intent = Intent()</span><br><span class="line">            <span class="comment">// 액션 설정</span></span><br><span class="line">            intent.action = <span class="string">&quot;com.yologger.broadcast_sender&quot;</span></span><br><span class="line">            <span class="comment">// 데이터 추가</span></span><br><span class="line">            intent.putExtra(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;Paul&quot;</span>)</span><br><span class="line">            <span class="comment">// 브로드케스트 인텐트 전송</span></span><br><span class="line">            sendBroadcast(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-broadcast-receiver"><a href="#2-broadcast-receiver" class="headerlink" title="(2) broadcast_receiver"></a>(2) broadcast_receiver</h3><p>broadcast_receiver 프로젝트는 브로드캐스트 인텐트를 수신합니다. 브로드캐스트 인텐트를 수신하려면 <code>BroadcastReceiver</code>클래스를 구현하고 <code>onReceive()</code>메소드를 오버라이딩 해야합니다. 아래 코드는 브로드케스트 인텐트를 수신하면 토스트 메시지를 출력합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>CustomBroadcastReceiver.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomBroadcastReceiver</span> : <span class="type">BroadcastReceiver</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onReceive</span><span class="params">(context: <span class="type">Context</span>, intent: <span class="type">Intent</span>)</span></span> &#123;</span><br><span class="line">        intent.action?.run &#123;</span><br><span class="line">            intent?.extras?.getString(<span class="string">&quot;name&quot;</span>).run &#123;</span><br><span class="line">                Toast.makeText(context, <span class="string">&quot;<span class="variable">$this</span>&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>MainActivity.kt</code>에서 브로드캐스트 리시버를 등록합니다. 브로드캐스트 리시버를 등록할 때는 <code>registerReceiver()</code>메소드를 사용합니다. <code>onDestroy()</code>에서는 <code>unregisterReceiver()</code>메소드를 호출하여 브로드캐스트 리시버를 해제해야합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> customBroadcastReceiver: CustomBroadcastReceiver</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        customBroadcastReceiver = CustomBroadcastReceiver()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> intentFilter = IntentFilter()</span><br><span class="line">        intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)</span><br><span class="line">        intentFilter.addAction(Intent.ACTION_POWER_CONNECTED)</span><br><span class="line">        intentFilter.addAction(<span class="string">&quot;com.yologger.broadcast_sender&quot;</span>)</span><br><span class="line"></span><br><span class="line">        registerReceiver(customBroadcastReceiver, intentFilter)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy()</span><br><span class="line">        unregisterReceiver(customBroadcastReceiver)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 두 앱을 설치하고 broadcast-receiver 앱을 실행합니다. 이후 broadcast-sender 앱을 실행하고 버튼을 누르면 다음과 같이 토스트 매시지가 출력됩니다.<br><img src="2.png"></p>
+<hr>
+<h1 id="시스템-브로드캐스트-인텐트"><a href="#시스템-브로드캐스트-인텐트" class="headerlink" title="시스템 브로드캐스트 인텐트"></a>시스템 브로드캐스트 인텐트</h1><p>안드로이드 시스템은 전원 연결, 전원 해제, 네트워크 상태 변경 등 특정 이벤트가 발생하면 브로드캐스트 인텐트를 전송합니다. 우리는 이 <code>시스템 브로드캐스트 인텐트</code>도 수신할 수 있습니다. 아래 코드는 전원이 연결되었을 때, 전원이 해제되었을 때 시스템 인텐트를 수신하는 예제입니다.</p>
+<figure class="highlight kotlin"><figcaption><span>CustomBroadcastReceiver.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomBroadcastReceiver</span> : <span class="type">BroadcastReceiver</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onReceive</span><span class="params">(context: <span class="type">Context</span>, intent: <span class="type">Intent</span>)</span></span> &#123;</span><br><span class="line">        intent.action?.run &#123;</span><br><span class="line">            <span class="keyword">when</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">                <span class="comment">// 전원이 연결되었을 때</span></span><br><span class="line">                Intent.ACTION_POWER_CONNECTED -&gt; &#123;</span><br><span class="line">                    Toast.makeText(context, <span class="string">&quot;ACTION POWER CONNECTED&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 전원이 해제되었을 때</span></span><br><span class="line">                Intent.ACTION_POWER_DISCONNECTED -&gt; &#123;</span><br><span class="line">                    Toast.makeText(context, <span class="string">&quot;ACTION POWER DISCONNECTED&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line">                    intent?.extras?.getString(<span class="string">&quot;name&quot;</span>).run &#123;</span><br><span class="line">                        Toast.makeText(context, <span class="string">&quot;<span class="variable">$this</span>&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 휴대폰에 전원코드를 꼽았다 빼면 아래와 같이 토스트 메시지가 출력됩니다.<br><img src="3.png"><br><img src="4.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/24/08_android/01_android_platform/190624_BroadcastIntent_BroadcastReceiver/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
                             aria-label=": [Android] 인텐트 필터(Intent Filter)"
                         >
@@ -1044,294 +1276,6 @@
                         <p>
                             <a
                                 href="/ko/2019/06/17/08_android/01_android_platform/190617_activity_lifecycle/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/16/08_android/01_android_platform/190616_activity/"
-                            aria-label=": [Android] 액티비티(Activity)란?"
-                        >
-                            [Android] 액티비티(Activity)란?
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-16T01:00:00+09:00">
-	
-		    2019/06/16
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="액티비티란"><a href="#액티비티란" class="headerlink" title="액티비티란?"></a>액티비티란?</h1><p>안드로이드 애플리케이션은 하나 이상의 액티비티로 구성됩니다. <code>액티비티(Activity)</code>는 애플리케이션을 구성하는 구성요소입니다. 액티비티는 하나의 <code>사용자 인터페이스 화면</code> 및 그것의 <code>기능</code>으로 구성됩니다.</p>
-<p>예를 들어 다음 메모장 앱을 살펴봅시다.<br><img src="1.png"><br><img src="2.png"><br>이 메모장 앱은 <code>목록을 보여주는 화면</code>과 <code>글을 작성하는 화면</code>으로 구성되어있습니다. 따라서 두 개의 액티비티로 구성되어있습니다.</p>
-<p>액티비티는 사용자 인터페이스 화면을 담당하는 <code>xml 파일</code>과 화면의 기능을 명세하는 <code>.kt 파일 (또는 .java 파일)</code>로 구성되어있습니다. 안드로이드 스튜디오에서 새로운 프로젝트를 만들면 기본으로 생성되는 <code>activity_main.xml</code>과 <code>MainActivity.kt</code>이 바로 그것입니다.<br><img src="3.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/16/08_android/01_android_platform/190616_activity/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"
-                            aria-label=": [Android] URI와 UriMatcher"
-                        >
-                            [Android] URI와 UriMatcher
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-15T01:00:00+09:00">
-	
-		    2019/06/15
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="URI"><a href="#URI" class="headerlink" title="URI"></a>URI</h1><p><code>URI(Uniform Resource Identifier, 통합 자원 식별자)</code>는 자원을 구분해주는 식별자입니다. 내 스마트폰이나 데스크톱에는 많은 자원(파일, 이미지, 비디오 등)이 존재합니다. 또한 연결된 인터넷 상에도 많은 자원이 존재합니다. URI는 이 자원을 구분하고 식별하는데 사용됩니다.</p>
-<p>우리는 구글에 접속할 때 웹 브라우저의 주소창에 <code>http://www.google.com</code>를 입력합니다. 이때 <code>http://www.google.com</code> 뒤에는 <code>index.html</code>이 생략되어있습니다</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="http://www.google.com/index.html">http://www.google.com/index.html</a></p>
-</blockquote>
-<p>이 주소도 URI입니다. 웹 브라우저는 URI에 위치한 index.html 파일을 가져와서 화면에 보여줍니다. 이처럼 URI는 자원을 구분하고 식별하는데 사용됩니다.</p>
-<h1 id="URI-구조"><a href="#URI-구조" class="headerlink" title="URI 구조"></a>URI 구조</h1><p>URI는 다음과 같은 구조를 가지고 있습니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scheme:[//[user[:password]@]host[:port]][/path][?query]</span><br></pre></td></tr></table></figure>
-<p><code>scheme</code>와 <code>host</code>는 필수사항이고 나머지는 선택사항입니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 예시</span><br><span class="line">https://www.google.com/index.html</span><br><span class="line">mailto:yologger@gmail.com</span><br><span class="line">tel:+82-10-1111-2222</span><br><span class="line">ftp://yologger:1234@192.168.0.1:21</span><br><span class="line">content://com.korea.trains/line/1</span><br><span class="line">file:///usr/local/bin/</span><br><span class="line">data:text/vnd-example+xyz;foo=bar;base64,R0lGODdh</span><br><span class="line">news:comp.infosystems.www.servers.unix</span><br><span class="line">telnet://192.0.2.16:80/</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-Scheme"><a href="#1-Scheme" class="headerlink" title="(1) Scheme"></a>(1) Scheme</h3><p><code>scheme</code>은 어떤 프로토콜을 사용할지 지정합니다. 자주 쓰는 스킴에는 http, https, ftp, content, file, data가 있습니다. 모든 URI 스킴은 <a target="_blank" rel="noopener" href="http://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">이 곳</a>에서 확인할 수 있습니다.</p>
-<h3 id="2-Host"><a href="#2-Host" class="headerlink" title="(2) Host"></a>(2) Host</h3><p>네트워크에 연결되어 있는 모든 컴퓨터 각각을 <code>호스트</code>라고 합니다. 보통 <code>도메인 네임</code>이나 <code>IP 주소</code>을 사용하여 호스트를 구분하고 식별합니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 도메인 네임</span><br><span class="line">http://www.netflix.com</span><br><span class="line">https://www.google.com</span><br><span class="line"></span><br><span class="line">// IP 주소</span><br><span class="line">https://172.217.27.78</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-Port"><a href="#3-Port" class="headerlink" title="(3) Port"></a>(3) Port</h3><p>컴퓨터 내에서 실행되고있는 어플리케이션들을 구분하기 위해 사용하는 번호입니다. 보통 HTTP 프로토콜을 사용할 때는 80, HTTPS 프로토콜을 사용할 때는 443 포트를 사용합니다. 예제는 다음과 같습니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://www.netflix.com:80</span><br><span class="line">https://www.google.com:443</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-Authority"><a href="#4-Authority" class="headerlink" title="(4) Authority"></a>(4) Authority</h3><p><code>authority</code>는 사용자 이름과 비밀번호, 호스트, 포트번호의 조합입니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">authority = [ username &quot;:&quot; password &quot;@&quot; ] host [ &quot;:&quot; port ]</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yologger:1234@mail.google.com/:587</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="5-Path"><a href="#5-Path" class="headerlink" title="(5) Path"></a>(5) Path</h3><p>요청할 자원에 대한 경로를 의미합니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 사람 자원의 경로</span><br><span class="line">https://www.example.com/person</span><br><span class="line"></span><br><span class="line">// 사람 중 프로그래머 자원의 경로</span><br><span class="line">https://www.example.com/person/programmer</span><br><span class="line"></span><br><span class="line">// 차량 자원의 경로</span><br><span class="line">https://www.example.com/car</span><br><span class="line"></span><br><span class="line">// 책 자원의 경로</span><br><span class="line">https://192.168.0.1/book</span><br></pre></td></tr></table></figure>
-
-<h3 id="6-Query"><a href="#6-Query" class="headerlink" title="(6) Query"></a>(6) Query</h3><p>경로에 있는 자원의 범위를 한정하기 위해 사용합니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 이름이 paul인 사람</span><br><span class="line">https://www.example.com/person?name=paul</span><br><span class="line"></span><br><span class="line">// 국가가 england인 사람</span><br><span class="line">https://www.example.com/person?nation=england</span><br><span class="line"></span><br><span class="line">// 이름이 john이고 국가가 america인 사람</span><br><span class="line">https://www.example.com/person?name=john&amp;nation=america</span><br><span class="line"></span><br><span class="line">// 제조업체가 benz인 자동차</span><br><span class="line">https://www.example.com/car?manufacturer=benz</span><br><span class="line"></span><br><span class="line">// 저자가 paul인 책</span><br><span class="line">https://192.168.0.1/book?author=paul</span><br><span class="line"></span><br><span class="line">// 저자가 john인 책</span><br><span class="line">https://192.168.0.1/book?author=john</span><br></pre></td></tr></table></figure>
-
-<h1 id="안드로이드에서의-URI"><a href="#안드로이드에서의-URI" class="headerlink" title="안드로이드에서의 URI"></a>안드로이드에서의 URI</h1><p>안드로이드 API는 URI를 취급하기 위해 <code>Uri</code>클래스를 제공합니다. <code>Uri</code>클래스는 암시적 인텐트, 컨텐트 프로바이더 등 안드로이드의 다양한 분야에서 많이 사용됩니다.</p>
-<p><code>Uri.Builder</code>클래스의 <code>build()</code>메소드를 사용하여 <code>Uri</code>객체를 생성할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> uri: Uri = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;paul&quot;</span>)</span><br><span class="line">    .appendQueryParameter(<span class="string">&quot;nation&quot;</span>, <span class="string">&quot;england&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
-<p><code>Uri</code>클래스의 <code>parse()</code>메소드를 사용할 수도 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.net.Uri</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> uri = Uri.parse(<span class="string">&quot;https://www.example.com/person/programmer?name=paul&amp;nation=england&quot;</span>)</span><br><span class="line"></span><br><span class="line">println(uri.toString())     </span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer?name=paul&amp;nation=england</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="UriMatcher"><a href="#UriMatcher" class="headerlink" title="UriMatcher"></a>UriMatcher</h1><p><code>UriMatcher</code>클래스는 두 개의 <code>Uri</code>를 비교하여 사용자가 정의한 값을 반환하는데 사용합니다. <code>UriMatcher</code>클래스는 두 개의 메소드만을 가지고 있습니다.</p>
-<h3 id="1-addUri"><a href="#1-addUri" class="headerlink" title="(1) addUri()"></a>(1) addUri()</h3><p>기준이 되는 Uri를 등록하는데 사용합니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addUri([authority], [path], [code])</span><br></pre></td></tr></table></figure>
-<p>세 번째 인자인 <code>code</code>는 두 <code>Uri</code>가 일치할 때 반환되는 정수값입니다.</p>
-<p><code>UriMatcher</code>객체를 생성하고 세 개의 <code>Uri</code>를 등록해봅시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uriMatcher = UriMatcher(UriMatcher.NO_MATCH)</span><br><span class="line"></span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person&quot;</span>, <span class="number">1</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;person/*&quot;</span>, <span class="number">2</span>)</span><br><span class="line">uriMatcher.addURI(<span class="string">&quot;www.example.com&quot;</span>, <span class="string">&quot;car/*&quot;</span>, <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
-<h3 id="2-match"><a href="#2-match" class="headerlink" title="(2) match()"></a>(2) match()</h3><p>인자로 전달된 <code>Uri</code>와 위에서 등록한 <code>Uri</code>과 비교하여 정수값을 반환합니다. </p>
-<p>우선 네 개의 <code>Uri</code>를 생성합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// https://www.example.com/person</span></span><br><span class="line"><span class="keyword">val</span> uri1 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/person/programmer</span></span><br><span class="line"><span class="keyword">val</span> uri2 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;person&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;programmer&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.example.com/car/convertible</span></span><br><span class="line"><span class="keyword">val</span> uri3 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.example.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;car&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;convertible&quot;</span>)</span><br><span class="line">    .build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://www.test.com/book</span></span><br><span class="line"><span class="keyword">val</span> uri4 = Uri.Builder()</span><br><span class="line">    .scheme(<span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .authority(<span class="string">&quot;www.test.com&quot;</span>)</span><br><span class="line">    .appendPath(<span class="string">&quot;book&quot;</span>)</span><br><span class="line">    .build()</span><br></pre></td></tr></table></figure>
-<p>이제 다음과 같이 두 <code>Uri</code>를 비교할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> result1 = uriMatcher.match(uri1)    <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result2 = uriMatcher.match(uri2)    <span class="comment">// 2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result3 = uriMatcher.match(uri3)    <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 일치하는 uri가 없으면 -1을 반환합니다.</span></span><br><span class="line"><span class="keyword">val</span> result4 = uriMatcher.match(uri4)    <span class="comment">// -1</span></span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/"
-                            aria-label=": [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기"
-                        >
-                            [Android] ADB(Android Debug Bridge)란? - 액티비티 스택 확인하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-14T01:00:00+09:00">
-	
-		    2019/06/14
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="ADB-Android-Debug-Bridge"><a href="#ADB-Android-Debug-Bridge" class="headerlink" title="ADB(Android Debug Bridge)"></a>ADB(Android Debug Bridge)</h1><p><code>ADB(Android Debug Bridge)</code>는 안드로이드 기기와 통신할 수 있는 명령어 도구입니다. ADB를 사용하면 윈도우의 계열 <u>명령 프롬프트</u>나 리눅스 계열의 <u>터미널</u>처럼 연결된 기기에 접근할 수 있습니다.</p>
-<p>ADB는 <code>안드로이드 SDK</code>의 <code>Platform Tools</code>에 포함되어 있습니다. </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/Users/[your_username]/Library/Android/sdk/platform-tools</span><br><span class="line"></span><br><span class="line">$ ls</span><br><span class="line">adb</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>어느 위치에서든 ADB 명령어를 사용하려면 아래와 같이 경로 설정을 해야합니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cd ~ </span><br><span class="line"></span><br><span class="line">$ echo &#x27;/Users/[your_username]/Library/Android/sdk/platform-tools&#x27; &gt;&gt; ~/.bash_profile</span><br><span class="line"></span><br><span class="line">$ source ~/.bash_profile</span><br></pre></td></tr></table></figure>
-
-
-<p>이제 <code>adb --help</code> 명령어를 입력하면 ADB와 관련된 옵션들을 확인할 수 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb --<span class="built_in">help</span></span></span><br><span class="line">Android Debug Bridge version 1.0.41</span><br><span class="line">Version 31.0.0-7110759</span><br><span class="line">Installed as /usr/local/bin/adb</span><br><span class="line"></span><br><span class="line">global options:</span><br><span class="line"> -a         listen on all network interfaces, not just localhost</span><br><span class="line"> -d         use USB device (error if multiple devices connected)</span><br><span class="line"> -e         use TCP/IP device (error if multiple TCP/IP devices available)</span><br><span class="line"> -s SERIAL  use device with given serial (overrides $ANDROID_SERIAL)</span><br><span class="line"> -t ID      use device with given transport id</span><br><span class="line"> -H         name of adb server host [default=localhost]</span><br><span class="line"> -P         port of adb server [default=5037]</span><br><span class="line"> -L SOCKET  listen on given socket for adb server [default=tcp:localhost:5037]</span><br><span class="line"></span><br><span class="line">general commands:</span><br><span class="line"> devices [-l]             list connected devices (-l for long output)</span><br><span class="line"> help                     show this help message</span><br><span class="line"> version                  show version num</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<p>안드로이드는 리눅스 기반의 운영체제입니다. 따라서 연결된 기기의 리눅스 쉘에 접속할 수 있습니다. 이 때는 <code>adb shell</code> 명령어를 사용합니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span></span><br></pre></td></tr></table></figure>
-<p>이제 연결된 기기의 디렉토리 구조를 확인할 수 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ls</span></span><br><span class="line">bin</span><br><span class="line">data</span><br><span class="line">sdcard</span><br><span class="line">storage</span><br><span class="line">dev</span><br><span class="line">sys</span><br><span class="line">system</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<h1 id="자주-쓰는-adb-명령어"><a href="#자주-쓰는-adb-명령어" class="headerlink" title="자주 쓰는 adb 명령어"></a>자주 쓰는 adb 명령어</h1><p><code>adb devices</code>명령어를 사용하면 실제 기기와 정상적으로 연결되었는지 확인할 수 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb devices</span></span><br><span class="line">List of devices attached</span><br><span class="line">R3CN109JVFK     device</span><br><span class="line">R332AEW32AA     device</span><br><span class="line">R3CN238IKEF     offline</span><br></pre></td></tr></table></figure>
-<table>
-<thead>
-<tr>
-<th>상태</th>
-<th>설명</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>offline</td>
-<td>기기가 연결되지 않았거나 비정상인 경우</td>
-</tr>
-<tr>
-<td>device</td>
-<td>정상적으로 기기가 연결된 경우</td>
-</tr>
-<tr>
-<td>no device</td>
-<td>연결된 기기가 없는 경우</td>
-</tr>
-</tbody></table>
-<p><code>adb reboot</code>명령어를 사용하면 기기를 재시작할 수 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb reboot</span></span><br></pre></td></tr></table></figure>
-<p>PC에서 안드로이드 기기로 파일을 복사할 수도 있습니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb push &quot;파일 명&quot; &quot;복사할 경로&quot;</span><br><span class="line"></span><br><span class="line">$ adb push backup.zip /sdcard</span><br></pre></td></tr></table></figure>
-<p>안드로이드 기기에서 PC로 파일을 복사할 수도 있습니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb pull &quot;파일 명&quot; &quot;복사할 경로&quot;</span><br><span class="line"></span><br><span class="line">$ adb pull /sdcard/log.txt .</span><br></pre></td></tr></table></figure>
-<p>APK 파일을 직접 설치할 수도 있습니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb install [app_name].apk</span><br><span class="line"></span><br><span class="line">$ adb install my_app.apk</span><br></pre></td></tr></table></figure>
-<p>앱을 삭제할 수도 있습니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb uninstall [package_name]</span><br><span class="line"></span><br><span class="line">$ adb uninstall com.yologger.package</span><br></pre></td></tr></table></figure>
-<p>연결된 기기의 시스템 정보를 가져올 수 도 있습니다. </p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys</span></span><br></pre></td></tr></table></figure>
-<p>아래와 같이 액티비티와 태스크의 스택을 확인할 때 많이 사용합니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities</span></span><br></pre></td></tr></table></figure>
-
-<p>위 명령어를 입력하면 너무 방대한 정보가 한꺼번에 출력됩니다. 따라서 여러 옵션과 <code>grep</code>을 적절히 활용하여 필요한 정보만 출력할 수 있습니다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ adb shell dumpsys activity activities | grep -i [package_name] | grep -i Hist</span><br><span class="line"></span><br><span class="line">$ adb shell dumpsys activity activities | grep -i com.yologger.activity | grep -i Hist</span><br></pre></td></tr></table></figure>
-
-<h1 id="액티비티-스택-확인하기"><a href="#액티비티-스택-확인하기" class="headerlink" title="액티비티 스택 확인하기"></a>액티비티 스택 확인하기</h1><p><code>ADB(Android Debug Bridge)</code>를 사용하면 현재 앱에서 실행 중인 모든 서비스를 확인할 수 있습니다.</p>
-<p><code>adb shell</code> 명령어를 사용하면 연결된 기기에 접속할 수 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span> </span><br></pre></td></tr></table></figure>
-<p><code>dumpsys</code> 명령어를 사용하면 모든 서비스를 확인할 수 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> dumpsys</span> </span><br></pre></td></tr></table></figure>
-<p>다음과 같이 호출할 수도 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys</span> </span><br></pre></td></tr></table></figure>
-
-<p>현재 기기에서 실행 중인 태스크와 액티비티만을 확인할 수 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities</span></span><br></pre></td></tr></table></figure>
-<p>특정 앱의 태스크와 액티비티만 확인할 수도 있습니다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities | grep -i [package_name] | grep -i Hist</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> adb shell dumpsys activity activities | grep -i com.yologger.myapp | grep -i Hist</span></span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

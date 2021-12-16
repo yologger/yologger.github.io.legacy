@@ -354,6 +354,253 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/07/09/08_android/01_android_platform/190709_fragment_backstack/"
+                            aria-label=": [Android] Fragment - (3) 프래그먼트 백 스택(Fragment Back Stack)"
+                        >
+                            [Android] Fragment - (3) 프래그먼트 백 스택(Fragment Back Stack)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-07-09T01:00:00+09:00">
+	
+		    2019/07/09
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="프래그먼트-백-스택-Back-Stack"><a href="#프래그먼트-백-스택-Back-Stack" class="headerlink" title="프래그먼트 백 스택(Back Stack)"></a>프래그먼트 백 스택(Back Stack)</h1><p>액티비티는 태스크에 스택 형태로 유지됩니다. 이 때문에 백 버튼을 누르면 스택의 최상단 액티비티를 종료하고 이전 액티비티로 돌아올 수 있습니다.</p>
+<p><code>프래그먼트 백 스택(Fragment Back Stack)</code>은 프래그먼트에서도 액티비티와 유사하게 이전 프래그먼트 상태로 돌아가는 것을 가능하게 합니다. 백 스택을 사용하면 트랜잭션을 백 스택이라는 공간에 유지합니다. 따라서 백 버튼이나 <code>Fragment.popBackStack()</code>을 호출하면 이전 프래그먼트의 상태로 돌아올 수 있습니다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>우선 <code>MainActivity</code>의 레이아웃는 다음과 같습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_btn&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_margin</span>=<span class="string">&quot;16dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textAllCaps</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toTopOf</span>=<span class="string">&quot;@+id/activity_main_fl&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Start Transaction&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">FrameLayout</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_fl&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;200dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">&quot;@+id/activity_main_btn&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">FrameLayout</span>&gt;</span></span><br><span class="line">    </span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>버튼을 누르면 다음과 같이 네 개의 트랜잭션을 실행하겠습니다. 백 스택에 트랜잭션을 추가할 때는 <code>addToBackStack(null)</code>메소드를 사용합니다. </p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById(R.id.activity_main_btn)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 첫 번째 트랜잭션 </span></span><br><span class="line">            <span class="comment">// Fragment A 추가</span></span><br><span class="line">            <span class="keyword">var</span> fragmentA = FragmentA()</span><br><span class="line">            <span class="keyword">val</span> transaction1 = supportFragmentManager.beginTransaction()</span><br><span class="line">            transaction1.add(R.id.activity_main_fl, fragmentA)</span><br><span class="line">            transaction1.addToBackStack(<span class="literal">null</span>)</span><br><span class="line">            transaction1.commit()</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 두 번째 트랜잭션</span></span><br><span class="line">            <span class="comment">// Fragment A 삭제</span></span><br><span class="line">            <span class="keyword">val</span> transaction2 = supportFragmentManager.beginTransaction()</span><br><span class="line">            transaction2.remove(fragmentA)</span><br><span class="line">            transaction2.addToBackStack(<span class="literal">null</span>)</span><br><span class="line">            transaction2.commit()</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 세 번째 트랜잭션 </span></span><br><span class="line">            <span class="comment">// Fragment B 추가</span></span><br><span class="line">            <span class="keyword">val</span> fragmentB = FragmentB()</span><br><span class="line">            <span class="keyword">val</span> transaction3 = supportFragmentManager.beginTransaction()</span><br><span class="line">            transaction3.add(R.id.activity_main_fl, fragmentB)</span><br><span class="line">            transaction3.addToBackStack(<span class="literal">null</span>)</span><br><span class="line">            transaction3.commit()</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 네 번째 트랜잭션</span></span><br><span class="line">            <span class="comment">// Fragment B를 Fragment A로 교체</span></span><br><span class="line">            <span class="keyword">val</span> transaction4 = supportFragmentManager.beginTransaction()</span><br><span class="line">            transaction4.replace(R.id.activity_main_fl, fragmentA)</span><br><span class="line">            transaction4.addToBackStack(<span class="literal">null</span>)</span><br><span class="line">            transaction4.commit()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 앱을 실행합시다. <code>백 버튼</code>을 누를 때 마다 이전 상태로 돌아가는 것을 확인할 수 있습니다.</p>
+<p>만약 백 스택에 트랜잭션을 추가하지 않았다면, <code>백 버튼</code>을 눌렀을 때 이전 상태로 돌아가지 않고 앱이 종료됩니다.</p>
+<p><code>백 버튼</code> 대신 <code>popBackStack()</code>메소드를 사용할 수도 있습니다.</p>
+<h1 id="OnBackStackChangedListener"><a href="#OnBackStackChangedListener" class="headerlink" title="OnBackStackChangedListener"></a>OnBackStackChangedListener</h1><p><code>OnBackStackChangedListener</code>를 사용하면 <code>백 스택</code>의 변화를 감지할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fragmentManager = supportFragmentManager</span><br><span class="line"></span><br><span class="line">fragmentManager.addOnBackStackChangedListener(<span class="keyword">object</span>: FragmentManager.OnBackStackChangedListener &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onBackStackChanged</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Do something when back stack changed.</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/07/09/08_android/01_android_platform/190709_fragment_backstack/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/"
+                            aria-label=": [Android]  Fragment - (2) 프래그먼트 매니저(Fragment Manager)"
+                        >
+                            [Android]  Fragment - (2) 프래그먼트 매니저(Fragment Manager)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-07-08T01:00:00+09:00">
+	
+		    2019/07/08
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="프래그먼트-매니저"><a href="#프래그먼트-매니저" class="headerlink" title="프래그먼트 매니저"></a>프래그먼트 매니저</h1><p><code>프래그먼트 매니저(Fragment Manager)</code>는 프래그먼트의 추가, 삭제, 교체 등을 담당하는 객체입니다. <code>Activity</code>클래스의 <code>supportFragmentManager</code>속성값으로 프래그먼트 매니저에 접근할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 프래그먼트 매니저</span></span><br><span class="line">        <span class="keyword">val</span> fragmentMananger = supportFragmentManager</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="프래그먼트-트랜잭션"><a href="#프래그먼트-트랜잭션" class="headerlink" title="프래그먼트 트랜잭션"></a>프래그먼트 트랜잭션</h1><p><code>프래그먼트 트랜잭션(Fragment Transaction)</code>은 프래그먼트 연산들의 한 단위를 나타내는 클래스입니다. 트랜잭션은 프래그먼트 매니저의 <code>beginTransaction()</code>메소드를 호출하여 시작할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentMananger = supportFragmentManager</span><br><span class="line"><span class="keyword">val</span> transaction = fragmentMananger.beginTransaction()</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>프래그먼트 트랜잭션에는 프래그먼트 연산을 위한 다양한 메소드가 존재합니다.</p>
+<h3 id="1-add"><a href="#1-add" class="headerlink" title="(1) add()"></a>(1) add()</h3><p>컨테이너 뷰에 프래그먼트를 추가합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentA = FragmentA()</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fragmentMananger = supportFragmentManager</span><br><span class="line"><span class="keyword">val</span> transaction = fragmentMananger.beginTransaction()</span><br><span class="line">transaction.add(R.id.activity_main_container, fragmentA)</span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 생명주기 메소드가 호출됩니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[FragmentA] onAttach</span><br><span class="line">[FragmentA] onCreate</span><br><span class="line">[FragmentA] onCreateView</span><br><span class="line">[FragmentA] onViewCreated</span><br><span class="line">[FragmentA] onStart</span><br><span class="line">[FragmentA] onResume</span><br></pre></td></tr></table></figure>
+<p>만약 컨테이너 뷰에 이전 프래그먼트가 있으면 이를 삭제하지 않고 위에 추가합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentB = FragmentB()</span><br><span class="line">transaction.add(R.id.activity_main_container, fragmentB)</span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 생명주기 메소드가 호출됩니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[FragmentB] onAttach</span><br><span class="line">[FragmentB] onCreate</span><br><span class="line">[FragmentB] onCreateView</span><br><span class="line">[FragmentB] onViewCreated</span><br><span class="line">[FragmentB] onStart</span><br><span class="line">[FragmentB] onResume</span><br></pre></td></tr></table></figure>
+<h3 id="2-remove"><a href="#2-remove" class="headerlink" title="(2) remove()"></a>(2) remove()</h3><p>컨테이너에서 프래그먼트를 삭제합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentA = FragmentA()</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> transaction = supportFragmentManager.beginTransaction()</span><br><span class="line">transaction.remove(fragmentA)</span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 생명주기 메소드가 호출됩니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[FragmentA] onPause</span><br><span class="line">[FragmentA] onStop</span><br><span class="line">[FragmentA] onDestroyView</span><br><span class="line">[FragmentA] onDestroy</span><br><span class="line">[FragmentA] onDetach</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-replace"><a href="#3-replace" class="headerlink" title="(3) replace()"></a>(3) replace()</h3><p>기존 프래그먼트를 삭제하고 새로운 프래그먼트를 추가합니다. <code>remove()</code> 후 <code>add()</code>를 호출한다고 생각하면 됩니다.</p>
+<p>컨테이너에 <code>FragmentA</code>가 이미 있다고 가정합시다. 이제 다음과 같이 <code>FragmentB</code>로 대체할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">transaction.replace(R.id.activity_main_fl, fragmentB)</span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+<p>생명주기 메소드는 다음과 같이 호출됩니다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[FragmentA] onPause</span><br><span class="line">[FragmentA] onStop</span><br><span class="line">[FragmentB] onAttach</span><br><span class="line">[FragmentB] onCreate</span><br><span class="line">[FragmentB] onCreateView</span><br><span class="line">[FragmentB] onViewCreated</span><br><span class="line">[FragmentB] onStart</span><br><span class="line">[FragmentA] onDestroyView</span><br><span class="line">[FragmentA] onDestroy</span><br><span class="line">[FragmentA] onDetach</span><br><span class="line">[FragmentB] onResume</span><br></pre></td></tr></table></figure>
+<p>기존에 있던 <code>FragmentA</code>는 <code>onDestroy()</code>까지 호출되어 메모리에서 사라지는 것을 확인할 수 있습니다.</p>
+<h3 id="4-commit"><a href="#4-commit" class="headerlink" title="(4) commit()"></a>(4) commit()</h3><p>트랜잭션은 다음과 같이 여러 연산으로 구성될 수 있습니다. 따라서 연산 후 반드시 <code>commit()</code>메소드를 호출해서 변경사항을 적용해야합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fragmentB = FragmentB()</span><br><span class="line">transaction.add(R.id.activity_main_container, fragmentB)</span><br><span class="line">transaction.remove(fragmentB)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fragmentC = FragmentC()</span><br><span class="line">transaction.add(R.id.activity_main_container, fragmentC)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fragmentD = FragmentD()</span><br><span class="line">transaction.replace(R.id.activity_main_container, fragmentD)</span><br><span class="line"></span><br><span class="line">transaction.commit()</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-그-외의-트랜잭션-연산"><a href="#5-그-외의-트랜잭션-연산" class="headerlink" title="(5) 그 외의 트랜잭션 연산"></a>(5) 그 외의 트랜잭션 연산</h3><p>트랜잭션 연산에는 위에서 살펴본 연산 외에도 <code>show()</code>, <code>hide()</code>, <code>attach()</code>, <code>detach()</code>, <code>isEmpty()</code>등이 있습니다.</p>
+<hr>
+<h2 id="childFragmentManager-parentFragmentManager"><a href="#childFragmentManager-parentFragmentManager" class="headerlink" title="childFragmentManager, parentFragmentManager"></a>childFragmentManager, parentFragmentManager</h2><p>우리는 액티비티에서 프래그먼트를 제어하기위해 <code>supportFragmentManager</code>속성을 사용했습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> supportFragmentManager = supportFragmentManager</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 프래그먼트를 살펴봅시다. 프래그먼트에는 <code>fragmentManager</code>, <code>childFragmentManager</code>, <code>parentFragmentManager</code>속성이 존재합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SubFragment</span>: <span class="type">Fragment</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onViewCreated</span><span class="params">(view: <span class="type">View</span>, savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onViewCreated(view, savedInstanceState)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> fragmentManager = fragmentManager</span><br><span class="line">        <span class="keyword">var</span> parentFragmentMgr = parentFragmentManager</span><br><span class="line">        <span class="keyword">var</span> childFragmentMgr = childFragmentManager</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="1-fragmentManager-deprecated"><a href="#1-fragmentManager-deprecated" class="headerlink" title="(1) fragmentManager (deprecated)"></a>(1) fragmentManager (deprecated)</h4><p>더 이상 사용하지 않습니다.</p>
+<h4 id="2-parentFragmentManager"><a href="#2-parentFragmentManager" class="headerlink" title="(2) parentFragmentManager"></a>(2) parentFragmentManager</h4><p>현재 프래그먼트를 제어하는 부모 액티비티나 부모 프래그먼트의 프래그먼트 매니저를 반환합니다.</p>
+<p><code>parentFragmentManager</code>를 통해서 자신을 다른 프래그먼트로 교체하는데 유용하게 사용할 수 있습니다.</p>
+<h4 id="3-childFragmentManager"><a href="#3-childFragmentManager" class="headerlink" title="(3) childFragmentManager"></a>(3) childFragmentManager</h4><p>현재 프래그먼트는 여러 개의 프래그먼트를 가질 수도 있습니다. 현재 프래그먼트는 <code>childFragmentManager</code>속성을 사용하여 자식 프래그먼트를 제어합니다.</p>
+<h4 id="4-예제"><a href="#4-예제" class="headerlink" title="(4) 예제"></a>(4) 예제</h4><p>다음과 같이 액티비티 안에 프래그먼트가 있고, 그 안에 또 프래그먼트가 있고, 그 안에 또 프래그먼트가 있다고 가정합시다.</p>
+<p><img src="0.png"><br>이러한 구조에서 <code>supportFragmentManager</code>, <code>parentFragmentManager</code>, <code>childFragmentManager</code>가 가리키는 객체는 다음과 같습니다.</p>
+<p><img src="1.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/07/08/08_android/01_android_platform/190708_fragment_manager/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/07/07/08_android/01_android_platform/190707_fragment/"
+                            aria-label=": [Android]  Fragment - (1) 프래그먼트"
+                        >
+                            [Android]  Fragment - (1) 프래그먼트
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-07-07T01:00:00+09:00">
+	
+		    2019/07/07
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="프래그먼트란"><a href="#프래그먼트란" class="headerlink" title="프래그먼트란?"></a>프래그먼트란?</h1><p><code>프래그먼트(Fragment)</code>는 액티비티 내부에서 독립적으로 애플리케이션의 UI를 관리하는 객체입니다. 모든 프래그먼트는 <code>Fragment</code>클래스를 구현합니다.   프래그먼트는 두 가지 방법으로 생성할 수 있습니다.</p>
+<h2 id="1-레이아웃-XML-파일에-프래그먼트-추가하기"><a href="#1-레이아웃-XML-파일에-프래그먼트-추가하기" class="headerlink" title="(1) 레이아웃 XML 파일에 프래그먼트 추가하기"></a>(1) 레이아웃 XML 파일에 프래그먼트 추가하기</h2><p>프래그먼트는 <code>&lt;fragmemt&gt;</code>태그를 사용하여 레이아웃 XML 파일에 추가할 수 있습니다.</p>
+<p>우선 다음과 같이 <code>MainFragment</code>를 생성합시다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainFragment.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainFragment</span> : <span class="type">Fragment</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreateView</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        inflater: <span class="type">LayoutInflater</span>, container: <span class="type">ViewGroup</span>?,</span></span></span><br><span class="line"><span class="params"><span class="function">        savedInstanceState: <span class="type">Bundle</span>?</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>: View? &#123;</span><br><span class="line">        <span class="comment">// Inflate the layout for this fragment</span></span><br><span class="line">        <span class="keyword">return</span> inflater.inflate(R.layout.fragment_main, container, <span class="literal">false</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>MainFragment</code>에 대한 레이아웃 파일은 다음과 같습니다.</p>
+<figure class="highlight xml"><figcaption><span>fragment_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:background</span>=<span class="string">&quot;#BB86FC&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainFragment&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;This is MainFragment&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 <code>MainActivity</code>에 대한 레이아웃 파일에 <code>MainFragment</code>를 추가합니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">fragment</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/fragment&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;com.yologger.fragment.MainFragment&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;500dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>앱을 실행하면 다음과 같습니다. 흰 부분은 액티비티 영역이고 보라색 부분은 프래그먼트 영역입니다.<br><img src="1.png"></p>
+<h2 id="2-코드로-프래그먼트-추가하기"><a href="#2-코드로-프래그먼트-추가하기" class="headerlink" title="(2) 코드로 프래그먼트 추가하기"></a>(2) 코드로 프래그먼트 추가하기</h2><p>프래그먼트는 코드에서 추가할 수도 있습니다. 순서는 다음과 같습니다. </p>
+<ol>
+<li><code>프래그먼트</code>의 인스턴스를 생성합니다.</li>
+<li>액티비티에서 <code>프래그먼트 매니저</code> 객체의 참조를 얻어옵니다.</li>
+<li>프래그먼트 매니저의 <code>beginTransaction()</code>메소드를 호출하여 <code>프래그먼트 트랜잭션</code> 인스턴스를 생성합니다.</li>
+<li>프래그먼트 트랜잭션 인스턴스에서 <code>add()</code>메소드를 호출합니다. 이때 프래그먼트가 추가될 뷰 그룹과 프래그먼트를 인자로 전달합니다.</li>
+<li>프래그먼트 트랜잭션 인스턴스에서 <code>commit()</code>메소드를 호출합니다.</li>
+</ol>
+<p>우선 <code>MainActivity</code>의 레이아웃 파일은 다음과 같습니다. <code>&lt;FrameLayout&gt;</code>은 프래그먼트가 추가될 뷰 그룹입니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">FrameLayout</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_container&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;500dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">FrameLayout</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 코드에서 프래그먼트를 추가합시다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 프래그먼트의 인스턴스를 생성합니다.</span></span><br><span class="line">        <span class="keyword">val</span> fragment = MainFragment()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 액티비티에서 프래그먼트 매니저 객체의 참조를 얻어옵니다.</span></span><br><span class="line">        <span class="keyword">val</span> fragmentManager = supportFragmentManager</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 프래그먼트 트랜잭션 인스턴스를 생성합니다.</span></span><br><span class="line">        <span class="keyword">val</span> fragmentTransaction = fragmentManager.beginTransaction()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 프래그먼트 트랜잭션 인스턴스에서 add()메소드를 호출합니다.</span></span><br><span class="line">        fragmentTransaction.add(R.id.activity_main_container, fragment)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 프래그먼트 트랜잭션 인스턴스에서 commit()메소드를 호출합니다.</span></span><br><span class="line">        fragmentTransaction.commit()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/07/07/08_android/01_android_platform/190707_fragment/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/07/06/08_android/01_android_platform/190706_content_provider/"
                             aria-label=": [Android] 컨텐트 프로바이더(Content Provider)와 컨텐트 리솔버(Content Resolver)"
                         >
@@ -1038,238 +1285,6 @@
                         <p>
                             <a
                                 href="/ko/2019/06/27/08_android/01_android_platform/190627_async_nonblocking/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/26/08_android/01_android_platform/190626_thread/"
-                            aria-label=": [Android] 스레드(Thread)"
-                        >
-                            [Android] 스레드(Thread)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-26T01:00:00+09:00">
-	
-		    2019/06/26
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="스레드란"><a href="#스레드란" class="headerlink" title="스레드란?"></a>스레드란?</h1><p><code>스레드(Thread)</code>는 <a href="/ko/2019/06/25/08_android/01_android_platform/190625_process/">프로세스(Process)</a> 내에서 실행되는 흐름을 말합니다. 일반적으로 하나의 프로세스에는 하나의 기본 스레드가 존재합니다. 이를 <code>매인 스레드</code>라고 합니다.<br><img src="1.png"><br>이제 하나의 스레드에서 두 개의 작업을 순차적으로 수행한다고 가정해봅시다.<br><img src="2.png"><br><code>Job #1</code>은 매우 긴 시간이 소요되는 작업입니다. 반면 <code>Job #2</code>는 상대적으로 짧은 시간이 소요되는 작업입니다. 그러나 <code>Job #1</code>이 먼저 실행되었으므로 <code>Job #2</code>는 <code>Job #1</code>이 끝날 때 까지 기다려야합니다. </p>
-<p>이제 스레드를 한 개 더 생성해보겠습니다.</p>
-<p><img src="3.png"><br>이처럼 스레드를 여러 개 추가하여 프로세스를 병렬 처리하는 환경을 <code>멀티 스레드</code> 환경이라고 합니다. </p>
-<h1 id="안드로이드에서의-스레드"><a href="#안드로이드에서의-스레드" class="headerlink" title="안드로이드에서의 스레드"></a>안드로이드에서의 스레드</h1><p>안드로이드 애플리케이션이 처음 시작되면, 안드로이드 운영체제는 하나의 프로세스와 하나의 매인 스레드를 생성합니다. 애플리케이션의 모든 컴포넌트는 매인 스레드 내에서 실행됩니다. </p>
-<h1 id="매인-스레드의-역할"><a href="#매인-스레드의-역할" class="headerlink" title="매인 스레드의 역할"></a>매인 스레드의 역할</h1><p><code>매인 스레드</code>의 주된 역할은 사용자 인터페이스를 처리하는 것입니다. 이러한 이유로 안드로이드에서의 메인 스레드는 <code>UI 스레드</code>라고도 합니다. </p>
-<p>매인 스레드에서 시간이 오래 걸리는 작업을 수행하면, 그 작업이 끝날 때까지 애플리캐이션 전체가 멈춘 것처럼 보이게 됩니다.</p>
-<p>예제를 살펴보겠습니다. <code>TOAST</code>버튼을 누르면 토스트 매시지를 보여줍니다. 예제는 <code>STOP</code>버튼을 누르면 매인 스래드를 10초 동안 정지합니다.<br><img src="4.png"><br>코드는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> buttonToast: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_toast) &#125;</span><br><span class="line">    <span class="keyword">val</span> buttonStop: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn_stop) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        buttonToast.setOnClickListener &#123;</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span>, <span class="string">&quot;Hello World&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        buttonStop.setOnClickListener &#123;</span><br><span class="line">            Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 <code>STOP</code>버튼을 누르면 안드로이드 시스템이 10초 동안 정지합니다. 이 때 <code>TOAST</code>버튼을 누르면 다음과 같은 에러가 발생합니다. 매인 스레드가 10초 동안 정지된 상태에서는 사용자 인터페이스 작업을 처리할 수 없기 때문입니다.<br><img src="5.png"></p>
-<p>따라서 시간이 오래 걸리는 작업은 별도의 스래드에서 실행해야합니다. <code>Runnable</code>클래스와 <code>Thread</code>클래스를 사용하여 별도의 스레드를 생성합시다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">buttonStop.setOnClickListener &#123;</span><br><span class="line">    <span class="keyword">var</span> runnable = Runnable &#123;</span><br><span class="line">        Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> thread = Thread(runnable)</span><br><span class="line">    thread.start()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 <code>STOP</code>버튼을 눌러도 앱이 멈추지 않습니다. 10초 정지 작업을 별도의 스레드에서 실행하기 때문에 매인 스레드는 사용자 인터페이스를 처리할 수 있습니다.</p>
-<h1 id="스레드-핸들러"><a href="#스레드-핸들러" class="headerlink" title="스레드 핸들러"></a>스레드 핸들러</h1><p>스레드와 관련해서 주의할 점이 하나 더 있습니다. 매인 스레드 외의 다른 스레드에서는 <code>사용자 인터페이스(UI) 요소</code>를 변경해서는 안된다는 것입니다. 다른 스레드에서 UI를 변경해야 하는 경우, 메인 스레드에 선언된 <code>핸들러(Handler)</code>로 메시지를 보내야 합니다.</p>
-<p>우선 <code>android.os.Handler</code>클래스를 사용하여 매인 스레드에 핸들러를 정의합니다. <code>handleMessage()</code>는 다른 스레드에서 메시지를 전송했을 때 호출됩니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.os.Handler</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn) &#125;</span><br><span class="line">    <span class="keyword">val</span> textView: TextView <span class="keyword">by</span> lazy &#123; findViewById&lt;TextView&gt;(R.id.activity_main_tv) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> handler = <span class="keyword">object</span>: Handler() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">handleMessage</span><span class="params">(msg: <span class="type">Message</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.handleMessage(msg)</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>새로 생성한 스레드에서는 10초 후에 매인 스레드로 메시지를 전송합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_btn) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">var</span> runnable = Runnable &#123;</span><br><span class="line">                Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> message = handler.obtainMessage()</span><br><span class="line">                <span class="keyword">val</span> bundle = Bundle()</span><br><span class="line">                bundle.putString(<span class="string">&quot;text&quot;</span>, <span class="string">&quot;Hello World&quot;</span>)</span><br><span class="line">                message.<span class="keyword">data</span> = bundle</span><br><span class="line">                handler.sendMessage(message)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> thread = Thread(runnable)</span><br><span class="line">            thread.start()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Handler</code>클래스의 <code>obtainMessage()</code>를 호출하여 메시지를 생성하비다. 이후 <code>Bundle</code> 객체를 사용하여 전송할 데이터를 추가합니다. 마지막으로 <code>sendMessage()</code>를 호출하면 메시지가 전송됩니다.</p>
-<p>이제 매인 스레드에서 메시지를 수신한 후 UI를 변경하겠습니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> handler = <span class="keyword">object</span>: Handler() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">handleMessage</span><span class="params">(msg: <span class="type">Message</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.handleMessage(msg)</span><br><span class="line">            <span class="keyword">val</span> bundle = msg.<span class="keyword">data</span></span><br><span class="line">            <span class="keyword">val</span> string = bundle.getString(<span class="string">&quot;text&quot;</span>)</span><br><span class="line">            string?.let &#123;</span><br><span class="line">                textView.text = it</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>버튼을 클릭하면 10초 후 텍스트 뷰가 변경됩니다.<br><img src="6.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/26/08_android/01_android_platform/190626_thread/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/25/08_android/01_android_platform/190625_process/"
-                            aria-label=": [Android] 프로세스(Process)"
-                        >
-                            [Android] 프로세스(Process)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-25T01:00:00+09:00">
-	
-		    2019/06/25
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="어플리케이션과-프로세스"><a href="#어플리케이션과-프로세스" class="headerlink" title="어플리케이션과 프로세스"></a>어플리케이션과 프로세스</h1><p>리눅스 기반의 운영체제인 안드로이드에서는 어플리케이션이 <code>리눅스 프로세스(Linux Process)</code>로 실행됩니다. 이때 프로세스 이름을 별도로 지정하지 않으면 <code>패키지 이름</code>을 프로세스 이름으로 사용합니다.</p>
-<p>패키지 이름은 <code>AndroidManifest.xml</code>에서 확인할 수 있습니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.your_project_name&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- .. --&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span> </span><br></pre></td></tr></table></figure>
-
-<p>이제 에뮬레이터나 연결된 기기에 앱을 설치합니다. 그리고 ADB를 통해 실제 프로세스 이름을 확인해봅시다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ adb shell</span><br><span class="line"></span><br><span class="line">&gt; ps -ef | grep &quot;com.yologger.your_project_name&quot;</span><br><span class="line">u0_a289   14996   850 0 15:08:05 ?   00:00:01 com.yologger.your_project_name</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p><code>&lt;application&gt;</code>태그 안에서 <code>android:process</code>속성을 사용하여 프로세스 이름을 직접 지정할 수도 있습니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.your_project_name&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:process</span>=<span class="string">&quot;com.yologger.your_process_name&quot;</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span> </span><br></pre></td></tr></table></figure>
-
-<p>다시 프로세스 이름을 확인해봅시다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> ps -ef | grep <span class="string">&quot;com.yologger.your_process_name&quot;</span></span>            </span><br><span class="line">u0_a289   18014   850 1 15:14:50 ?   00:00:01 com.yologger.your_process_name</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<h1 id="컴포넌트와-프로세스"><a href="#컴포넌트와-프로세스" class="headerlink" title="컴포넌트와 프로세스"></a>컴포넌트와 프로세스</h1><p>하나의 애플리케이션은 여러 컴포넌트로 구성됩니다. 대부분의 컴포넌트들은 같은 프로세스에서 실행됩니다. 그러나 컴포넌트를 다른 프로세스에서 실행할 수도 있습니다. 이때는 컴포넌트에서 <code>android:process</code>속성을 사용하면 됩니다.</p>
-<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.your_project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Your_Project&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;com.yolo&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.MAIN&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.LAUNCHER&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> </span></span><br><span class="line"><span class="tag">            <span class="attr">android:name</span>=<span class="string">&quot;.ActivityA&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;com.yolo.process1&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span> </span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> </span></span><br><span class="line"><span class="tag">            <span class="attr">android:name</span>=<span class="string">&quot;.ActivityB&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;com.yolo.process2&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span>  </span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">service</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:name</span>=<span class="string">&quot;.MyService&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:enabled</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:exported</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:process</span>=<span class="string">&quot;com.yolo.process3&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/25/08_android/01_android_platform/190625_process/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/24/08_android/01_android_platform/190624_BroadcastIntent_BroadcastReceiver/"
-                            aria-label=": [Android] 브로드캐스트 인텐트와 브로드케스트 리시버"
-                        >
-                            [Android] 브로드캐스트 인텐트와 브로드케스트 리시버
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-24T01:00:00+09:00">
-	
-		    2019/06/24
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="브로드캐스트-인탠트"><a href="#브로드캐스트-인탠트" class="headerlink" title="브로드캐스트 인탠트"></a>브로드캐스트 인탠트</h1><p><code>브로드캐스트 인탠트(Broadcast Intent)</code>를 사용하면 시스템의 다른 컴포넌트들에게 시스템 차원의 메시지를 전송할 수 있습니다.</p>
-<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>아래와 같이 두 개의 프로젝트를 생성합니다.</p>
-<ul>
-<li>broadcast_sender</li>
-<li>broadcast_receiver</li>
-</ul>
-<h3 id="1-broadcast-sender"><a href="#1-broadcast-sender" class="headerlink" title="(1) broadcast_sender"></a>(1) broadcast_sender</h3><p>broadcast_sender 프로젝트는 브로드캐스트 인텐트를 생성하여 안드로이드 시스템에 전달합니다. 레이아웃은 다음과 같습니다.</p>
-<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_button&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Send Broadcast&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>화면은 다음과 같습니다.<br><img src="1.png"></p>
-<p>코드는 다음과 같습니다. 버튼을 누르면 브로드캐스트 인텐트를 생성하여 시스템에 전송합니다. 이때 <code>sendBroadcast()</code>메소드를 사용합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 인텐트 생성</span></span><br><span class="line">            <span class="keyword">val</span> intent = Intent()</span><br><span class="line">            <span class="comment">// 액션 설정</span></span><br><span class="line">            intent.action = <span class="string">&quot;com.yologger.broadcast_sender&quot;</span></span><br><span class="line">            <span class="comment">// 데이터 추가</span></span><br><span class="line">            intent.putExtra(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;Paul&quot;</span>)</span><br><span class="line">            <span class="comment">// 브로드케스트 인텐트 전송</span></span><br><span class="line">            sendBroadcast(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-broadcast-receiver"><a href="#2-broadcast-receiver" class="headerlink" title="(2) broadcast_receiver"></a>(2) broadcast_receiver</h3><p>broadcast_receiver 프로젝트는 브로드캐스트 인텐트를 수신합니다. 브로드캐스트 인텐트를 수신하려면 <code>BroadcastReceiver</code>클래스를 구현하고 <code>onReceive()</code>메소드를 오버라이딩 해야합니다. 아래 코드는 브로드케스트 인텐트를 수신하면 토스트 메시지를 출력합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>CustomBroadcastReceiver.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomBroadcastReceiver</span> : <span class="type">BroadcastReceiver</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onReceive</span><span class="params">(context: <span class="type">Context</span>, intent: <span class="type">Intent</span>)</span></span> &#123;</span><br><span class="line">        intent.action?.run &#123;</span><br><span class="line">            intent?.extras?.getString(<span class="string">&quot;name&quot;</span>).run &#123;</span><br><span class="line">                Toast.makeText(context, <span class="string">&quot;<span class="variable">$this</span>&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>이제 <code>MainActivity.kt</code>에서 브로드캐스트 리시버를 등록합니다. 브로드캐스트 리시버를 등록할 때는 <code>registerReceiver()</code>메소드를 사용합니다. <code>onDestroy()</code>에서는 <code>unregisterReceiver()</code>메소드를 호출하여 브로드캐스트 리시버를 해제해야합니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> customBroadcastReceiver: CustomBroadcastReceiver</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        customBroadcastReceiver = CustomBroadcastReceiver()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> intentFilter = IntentFilter()</span><br><span class="line">        intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)</span><br><span class="line">        intentFilter.addAction(Intent.ACTION_POWER_CONNECTED)</span><br><span class="line">        intentFilter.addAction(<span class="string">&quot;com.yologger.broadcast_sender&quot;</span>)</span><br><span class="line"></span><br><span class="line">        registerReceiver(customBroadcastReceiver, intentFilter)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy()</span><br><span class="line">        unregisterReceiver(customBroadcastReceiver)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>이제 두 앱을 설치하고 broadcast-receiver 앱을 실행합니다. 이후 broadcast-sender 앱을 실행하고 버튼을 누르면 다음과 같이 토스트 매시지가 출력됩니다.<br><img src="2.png"></p>
-<hr>
-<h1 id="시스템-브로드캐스트-인텐트"><a href="#시스템-브로드캐스트-인텐트" class="headerlink" title="시스템 브로드캐스트 인텐트"></a>시스템 브로드캐스트 인텐트</h1><p>안드로이드 시스템은 전원 연결, 전원 해제, 네트워크 상태 변경 등 특정 이벤트가 발생하면 브로드캐스트 인텐트를 전송합니다. 우리는 이 <code>시스템 브로드캐스트 인텐트</code>도 수신할 수 있습니다. 아래 코드는 전원이 연결되었을 때, 전원이 해제되었을 때 시스템 인텐트를 수신하는 예제입니다.</p>
-<figure class="highlight kotlin"><figcaption><span>CustomBroadcastReceiver.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomBroadcastReceiver</span> : <span class="type">BroadcastReceiver</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onReceive</span><span class="params">(context: <span class="type">Context</span>, intent: <span class="type">Intent</span>)</span></span> &#123;</span><br><span class="line">        intent.action?.run &#123;</span><br><span class="line">            <span class="keyword">when</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">                <span class="comment">// 전원이 연결되었을 때</span></span><br><span class="line">                Intent.ACTION_POWER_CONNECTED -&gt; &#123;</span><br><span class="line">                    Toast.makeText(context, <span class="string">&quot;ACTION POWER CONNECTED&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 전원이 해제되었을 때</span></span><br><span class="line">                Intent.ACTION_POWER_DISCONNECTED -&gt; &#123;</span><br><span class="line">                    Toast.makeText(context, <span class="string">&quot;ACTION POWER DISCONNECTED&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line">                    intent?.extras?.getString(<span class="string">&quot;name&quot;</span>).run &#123;</span><br><span class="line">                        Toast.makeText(context, <span class="string">&quot;<span class="variable">$this</span>&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 휴대폰에 전원코드를 꼽았다 빼면 아래와 같이 토스트 메시지가 출력됩니다.<br><img src="3.png"><br><img src="4.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/24/08_android/01_android_platform/190624_BroadcastIntent_BroadcastReceiver/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
