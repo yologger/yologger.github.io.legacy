@@ -1,0 +1,768 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 의존성 주입(DI) - Koin 사용법 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n안드로이드 의존성 주입 라이브러리들안드로이드에서 사용하는 대표적인 의존성 주입 라이브러리는 세 가지 입니다.\n\nKoin\nDagger 2\nHilt\n\nKoin은 코틀린 환경에서 사용할 수 있는 의존성 주입 라이브러리 입니다. 다른 의존성 주입 라이브러리에 비해 상대적으로 배우고 쉽습니다. 그러나 Koin은 런타임에 리플렉션을 통해 의존성을 주입해주므로 성능이 저하될 수 있습니다.\nDagger나 Hilt는 의존성 주입에 어노테이션을 사용합니다. 어노테이션은 컴파일 타임에 코드로 변환되므로 컴파일 타임은 길어질 수 있으나 런타임에 성능이 저하되지 않습니다. 따라서 큰 규모의 프로젝트에서는 Dagger나 Hilt가 권장됩니다.\n\n설정Koin을 사용하기 위해 의존성을 추가합니다.\n12345dependencies &#123;    // Koin    implementation &quot;io.insert-koin:koin-android:$koin_verison&quot;&#125;\n\n예제LoginPresenter클래스는 다음과 같습니다.\n12345class LoginPresenter &#123;    fun login() &#123;        // do something    &#125;&#125;\n이 객체를 LoginActivity에 주입하려고 합니다.\n123456789101112131415class LoginActivity : AppCompatActivity() &#123;    private val loginButton: Button by lazy &#123; findViewById(R.id.activity_login_btn_login) &#125;    private val loginPresenter: LoginPresenter  // 이 곳에 주입하려고 합니다.    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_login)        loginButton.setOnClickListener &#123;            loginPresenter.login()        &#125;    &#125;&#125;\n\n필드 주입우선 module을 사용하여 객체를 어떻게 주입할지 선언해야합니다. factory()를 사용하면 의존성 주입이 필요할 때 마다 새로운 인스턴스를 생성합니다.\n1234567// presenterModule.ktimport org.koin.dsl.moduleval presenterModule = module &#123;    // LoginPresenter 타입의 변수에 객체를 주입    factory&lt;LoginPresenter&gt; &#123; LoginPresenter() &#125;&#125;\n\nApplication 클래스에서 다음과 같이 Koin을 초기화합니다. modules()안에 위에서 정의한 모듈을 전달합니다.\n1234567891011121314import org.koin.android.ext.koin.androidContextimport org.koin.android.ext.koin.androidLoggerimport org.koin.core.context.startKoinclass App: Application() &#123;    override fun onCreate() &#123;        super.onCreate()        startKoin &#123;            androidLogger()            androidContext(this@App)            modules(presenterModule)        &#125;    &#125;&#125;\n이제 by inject()를 통해 의존성을 주입할 수 있습니다. 아래와 같이 클래스의 멤버변수에 의존성을 주입하는 방법을 필드 주입이라고 합니다.\n1234567891011121314151617import org.koin.android.ext.android.injectclass LoginActivity : AppCompatActivity() &#123;    private val loginButton: Button by lazy &#123; findViewById(R.id.activity_login_btn_login) &#125;    private val loginPresenter: LoginPresenter by inject()  // 의존성 주입    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_login)        loginButton.setOnClickListener &#123;            loginPresenter.login()        &#125;    &#125;&#125;\n\n파라미터가 있는 경우LoginPresenter의 생성자에 파라미터가 있는 예제를 살펴봅시다.\n12345class LoginUseCase &#123;    fun execute() &#123;        // do something    &#125;&#125;\n1234567class LoginPresenter(    private val loginUseCase: LoginUseCase  // 이 곳에도 의존성을 주입해야합니다.) &#123;    fun login() &#123;        loginUseCase.execute()    &#125;&#125;\n이를 위해 useCaseModule을 정의합니다.\n1234val useCaseModule = module &#123;    // LoginUseCase 타입의 변수에 LoginUseCase 객체를 주입합니다.    factory&lt;LoginUseCase&gt; &#123; LoginUseCase() &#125;&#125;\n그리고 presenterModule을 수정합니다. LoginPresenter의 생성자에 LoginUseCase객체를 전달해야하기 때문입니다. 이때 get()을 사용하면 Koin이 적절한 인스턴스를 알아서 주입해줍니다.\n12345678// presenterModule.ktimport org.koin.dsl.moduleval presenterModule = module &#123;    factory&lt;LoginPresenter&gt; &#123;         LoginPresenter(get())    &#125;&#125;\n새로운 모듈을 Application의 modules()에 추가합니다.\n12345678910class App: Application() &#123;    override fun onCreate() &#123;        super.onCreate()        startKoin &#123;            androidLogger()            androidContext(this@App)            modules(presenterModule, useCaseModule)        &#125;    &#125;&#125;\n\n인터페이스에 구현체 주입인터페이스에 구현체를 주입하는 경우에도 Koin을 사용할 수 있습니다. UserRepository 인터페이스와 이를 구현한 UserRepositoryImpl 클래스가 있다고 가정합시다.\n123interface UserRepository &#123;    fun login()&#125; \n12345class UserRepositoryImpl: UserRepository &#123;    override fun login() &#123;        // do something    &#125;&#125;\nLoginUseCase클래스의 생성자에 UserRepositoryImpl 객체를 주입하려고 합니다.\n1234567class LoginUseCase(    private val userRepository: UserRepository) &#123;    fun execute() &#123;        userRepository.login()    &#125;&#125;\n이를 위해 새로운 모듈을 생성합니다.\n12345// repositoryModule.ktval repositoryModule = module &#123;    // UserRepository 타입의 변수에 UserRepositoryImpl 타입의 객체를 주입합니다.    factory&lt;UserRepository&gt; &#123; UserRepositoryImpl() &#125;&#125;\nuseCaseModule도 수정합니다.\n1234// useCaseModule.ktval useCaseModule = module &#123;    factory&lt;LoginUseCase&gt; &#123; LoginUseCase(get()) &#125;&#125;\n새로운 모듈을 Application클래스에서 추가합니다.\n12345678910class App: Application() &#123;    override fun onCreate() &#123;        super.onCreate()        startKoin &#123;            androidLogger()            androidContext(this@App)            modules(presenterModule, useCaseModule, repositoryModule)        &#125;    &#125;&#125;\n\n싱글톤factory()를 사용하면 의존성을 주입할 때 매번 새로운 객체를 생성합니다. 반면 single()을 사용하면 주입되는 객체를 싱글톤으로 유지합니다.\n123val repositoryModule = module &#123;    single&lt;UserRepository&gt; &#123; UserRepositoryImpl() &#125;&#125;\n\nViewModel 주입Koin을 사용하면 MVVM아키텍처에서 ViewModel을 쉽게 주입할 수 있습니다. LoginViewModel을 LoginActivity에 주입해보겠습니다.\n12345class LoginViewModel: ViewModel() &#123;    fun login() &#123;        // do something.    &#125;&#125;\nViewModel을 위한 모듈을 정의합니다. 이 때 factory()나 single() 대신 viewModel()을 사용합니다.\n1234567import org.koin.androidx.viewmodel.dsl.viewModelimport org.koin.dsl.moduleval viewModelModule = module &#123;    // viewModel()    viewModel&lt;LoginViewModel&gt; &#123; LoginViewModel() &#125;&#125;\n액티비티에서는 by viewModel()을 통해 ViewModel을 주입받을 수 있습니다.\n1234567891011121314151617import org.koin.androidx.viewmodel.ext.android.viewModelclass LoginActivity : AppCompatActivity() &#123;    private val loginButton: Button by lazy &#123; findViewById(R.id.activity_login_btn_login) &#125;    private val loginViewModel: LoginViewModel by viewModel()   // ViewModel 주입    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_login)        loginButton.setOnClickListener &#123;            loginViewModel.login()        &#125;    &#125;&#125;\n모듈을 Application클래스에 추가합니다.\n12345678910class App: Application() &#123;    override fun onCreate() &#123;        super.onCreate()        startKoin &#123;            androidLogger()            androidContext(this@App)            modules(viewModelModule)        &#125;    &#125;&#125;\n\n뷰모델의 생성자에 파라미터가 있는 경우Koin을 사용하지 않는 프로젝트에서는 생성자의 파라미터가 있는 뷰모델을 생성하기 위해 ViewModelFactory를 정의해야합니다. 그러나 Koin을 사용하면 ViewModelFactory를 자동으로 생성해주기 때문에 직접 ViewModelFactory를 정의할 필요가 없습니다.\n123456class LoginViewModel(    private val loginUseCase: LoginUseCase) : ViewModel() &#123;    fun login() &#123;        loginUseCase.execute()    &#125;\n123val viewModelModule = module &#123;    viewModel&lt;LoginViewModel&gt; &#123; LoginViewModel(get()) &#125;&#125;\n123456789101112131415161718import org.koin.androidx.viewmodel.ext.android.viewModelclass LoginActivity : AppCompatActivity() &#123;    private val loginButton: Button by lazy &#123; findViewById(R.id.activity_login_btn_login) &#125;    // 뷰모델 주입    private val loginViewModel: LoginViewModel by viewModel()    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_login)        loginButton.setOnClickListener &#123;            loginViewModel.login()        &#125;    &#125;&#125;","dateCreated":"2020-08-01T01:00:00+09:00","dateModified":"2021-12-16T19:02:36+09:00","datePublished":"2020-08-01T01:00:00+09:00","description":"","headline":"[Android] 의존성 주입(DI) - Koin 사용법","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/","keywords":"Android, DI, Koin"}</script>
+    <meta name="description" content="안드로이드 의존성 주입 라이브러리들안드로이드에서 사용하는 대표적인 의존성 주입 라이브러리는 세 가지 입니다.  Koin Dagger 2 Hilt  Koin은 코틀린 환경에서 사용할 수 있는 의존성 주입 라이브러리 입니다. 다른 의존성 주입 라이브러리에 비해 상대적으로 배우고 쉽습니다. 그러나 Koin은 런타임에 리플렉션을 통해 의존성을 주입해주므로 성능이">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 의존성 주입(DI) - Koin 사용법">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="안드로이드 의존성 주입 라이브러리들안드로이드에서 사용하는 대표적인 의존성 주입 라이브러리는 세 가지 입니다.  Koin Dagger 2 Hilt  Koin은 코틀린 환경에서 사용할 수 있는 의존성 주입 라이브러리 입니다. 다른 의존성 주입 라이브러리에 비해 상대적으로 배우고 쉽습니다. 그러나 Koin은 런타임에 리플렉션을 통해 의존성을 주입해주므로 성능이">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-07-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-16T10:02:36.752Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="DI">
+<meta property="article:tag" content="Koin">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 의존성 주입(DI) - Koin 사용법
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-08-01T01:00:00+09:00">
+	
+		    2020/08/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/DI/">DI</a>, <a class="category-link" href="/ko/categories/Android/DI/Koin/">Koin</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="안드로이드-의존성-주입-라이브러리들"><a href="#안드로이드-의존성-주입-라이브러리들" class="headerlink" title="안드로이드 의존성 주입 라이브러리들"></a>안드로이드 의존성 주입 라이브러리들</h1><p>안드로이드에서 사용하는 대표적인 의존성 주입 라이브러리는 세 가지 입니다.</p>
+<ul>
+<li><code>Koin</code></li>
+<li><code>Dagger 2</code></li>
+<li><code>Hilt</code></li>
+</ul>
+<p><code>Koin</code>은 코틀린 환경에서 사용할 수 있는 의존성 주입 라이브러리 입니다. 다른 의존성 주입 라이브러리에 비해 상대적으로 배우고 쉽습니다. 그러나 <code>Koin</code>은 런타임에 리플렉션을 통해 의존성을 주입해주므로 성능이 저하될 수 있습니다.</p>
+<p><code>Dagger</code>나 <code>Hilt</code>는 의존성 주입에 어노테이션을 사용합니다. 어노테이션은 컴파일 타임에 코드로 변환되므로 컴파일 타임은 길어질 수 있으나 런타임에 성능이 저하되지 않습니다. 따라서 큰 규모의 프로젝트에서는 <code>Dagger</code>나 <code>Hilt</code>가 권장됩니다.</p>
+<hr>
+<h1 id="설정"><a href="#설정" class="headerlink" title="설정"></a>설정</h1><p><code>Koin</code>을 사용하기 위해 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Koin</span></span><br><span class="line">    implementation <span class="string">&quot;io.insert-koin:koin-android:$koin_verison&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p><code>LoginPresenter</code>클래스는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginPresenter</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// do something</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 객체를 <code>LoginActivity</code>에 주입하려고 합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginButton: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_login_btn_login) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginPresenter: LoginPresenter  <span class="comment">// 이 곳에 주입하려고 합니다.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_login)</span><br><span class="line"></span><br><span class="line">        loginButton.setOnClickListener &#123;</span><br><span class="line">            loginPresenter.login()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="필드-주입"><a href="#필드-주입" class="headerlink" title="필드 주입"></a>필드 주입</h1><p>우선 <code>module</code>을 사용하여 객체를 어떻게 주입할지 선언해야합니다. <code>factory()</code>를 사용하면 의존성 주입이 필요할 때 마다 새로운 인스턴스를 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// presenterModule.kt</span></span><br><span class="line"><span class="keyword">import</span> org.koin.dsl.module</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> presenterModule = module &#123;</span><br><span class="line">    <span class="comment">// LoginPresenter 타입의 변수에 객체를 주입</span></span><br><span class="line">    factory&lt;LoginPresenter&gt; &#123; LoginPresenter() &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Application</code> 클래스에서 다음과 같이 <code>Koin</code>을 초기화합니다. <code>modules()</code>안에 위에서 정의한 모듈을 전달합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.koin.android.ext.koin.androidContext</span><br><span class="line"><span class="keyword">import</span> org.koin.android.ext.koin.androidLogger</span><br><span class="line"><span class="keyword">import</span> org.koin.core.context.startKoin</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">App</span>: <span class="type">Application</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        startKoin &#123;</span><br><span class="line">            androidLogger()</span><br><span class="line">            androidContext(<span class="keyword">this</span><span class="symbol">@App</span>)</span><br><span class="line">            modules(presenterModule)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>by inject()</code>를 통해 의존성을 주입할 수 있습니다. 아래와 같이 클래스의 멤버변수에 의존성을 주입하는 방법을 <code>필드 주입</code>이라고 합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.koin.android.ext.android.inject</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginButton: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_login_btn_login) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginPresenter: LoginPresenter <span class="keyword">by</span> inject()  <span class="comment">// 의존성 주입</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_login)</span><br><span class="line"></span><br><span class="line">        loginButton.setOnClickListener &#123;</span><br><span class="line">            loginPresenter.login()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="파라미터가-있는-경우"><a href="#파라미터가-있는-경우" class="headerlink" title="파라미터가 있는 경우"></a>파라미터가 있는 경우</h1><p><code>LoginPresenter</code>의 생성자에 파라미터가 있는 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginUseCase</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">execute</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// do something</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginPresenter</span></span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginUseCase: LoginUseCase  <span class="comment">// 이 곳에도 의존성을 주입해야합니다.</span></span><br><span class="line">) &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> &#123;</span><br><span class="line">        loginUseCase.execute()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이를 위해 <code>useCaseModule</code>을 정의합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> useCaseModule = module &#123;</span><br><span class="line">    <span class="comment">// LoginUseCase 타입의 변수에 LoginUseCase 객체를 주입합니다.</span></span><br><span class="line">    factory&lt;LoginUseCase&gt; &#123; LoginUseCase() &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>그리고 <code>presenterModule</code>을 수정합니다. <code>LoginPresenter</code>의 생성자에 <code>LoginUseCase</code>객체를 전달해야하기 때문입니다. 이때 <code>get()</code>을 사용하면 <code>Koin</code>이 적절한 인스턴스를 알아서 주입해줍니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// presenterModule.kt</span></span><br><span class="line"><span class="keyword">import</span> org.koin.dsl.module</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> presenterModule = module &#123;</span><br><span class="line">    factory&lt;LoginPresenter&gt; &#123; </span><br><span class="line">        LoginPresenter(<span class="keyword">get</span>())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>새로운 모듈을 <code>Application</code>의 <code>modules()</code>에 추가합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">App</span>: <span class="type">Application</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        startKoin &#123;</span><br><span class="line">            androidLogger()</span><br><span class="line">            androidContext(<span class="keyword">this</span><span class="symbol">@App</span>)</span><br><span class="line">            modules(presenterModule, useCaseModule)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="인터페이스에-구현체-주입"><a href="#인터페이스에-구현체-주입" class="headerlink" title="인터페이스에 구현체 주입"></a>인터페이스에 구현체 주입</h1><p>인터페이스에 구현체를 주입하는 경우에도 <code>Koin</code>을 사용할 수 있습니다. <code>UserRepository</code> 인터페이스와 이를 구현한 <code>UserRepositoryImpl</code> 클래스가 있다고 가정합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">UserRepository</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span></span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserRepositoryImpl</span>: <span class="type">UserRepository &#123;</span></span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// do something</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>LoginUseCase</code>클래스의 생성자에 <code>UserRepositoryImpl</code> 객체를 주입하려고 합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginUseCase</span></span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> userRepository: UserRepository</span><br><span class="line">) &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">execute</span><span class="params">()</span></span> &#123;</span><br><span class="line">        userRepository.login()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이를 위해 새로운 모듈을 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// repositoryModule.kt</span></span><br><span class="line"><span class="keyword">val</span> repositoryModule = module &#123;</span><br><span class="line">    <span class="comment">// UserRepository 타입의 변수에 UserRepositoryImpl 타입의 객체를 주입합니다.</span></span><br><span class="line">    factory&lt;UserRepository&gt; &#123; UserRepositoryImpl() &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>useCaseModule</code>도 수정합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// useCaseModule.kt</span></span><br><span class="line"><span class="keyword">val</span> useCaseModule = module &#123;</span><br><span class="line">    factory&lt;LoginUseCase&gt; &#123; LoginUseCase(<span class="keyword">get</span>()) &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>새로운 모듈을 <code>Application</code>클래스에서 추가합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">App</span>: <span class="type">Application</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        startKoin &#123;</span><br><span class="line">            androidLogger()</span><br><span class="line">            androidContext(<span class="keyword">this</span><span class="symbol">@App</span>)</span><br><span class="line">            modules(presenterModule, useCaseModule, repositoryModule)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="싱글톤"><a href="#싱글톤" class="headerlink" title="싱글톤"></a>싱글톤</h1><p><code>factory()</code>를 사용하면 의존성을 주입할 때 매번 새로운 객체를 생성합니다. 반면 <code>single()</code>을 사용하면 주입되는 객체를 싱글톤으로 유지합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> repositoryModule = module &#123;</span><br><span class="line">    single&lt;UserRepository&gt; &#123; UserRepositoryImpl() &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="ViewModel-주입"><a href="#ViewModel-주입" class="headerlink" title="ViewModel 주입"></a>ViewModel 주입</h1><p><code>Koin</code>을 사용하면 <code>MVVM</code>아키텍처에서 <code>ViewModel</code>을 쉽게 주입할 수 있습니다. <code>LoginViewModel</code>을 <code>LoginActivity</code>에 주입해보겠습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginViewModel</span>: <span class="type">ViewModel</span></span>() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// do something.</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ViewModel</code>을 위한 모듈을 정의합니다. 이 때 <code>factory()</code>나 <code>single()</code> 대신 <code>viewModel()</code>을 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.koin.androidx.viewmodel.dsl.viewModel</span><br><span class="line"><span class="keyword">import</span> org.koin.dsl.module</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> viewModelModule = module &#123;</span><br><span class="line">    <span class="comment">// viewModel()</span></span><br><span class="line">    viewModel&lt;LoginViewModel&gt; &#123; LoginViewModel() &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>액티비티에서는 <code>by viewModel()</code>을 통해 <code>ViewModel</code>을 주입받을 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.koin.androidx.viewmodel.ext.android.viewModel</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginButton: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_login_btn_login) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginViewModel: LoginViewModel <span class="keyword">by</span> viewModel()   <span class="comment">// ViewModel 주입</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_login)</span><br><span class="line"></span><br><span class="line">        loginButton.setOnClickListener &#123;</span><br><span class="line">            loginViewModel.login()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>모듈을 <code>Application</code>클래스에 추가합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">App</span>: <span class="type">Application</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        startKoin &#123;</span><br><span class="line">            androidLogger()</span><br><span class="line">            androidContext(<span class="keyword">this</span><span class="symbol">@App</span>)</span><br><span class="line">            modules(viewModelModule)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="뷰모델의-생성자에-파라미터가-있는-경우"><a href="#뷰모델의-생성자에-파라미터가-있는-경우" class="headerlink" title="뷰모델의 생성자에 파라미터가 있는 경우"></a>뷰모델의 생성자에 파라미터가 있는 경우</h1><p><code>Koin</code>을 사용하지 않는 프로젝트에서는 생성자의 파라미터가 있는 뷰모델을 생성하기 위해 <code>ViewModelFactory</code>를 정의해야합니다. 그러나 <code>Koin</code>을 사용하면 <code>ViewModelFactory</code>를 자동으로 생성해주기 때문에 직접 <code>ViewModelFactory</code>를 정의할 필요가 없습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginViewModel</span></span>(</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginUseCase: LoginUseCase</span><br><span class="line">) : ViewModel() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> &#123;</span><br><span class="line">        loginUseCase.execute()</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> viewModelModule = module &#123;</span><br><span class="line">    viewModel&lt;LoginViewModel&gt; &#123; LoginViewModel(<span class="keyword">get</span>()) &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.koin.androidx.viewmodel.ext.android.viewModel</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginButton: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_login_btn_login) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 뷰모델 주입</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> loginViewModel: LoginViewModel <span class="keyword">by</span> viewModel()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_login)</span><br><span class="line"></span><br><span class="line">        loginButton.setOnClickListener &#123;</span><br><span class="line">            loginViewModel.login()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/DI/" rel="tag">DI</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Koin/" rel="tag">Koin</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/02/08_android/12_di/20200802_dagger/"
+                    data-tooltip="[Android] 의존성 주입(DI) - Dagger 사용법"
+                    aria-label="이전: [Android] 의존성 주입(DI) - Dagger 사용법"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/07/05/08_android/03_jetpack/01_architecture/20200705_data_binding/"
+                    data-tooltip="[Android Jetpack] Data Binding 개념 및 사용법"
+                    aria-label="다음: [Android Jetpack] Data Binding 개념 및 사용법"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/02/08_android/12_di/20200802_dagger/"
+                    data-tooltip="[Android] 의존성 주입(DI) - Dagger 사용법"
+                    aria-label="이전: [Android] 의존성 주입(DI) - Dagger 사용법"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/07/05/08_android/03_jetpack/01_architecture/20200705_data_binding/"
+                    data-tooltip="[Android Jetpack] Data Binding 개념 및 사용법"
+                    aria-label="다음: [Android Jetpack] Data Binding 개념 및 사용법"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

@@ -1,0 +1,781 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.\n\n코루틴이란?\nwithContext()와 suspend 함수\n스코프(Scope)의 종류\n코루틴 생성하기 - launch(), async(), runBlocking()\n코루틴 예외 처리\nFlow, Channel, StateFlow\n\n\nFlow코루틴의 Flow는 순차적으로 값을 방출하고 정상적으로 또는 예외로 완료되는 비동기적인 스트림입니다. RxJava나 RxKotlin의 Observable과 유사합니다.\nFlow는 다음과 같이 생성합니다.\n123val flow = flow &#123;    // ..&#125;\n이제 Flow에서 정수 1, 2, 3을 방출해보겠습니다.\n12345val flow = flow &#123;    emit(1)    emit(2)    emit(3)&#125;\n이렇게 방출된 데이터는 collect()메소드를 통해 수신할 수 있습니다.\n12345678910val flow = flow &#123;    emit(1)    emit(2)    emit(3)&#125;flow    .collect &#123; value -&gt;        println(value)    &#125;\n그러나 위 코드를 실행하면 다음과 같은 에러가 발생합니다.\n1Suspend function &#x27;collect&#x27; should be called only from a coroutine or another suspend function\ncollect()함수는 코루틴에서 호출해야하기 때문입니다. 따라서 코루틴 내에서 collect()를 호출하도록 수정합시다.\n12345678910111213141516val flow = flow &#123;    emit(1)    emit(2)    emit(3)&#125;// 스코프 생성val scope = CoroutineScope(Dispatchers.IO)// 코루틴 생성scope.launch &#123;    flow        .collect &#123;            println(it)        &#125;&#125;\n위 코드는 Flow의 데이터 방출과 데이터 수신을 모두 Dispatchers.IO가 제공하는 스레드에서 처리합니다. 만약 데이터 수신만 매인 스레드에서 수행하려면 다음과 같이 코드를 수정합니다.\n123456789101112131415161718val flow = flow &#123;    emit(1)    emit(2)    emit(3)&#125;// 스코프 생성val scope = CoroutineScope(Dispatchers.IO)// 코루틴 생성scope.launch &#123;    flow        .collect &#123;            withContext(Dispatchers.Main) &#123;                println(it)            &#125;        &#125;&#125;\ndelay()함수를 사용하면 데이터 방출 주기를 조절할 수 있습니다. 1초에 한 번씩 한 개의 데이터를 방출하는 코드는 다음과 같습니다.\n123456val flow = flow &#123;    for (i: Int in 1..10) &#123;        emit(i)        delay(1000)    &#125;&#125;\n\nFlow 내부에서 Exception을 방출할 수도 있습니다.\n123456789val flow = flow &#123;    for (i: Int in 1..10) &#123;        emit(i)        delay(1000)        if (i == 5) &#123;            throw Exception(&quot;This is error&quot;)        &#125;    &#125;&#125;\n이러한 경우 try-catch구문으로 에러를 처리할 수 있습니다.\n123456789101112131415161718192021222324val flow = flow &#123;    for (i: Int in 1..10) &#123;        emit(i)        delay(1000)        if (i == 5) &#123;            throw Exception(&quot;This is error&quot;)        &#125;    &#125;&#125;val scope = CoroutineScope(Dispatchers.IO)scope.launch &#123;    try &#123;        flow            .collect &#123;                withContext(Dispatchers.Main) &#123;                    println(it)                &#125;            &#125;    &#125; catch (e: Exception) &#123;        println(&quot;error: $&#123;e.localizedMessage&#125;&quot;)    &#125;&#125;\n다음과 같이 catch()를 사용하여 에러를 처리할 수도 있습니다.\n1234567891011scope.launch &#123;    flow        .catch &#123; e -&gt;            println(&quot;error: $&#123;e.localizedMessage&#125;&quot;)        &#125;        .collect &#123;            withContext(Dispatchers.Main) &#123;                println(it)            &#125;        &#125;&#125;\n\nChannelFlow가 콜드 스트림이면 Channel은 핫 스트림입니다. 구독자의 관찰 여부와 상관없이 데이터를 방출합니다. RxJava의 Subject와 유사합니다. \n버튼을 누르면 Channel로 데이터를 한 개 배출하고, 이를 수신하여 로그에 출력하는 예제를 살펴봅시다.\n1234567891011121314class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        // 버튼을 눌렀을 때        button.setOnClickListener &#123;        &#125;    &#125;&#125;    \nChannel은 다음과 같이 생성합니다.\n12345678910111213141516class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    // 채널 생성    val channel = Channel&lt;String&gt;()    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;        &#125;    &#125;&#125;    \nChannel클래스의 send()함수를 사용하여 채널에 데이터를 방출할 수 있습니다. send()함수는 suspend함수이므로 코루틴 내에서 호출되어야 합니다.\n1234567891011121314151617181920212223class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    // 채널 생성    val channel = Channel&lt;String&gt;()    // 스코프 생성    private val scope = CoroutineScope(Dispatchers.Main)    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;            // 코루틴 생성            scope.launch(Dispatchers.IO) &#123;                // 데이터 방출                channel.send(&quot;Data&quot;)            &#125;        &#125;    &#125;&#125;    \n이제 데이터가 방출될 때 마다 수신하도록 관찰자를 등록합니다. Channel클래스의 consumeEach()를 사용하면 됩니다. consumeEach()또한 suspend함수이므로 코루틴 내에서 호출되어야합니다.\n1234567891011121314151617181920212223242526272829class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    // 채널 생성    val channel = Channel&lt;String&gt;()    // 스코프 생성    private val scope = CoroutineScope(Dispatchers.Main)    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;                    scope.launch(Dispatchers.IO) &#123;                channel.send(&quot;Data&quot;)            &#125;            scope.launch &#123;                // 채널 관찰                channel.consumeEach &#123;                    println(it)                &#125;            &#125;        &#125;    &#125;&#125;    \n이제 앱을 실행합시다. 버튼을 클릭할 때 마다 로그에 아래와 같이 출력됩니다.\n1234Data    // 첫 번째 클릭Data    // 두 번째 클릭Data    // 세 번째 클릭...\nChannel을 다 사용하면 Channel클래스의 close()를 호출하여 자원을 해제해야합니다. Activity의 onDestroy()에서 이 함수를 호출해줍니다.\n1234567891011121314151617181920212223242526272829303132class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    val channel = Channel&lt;String&gt;()    private val scope = CoroutineScope(Dispatchers.Main)    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;                    scope.launch(Dispatchers.IO) &#123;                channel.send(&quot;Data&quot;)            &#125;            scope.launch &#123;                channel.consumeEach &#123;                    println(it)                &#125;            &#125;        &#125;    &#125;    override fun onDestroy() &#123;        super.onDestroy()        // 액티비티가 메모리에서 사라질 때 자원 해제        channel.close()    &#125;&#125;    \n\nStateFlow코루틴의 Flow나 Channel은 이벤트 기반의 스트림입니다. 상태를 유지하지 않으며, 이벤트 방출과 함께 값을 수신자에게 전달합니다.\n반면 코루틴의 StateFlow 상태 기반의 스트림입니다. 상태가 변하면 수신자에게 이 사실을 통보하게 됩니다. 상태 기반의 스트림은 상태가 변한 후에도 값을 유지합니다. 따라서 상태가 변한 후에도 값에 계속 접근할 수 있습니다. 이러한 점에서 StateFlow은 LiveData와 유사합니다.\n\n\n\nCoroutine\n설명\n\n\n\nFlow\nRxJava의 Observable과 유사\n\n\nChannel\nRxJava의 Subject와 유사\n\n\nLiveData\nACC의 LiveData와 유사\n\n\n버튼을 누르면 StateFlow의 상태를 변화시키고, 이를 탐지하여 로그에 출력하는 예제를 살펴봅시다.\n1234567891011121314class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        // 버튼을 눌렀을 때        button.setOnClickListener &#123;        &#125;    &#125;&#125;    \nStateFlow는 상태를 변화시킬 수 없으며 MutableStateFlow는 상태를 변화시킬 수 있습니다. 보통 캡슐화를 위해 다음과 같이 StateFlow를 생성합니다.\n1234567891011121314151617class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    // StateFlow 생성    val _stateFlow = MutableStateFlow(1)    //  초기값 1    val stateFlow = _stateFlow    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;        &#125;    &#125;&#125;    \n이제 버튼을 클릭할 때 마다 상태에 저장된 값을 1씩 증가시키겠습니다.\n1234567891011121314151617class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    val _stateFlow = MutableStateFlow(1)    val stateFlow = _stateFlow    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;            // 값을 1씩 증가            _stateFlow.value = _stateFlow.value + 1        &#125;    &#125;&#125;    \nStateFlow의 상태변화는 collect()함수를 사용하여 관찰합니다. collect()는 suspend()함수이므로 코루틴 내에서 호출합니다.\n1234567891011121314151617181920212223242526class MainActivity : AppCompatActivity() &#123;    // 스코프 생성    val scope = CoroutineScope(Dispatchers.Main)    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    val _stateFlow = MutableStateFlow(1)    val stateFlow = _stateFlow    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;            _stateFlow.value = _stateFlow.value + 1        &#125;        scope.launch &#123;            // StateFlow 관찰            stateFlow.collect &#123;                print(it)            &#125;        &#125;    &#125;&#125;    ","dateCreated":"2020-09-06T00:00:00+09:00","dateModified":"2021-12-16T19:36:48+09:00","datePublished":"2020-09-06T00:00:00+09:00","description":"","headline":"[Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/","keywords":"Android, Coroutine"}</script>
+    <meta name="description" content="여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.  코루틴이란? withContext()와 suspend 함수 스코프(Scope)의 종류 코루틴 생성하기 - launch(), async(), runBlocking() 코루틴 예외 처리 Flow, Channel, StateFlow   Flow코루틴의 Flow는 순차적으로 값을 방출">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.  코루틴이란? withContext()와 suspend 함수 스코프(Scope)의 종류 코루틴 생성하기 - launch(), async(), runBlocking() 코루틴 예외 처리 Flow, Channel, StateFlow   Flow코루틴의 Flow는 순차적으로 값을 방출">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-09-05T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-16T10:36:48.832Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Coroutine">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-09-06T00:00:00+09:00">
+	
+		    2020/09/06
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Coroutine/">Coroutine</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<p>여섯 개의 포스트에 걸쳐 <code>코루틴(Coroutine)</code>에 대해 알아보고있습니다.</p>
+<ol>
+<li><a href="/ko/2020/09/01/08_android/05_coroutine/200901_coroutine/">코루틴이란?</a></li>
+<li><a href="/ko/2020/09/02/08_android/05_coroutine/200902_withContext_suspend/">withContext()와 suspend 함수</a></li>
+<li><a href="/ko/2020/09/03/08_android/05_coroutine/200903_scope/">스코프(Scope)의 종류</a></li>
+<li><a href="/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/">코루틴 생성하기 - launch(), async(), runBlocking()</a></li>
+<li><a href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/">코루틴 예외 처리</a></li>
+<li><a href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/">Flow, Channel, StateFlow</a></li>
+</ol>
+<hr>
+<h1 id="Flow"><a href="#Flow" class="headerlink" title="Flow"></a>Flow</h1><p>코루틴의 <code>Flow</code>는 순차적으로 값을 방출하고 정상적으로 또는 예외로 완료되는 비동기적인 <code>스트림</code>입니다. <code>RxJava</code>나 <code>RxKotlin</code>의 <code>Observable</code>과 유사합니다.</p>
+<p><code>Flow</code>는 다음과 같이 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>Flow</code>에서 정수 1, 2, 3을 방출해보겠습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    emit(<span class="number">1</span>)</span><br><span class="line">    emit(<span class="number">2</span>)</span><br><span class="line">    emit(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이렇게 방출된 데이터는 <code>collect()</code>메소드를 통해 수신할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    emit(<span class="number">1</span>)</span><br><span class="line">    emit(<span class="number">2</span>)</span><br><span class="line">    emit(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">flow</span><br><span class="line">    .collect &#123; value -&gt;</span><br><span class="line">        println(value)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>그러나 위 코드를 실행하면 다음과 같은 에러가 발생합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Suspend function &#x27;collect&#x27; should be called only from a coroutine or another suspend function</span><br></pre></td></tr></table></figure>
+<p><code>collect()</code>함수는 코루틴에서 호출해야하기 때문입니다. 따라서 코루틴 내에서 <code>collect()</code>를 호출하도록 수정합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    emit(<span class="number">1</span>)</span><br><span class="line">    emit(<span class="number">2</span>)</span><br><span class="line">    emit(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 스코프 생성</span></span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 코루틴 생성</span></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    flow</span><br><span class="line">        .collect &#123;</span><br><span class="line">            println(it)</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드는 <code>Flow</code>의 <u>데이터 방출</u>과 <u>데이터 수신</u>을 모두 <code>Dispatchers.IO</code>가 제공하는 스레드에서 처리합니다. 만약 <u>데이터 수신</u>만 매인 스레드에서 수행하려면 다음과 같이 코드를 수정합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    emit(<span class="number">1</span>)</span><br><span class="line">    emit(<span class="number">2</span>)</span><br><span class="line">    emit(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 스코프 생성</span></span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 코루틴 생성</span></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    flow</span><br><span class="line">        .collect &#123;</span><br><span class="line">            withContext(Dispatchers.Main) &#123;</span><br><span class="line">                println(it)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>delay()</code>함수를 사용하면 데이터 방출 주기를 조절할 수 있습니다. 1초에 한 번씩 한 개의 데이터를 방출하는 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    <span class="keyword">for</span> (i: <span class="built_in">Int</span> <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123;</span><br><span class="line">        emit(i)</span><br><span class="line">        delay(<span class="number">1000</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Flow</code> 내부에서 <code>Exception</code>을 방출할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    <span class="keyword">for</span> (i: <span class="built_in">Int</span> <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123;</span><br><span class="line">        emit(i)</span><br><span class="line">        delay(<span class="number">1000</span>)</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">5</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> Exception(<span class="string">&quot;This is error&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이러한 경우 <code>try-catch</code>구문으로 에러를 처리할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    <span class="keyword">for</span> (i: <span class="built_in">Int</span> <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123;</span><br><span class="line">        emit(i)</span><br><span class="line">        delay(<span class="number">1000</span>)</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">5</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> Exception(<span class="string">&quot;This is error&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        flow</span><br><span class="line">            .collect &#123;</span><br><span class="line">                withContext(Dispatchers.Main) &#123;</span><br><span class="line">                    println(it)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">        println(<span class="string">&quot;error: <span class="subst">$&#123;e.localizedMessage&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 <code>catch()</code>를 사용하여 에러를 처리할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scope.launch &#123;</span><br><span class="line">    flow</span><br><span class="line">        .<span class="keyword">catch</span> &#123; e -&gt;</span><br><span class="line">            println(<span class="string">&quot;error: <span class="subst">$&#123;e.localizedMessage&#125;</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        .collect &#123;</span><br><span class="line">            withContext(Dispatchers.Main) &#123;</span><br><span class="line">                println(it)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h1><p><code>Flow</code>가 <a href="/ko/2020/01/09/08_android/04_reactivex/20200109_stream_dataflow/">콜드 스트림</a>이면 <code>Channel</code>은 <a href="/ko/2020/01/09/08_android/04_reactivex/20200109_stream_dataflow/">핫 스트림</a>입니다. 구독자의 관찰 여부와 상관없이 데이터를 방출합니다. <code>RxJava</code>의 <a href="/ko/2020/01/08/08_android/04_reactivex/20200108_subject/"><code>Subject</code></a>와 유사합니다. </p>
+<p>버튼을 누르면 <code>Channel</code>로 데이터를 한 개 배출하고, 이를 수신하여 로그에 출력하는 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 버튼을 눌렀을 때</span></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p><code>Channel</code>은 다음과 같이 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 채널 생성</span></span><br><span class="line">    <span class="keyword">val</span> channel = Channel&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p><code>Channel</code>클래스의 <code>send()</code>함수를 사용하여 채널에 데이터를 방출할 수 있습니다. <code>send()</code>함수는 <code>suspend</code>함수이므로 코루틴 내에서 호출되어야 합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 채널 생성</span></span><br><span class="line">    <span class="keyword">val</span> channel = Channel&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 스코프 생성</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 코루틴 생성</span></span><br><span class="line">            scope.launch(Dispatchers.IO) &#123;</span><br><span class="line">                <span class="comment">// 데이터 방출</span></span><br><span class="line">                channel.send(<span class="string">&quot;Data&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p>이제 데이터가 방출될 때 마다 수신하도록 관찰자를 등록합니다. <code>Channel</code>클래스의 <code>consumeEach()</code>를 사용하면 됩니다. <code>consumeEach()</code>또한 <code>suspend</code>함수이므로 코루틴 내에서 호출되어야합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 채널 생성</span></span><br><span class="line">    <span class="keyword">val</span> channel = Channel&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 스코프 생성</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">        </span><br><span class="line">            scope.launch(Dispatchers.IO) &#123;</span><br><span class="line">                channel.send(<span class="string">&quot;Data&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            scope.launch &#123;</span><br><span class="line">                <span class="comment">// 채널 관찰</span></span><br><span class="line">                channel.consumeEach &#123;</span><br><span class="line">                    println(it)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행합시다. 버튼을 클릭할 때 마다 로그에 아래와 같이 출력됩니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Data    // 첫 번째 클릭</span><br><span class="line">Data    // 두 번째 클릭</span><br><span class="line">Data    // 세 번째 클릭</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p><code>Channel</code>을 다 사용하면 <code>Channel</code>클래스의 <code>close()</code>를 호출하여 자원을 해제해야합니다. <code>Activity</code>의 <code>onDestroy()</code>에서 이 함수를 호출해줍니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> channel = Channel&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">        </span><br><span class="line">            scope.launch(Dispatchers.IO) &#123;</span><br><span class="line">                channel.send(<span class="string">&quot;Data&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            scope.launch &#123;</span><br><span class="line">                channel.consumeEach &#123;</span><br><span class="line">                    println(it)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy()</span><br><span class="line">        <span class="comment">// 액티비티가 메모리에서 사라질 때 자원 해제</span></span><br><span class="line">        channel.close()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+
+<h1 id="StateFlow"><a href="#StateFlow" class="headerlink" title="StateFlow"></a>StateFlow</h1><p>코루틴의 <code>Flow</code>나 <code>Channel</code>은 <a href="/ko/2020/01/01/08_android/04_reactivex/20200101_reactive_programming/">이벤트 기반의 스트림</a>입니다. 상태를 유지하지 않으며, 이벤트 방출과 함께 값을 수신자에게 전달합니다.</p>
+<p>반면 코루틴의 <code>StateFlow</code> <a href="/ko/2020/01/01/08_android/04_reactivex/20200101_reactive_programming/">상태 기반의 스트림</a>입니다. 상태가 변하면 수신자에게 이 사실을 통보하게 됩니다. <code>상태 기반의 스트림</code>은 상태가 변한 후에도 값을 유지합니다. 따라서 상태가 변한 후에도 값에 계속 접근할 수 있습니다. 이러한 점에서 <code>StateFlow</code>은 <code>LiveData</code>와 유사합니다.</p>
+<table>
+<thead>
+<tr>
+<th>Coroutine</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Flow</td>
+<td>RxJava의 Observable과 유사</td>
+</tr>
+<tr>
+<td>Channel</td>
+<td>RxJava의 Subject와 유사</td>
+</tr>
+<tr>
+<td>LiveData</td>
+<td>ACC의 LiveData와 유사</td>
+</tr>
+</tbody></table>
+<p>버튼을 누르면 <code>StateFlow</code>의 상태를 변화시키고, 이를 탐지하여 로그에 출력하는 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 버튼을 눌렀을 때</span></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p><code>StateFlow</code>는 상태를 변화시킬 수 없으며 <code>MutableStateFlow</code>는 상태를 변화시킬 수 있습니다. 보통 캡슐화를 위해 다음과 같이 <code>StateFlow</code>를 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// StateFlow 생성</span></span><br><span class="line">    <span class="keyword">val</span> _stateFlow = MutableStateFlow(<span class="number">1</span>)    <span class="comment">//  초기값 1</span></span><br><span class="line">    <span class="keyword">val</span> stateFlow = _stateFlow</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p>이제 버튼을 클릭할 때 마다 상태에 저장된 값을 1씩 증가시키겠습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> _stateFlow = MutableStateFlow(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">val</span> stateFlow = _stateFlow</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 값을 1씩 증가</span></span><br><span class="line">            _stateFlow.value = _stateFlow.value + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p><code>StateFlow</code>의 상태변화는 <code>collect()</code>함수를 사용하여 관찰합니다. <code>collect()</code>는 <code>suspend()</code>함수이므로 코루틴 내에서 호출합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 스코프 생성</span></span><br><span class="line">    <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> _stateFlow = MutableStateFlow(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">val</span> stateFlow = _stateFlow</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            _stateFlow.value = _stateFlow.value + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scope.launch &#123;</span><br><span class="line">            <span class="comment">// StateFlow 관찰</span></span><br><span class="line">            stateFlow.collect &#123;</span><br><span class="line">                print(it)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Coroutine/" rel="tag">Coroutine</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2021/01/01/08_android/01_android_platform/210101_architecture_pattern_mvc/"
+                    data-tooltip="[Android] 아키텍처 패턴 - (1) MVC"
+                    aria-label="이전: [Android] 아키텍처 패턴 - (1) MVC"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                    aria-label="다음: [Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2021/01/01/08_android/01_android_platform/210101_architecture_pattern_mvc/"
+                    data-tooltip="[Android] 아키텍처 패턴 - (1) MVC"
+                    aria-label="이전: [Android] 아키텍처 패턴 - (1) MVC"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                    aria-label="다음: [Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

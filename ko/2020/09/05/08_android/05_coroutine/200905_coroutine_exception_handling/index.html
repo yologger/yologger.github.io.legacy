@@ -1,0 +1,739 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.\n\n코루틴이란?\nwithContext()와 suspend 함수\n스코프(Scope)의 종류\n코루틴 생성하기 - launch(), async(), runBlocking()\n코루틴 예외 처리\nFlow, Channel, StateFlow\n\n\nJob스코프를 생성할 때 다음과 같이 Job을 전달할 수 있습니다.\n12345678val scope = CoroutineScope(Dispatchers.Main + Job())fun loadData() &#123;        scope.launch &#123;        val data = networkRequest()        updateUI(data)    &#125;&#125;\nCoroutineScope 코드를 살펴봅시다. Job을 전달하지 않으면 기본 값으로 Job()을 생성하여 사용합니다.\n12public fun CoroutineScope(context: CoroutineContext): CoroutineScope =    ContextScope(if (context[Job] != null) context else context + Job())\n따라서 아래 두 코드는 동일합니다.\n1val scope = CoroutineScope(Dispatchers.Main)\n1val scope = CoroutineScope(Dispatchers.Main + Job())\nJob은 자식 Job을 가질 수 있습니다.\n1234567891011val parentJob = CoroutineScope(Dispatchers.Main).launch &#123;    // ...    val childJob = CoroutineScope(Dispatchers.IO).launch &#123;        // ...        val grandChildJob = CoroutineScope(Dispatchers.Default).launch &#123;            // ...        &#125;    &#125;&#125;\n\nSupervisorJobJob()을 전달하면 스코프 내에서 어떤 코루틴에서 예외가 발생할 때 다른 모든 코루틴을 중지시킵니다.\n반면 SupervisorJob()을 전달하면 스코프 내에서 어떤 코루틴에서 예외가 발생할 때 그 코루틴만 중지시킵니다.\n12345678val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())fun loadData() &#123;        scope.launch &#123;        val data = networkRequest()        updateUI(data)    &#125;&#125;\n\n\nlaunch()의 에러 처리우선 updateData()라는 suspend 함수를 정의해봅시다. 이 함수는 10초 후 예외를 발생합니다.\n123456suspend fun updateData() &#123;    withContext(Dispatchers.IO) &#123;        Thread.sleep(10 * 1000)        throw Exception(&quot;exception&quot;)    &#125;&#125;\nlaunch() 함수로 코루틴을 생성했다면 다음과 같이 에러를 처리할 수 있습니다.\n1234567891011// 스코프 생성val scope = CoroutineScope(Dispatchers.IO)// 코루틴 생성scope.launch &#123;    try &#123;        updateData()    &#125; catch (e: Exception) &#123;        println(e.localizedMessage)    &#125;&#125;\nsuspend 함수를 호출하는 부분을 try-catch 구문으로 감싸주면 됩니다.\nasync(), await()의 에러처리async()와 await() 함수를 사용한다면 다음과 같이 에러를 처리할 수 있습니다. \n12345678910111213val scope = CoroutineScope(Dispatchers.IO)val deferred = scope.async &#123;    updateData()&#125;scope.launch &#123;    try &#123;        deferred.await()    &#125; catch (e: Exception) &#123;        println(e.localizedMessage)    &#125;&#125;\nDeferred객체의 await() 함수를 호출하는 부분을 try-catch 구문으로 감싸주면 됩니다.\nCoroutineExceptionHandlertry-catch 구문 대신 CoroutineExceptionHandler를 사용하여 예외를 처리할 수도 있습니다.\n123456789val scope = CoroutineScope(Dispatchers.IO)val handler = CoroutineExceptionHandler &#123; coroutineContext, throwable -&gt;    println(throwable.localizedMessage)&#125;scope.launch(handler) &#123;    updateData()&#125;","dateCreated":"2020-09-05T00:00:00+09:00","dateModified":"2021-12-16T19:31:52+09:00","datePublished":"2020-09-05T00:00:00+09:00","description":"","headline":"[Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/","keywords":"Android, Coroutine"}</script>
+    <meta name="description" content="여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.  코루틴이란? withContext()와 suspend 함수 스코프(Scope)의 종류 코루틴 생성하기 - launch(), async(), runBlocking() 코루틴 예외 처리 Flow, Channel, StateFlow   Job스코프를 생성할 때 다음과 같이 Job을">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.  코루틴이란? withContext()와 suspend 함수 스코프(Scope)의 종류 코루틴 생성하기 - launch(), async(), runBlocking() 코루틴 예외 처리 Flow, Channel, StateFlow   Job스코프를 생성할 때 다음과 같이 Job을">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-09-04T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-16T10:31:52.038Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Coroutine">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-09-05T00:00:00+09:00">
+	
+		    2020/09/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Coroutine/">Coroutine</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<p>여섯 개의 포스트에 걸쳐 <code>코루틴(Coroutine)</code>에 대해 알아보고있습니다.</p>
+<ol>
+<li><a href="/ko/2020/09/01/08_android/05_coroutine/200901_coroutine/">코루틴이란?</a></li>
+<li><a href="/ko/2020/09/02/08_android/05_coroutine/200902_withContext_suspend/">withContext()와 suspend 함수</a></li>
+<li><a href="/ko/2020/09/03/08_android/05_coroutine/200903_scope/">스코프(Scope)의 종류</a></li>
+<li><a href="/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/">코루틴 생성하기 - launch(), async(), runBlocking()</a></li>
+<li><a href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/">코루틴 예외 처리</a></li>
+<li><a href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/">Flow, Channel, StateFlow</a></li>
+</ol>
+<hr>
+<h1 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h1><p>스코프를 생성할 때 다음과 같이 <code>Job</code>을 전달할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main + Job())</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span> &#123;    </span><br><span class="line">    scope.launch &#123;</span><br><span class="line">        <span class="keyword">val</span> <span class="keyword">data</span> = networkRequest()</span><br><span class="line">        updateUI(<span class="keyword">data</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>CoroutineScope</code> 코드를 살펴봅시다. <code>Job</code>을 전달하지 않으면 기본 값으로 <code>Job()</code>을 생성하여 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">fun</span> <span class="title">CoroutineScope</span><span class="params">(context: <span class="type">CoroutineContext</span>)</span></span>: CoroutineScope =</span><br><span class="line">    ContextScope(<span class="keyword">if</span> (context[Job] != <span class="literal">null</span>) context <span class="keyword">else</span> context + Job())</span><br></pre></td></tr></table></figure>
+<p>따라서 아래 두 코드는 동일합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main + Job())</span><br></pre></td></tr></table></figure>
+<p><code>Job</code>은 자식 <code>Job</code>을 가질 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> parentJob = CoroutineScope(Dispatchers.Main).launch &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> childJob = CoroutineScope(Dispatchers.IO).launch &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> grandChildJob = CoroutineScope(Dispatchers.Default).launch &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="SupervisorJob"><a href="#SupervisorJob" class="headerlink" title="SupervisorJob"></a>SupervisorJob</h1><p><code>Job()</code>을 전달하면 스코프 내에서 어떤 코루틴에서 예외가 발생할 때 <u>다른 모든 코루틴을 중지</u>시킵니다.</p>
+<p>반면 <code>SupervisorJob()</code>을 전달하면 스코프 내에서 어떤 코루틴에서 예외가 발생할 때 <u>그 코루틴만 중지</u>시킵니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main + SupervisorJob())</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span> &#123;    </span><br><span class="line">    scope.launch &#123;</span><br><span class="line">        <span class="keyword">val</span> <span class="keyword">data</span> = networkRequest()</span><br><span class="line">        updateUI(<span class="keyword">data</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="launch-의-에러-처리"><a href="#launch-의-에러-처리" class="headerlink" title="launch()의 에러 처리"></a>launch()의 에러 처리</h1><p>우선 <code>updateData()</code>라는 suspend 함수를 정의해봅시다. 이 함수는 10초 후 예외를 발생합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateData</span><span class="params">()</span></span> &#123;</span><br><span class="line">    withContext(Dispatchers.IO) &#123;</span><br><span class="line">        Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)</span><br><span class="line">        <span class="keyword">throw</span> Exception(<span class="string">&quot;exception&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>launch()</code> 함수로 코루틴을 생성했다면 다음과 같이 에러를 처리할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 스코프 생성</span></span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 코루틴 생성</span></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        updateData()</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">        println(e.localizedMessage)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>suspend 함수</code>를 호출하는 부분을 <code>try-catch 구문</code>으로 감싸주면 됩니다.</p>
+<h1 id="async-await-의-에러처리"><a href="#async-await-의-에러처리" class="headerlink" title="async(), await()의 에러처리"></a>async(), await()의 에러처리</h1><p><code>async()</code>와 <code>await()</code> 함수를 사용한다면 다음과 같이 에러를 처리할 수 있습니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> deferred = scope.async &#123;</span><br><span class="line">    updateData()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        deferred.await()</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">        println(e.localizedMessage)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Deferred</code>객체의 <code>await()</code> 함수를 호출하는 부분을 <code>try-catch 구문</code>으로 감싸주면 됩니다.</p>
+<h1 id="CoroutineExceptionHandler"><a href="#CoroutineExceptionHandler" class="headerlink" title="CoroutineExceptionHandler"></a>CoroutineExceptionHandler</h1><p><code>try-catch 구문</code> 대신 <code>CoroutineExceptionHandler</code>를 사용하여 예외를 처리할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> handler = CoroutineExceptionHandler &#123; coroutineContext, throwable -&gt;</span><br><span class="line">    println(throwable.localizedMessage)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">scope.launch(handler) &#123;</span><br><span class="line">    updateData()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Coroutine/" rel="tag">Coroutine</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                    aria-label="이전: [Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (4) 코루틴 생성하기 - launch(), async(), runBlocking()"
+                    aria-label="다음: [Android] 코루틴(Coroutine) - (4) 코루틴 생성하기 - launch(), async(), runBlocking()"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                    aria-label="이전: [Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (4) 코루틴 생성하기 - launch(), async(), runBlocking()"
+                    aria-label="다음: [Android] 코루틴(Coroutine) - (4) 코루틴 생성하기 - launch(), async(), runBlocking()"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

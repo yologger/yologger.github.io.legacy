@@ -1,0 +1,794 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] 코루틴(Coroutine) - (4) 코루틴 생성하기 - launch(), async(), runBlocking() - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.\n\n코루틴이란?\nwithContext()와 suspend 함수\n스코프(Scope)의 종류\n코루틴 생성하기 - launch(), async(), runBlocking()\n코루틴 예외 처리\nFlow, Channel, StateFlow\n\n\nlaunch()스코프에 정의된 launch()함수를 호출하여 코루틴을 생성할 수 있습니다.\n12345val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)scope.launch &#123;    // ...&#125;\n만약 다음과 같이 여러 코루틴을 생성한다고 가정합시다.\n123456789val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)scope.launch &#123;    // ...&#125;scope.launch &#123;    // ...&#125;\n위 코드는 스코프 함수 with()를 사용하여 다음과 같이 표현할 수 있습니다.\n1234567891011val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)with(scope) &#123;    launch &#123;        // ...    &#125;    launch &#123;        // ...    &#125;&#125;\n\n\nJob 객체launch()로 코루틴을 생성하면 Job클래스의 인스턴스를 반환합니다.\n12345val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)val job: Job = scope.launch &#123;    // ...&#125;\nJob을 사용하면 스코프 내부의 개별 코루틴을 관리할 수 있습니다. 아래 코드를 살펴봅시다.\n12345678910111213var scope = CoroutineScope(Dispatchers.Main)with(scope) &#123;    val jobA = launch &#123;        delay(5 * 1000)        println(&quot;jobA() finished.&quot;)    &#125;    val jobB = launch &#123;        delay(5 * 1000)        println(&quot;jobB() finished.&quot;)    &#125;&#125;\n위 코드는 두 코루틴을 동시에 실행합니다. 실행 후 5초 뒤에 로그에 다음과 같이 출력됩니다.\n123// 5초 뒤 두 줄이 동시에 출력됩니다.jobA() finished.jobB() finished.\nJob클래스의 cacnel()을 사용하면 코루틴을 취소할 수 있습니다. \n1234567891011121314var scope = CoroutineScope(Dispatchers.Main)with(scope) &#123;    val jobA = launch &#123;        delay(5 * 1000)        println(&quot;jobA() finished.&quot;)    &#125;    val jobB = launch &#123;        jobA.cancel()   // jobA 취소        delay(5 * 1000)        println(&quot;jobB() finished.&quot;)    &#125;&#125;\n실행 후 5초 뒤에 한 줄만 출력됩니다. jobB에서 jobA를 취소했기 때문입니다.\n1jobB() finished.\n또 다른 예제를 살펴봅시다.\n1234567891011121314var scope = CoroutineScope(Dispatchers.Main)with(scope) &#123;    val jobA = launch &#123;        delay(5 * 1000)        println(&quot;jobA() finished.&quot;)    &#125;    val jobB = launch &#123;        jobA.join()   // jobA가 끝날 때 까지 기다립니다.        delay(5 * 1000)        println(&quot;jobB() finished.&quot;)    &#125;&#125;\n실행 후 5초 뒤에 한 줄만 출력됩니다. 다시 5초 뒤 다른 한 줄이 출력됩니다.\n12345// 실행 후 5초 뒤 출력jobA() finished.// 실행 후 10초 뒤 출력jobB() finished.\njoin()은 Job이 완료될 때 까지 현재 코루틴을 중지합니다. 위 예제에서는 jobA가 종료될 때까지 jobB가 실행되지 않고 기다리게 됩니다.\njoinAll()을 사용하면 여러 Job이 완료될 때 까지 현재 코루틴을 중지할 수 있습니다.\n123456789101112131415var scope = CoroutineScope(Dispatchers.Main)with(scope) &#123;    val jobA = launch &#123;        delay(5 * 1000)        println(&quot;jobA() finished.&quot;)    &#125;    val jobB = launch &#123;        delay(10* 1000)        println(&quot;jobB() finished.&quot;)    &#125;    val jobC = launch &#123;        joinAll(jobA, jobB)        println(&quot;jobC() finished.&quot;)    &#125;&#125;\n결과는 다음과 같습니다.\n123456// 5초 뒤 출력jobA() finished.// 10초 뒤 출력jobB() finished.jobC() finished.\n이처럼 Job을 사용하면 스코프 내부의 개별 코루틴을 관리할 수 있습니다.\nrunBlocking()우선 아래 코드를 살펴봅시다. launch()를 사용하여 코루틴을 생성하고 있습니다. 이 코루틴은 매인 스레드에서 실행됩니다. \n123456789101112class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        button.setOnClickListener &#123;            val scope = CoroutineScope(Dispatchers.Main)            scope.launch &#123;                // ...            &#125;        &#125;    &#125;\n위 코드를 runBlocking()로 구현하면 다음과 같습니다.\n1234567891011class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        button.setOnClickListener &#123;            runBlocking &#123;                // ...            &#125;        &#125;    &#125;\n\n\n\nrunBlocking()은 현재 스레드에서 실행되는 새로운 코루틴 생성합니다. 이 함수의 결과 값이 Job객체인 것을 보면 알 수 있습니다.\n123val job: Job = runBlocking &#123;    // ...&#125;\n스코프와 launch()를 사용하여 코루틴을 생성할 땐, 코루틴이 실행될 스레드를 Dispatcher로 지정해주었습니다.\n123456789val scope1 = CoroutineScope(Dispatchers.Main)scope1.launch &#123;    // 매인 스레드에서 코루틴 블록 실행&#125;val scope2 = CoroutineScope(Dispatchers.IO)scope2.launch &#123;    // Dispatchers.IO가 제공하는 스레드에서 코루틴 블록 실행&#125;\n그러나 runBlocking()은 이 함수를 호출하는 코드가 실행되고 있는 스레드에서 코루틴 블록을 실행합니다. 따라서 별도의 Dispatcher를 지정할 필요가 없습니다.\n123runBlocking &#123;    // ...&#125;\n또한 launch()와 runBlocking()에는 중요한 차이점이 있습니다. runBlocking()는 코루틴이 끝날 때 까지 현재 스레드를 일지중지합니다. runBlocking() 예제를 살펴봅시다.\n12345runBlocking &#123;    delay(5 * 1000)    println(&quot;Coroutine Block&quot;)&#125;println(&quot;Finished.&quot;)\n위 코드를 실행하면 다음과 같은 로그가 출력됩니다.\n123// 5초 뒤 아래 두 줄 출력Coroutine BlockFinished.\nrunBlocking()의 코루틴 블록이 끝날 때 까지 println(&quot;Finished.&quot;)가 호출되지 않고 현재 스레드가 중지된 것입니다. 따라서 println(&quot;Finished.&quot;)는 코루틴 블록이 끝나고 호출됩니다. \n이제 launch() 예제를 살펴봅시다.\n12345CoroutineScope(Dispatchers.Main).launch &#123;    delay(5 * 1000)    println(&quot;Coroutine Block&quot;)&#125;println(&quot;Finished.&quot;)\n위 코드를 실행하면 다음과 같은 로그가 출력됩니다.\n12345// 실행 시 바로 출력Finished.// 5초 뒤 아래 한 줄 출력Coroutine Block\nlaunch()의 코루틴 블록이 끝나든 말든 현재 스레드는 중지되지 않으며, 코루틴 블록과 별도로 실행되어 println(&quot;Finished.&quot;)가 즉시 호출된 것입니다.\n이처럼 runBlocking() 새로운 코루틴을 생성하고 실행하며, 현재 스레드는 코루틴이 끝날 때 까지 중지시킵니다.\n코루틴과 스레드의 차이점아래 코드를 다시 한번 살펴봅시다. println(&quot;Finished.&quot;)는 매인 스레드에서 호출됩니다. 코루틴 블록도 역시 같은 매인 스레드에서 실행됩니다.\n1234567891011121314class MainActivity : AppCompatActivity() &#123;    private val button: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        button.setOnClickListener &#123;            val scope = CoroutineScope(Dispatchers.Main)            scope.launch &#123;                delay(5 * 1000)                println(&quot;Coroutine Block&quot;)             &#125;            println(&quot;Finished.&quot;)         &#125;    &#125;\n그런데 여기서 주목할 부분이 하나 있습니다. delay(5 * 1000)는 현재 코루틴을 5초 동안 중지시킵니다. 그런데 매인 스레드는 5초 동안 중지되지 않으며, println(&quot;Finished.&quot;)가 즉시 호출됩니다. 이는 코루틴과 스레드가 동일하지 않다는 것을 의미합니다. \n그렇다면 println(&quot;Finished.&quot;)와 코루틴 블록이 어떻게 하나의 스레드 안에서 동시에 실행될 수 있을까요? 이는 스레드가 코루틴을 병행(Concurrency) 처리하기 때문입니다.\n동시처리, 병행과 병렬우선 병행(Concurrency) 처리를 그림으로 표현하면 다음과 같습니다.병행 처리는 하나의 스레드에서 두 작업을 사람이 인식하기 어려운 짧은 간격으로 번갈아가며 수행합니다. 따라서 사람이 보기에는 두 작업이 동시에 수행되는 것처럼 보입니다.\n병렬(Parallelism) 처리를 그림으로 표현하며 다음과 같습니다.병렬 처리는 말 그대로 두 개의 스레드에서 두 작업을 동시에 수행합니다. 진정한 의미의 병렬 처리는 멀티 코어 CPU같은 하드웨어 레벨의 지원과 운영체제 레벨에서의 지원이 필요합니다.\n코루틴은 스레드에서 병행(Concurrency)적으로 처리됩니다. 따라서 바로 위 예제에서 println(&quot;Finished.&quot;)와 코루틴이 같은 스레드에서 호출되었음에도 동시에 실행되는 것입니다.\nasync(), await(), Deferred 객체코루틴은 async()를 호출하여 생성할 수도 있습니다. 그렇다면 launch()와 async()의 차이점은 무엇일까요? 차이점은 바로 코루틴의 값 반환 유무입니다. \nlaunch()으로 생성한 코루틴은 값을 반환하지 않습니다.\n12345val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)scope.launch &#123;    // 반환값이 없음&#125;\n반면 async()로 생성한 코루틴은 값을 반환합니다.\n12345678val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)scope.async &#123;    // ...    // 반환값이 있음    return something&#125;\n또한 launch()는 Job을 반환하지만 async()는 Deferred객체를 반환합니다. \n1234567val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)var deferred: Deferred = scope.async &#123;    // ...    return something&#125;// 이 단계에서는 코루틴이 정의만 되어있을 뿐 아직 실행되진 않습니다.\nDeferred객체에는 await()가 정의되어있습니다. 이 메소드를 호출하기 전까지 코루틴 블록은 실행되지 않고 대기합니다. await()를 호출하면 코루틴 블록이 실행되고 값을 반환합니다.\n123456789val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)var deferred: Deferred = scope.async &#123;    // ...    return something&#125;// 이 단계에서는 코루틴이 정의만 되어있을 뿐 아직 실행되진 않습니다.val result = deferred.await()   // 이 단계에서 코루틴이 실행되고 값이 반환됩니다.\n\nasync(), await()는 서로 다른 시간이 걸리는 두 작업이 모두 끝나길 기다렸다가 한꺼번에 종료하는데 사용할 수도 있습니다.\n1234567891011121314151617181920212223suspend fun loadData(): String &#123;    val scope = CoroutineScope(Dispatchers.IO)    with(scope) &#123;        val deferred1 = async &#123; getFirstData() &#125;        val deferred2 = async &#123; getSecondData() &#125;        val result1 = deferred1.await()        val result2 = deferred2.await()        return &quot;$result1 &amp; $result2&quot;    &#125;&#125;fun getFirstData(): String &#123;    Thread.sleep(5 * 1000)     //  5 seconds    return &quot;First Data&quot;&#125;fun getSecondData(): String &#123;    Thread.sleep(10 * 1000)     //  10 seconds    return &quot;Second Data&quot;&#125;\n\n\n예제를 async(), await()로 구현하기우리는 이전 포스트에서 launch()를 사용하여 스코프를 생성하고 실행했습니다.\n12345678910111213141516171819202122232425262728293031323334353637383940class MainActivity : AppCompatActivity() &#123;    private val buttonLoadData: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button_load_data) &#125;    private val textViewData: TextView by lazy &#123; findViewById&lt;TextView&gt;(R.id.activity_main_textView_data) &#125;    private val buttonShowData: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button_show_data) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        buttonLoadData.setOnClickListener &#123;            val scope = CoroutineScope(Dispatchers.IO)            scope.launch &#123;                val result = loadData()                withContext(Dispatchers.Main) &#123;                    updateUI(result)                &#125;            &#125;        &#125;        buttonShowData.setOnClickListener &#123;            Toast.makeText(this@MainActivity, &quot;$&#123;textViewData.text&#125;&quot;, Toast.LENGTH_SHORT).show()        &#125;    &#125;    fun loadData(): String &#123;        val result = networkRequest()        return result    &#125;    fun networkRequest(): String &#123;        Thread.sleep(10 * 1000)     //  10 seconds        return &quot;This is data&quot;    &#125;    fun updateUI(text: String) &#123;        textViewData.text = text    &#125;&#125;\n이 예제를 async()를 사용하여 구현하면 다음과 같습니다.\n123456789101112131415161718192021222324252627282930313233343536373839404142class MainActivity : AppCompatActivity() &#123;    private val buttonLoadData: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button_load_data) &#125;    private val textViewData: TextView by lazy &#123; findViewById&lt;TextView&gt;(R.id.activity_main_textView_data) &#125;    private val buttonShowData: Button by lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button_show_data) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        buttonLoadData.setOnClickListener &#123;            val scope = CoroutineScope(Dispatchers.Main)            scope.launch &#123;                val result = loadData()                updateUI(result)            &#125;        &#125;        buttonShowData.setOnClickListener &#123;            Toast.makeText(this@MainActivity, &quot;$&#123;textViewData.text&#125;&quot;, Toast.LENGTH_SHORT).show()        &#125;    &#125;    suspend fun loadData(): String &#123;        val scope = CoroutineScope(Dispatchers.IO)        val deferred = scope.async &#123;            networkRequest()        &#125;        val result = deferred.await()        return result    &#125;    fun networkRequest(): String &#123;        Thread.sleep(10 * 1000)     //  10 seconds        return &quot;This is data&quot;    &#125;    fun updateUI(data: String) &#123;        textViewData.text = data    &#125;&#125;","dateCreated":"2020-09-04T00:00:00+09:00","dateModified":"2021-12-16T19:30:54+09:00","datePublished":"2020-09-04T00:00:00+09:00","description":"","headline":"[Android] 코루틴(Coroutine) - (4) 코루틴 생성하기 - launch(), async(), runBlocking()","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/","keywords":"Android, Coroutine"}</script>
+    <meta name="description" content="여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.  코루틴이란? withContext()와 suspend 함수 스코프(Scope)의 종류 코루틴 생성하기 - launch(), async(), runBlocking() 코루틴 예외 처리 Flow, Channel, StateFlow   launch()스코프에 정의된 launch()함">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] 코루틴(Coroutine) - (4) 코루틴 생성하기 - launch(), async(), runBlocking()">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="여섯 개의 포스트에 걸쳐 코루틴(Coroutine)에 대해 알아보고있습니다.  코루틴이란? withContext()와 suspend 함수 스코프(Scope)의 종류 코루틴 생성하기 - launch(), async(), runBlocking() 코루틴 예외 처리 Flow, Channel, StateFlow   launch()스코프에 정의된 launch()함">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/2.png">
+<meta property="article:published_time" content="2020-09-03T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-16T10:30:54.498Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Coroutine">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] 코루틴(Coroutine) - (4) 코루틴 생성하기 - launch(), async(), runBlocking()
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-09-04T00:00:00+09:00">
+	
+		    2020/09/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Coroutine/">Coroutine</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<p>여섯 개의 포스트에 걸쳐 <code>코루틴(Coroutine)</code>에 대해 알아보고있습니다.</p>
+<ol>
+<li><a href="/ko/2020/09/01/08_android/05_coroutine/200901_coroutine/">코루틴이란?</a></li>
+<li><a href="/ko/2020/09/02/08_android/05_coroutine/200902_withContext_suspend/">withContext()와 suspend 함수</a></li>
+<li><a href="/ko/2020/09/03/08_android/05_coroutine/200903_scope/">스코프(Scope)의 종류</a></li>
+<li><a href="/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/">코루틴 생성하기 - launch(), async(), runBlocking()</a></li>
+<li><a href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/">코루틴 예외 처리</a></li>
+<li><a href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/">Flow, Channel, StateFlow</a></li>
+</ol>
+<hr>
+<h1 id="launch"><a href="#launch" class="headerlink" title="launch()"></a>launch()</h1><p>스코프에 정의된 <code>launch()</code>함수를 호출하여 코루틴을 생성할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope: CoroutineScope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>만약 다음과 같이 여러 코루틴을 생성한다고 가정합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope: CoroutineScope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드는 스코프 함수 <code>with()</code>를 사용하여 다음과 같이 표현할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope: CoroutineScope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line">with(scope) &#123;</span><br><span class="line">    launch &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    launch &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Job-객체"><a href="#Job-객체" class="headerlink" title="Job 객체"></a>Job 객체</h1><p><code>launch()</code>로 코루틴을 생성하면 <code>Job</code>클래스의 인스턴스를 반환합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope: CoroutineScope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> job: Job = scope.launch &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Job</code>을 사용하면 스코프 내부의 개별 코루틴을 관리할 수 있습니다. 아래 코드를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">with(scope) &#123;</span><br><span class="line">    <span class="keyword">val</span> jobA = launch &#123;</span><br><span class="line">        delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">        println(<span class="string">&quot;jobA() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> jobB = launch &#123;</span><br><span class="line">        delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">        println(<span class="string">&quot;jobB() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드는 두 코루틴을 동시에 실행합니다. 실행 후 5초 뒤에 로그에 다음과 같이 출력됩니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 5초 뒤 두 줄이 동시에 출력됩니다.</span><br><span class="line">jobA() finished.</span><br><span class="line">jobB() finished.</span><br></pre></td></tr></table></figure>
+<p><code>Job</code>클래스의 <code>cacnel()</code>을 사용하면 코루틴을 취소할 수 있습니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">with(scope) &#123;</span><br><span class="line">    <span class="keyword">val</span> jobA = launch &#123;</span><br><span class="line">        delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">        println(<span class="string">&quot;jobA() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> jobB = launch &#123;</span><br><span class="line">        jobA.cancel()   <span class="comment">// jobA 취소</span></span><br><span class="line">        delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">        println(<span class="string">&quot;jobB() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>실행 후 5초 뒤에 한 줄만 출력됩니다. <code>jobB</code>에서 <code>jobA</code>를 취소했기 때문입니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobB() finished.</span><br></pre></td></tr></table></figure>
+<p>또 다른 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">with(scope) &#123;</span><br><span class="line">    <span class="keyword">val</span> jobA = launch &#123;</span><br><span class="line">        delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">        println(<span class="string">&quot;jobA() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> jobB = launch &#123;</span><br><span class="line">        jobA.join()   <span class="comment">// jobA가 끝날 때 까지 기다립니다.</span></span><br><span class="line">        delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">        println(<span class="string">&quot;jobB() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>실행 후 5초 뒤에 한 줄만 출력됩니다. 다시 5초 뒤 다른 한 줄이 출력됩니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 실행 후 5초 뒤 출력</span><br><span class="line">jobA() finished.</span><br><span class="line"></span><br><span class="line">// 실행 후 10초 뒤 출력</span><br><span class="line">jobB() finished.</span><br></pre></td></tr></table></figure>
+<p><code>join()</code>은 <code>Job</code>이 완료될 때 까지 현재 코루틴을 중지합니다. 위 예제에서는 <code>jobA</code>가 종료될 때까지 <code>jobB</code>가 실행되지 않고 기다리게 됩니다.</p>
+<p><code>joinAll()</code>을 사용하면 여러 <code>Job</code>이 완료될 때 까지 현재 코루틴을 중지할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line">with(scope) &#123;</span><br><span class="line">    <span class="keyword">val</span> jobA = launch &#123;</span><br><span class="line">        delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">        println(<span class="string">&quot;jobA() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">val</span> jobB = launch &#123;</span><br><span class="line">        delay(<span class="number">10</span>* <span class="number">1000</span>)</span><br><span class="line">        println(<span class="string">&quot;jobB() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">val</span> jobC = launch &#123;</span><br><span class="line">        joinAll(jobA, jobB)</span><br><span class="line">        println(<span class="string">&quot;jobC() finished.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같습니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 5초 뒤 출력</span><br><span class="line">jobA() finished.</span><br><span class="line"></span><br><span class="line">// 10초 뒤 출력</span><br><span class="line">jobB() finished.</span><br><span class="line">jobC() finished.</span><br></pre></td></tr></table></figure>
+<p>이처럼 <code>Job</code>을 사용하면 스코프 내부의 개별 코루틴을 관리할 수 있습니다.</p>
+<h1 id="runBlocking"><a href="#runBlocking" class="headerlink" title="runBlocking()"></a>runBlocking()</h1><p>우선 아래 코드를 살펴봅시다. <code>launch()</code>를 사용하여 코루틴을 생성하고 있습니다. 이 코루틴은 매인 스레드에서 실행됩니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line">            scope.launch &#123;</span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드를 <code>runBlocking()</code>로 구현하면 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            runBlocking &#123;</span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><code>runBlocking()</code>은 <u>현재 스레드에서 실행</u>되는 새로운 코루틴 생성합니다. 이 함수의 결과 값이 <code>Job</code>객체인 것을 보면 알 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> job: Job = runBlocking &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>스코프와 <code>launch()</code>를 사용하여 코루틴을 생성할 땐, 코루틴이 실행될 스레드를 <code>Dispatcher</code>로 지정해주었습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope1 = CoroutineScope(Dispatchers.Main)</span><br><span class="line">scope1.launch &#123;</span><br><span class="line">    <span class="comment">// 매인 스레드에서 코루틴 블록 실행</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> scope2 = CoroutineScope(Dispatchers.IO)</span><br><span class="line">scope2.launch &#123;</span><br><span class="line">    <span class="comment">// Dispatchers.IO가 제공하는 스레드에서 코루틴 블록 실행</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>그러나 <code>runBlocking()</code>은 <u>이 함수를 호출하는 코드가 실행되고 있는 스레드</u>에서 코루틴 블록을 실행합니다. 따라서 별도의 <code>Dispatcher</code>를 지정할 필요가 없습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">runBlocking &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>또한 <code>launch()</code>와 <code>runBlocking()</code>에는 중요한 차이점이 있습니다. <code>runBlocking()</code>는 <u>코루틴이 끝날 때 까지 현재 스레드를 일지중지</u>합니다. <code>runBlocking()</code> 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">runBlocking &#123;</span><br><span class="line">    delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">    println(<span class="string">&quot;Coroutine Block&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">println(<span class="string">&quot;Finished.&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>위 코드를 실행하면 다음과 같은 로그가 출력됩니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 5초 뒤 아래 두 줄 출력</span><br><span class="line">Coroutine Block</span><br><span class="line">Finished.</span><br></pre></td></tr></table></figure>
+<p><code>runBlocking()</code>의 코루틴 블록이 끝날 때 까지 <code>println(&quot;Finished.&quot;)</code>가 호출되지 않고 현재 스레드가 중지된 것입니다. 따라서 <code>println(&quot;Finished.&quot;)</code>는 코루틴 블록이 끝나고 호출됩니다. </p>
+<p>이제 <code>launch()</code> 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CoroutineScope(Dispatchers.Main).launch &#123;</span><br><span class="line">    delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">    println(<span class="string">&quot;Coroutine Block&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">println(<span class="string">&quot;Finished.&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>위 코드를 실행하면 다음과 같은 로그가 출력됩니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 실행 시 바로 출력</span><br><span class="line">Finished.</span><br><span class="line"></span><br><span class="line">// 5초 뒤 아래 한 줄 출력</span><br><span class="line">Coroutine Block</span><br></pre></td></tr></table></figure>
+<p><code>launch()</code>의 코루틴 블록이 끝나든 말든 현재 스레드는 중지되지 않으며, 코루틴 블록과 별도로 실행되어 <code>println(&quot;Finished.&quot;)</code>가 즉시 호출된 것입니다.</p>
+<p>이처럼 <code>runBlocking()</code> 새로운 코루틴을 생성하고 실행하며, 현재 스레드는 코루틴이 끝날 때 까지 중지시킵니다.</p>
+<h1 id="코루틴과-스레드의-차이점"><a href="#코루틴과-스레드의-차이점" class="headerlink" title="코루틴과 스레드의 차이점"></a>코루틴과 스레드의 차이점</h1><p>아래 코드를 다시 한번 살펴봅시다. <code>println(&quot;Finished.&quot;)</code>는 매인 스레드에서 호출됩니다. 코루틴 블록도 역시 같은 매인 스레드에서 실행됩니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line">            scope.launch &#123;</span><br><span class="line">                delay(<span class="number">5</span> * <span class="number">1000</span>)</span><br><span class="line">                println(<span class="string">&quot;Coroutine Block&quot;</span>) </span><br><span class="line">            &#125;</span><br><span class="line">            println(<span class="string">&quot;Finished.&quot;</span>) </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>그런데 여기서 주목할 부분이 하나 있습니다. <code>delay(5 * 1000)</code>는 현재 코루틴을 5초 동안 중지시킵니다. 그런데 매인 스레드는 5초 동안 중지되지 않으며, <code>println(&quot;Finished.&quot;)</code>가 즉시 호출됩니다. 이는 코루틴과 스레드가 동일하지 않다는 것을 의미합니다. </p>
+<p>그렇다면 <code>println(&quot;Finished.&quot;)</code>와 코루틴 블록이 어떻게 하나의 스레드 안에서 동시에 실행될 수 있을까요? 이는 스레드가 코루틴을 <code>병행(Concurrency) 처리</code>하기 때문입니다.</p>
+<h1 id="동시처리-병행과-병렬"><a href="#동시처리-병행과-병렬" class="headerlink" title="동시처리, 병행과 병렬"></a>동시처리, 병행과 병렬</h1><p>우선 <code>병행(Concurrency) 처리</code>를 그림으로 표현하면 다음과 같습니다.<br><img src="1.png"><br>병행 처리는 하나의 스레드에서 두 작업을 사람이 인식하기 어려운 짧은 간격으로 번갈아가며 수행합니다. 따라서 사람이 보기에는 두 작업이 동시에 수행되는 것처럼 보입니다.</p>
+<p><code>병렬(Parallelism) 처리</code>를 그림으로 표현하며 다음과 같습니다.<br><img src="2.png"><br>병렬 처리는 말 그대로 두 개의 스레드에서 두 작업을 동시에 수행합니다. 진정한 의미의 병렬 처리는 멀티 코어 CPU같은 하드웨어 레벨의 지원과 운영체제 레벨에서의 지원이 필요합니다.</p>
+<p>코루틴은 스레드에서 <code>병행(Concurrency)</code>적으로 처리됩니다. 따라서 바로 위 예제에서 <code>println(&quot;Finished.&quot;)</code>와 코루틴이 같은 스레드에서 호출되었음에도 동시에 실행되는 것입니다.</p>
+<h1 id="async-await-Deferred-객체"><a href="#async-await-Deferred-객체" class="headerlink" title="async(), await(), Deferred 객체"></a>async(), await(), Deferred 객체</h1><p>코루틴은 <code>async()</code>를 호출하여 생성할 수도 있습니다. 그렇다면 <code>launch()</code>와 <code>async()</code>의 차이점은 무엇일까요? 차이점은 바로 코루틴의 값 반환 유무입니다. </p>
+<p><code>launch()</code>으로 생성한 코루틴은 값을 반환하지 않습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope: CoroutineScope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="comment">// 반환값이 없음</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>반면 <code>async()</code>로 생성한 코루틴은 값을 반환합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope: CoroutineScope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line">scope.async &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 반환값이 있음</span></span><br><span class="line">    <span class="keyword">return</span> something</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>또한 <code>launch()</code>는 <code>Job</code>을 반환하지만 <code>async()</code>는 <code>Deferred</code>객체를 반환합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope: CoroutineScope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> deferred: Deferred = scope.async &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span> something</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 이 단계에서는 코루틴이 정의만 되어있을 뿐 아직 실행되진 않습니다.</span></span><br></pre></td></tr></table></figure>
+<p><code>Deferred</code>객체에는 <code>await()</code>가 정의되어있습니다. 이 메소드를 호출하기 전까지 코루틴 블록은 실행되지 않고 대기합니다. <code>await()</code>를 호출하면 코루틴 블록이 실행되고 값을 반환합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope: CoroutineScope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> deferred: Deferred = scope.async &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span> something</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 이 단계에서는 코루틴이 정의만 되어있을 뿐 아직 실행되진 않습니다.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result = deferred.await()   <span class="comment">// 이 단계에서 코루틴이 실행되고 값이 반환됩니다.</span></span><br></pre></td></tr></table></figure>
+
+<p><code>async()</code>, <code>await()</code>는 서로 다른 시간이 걸리는 두 작업이 모두 끝나길 기다렸다가 한꺼번에 종료하는데 사용할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">    <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line">    with(scope) &#123;</span><br><span class="line">        <span class="keyword">val</span> deferred1 = async &#123; getFirstData() &#125;</span><br><span class="line">        <span class="keyword">val</span> deferred2 = async &#123; getSecondData() &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> result1 = deferred1.await()</span><br><span class="line">        <span class="keyword">val</span> result2 = deferred2.await()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;<span class="variable">$result1</span> &amp; <span class="variable">$result2</span>&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getFirstData</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">    Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>)     <span class="comment">//  5 seconds</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;First Data&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getSecondData</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">    Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Second Data&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="예제를-async-await-로-구현하기"><a href="#예제를-async-await-로-구현하기" class="headerlink" title="예제를 async(), await()로 구현하기"></a>예제를 async(), await()로 구현하기</h1><p>우리는 이전 포스트에서 <code>launch()</code>를 사용하여 스코프를 생성하고 실행했습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonLoadData: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button_load_data) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> textViewData: TextView <span class="keyword">by</span> lazy &#123; findViewById&lt;TextView&gt;(R.id.activity_main_textView_data) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonShowData: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button_show_data) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        buttonLoadData.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line">            scope.launch &#123;</span><br><span class="line">                <span class="keyword">val</span> result = loadData()</span><br><span class="line">                withContext(Dispatchers.Main) &#123;</span><br><span class="line">                    updateUI(result)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        buttonShowData.setOnClickListener &#123;</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;<span class="subst">$&#123;textViewData.text&#125;</span>&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">        <span class="keyword">val</span> result = networkRequest()</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">networkRequest</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">        Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;This is data&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">updateUI</span><span class="params">(text: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">        textViewData.text = text</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 예제를 <code>async()</code>를 사용하여 구현하면 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonLoadData: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button_load_data) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> textViewData: TextView <span class="keyword">by</span> lazy &#123; findViewById&lt;TextView&gt;(R.id.activity_main_textView_data) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonShowData: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.activity_main_button_show_data) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        buttonLoadData.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line">            scope.launch &#123;</span><br><span class="line">                <span class="keyword">val</span> result = loadData()</span><br><span class="line">                updateUI(result)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        buttonShowData.setOnClickListener &#123;</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;<span class="subst">$&#123;textViewData.text&#125;</span>&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">        <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line">        <span class="keyword">val</span> deferred = scope.async &#123;</span><br><span class="line">            networkRequest()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">val</span> result = deferred.await()</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">networkRequest</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">        Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)     <span class="comment">//  10 seconds</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;This is data&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">updateUI</span><span class="params">(<span class="keyword">data</span>: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">        textViewData.text = <span class="keyword">data</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Coroutine/" rel="tag">Coroutine</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                    aria-label="이전: [Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/03/08_android/05_coroutine/200903_scope/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (3) 스코프(Scope)의 종류"
+                    aria-label="다음: [Android] 코루틴(Coroutine) - (3) 스코프(Scope)의 종류"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                    aria-label="이전: [Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/03/08_android/05_coroutine/200903_scope/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (3) 스코프(Scope)의 종류"
+                    aria-label="다음: [Android] 코루틴(Coroutine) - (3) 스코프(Scope)의 종류"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
