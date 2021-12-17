@@ -354,6 +354,157 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/07/01/08_android/03_jetpack/01_architecture/20200701_lifecycle/"
+                            aria-label=": [Android Jetpack] Lifecycle Owner와 Lifecycle-aware Component"
+                        >
+                            [Android Jetpack] Lifecycle Owner와 Lifecycle-aware Component
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-07-01T01:00:00+09:00">
+	
+		    2020/07/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Jetpack/">Jetpack</a>, <a class="category-link" href="/ko/categories/Android/Jetpack/Architecture-Component/">Architecture Component</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Jetpack"><a href="#Jetpack" class="headerlink" title="Jetpack"></a>Jetpack</h1><p><code>Jetpack</code>은 더 좋은 품질의 안드로이드 개발을 돕는 라이브러리의 집합입니다.<br><img src="1.png"><br><code>Jetpack</code>은 크게 네 가지 카테고리로 분류됩니다.</p>
+<ul>
+<li>Architecture Component</li>
+<li>UI Component</li>
+<li>Foundation Component</li>
+<li>Behavior Component</li>
+</ul>
+<p>이번 포스트에서는 <code>Lifecycle Owner</code>와 <code>Lifecycle-aware Component</code>에 대해 알아보겠습니다.</p>
+<hr>
+<h1 id="Lifecycle"><a href="#Lifecycle" class="headerlink" title="Lifecycle"></a>Lifecycle</h1><p><code>Activity</code>, <code>Fragment</code> 등 대부분의 안드로이드 컴포넌트들은 <code>생명주기(Lifecycle)</code>을 가지고 있습니다. 또한 컴포넌트가 생성되거나 화면에 보이거나 화면에서 사라질 때 사전에 정의된 <code>생명주기 함수(Lifecycle Method)</code>를 호출합니다.</p>
+<h1 id="Lifecycle-Owner"><a href="#Lifecycle-Owner" class="headerlink" title="Lifecycle Owner"></a>Lifecycle Owner</h1><p><code>Activity</code>, <code>Fragment</code> 등 대부분의 안드로이드 컴포넌트들은 <code>LifecycleOwner</code>클래스를 구현하고 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>AppCompatActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">AppCompatActivity</span>: <span class="type">... </span>, <span class="type">LifeCycleOwner &#123;</span></span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><figcaption><span>Fragment.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">Fragment</span>: <span class="type">... </span>, <span class="type">LifeCycleOwner &#123;</span></span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>LifecycleOwner</code>클래스에는 <code>getLifeCycle()</code>메소드가 정의되어있습니다. 이 메소드를 호출하여 해당 컴포넌트의 <code>LifeCycle</code>에 접근할 수 있습니다.</p>
+<figure class="highlight java"><figcaption><span>LifeCycleOwner.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LifeCycleOwner</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="function">LifeCycle <span class="title">getLifeCycle</span><span class="params">()</span></span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Lifecycle-aware-Compoent"><a href="#Lifecycle-aware-Compoent" class="headerlink" title="Lifecycle-aware Compoent"></a>Lifecycle-aware Compoent</h1><p><a target="_blank" rel="noopener" href="https://developer.android.com/topic/libraries/architecture/lifecycle"><code>Lifecycle-aware Compoent</code></a>를 사용하면 <code>Lifecycle</code>의 상태 변화를 탐지할 수 있습니다. Lifecycle-aware Compoent를 사용하려면 모듈 수준의 <code>build.gradle</code>에 의존성을 추가해야합니다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;kotlin-kapt&#x27;</span></span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&quot;androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version&quot;</span></span><br><span class="line">    kapt <span class="string">&quot;androidx.lifecycle:lifecycle-compiler:$lifecycle_version&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>그 다음 <code>LifecycleObserver</code>클래스를 구현하는 클래스를 정의합니다. 생명주기가 변할 때 마다 결과를 출력하는 커스텀 로그를 정의해봅시다.</p>
+<figure class="highlight kotlin"><figcaption><span>CustomLogger.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomLogger</span> : <span class="type">LifecycleObserver &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@OnLifecycleEvent(Lifecycle.Event.ON_CREATE)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        println(<span class="string">&quot;onCreate&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span> &#123;</span><br><span class="line">        println(<span class="string">&quot;onDestory&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>LifeCycleOwner</code>를 구현하는 클래스에서 <code>lifecycle</code>속성과 <code>addObserver()</code>메소드를 통해 <code>Observer</code>를 등록할 수 있습니다.</p>
+<figure class="highlight kotlin"><figcaption><span>CreateActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        <span class="comment">// Observer 등록</span></span><br><span class="line">        lifecycle.addObserver(CustomLogger())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy()</span><br><span class="line">        <span class="comment">// Observer 해제</span></span><br><span class="line">        lifecycle.removeObserver(CustomLogger())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/07/01/08_android/03_jetpack/01_architecture/20200701_lifecycle/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/"
+                            aria-label=": [Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기"
+                        >
+                            [Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-06T01:00:00+09:00">
+	
+		    2020/06/06
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="포그라운드-상태에서-알람-받기"><a href="#포그라운드-상태에서-알람-받기" class="headerlink" title="포그라운드 상태에서 알람 받기"></a>포그라운드 상태에서 알람 받기</h1><p>현재 포그라운드로 실행되고 있는 앱은 Firebase 알림을 받지 못합니다. </p>
+<p>포그라운드 상태에서 알림을 받으려면 <code>FirebaseMessagingService</code>클래스를 구현하고 <code>onMessageReceived()</code>메서드를 오버라이딩 해야합니다.</p>
+<p><code>MyFBMessageService</code>라는 클래스를 다음과 같이 구현합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyFBMessageService</span> : <span class="type">FirebaseMessagingService</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMessageReceived</span><span class="params">(remoteMessage: <span class="type">RemoteMessage</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMessageReceived(remoteMessage)</span><br><span class="line">        <span class="comment">// Do somthing when you receive a message.</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>onMessageReceived()</code>메소드가 호출될 때는 <code>RemoteMessage</code>객체를 인자로 받습니다. 이 객체에는 알림의 <code>제목</code>과 <code>내용</code>같은 정보가 담겨있습니다. </p>
+<p>제목과 내용을 로그에 출력해보겠습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyFBMessageService</span> : <span class="type">FirebaseMessagingService</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMessageReceived</span><span class="params">(remoteMessage: <span class="type">RemoteMessage</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMessageReceived(remoteMessage)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 제목</span></span><br><span class="line">        <span class="keyword">val</span> title = remoteMessage.notification?.title</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 내용</span></span><br><span class="line">        <span class="keyword">val</span> body = remoteMessage.notification?.body</span><br><span class="line"></span><br><span class="line">        Log.d(<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;title: <span class="subst">$&#123;title&#125;</span>&quot;</span>)</span><br><span class="line">        Log.d(<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;body: <span class="subst">$&#123;body&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>마지막으로 <code>AndroidManifest.xml</code>에 <code>Firebase 메시징과 관련된 액션</code>을 수신할 수 있도록 <code>인텐트 필터</code>를 추가합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManefest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.remote_notification&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Remote_notification&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">service</span> <span class="attr">android:name</span>=<span class="string">&quot;.MyFBMessageService&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:enabled</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:exported</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;com.google.firebase.MESSAGING_EVENT&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행시킵니다. 홈 버튼을 누르지 않고 앱을 포그라운드 상태로 유지합니다.<br><img src="1.png"></p>
+<p><code>Firebase 콘솔</code>에서 알림을 보냅시다.<br><img src="2.png"><br>그러면 로그에 다음과 같은 내용이 출력됩니다.<br><img src="3.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
                             aria-label=": [Android] 알림(Notification) - (5) 원격 알림"
                         >
@@ -1001,163 +1152,6 @@
                         <p>
                             <a
                                 href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/"
-                            aria-label=": [구글 지도(Google Maps)] (5) 지도에 내 위치 보여주기"
-                        >
-                            [구글 지도(Google Maps)] (5) 지도에 내 위치 보여주기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-05-05T01:00:00+09:00">
-	
-		    2020/05/05
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
-<ul>
-<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
-<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
-<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
-<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
-<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
-<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
-<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
-</ul>
-<hr>
-<h1 id="위치-권한"><a href="#위치-권한" class="headerlink" title="위치 권한"></a>위치 권한</h1><p>내 위치 정보를 가져오려면 권한이 필요합니다. <code>AndroidManifest.xml</code>에 권한을 추가합니다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.example_android_google_maps&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.ACCESS_COARSE_LOCATION&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.ACCESS_FINE_LOCATION&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><code>GoogleMap</code> 객체의 <code>setMyLocationEnable()</code>을 호출하면 지도에 내 현재 위치를 표시할 수 있습니다. 우선 지도의 초기 화면은 시드니로 설정합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> mMap: GoogleMap? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_PERMISSIONS = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(-<span class="number">33.8688</span>, <span class="number">151.2093</span>)</span><br><span class="line">        mMap?.moveCamera(CameraUpdateFactory.newLatLng(sydney))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>위치 정보는 위험 권한이므로 권한을 확인해야합니다. 다음과 같이 권한 관련 코드를 추가합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> mMap: GoogleMap? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_PERMISSIONS = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(-<span class="number">33.8688</span>, <span class="number">151.2093</span>)</span><br><span class="line">        mMap?.moveCamera(CameraUpdateFactory.newLatLng(sydney))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> hasFineLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_FINE_LOCATION)</span><br><span class="line">        <span class="keyword">val</span> hasCoarseLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_COARSE_LOCATION)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED &amp;&amp; hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">            <span class="comment">// 권한이 없을 때 권한 요청</span></span><br><span class="line">            ActivityCompat.requestPermissions(<span class="keyword">this</span>, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_CODE_PERMISSIONS)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 권한이 있을 때</span></span><br><span class="line">            mMap?.setMyLocationEnabled(<span class="literal">true</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onRequestPermissionsResult</span><span class="params">(requestCode: <span class="type">Int</span>, permissions: <span class="type">Array</span>&lt;<span class="type">out</span> <span class="type">String</span>&gt;, grantResults: <span class="type">IntArray</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onRequestPermissionsResult(requestCode, permissions, grantResults)</span><br><span class="line">        <span class="keyword">when</span> (requestCode) &#123;</span><br><span class="line">            REQUEST_CODE_PERMISSIONS -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span>(grantResults.isNotEmpty()) &#123;</span><br><span class="line">                    <span class="keyword">for</span> ((i, permission) <span class="keyword">in</span> permissions.withIndex()) &#123;</span><br><span class="line">                        isPermissionsGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;Permissions denied.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>마지막으로 <code>GoogleMap</code>객체의 <code>setMyLocationEnabled(true)</code>를 호출합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED &amp;&amp; hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">            <span class="comment">// 권한이 없을 때 권한 요청</span></span><br><span class="line">            ActivityCompat.requestPermissions(<span class="keyword">this</span>, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_CODE_PERMISSIONS)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 권한이 있을 때</span></span><br><span class="line">            mMap?.setMyLocationEnabled(<span class="literal">true</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 앱을 실행해봅시다. 초기 화면은 시드니로 설정되어있습니다.<br><img src="1.png"></p>
-<p>지도를 이동시켜 본인의 위치로 이동하면 파란 점을 확인할 수 있습니다. 이 점이 본인의 위치입니다.<br><img src="2.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/"
-                            aria-label=": [구글 지도(Google Maps)] (4) 지도 확대와 축소 (줌-인과 줌-아웃)"
-                        >
-                            [구글 지도(Google Maps)] (4) 지도 확대와 축소 (줌-인과 줌-아웃)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-05-04T01:00:00+09:00">
-	
-		    2020/05/04
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
-<ul>
-<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
-<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
-<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
-<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
-<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
-<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
-<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
-</ul>
-<hr>
-<h1 id="줌-인-줌-아웃"><a href="#줌-인-줌-아웃" class="headerlink" title="줌-인, 줌-아웃"></a>줌-인, 줌-아웃</h1><p>지도를 확대하는 것을 <code>줌-인(Zoom-in)</code>, 축소하는 것을 <code>줌-아웃(Zoom-out)</code>이라고 합니다. 예제를 만들면서 <code>줌-인</code>과 <code>줌-아웃</code>에 대해 알아보겠습니다.</p>
-<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>우선 다음과 같이 두 개의 버튼을 추가합니다.<br><img src="1.png"><br>레이아웃 파일은 다음과 같습니다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>activity_main.xml</span><ul class="tabs"><li class="tab active">xml</li></ul></figcaption><div class="tabs-content"><figure class="highlight xml" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">".MainActivity"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">fragment</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_fragment_map"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">tools:context</span>=<span class="string">".MapsActivity"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">"com.google.android.gms.maps.SupportMapFragment"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.google.android.material.floatingactionbutton.FloatingActionButton</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_fab_zoom_in"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:clickable</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:srcCompat</span>=<span class="string">"@drawable/ic_baseline_add_24"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_margin</span>=<span class="string">"16dp"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.google.android.material.floatingactionbutton.FloatingActionButton</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_fab_zoom_out"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:clickable</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:srcCompat</span>=<span class="string">"@drawable/ic_baseline_remove_24"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">"@+id/activity_fab_zoom_in"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_margin</span>=<span class="string">"16dp"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-<p>코드는 다음과 같습니다. 카메라 위치를 바꿀 때는 <code>GoogleMap</code>클래스의 <code>moveCamera()</code>메소드를 호출합니다. 이 때 <code>줌-인</code>을 하려면 <code>CameraUpdateFactory.zoomIn()</code>을 <code>줌-아웃</code>을 하려면 <code>CameraUpdateFactory.zoomOut()</code>을 인자로 전달합니다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>MainActivity.kt</span><ul class="tabs"><li class="tab active">kotlin</li></ul></figcaption><div class="tabs-content"><figure class="highlight kotlin" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback {</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonZoomIn: FloatingActionButton <span class="keyword">by</span> lazy { findViewById&lt;FloatingActionButton&gt;(R.id.activity_fab_zoom_in) }</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonZoomOut: FloatingActionButton <span class="keyword">by</span> lazy { findViewById&lt;FloatingActionButton&gt;(R.id.activity_fab_zoom_out) }</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> {</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line"></span><br><span class="line">        buttonZoomIn.setOnClickListener {</span><br><span class="line">            mMap.moveCamera(CameraUpdateFactory.zoomIn())</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        buttonZoomOut.setOnClickListener {</span><br><span class="line">            mMap.moveCamera(CameraUpdateFactory.zoomOut())</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> {</span><br><span class="line">        mMap = googleMap</span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(<span class="number">37.5665</span>, <span class="number">126.9780</span>)</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-<p>이제 (+) 버튼을 누르면 줌-인, (-) 버튼을 누르면 줌-아웃이 됩니다. <code>zoomTo()</code>메소드를 사용하면 특정 줌으로 이동할 수 있습니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

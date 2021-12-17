@@ -354,6 +354,72 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/02/21/04_java/180221_anonymous_class/"
+                            aria-label=": [Java] 익명 클래스(Anonymous Class)"
+                        >
+                            [Java] 익명 클래스(Anonymous Class)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-02-21T00:00:00+09:00">
+	
+		    2018/02/21
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="익명-클래스"><a href="#익명-클래스" class="headerlink" title="익명 클래스"></a>익명 클래스</h1><p>다음과 같은 부모 클래스가 있다고 가정하자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 부모 클래스</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이를 상속한 자식 클래스를 한번만 사용하는 경우, 매번 자식 클래스를 정의하기에는 번거로운 경우가 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 자식 클래스를 정의</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Designer</span> <span class="keyword">extends</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Do something.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 자식 클래스 사용</span></span><br><span class="line">Person person = <span class="keyword">new</span> Designer();</span><br><span class="line">person.doSomething();</span><br></pre></td></tr></table></figure>
+
+<p>이러한 경우 익명 클래스를 유용하게 사용할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 익명 클래스 사용</span></span><br><span class="line">Person person = <span class="keyword">new</span> Person() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Do something.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">person.doSomething();</span><br></pre></td></tr></table></figure>
+<p>익명 클래스는 안드로이드 어플리케이션 개발에서 이벤트를 처리할 때 많이 사용한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Button loginButton = findViewById(R.id.loginButton);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 버튼을 눌렀을 때 실행할 코드를 익명 클래스로 등록</span></span><br><span class="line">loginButton.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// log in</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/02/21/04_java/180221_anonymous_class/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/02/20/04_java/180220_inner_class/"
                             aria-label=": [Java] 내부 클래스(Inner Class)"
                         >
@@ -950,71 +1016,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/02/11/04_java/180211_class_instance_object/"
-                            aria-label=": [Java] Class, Instance, Object"
-                        >
-                            [Java] Class, Instance, Object
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-02-11T00:00:00+09:00">
-	
-		    2018/02/11
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="객체지향-프로그래밍"><a href="#객체지향-프로그래밍" class="headerlink" title="객체지향 프로그래밍"></a>객체지향 프로그래밍</h1><p>자바는 모든 대상을 <code>객체(Object)</code>로 바라본다. 이러한 점에서 자바는 <code>객체지향 프로그래밍(Object-oriented Programming)</code>언어다. 객체지향 프로그래밍을 이해하려면 클래스와 인스턴스에 대해 알아야한다.</p>
-<h1 id="클래스와-인스턴스"><a href="#클래스와-인스턴스" class="headerlink" title="클래스와 인스턴스"></a>클래스와 인스턴스</h1><p>클래스와 인스턴스를 설명할 때 와플 기계와 와플을 예로 든다.<br><img src="1.png"></p>
-<p><code>클래스(Class)</code>는 <u>인스턴스를 만드는 틀</u>, <code>인스턴스(Instance)</code>는 <u>클래스로 만든 무언가</u>다. 즉 클래스는 와플 기계, 인스턴스 와플이다. 클래스를 코드로 표현하면 다음과 같다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Waffle</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>인스턴스는 다음과 같이 생성한다. 키워드 <code>new</code>를 사용하고 클래스 이름 뒤에 <code>()</code>를 붙여주면 된다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Waffle waffle = <span class="keyword">new</span> Waffle()</span><br></pre></td></tr></table></figure>
-<p>이렇게 만든 인스턴스는 <code>객체(Object)</code>라고도 한다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/02/11/04_java/180211_class_instance_object/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1041,7 +1042,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 22 of 23</li>
+        <li class="pagination-number">page 22 of 24</li>
     </ul>
 </div>
 

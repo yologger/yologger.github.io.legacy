@@ -354,6 +354,136 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/06/04/08_android/11_notification/200604_notification_group/"
+                            aria-label=": [Android] 알림(Notification) - (4) 알림 메시지 묶기"
+                        >
+                            [Android] 알림(Notification) - (4) 알림 메시지 묶기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-04T01:00:00+09:00">
+	
+		    2020/06/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="알림-메시지-묶기"><a href="#알림-메시지-묶기" class="headerlink" title="알림 메시지 묶기"></a>알림 메시지 묶기</h1><p>같은 앱에서 여러 알림을 보낼 때 다음과 같이 묶을 수 있습니다. 예제를 살펴보겠습니다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>버튼을 눌렀을 때 다음과 같이 세 개의 알림을 보내봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">button.setOnClickListener &#123; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_1_ID = <span class="number">1</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_2_ID = <span class="number">2</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_3_ID = <span class="number">3</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification1 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification 1&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification 1&quot;</span>)</span><br><span class="line">        .build()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification2 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification 2&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification 2&quot;</span>)</span><br><span class="line">        .build()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification3 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification 3&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification 3&quot;</span>)</span><br><span class="line">        .build()</span><br><span class="line"></span><br><span class="line">    notificationManager.notify(NOTIFICATION_1_ID, notification1)</span><br><span class="line">    notificationManager.notify(NOTIFICATION_2_ID, notification2)</span><br><span class="line">    notificationManager.notify(NOTIFICATION_3_ID, notification3)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 버튼을 누르면 상단 상태바에 세 개의 알림을 확인할 수 있습니다.<br><img src="1.png"><br>알람 패널에도 세 개의 알림이 있습니다.<br><img src="2.png"><br><code>NotificationCompat.Builder</code>클래스의 <code>setGroup()</code>과 <code>setGroupSummary()</code>를 사용하면 연관된 알람들을 한 개의 알람으로 묶을 수 있습니다. 코드를 다음과 같이 수정해봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">button.setOnClickListener &#123; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_GROUP_ID = <span class="number">0</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_1_ID = <span class="number">1</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_2_ID = <span class="number">2</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_3_ID = <span class="number">3</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_GROUP_KEY = <span class="string">&quot;notification_group_key&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification1 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification 1&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification 1&quot;</span>)</span><br><span class="line">        .setGroup(NOTIFICATION_GROUP_KEY)</span><br><span class="line">        .build()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification2 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification 2&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification 2&quot;</span>)</span><br><span class="line">        .setGroup(NOTIFICATION_GROUP_KEY)</span><br><span class="line">        .build()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification3 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification 3&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification 3&quot;</span>)</span><br><span class="line">        .setGroup(NOTIFICATION_GROUP_KEY)</span><br><span class="line">        .build()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> summaryNotification = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;Summary Notification&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a summary notification&quot;</span>)</span><br><span class="line">        .setGroup(NOTIFICATION_GROUP_KEY)</span><br><span class="line">        .setGroupSummary(<span class="literal">true</span>)</span><br><span class="line">        .build()</span><br><span class="line"></span><br><span class="line">    notificationManager.notify(NOTIFICATION_1_ID, notification1)</span><br><span class="line">    notificationManager.notify(NOTIFICATION_2_ID, notification2)</span><br><span class="line">    notificationManager.notify(NOTIFICATION_3_ID, notification3)</span><br><span class="line">    notificationManager.notify(NOTIFICATION_GROUP_ID, summaryNotification)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행합니다. 버튼을 클릭하면 상단 상태바에 한 개의 알람만 확인할 수 있습니다.<br><img src="3.png"><br>알람 패널에는 연관된 세 개의 알람이 그룹으로 묶여있습니다.<br><img src="4.png"><br>그룹을 클릭하면 세 개의 알람을 모두 확인할 수 있습니다.<br><img src="5.png"><br>전체 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_GROUP_ID = <span class="number">0</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_1_ID = <span class="number">1</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_2_ID = <span class="number">2</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_3_ID = <span class="number">3</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_GROUP_KEY = <span class="string">&quot;notification_group_key&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line">                <span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">                notificationChannel.description = channelDescription</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">                notificationManager.createNotificationChannel(notificationChannel)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification1 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                        .setContentTitle(<span class="string">&quot;A Notification 1&quot;</span>)</span><br><span class="line">                        .setContentText(<span class="string">&quot;This is a notification 1&quot;</span>)</span><br><span class="line">                        .setGroup(NOTIFICATION_GROUP_KEY)</span><br><span class="line">                        .build()</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification2 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                        .setContentTitle(<span class="string">&quot;A Notification 2&quot;</span>)</span><br><span class="line">                        .setContentText(<span class="string">&quot;This is a notification 2&quot;</span>)</span><br><span class="line">                        .setGroup(NOTIFICATION_GROUP_KEY)</span><br><span class="line">                        .build()</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification3 = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                        .setContentTitle(<span class="string">&quot;A Notification 3&quot;</span>)</span><br><span class="line">                        .setContentText(<span class="string">&quot;This is a notification 3&quot;</span>)</span><br><span class="line">                        .setGroup(NOTIFICATION_GROUP_KEY)</span><br><span class="line">                        .build()</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> summaryNotification = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                        .setContentTitle(<span class="string">&quot;Summary Notification&quot;</span>)</span><br><span class="line">                        .setContentText(<span class="string">&quot;This is a summary notification&quot;</span>)</span><br><span class="line">                        .setGroup(NOTIFICATION_GROUP_KEY)</span><br><span class="line">                        .setGroupSummary(<span class="literal">true</span>)</span><br><span class="line">                        .build()</span><br><span class="line"></span><br><span class="line">                notificationManager.notify(NOTIFICATION_1_ID, notification1)</span><br><span class="line">                notificationManager.notify(NOTIFICATION_2_ID, notification2)</span><br><span class="line">                notificationManager.notify(NOTIFICATION_3_ID, notification3)</span><br><span class="line">                notificationManager.notify(NOTIFICATION_GROUP_ID, summaryNotification)</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// ..</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/04/08_android/11_notification/200604_notification_group/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/06/03/08_android/11_notification/200603_notification_action/"
+                            aria-label=": [Android] 알림(Notification) - (3) 알림에 액션 추가하기"
+                        >
+                            [Android] 알림(Notification) - (3) 알림에 액션 추가하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-03T01:00:00+09:00">
+	
+		    2020/06/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="액션"><a href="#액션" class="headerlink" title="액션"></a>액션</h1><p>알림에는 버튼이 포함될 수 있습니다. 이를 <code>액션 버튼</code>이라고 합니다.</p>
+<p><img src="1.png"><br>액션은 다음과 같이 생성할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> action = NotificationCompat.Action.Builder(</span><br><span class="line">    android.R.drawable.sym_action_chat,</span><br><span class="line">    <span class="string">&quot;OPEN&quot;</span>,</span><br><span class="line">    pendingIntent</span><br><span class="line">).build()</span><br></pre></td></tr></table></figure>
+<p>생성된 액션은 <code>NotificationBuilder</code>객체의 <code>addAction()</code>메소드를 사용하여 추가합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationBuilder.addAction(action)</span><br></pre></td></tr></table></figure>
+<p>전체 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> REQUEST_CODE = <span class="number">1</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line">                <span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">                notificationChannel.description = channelDescription</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">                notificationManager.createNotificationChannel(notificationChannel)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> resultIntent = Intent(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, ResultActivity::<span class="keyword">class</span>.java)</span><br><span class="line">                <span class="keyword">val</span> pendingIntent = PendingIntent.getActivity(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, REQUEST_CODE, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)</span><br><span class="line">                notificationBuilder.setContentIntent(pendingIntent)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> action = NotificationCompat.Action.Builder(</span><br><span class="line">                    android.R.drawable.sym_action_chat,</span><br><span class="line">                    <span class="string">&quot;OPEN&quot;</span>,</span><br><span class="line">                    pendingIntent</span><br><span class="line">                ).build()</span><br><span class="line"></span><br><span class="line">                notificationBuilder.addAction(action)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification = notificationBuilder.build()</span><br><span class="line"></span><br><span class="line">                notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// ... </span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 알림 패널에서 액션 버튼을 클릭하면 <code>ResultActivity</code>가 실행됩니다.<br><img src="2.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/03/08_android/11_notification/200603_notification_action/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/06/02/08_android/11_notification/200602_notification_start_activity/"
                             aria-label=": [Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
                         >
@@ -1028,190 +1158,6 @@
                         <p>
                             <a
                                 href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/"
-                            aria-label=": [구글 지도(Google Maps)] (2) 지도 타입 변경하기"
-                        >
-                            [구글 지도(Google Maps)] (2) 지도 타입 변경하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-05-02T01:00:00+09:00">
-	
-		    2020/05/02
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
-<ul>
-<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
-<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
-<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
-<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
-<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
-<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
-<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
-</ul>
-<hr>
-<h1 id="지도-타입"><a href="#지도-타입" class="headerlink" title="지도 타입"></a>지도 타입</h1><p><code>구글 지도(Google Maps) API</code>는 여러 타입의 지도를 제공합니다. <code>setMapType()</code>메서드를 사용하면 지도의 타입을 변경할 수 있습니다. 우선 인공위성 타입의 지도입니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line">        <span class="keyword">val</span> seoul = LatLng(<span class="number">37.5665</span>, <span class="number">126.9780</span>)</span><br><span class="line">        mMap.moveCamera(CameraUpdateFactory.newLatLng(seoul))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 위성 지도</span></span><br><span class="line">        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="1.png"><br>표준 타입의 지도는 다음과 같이 보여줄 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line">        <span class="keyword">val</span> seoul = LatLng(<span class="number">37.5665</span>, <span class="number">126.9780</span>)</span><br><span class="line">        mMap.moveCamera(CameraUpdateFactory.newLatLng(seoul))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 표준 지도</span></span><br><span class="line">        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="2.png"></p>
-<p>그 밖에도 다양한 타입의 지도를 제공합니다.</p>
-<ul>
-<li><code>GoogleMap.MAP_TYPE_NONE</code>: 격자선 없이 나타납니다.</li>
-<li><code>GoogleMap.MAP_TYPE_NORMAL</code>: 전형적인 도로 지도로 구성되는 표준 뷰입니다.</li>
-<li><code>GoogleMap.MAP_TYPE_SATELLITE</code>: 해당 지도 영역의 인공위성 사진을 보여줍니다</li>
-<li><code>GoogleMap.MAP_TYPE_HYBRID</code>: 도로 지도가 겹쳐진 인공위성 사진을 보여줍니다</li>
-<li><code>GoogleMap.MAP_TYPE_TERRAIN</code>: 등고선과 색상 등의 지형 정보가 나타납니다.</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/"
-                            aria-label=": [구글 지도(Google Maps)] (1) 구글 지도 띄우기"
-                        >
-                            [구글 지도(Google Maps)] (1) 구글 지도 띄우기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-05-01T01:00:00+09:00">
-	
-		    2020/05/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
-<ul>
-<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
-<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
-<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
-<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
-<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
-<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
-<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
-</ul>
-<hr>
-<h1 id="1-SHA-1-인증키-발급"><a href="#1-SHA-1-인증키-발급" class="headerlink" title="1. SHA-1 인증키 발급"></a>1. SHA-1 인증키 발급</h1><p><code>Google Cloud Platform</code>, <code>Google Play</code>, <code>Google Firebase</code> 등의 서비스를 사용하다보면 <code>SHA-1 인증키</code>가 필요한 경우가 많습니다. <code>SHA-1 인증키</code>는 안드로이드 스튜디오에서 아래와 같이 발급할 수 있습니다.</p>
-<p>우선 프로젝트를 열고 <code>[Gradle] &gt; [Task] &gt; [android] &gt; [signingReport]</code>를 클릭합니다.<br><img src="1.png"></p>
-<p>그럼 하단 로그에 다음과 같이 <code>SHA1 인증키</code>가 출력됩니다.<br><img src="2.png"></p>
-<h1 id="2-API-Key-발급"><a href="#2-API-Key-발급" class="headerlink" title="2. API Key 발급"></a>2. API Key 발급</h1><p><code>Google Maps API</code>를 사용하려면 <code>API Key</code>를 발급받아야 합니다. <a target="_blank" rel="noopener" href="https://cloud.google.com/">https://cloud.google.com/</a>에서 로그인하고 오른쪽 상단에 있는 콘솔 버튼을 눌러줍니다.<br><img src="3.png"></p>
-<p><code>API 및 서비스</code>에 들어갑니다.<br><img src="4.png"></p>
-<p>프로젝트를 하나도 추가하지 않았다면 다음과 같은 화면이 나옵니다. 오른쪽 <code>프로젝트 만들기</code>를 클릭합니다.<br><img src="5.png"></p>
-<p><code>프로젝트 이름</code>을 입력하고 <code>만들기</code>를 클릭합니다.<br><img src="6.png"></p>
-<p>프로젝트가 생성되었습니다. 왼쪽 사이드 바 메뉴에서 <code>[API 및 서비스] &gt; [대시보드]</code>로 들어갑니다<br><img src="7.png"></p>
-<p>상단 중앙의 <code>API 및 서비스 사용 설정</code>을 클릭합니다.<br><img src="8.png"></p>
-<p><code>Maps SDK for Android</code>를 선택합니다.<br><img src="9.png"></p>
-<p><code>사용</code> 버튼을 누릅니다.<br><img src="10.png"></p>
-<p>왼쪽 메뉴에서 <code>사용자 인증 정보</code>를 누르고 상단의 <code>사용자 인증 정보 만들기</code>를 클릭한 후 <code>API 키</code>를 선택합니다.<br><img src="11.png"></p>
-<p><code>키 제한</code>을 클릭합니다. <code>키 제한</code>은 실제 배포되는 앱에서 키가 무단으로 사용되는 것을 방지하기 위함입니다.<br><img src="12.png"></p>
-<p>키의 <code>이름</code>은 임의로 설정합니다.<br><img src="13.png"></p>
-<p>키를 <code>Android 앱</code>에서만 사용할 수 있도록 제한할 수 있습니다.<br><img src="14.png"></p>
-<p><code>Google Cloud Platform</code>은 여러 API를 제공합니다. 이 중에서 <code>안드로이드를 위한 맵 API</code>만 사용하도록 제한할 수도 있습니다.<br><img src="15.png"></p>
-<p>아래와 같이 <code>앱의 사용량</code>도 제한할 수 있습니다. 이때 항목 추가를 누르고 위 안드로이드 스튜디오 프로젝트에서 발급한 <code>SHA-1 인증키</code>와 <code>패키지 이름</code>을 입력합니다. 이후 <code>완료</code> 버튼을 누르고 하단의 <code>저장</code> 버튼을 누릅니다.<br><img src="16.png"></p>
-<h1 id="3-안드로이드-스튜디오에서-구글-맵스-설정"><a href="#3-안드로이드-스튜디오에서-구글-맵스-설정" class="headerlink" title="3. 안드로이드 스튜디오에서 구글 맵스 설정"></a>3. 안드로이드 스튜디오에서 구글 맵스 설정</h1><p><code>Google Maps Android API</code>를 사용하려면 <code>Google Play Services</code> 라이브러리를 설치해야합니다. </p>
-<p>안드로이드 스튜디오에서 <code>SDK Manager</code>에 들어가서 <code>SDK Tools</code>를 선택합니다. <code>Google player services</code>를 체크하고 <code>OK</code> 버튼을 눌러 설치합니다.<br><img src="17.png"><br>이제 모듈 수준의 <code>build.gradle</code>에 의존성을 추가해줍니다.</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.gms:play-services-maps:17.0.1&#x27;</span></span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.gms:play-services-location:18.0.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="4-레이아웃에-구글-맵스-추가하기"><a href="#4-레이아웃에-구글-맵스-추가하기" class="headerlink" title="4. 레이아웃에 구글 맵스 추가하기"></a>4. 레이아웃에 구글 맵스 추가하기</h1><p>이제 <code>구글 맵스(Google Maps)</code>에서 서울을 표시해보겠습니다. 레이아웃에 다음과 같이 구글 맵스와 관련된 프래그먼트를 추가합니다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">fragment</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">tools:context</span>=<span class="string">&quot;.MapsActivity&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_fragment_map&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;com.google.android.gms.maps.SupportMapFragment&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>다음과 같이 코드를 작성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment: SuppoortMapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">object</span> : OnMapReadyCallback &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>SuppoortMapFragment</code>클래스의 <code>getMapAsync()</code>메소드는 구글 맵스와 관련된 프래그먼트를 비동기적으로 준비하고 <code>onMapReady()</code>를 호출합니다. 이때 <code>onMapReady()</code>메소드의 매개변수로 지도 데이터가 전달됩니다. </p>
-<p>위 코드는 다음과 같이 변경할 수도 있습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>준비가 되면 실행할 코드를 <code>onMapReady()</code>에 서울의 위치를 보여주는 코드를 작성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line">        <span class="keyword">val</span> seoul = LatLng(<span class="number">37.5665</span>, <span class="number">126.9780</span>)</span><br><span class="line">        mMap.moveCamera(CameraUpdateFactory.newLatLng(seoul))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>앱을 실행하면 서울 위치가 화면에 나옵니다.<br><img src="18.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

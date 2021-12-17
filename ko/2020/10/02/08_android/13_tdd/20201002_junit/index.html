@@ -1,0 +1,749 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] TDD(Test-Driven Development) - (2) JUnit이란? - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nJUnitJunit은 단위테스트 도구다. JUnit을 사용하면 디버깅을 위해 앱을 매번 빌드하고 System.out.println()으로 로그를 찍을 필요가 없어진다.\n설정보통 안드로이드 프로젝트를 생성하면 JUnit과 관련된 의존성이 자동으로 포함된다.\n모듈 수준의 buiid.gradle12345678dependencies &#123;    // 로컬 단위 테스트에서의 JUnit    testImplementation &#x27;junit:junit:4.+&#x27;    // 계측 테스트에서의 JUnit    androidTestImplementation &#x27;androidx.test.ext:junit:1.1.3&#x27;&#125;\n\n사용합과 차를 계산해주는 Calculator클래스가 있다.\nCalculator.kt123456789class Calculator &#123;    fun plus(a: Int, b: Int): Int &#123;        return a+b    &#125;        fun minus(a: Int, b: Int): Int &#123;        return a-b    &#125;&#125;\n이 클래스를 JUnit으로 테스트해보자. test디렉토리에 ExampleUnitTest.kt을 생성하고 다음과 같이 작성하자.\nExampleUnitTest.kt1234567891011121314151617import org.junit.Testimport org.junit.Assert.*class ExampleUnitTest &#123;    @Test    fun test_plus() &#123;        val calculator = Calculator()        assertEquals(10, calculator.plus(3, 7))    &#125;    @Test    fun test_minus() &#123;        val calculator = Calculator()        assertEquals(3, calculator.minus(10, 7))    &#125;&#125;\ntest_plus()에는 Calculator.plus()메소드를 테스트하는 코드를 작성한다. 또한 @Test어노테이션을 붙이면 테스트 실행 버튼이 생성된다.JUnit의 org.junit.Assert패키지에는 테스트를 위한 다양한 함수가 존재한다. assertEquals()의 첫 번째 인자는 기대값, 두 번째 인자는 실제값을 전달한다. \n이 함수는 두 값이 동일하면 테스트를 성공시킨다.두 값이 다르면 실패시킨다.\n다음은 자주 사용하는 메소드다.\n(1) assertEqual()두 값이 동일한지 비교한다.\n12345@Testfun test_equal() &#123;    assertEquals(10, 3+7)   // SUCCESS    assertEquals(10, 1+3)   // FAILURE&#125;\n\n(2) assertArrayEquals()두 배열이 동일한지 비교한다.\n12345678@Testfun test_compare_arrays() &#123;    val arr1 = arrayOf(1, 2, 3)    val arr2 = arrayOf(1, 2, 3)    val arr3 = arrayOf(4, 5, 6)    assertArrayEquals(arr1, arr2)   // Success    assertArrayEquals(arr1, arr3)   // Failure&#125;\n\n(3) assertSame()두 객체가 동일한지 비교한다.\n123456@Testfun test_object() &#123;    val p1 = Person(&quot;Paul&quot;, &quot;USA&quot;)    val p2 = p1    assertSame(p1, p2)  // SUCCESS&#125;\n\n(4) assertTrue()값이 true인지 확인한다.\n12345@Testfun test_isMarried() &#123;    val isMarried = true    assertTrue(isMarried) // SUCCESS&#125;\n(5) assertNotNull()값이 null인지 확인한다.\n12345@Testfun test_notNull() &#123;    val person: Person? = Person(&quot;Paul&quot;, &quot;USA&quot;)    assertNotNull(person)   // SUCCESS&#125;\n12345@Testfun test_notNull() &#123;    val person: Person? = null    assertNotNull(person)   // FAILURE&#125;\n이 곳에서 모든 Assert 메소드를 확인할 수 있다.\n@Before, @AfterExampleUnitTest.kt는 다음 코드가 중복되고있다.\n12val calculator = Calculator()assertEquals(10, calculator.plus(3, 7))\n@Before, @After 어노테이션을 사용하면 코드의 중복을 제거할 수 있다.\n@Before가 붙은 메소드는 클래스 내부의 테스트 메소드들이 실행되기 전에 호출된다. 보통 초기화 작업을 수행한다.\nExampleUnitTest.kt1234567891011121314151617181920212223242526272829import org.junit.Afterimport org.junit.Testimport org.junit.Assert.*import org.junit.Beforeclass ExampleUnitTest &#123;    lateinit var calculator: Calculator    @Before    fun setup() &#123;        calculator = Calculator()    &#125;    @Test    fun test_plus() &#123;        assertEquals(10, calculator.plus(3, 7))    &#125;    @Test    fun test_minus() &#123;        assertEquals(3, calculator.minus(10, 7))    &#125;    @After    fun tearDown() &#123;    &#125;&#125;\n@After가 붙은 메소드는 클래스 내부의 테스트 메소드들이 실행된 후에 호출된다. 보통 테스트에 사용한 자원을 해제하는데 사용한다.\nTest RunnerTest Runner는 테스트 클래스를 초기화하고, 테스트 메소드를 실행하고, 테스트 결과를 로그에 알려준다. 모든 Test Runner는 org.junit.runner.Runner클래스를 상속한다.\n커스텀 Test Runner를 @RunWith어노테이션으로 지정할 수 있다. Test Runner를 지정하지 않으면 기본 Test Runner인 BlockJUnit4ClassRunner를 사용한다. 예를 들어 다음 코드는 \nExampleUnitTest.kt1234567891011import org.junit.Testimport org.junit.Assert.*class ExampleUnitTest &#123;        @Test    fun test_add() &#123;        val calculator = Calculator()        assertEquals(10, calculator.plus(3, 7))    &#125;&#125;\n다음 코드와 동일하다.\nExampleUnitTest.kt12345678910import org.junit.runners.BlockJUnit4ClassRunner@RunWith(BlockJUnit4ClassRunner::class)class ExampleUnitTest &#123;    @Test    fun localUnitTest() &#123;        // ...    &#125;&#125;\n안드로이드 어플리케이션을 개발할 때에는 주로 androidx.test.ext:junit:1.1.3&#39;가 제공하는 AndroidJUnit4를 사용한다.\nExampleInstrumentedTest1234567891011import androidx.test.ext.junit.runners.AndroidJUnit4import org.junit.runner.RunWith@RunWith(AndroidJUnit4::class)class ExampleInstrumentedTest &#123;    @Test    fun instrumentedTest() &#123;        // ...    &#125;&#125;\n스프링 부트 어플리케이션을 개발할 때에는 스프링 프레임워크가 제공하는 SpringRunner를 사용한다.\nExampleControllerTest1234567891011import org.springframework.test.context.junit4.SpringRunnerimport org.junit.runner.RunWith@RunWith(SpringRunner::class)class ExampleControllerTest &#123;    @Test    fun apiTest() &#123;        // ...    &#125;&#125;","dateCreated":"2020-10-02T01:00:00+09:00","dateModified":"2021-12-17T21:45:26+09:00","datePublished":"2020-10-02T01:00:00+09:00","description":"","headline":"[Android] TDD(Test-Driven Development) - (2) JUnit이란?","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/","keywords":"Android, TDD"}</script>
+    <meta name="description" content="JUnitJunit은 단위테스트 도구다. JUnit을 사용하면 디버깅을 위해 앱을 매번 빌드하고 System.out.println()으로 로그를 찍을 필요가 없어진다. 설정보통 안드로이드 프로젝트를 생성하면 JUnit과 관련된 의존성이 자동으로 포함된다. 모듈 수준의 buiid.gradle12345678dependencies &amp;#123;    &#x2F;&#x2F; 로컬">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] TDD(Test-Driven Development) - (2) JUnit이란?">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="JUnitJunit은 단위테스트 도구다. JUnit을 사용하면 디버깅을 위해 앱을 매번 빌드하고 System.out.println()으로 로그를 찍을 필요가 없어진다. 설정보통 안드로이드 프로젝트를 생성하면 JUnit과 관련된 의존성이 자동으로 포함된다. 모듈 수준의 buiid.gradle12345678dependencies &amp;#123;    &#x2F;&#x2F; 로컬">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/3.png">
+<meta property="article:published_time" content="2020-10-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-17T12:45:26.308Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="TDD">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] TDD(Test-Driven Development) - (2) JUnit이란?
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-10-02T01:00:00+09:00">
+	
+		    2020/10/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/TDD/">TDD</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="JUnit"><a href="#JUnit" class="headerlink" title="JUnit"></a>JUnit</h1><p><code>Junit</code>은 단위테스트 도구다. JUnit을 사용하면 디버깅을 위해 앱을 매번 빌드하고 <code>System.out.println()</code>으로 로그를 찍을 필요가 없어진다.</p>
+<h1 id="설정"><a href="#설정" class="headerlink" title="설정"></a>설정</h1><p>보통 안드로이드 프로젝트를 생성하면 JUnit과 관련된 의존성이 자동으로 포함된다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 buiid.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 로컬 단위 테스트에서의 JUnit</span></span><br><span class="line">    testImplementation <span class="string">&#x27;junit:junit:4.+&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 계측 테스트에서의 JUnit</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.ext:junit:1.1.3&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="사용"><a href="#사용" class="headerlink" title="사용"></a>사용</h1><p>합과 차를 계산해주는 <code>Calculator</code>클래스가 있다.</p>
+<figure class="highlight kotlin"><figcaption><span>Calculator.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Calculator</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a+b</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a-b</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 클래스를 JUnit으로 테스트해보자. <code>test</code>디렉토리에 <code>ExampleUnitTest.kt</code>을 생성하고 다음과 같이 작성하자.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.Assert.*</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_plus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">        assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_minus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">        assertEquals(<span class="number">3</span>, calculator.minus(<span class="number">10</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>test_plus()</code>에는 <code>Calculator.plus()</code>메소드를 테스트하는 코드를 작성한다. 또한 <code>@Test</code>어노테이션을 붙이면 테스트 실행 버튼이 생성된다.<br><img src="1.png"><br>JUnit의 <code>org.junit.Assert</code>패키지에는 테스트를 위한 다양한 함수가 존재한다. <code>assertEquals()</code>의 첫 번째 인자는 기대값, 두 번째 인자는 실제값을 전달한다. </p>
+<p>이 함수는 두 값이 동일하면 테스트를 성공시킨다.<br><img src="2.png"><br>두 값이 다르면 실패시킨다.<br><img src="3.png"></p>
+<p>다음은 자주 사용하는 메소드다.</p>
+<h3 id="1-assertEqual"><a href="#1-assertEqual" class="headerlink" title="(1) assertEqual()"></a>(1) assertEqual()</h3><p>두 값이 동일한지 비교한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_equal</span><span class="params">()</span></span> &#123;</span><br><span class="line">    assertEquals(<span class="number">10</span>, <span class="number">3</span>+<span class="number">7</span>)   <span class="comment">// SUCCESS</span></span><br><span class="line">    assertEquals(<span class="number">10</span>, <span class="number">1</span>+<span class="number">3</span>)   <span class="comment">// FAILURE</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-assertArrayEquals"><a href="#2-assertArrayEquals" class="headerlink" title="(2) assertArrayEquals()"></a>(2) assertArrayEquals()</h3><p>두 배열이 동일한지 비교한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_compare_arrays</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> arr1 = arrayOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    <span class="keyword">val</span> arr2 = arrayOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    <span class="keyword">val</span> arr3 = arrayOf(<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>)</span><br><span class="line">    assertArrayEquals(arr1, arr2)   <span class="comment">// Success</span></span><br><span class="line">    assertArrayEquals(arr1, arr3)   <span class="comment">// Failure</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-assertSame"><a href="#3-assertSame" class="headerlink" title="(3) assertSame()"></a>(3) assertSame()</h3><p>두 객체가 동일한지 비교한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_object</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> p1 = Person(<span class="string">&quot;Paul&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">    <span class="keyword">val</span> p2 = p1</span><br><span class="line">    assertSame(p1, p2)  <span class="comment">// SUCCESS</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-assertTrue"><a href="#4-assertTrue" class="headerlink" title="(4) assertTrue()"></a>(4) assertTrue()</h3><p>값이 <code>true</code>인지 확인한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_isMarried</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> isMarried = <span class="literal">true</span></span><br><span class="line">    assertTrue(isMarried) <span class="comment">// SUCCESS</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="5-assertNotNull"><a href="#5-assertNotNull" class="headerlink" title="(5) assertNotNull()"></a>(5) assertNotNull()</h3><p>값이 <code>null</code>인지 확인한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_notNull</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> person: Person? = Person(<span class="string">&quot;Paul&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">    assertNotNull(person)   <span class="comment">// SUCCESS</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">fun test_notNull() &#123;</span><br><span class="line">    val person: Person? = null</span><br><span class="line">    assertNotNull(person)   // FAILURE</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="http://junit.sourceforge.net/javadoc/org/junit/Assert.html">이 곳</a>에서 모든 Assert 메소드를 확인할 수 있다.</p>
+<h1 id="Before-After"><a href="#Before-After" class="headerlink" title="@Before, @After"></a>@Before, @After</h1><p><code>ExampleUnitTest.kt</code>는 다음 코드가 중복되고있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br></pre></td></tr></table></figure>
+<p><code>@Before</code>, <code>@After</code> 어노테이션을 사용하면 코드의 중복을 제거할 수 있다.</p>
+<p><code>@Before</code>가 붙은 메소드는 클래스 내부의 테스트 메소드들이 실행되기 전에 호출된다. 보통 초기화 작업을 수행한다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.After</span><br><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.Assert.*</span><br><span class="line"><span class="keyword">import</span> org.junit.Before</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> calculator: Calculator</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Before</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">setup</span><span class="params">()</span></span> &#123;</span><br><span class="line">        calculator = Calculator()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_plus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_minus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        assertEquals(<span class="number">3</span>, calculator.minus(<span class="number">10</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@After</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>@After</code>가 붙은 메소드는 클래스 내부의 테스트 메소드들이 실행된 후에 호출된다. 보통 테스트에 사용한 자원을 해제하는데 사용한다.</p>
+<h1 id="Test-Runner"><a href="#Test-Runner" class="headerlink" title="Test Runner"></a>Test Runner</h1><p><code>Test Runner</code>는 테스트 클래스를 초기화하고, 테스트 메소드를 실행하고, 테스트 결과를 로그에 알려준다. 모든 Test Runner는 <code>org.junit.runner.Runner</code>클래스를 상속한다.</p>
+<p>커스텀 Test Runner를 <code>@RunWith</code>어노테이션으로 지정할 수 있다. Test Runner를 지정하지 않으면 기본 Test Runner인 <code>BlockJUnit4ClassRunner</code>를 사용한다. 예를 들어 다음 코드는 </p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.Assert.*</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_add</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">        assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음 코드와 동일하다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.runners.BlockJUnit4ClassRunner</span><br><span class="line"></span><br><span class="line"><span class="meta">@RunWith(BlockJUnit4ClassRunner::class)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">localUnitTest</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>안드로이드 어플리케이션을 개발할 때에는 주로 <code>androidx.test.ext:junit:1.1.3&#39;</code>가 제공하는 <code>AndroidJUnit4</code>를 사용한다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleInstrumentedTest</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> androidx.test.ext.junit.runners.AndroidJUnit4</span><br><span class="line"><span class="keyword">import</span> org.junit.runner.RunWith</span><br><span class="line"></span><br><span class="line"><span class="meta">@RunWith(AndroidJUnit4::class)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleInstrumentedTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">instrumentedTest</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>스프링 부트 어플리케이션을 개발할 때에는 스프링 프레임워크가 제공하는 <code>SpringRunner</code>를 사용한다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleControllerTest</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.test.context.junit4.SpringRunner</span><br><span class="line"><span class="keyword">import</span> org.junit.runner.RunWith</span><br><span class="line"></span><br><span class="line"><span class="meta">@RunWith(SpringRunner::class)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleControllerTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">apiTest</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/TDD/" rel="tag">TDD</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/10/03/08_android/13_tdd/20201003_espresso/"
+                    data-tooltip="[Android] TDD(Test-Driven Development) - (3) Espresso, UI 테스트하기"
+                    aria-label="이전: [Android] TDD(Test-Driven Development) - (3) Espresso, UI 테스트하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                    data-tooltip="[Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기"
+                    aria-label="다음: [Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/10/03/08_android/13_tdd/20201003_espresso/"
+                    data-tooltip="[Android] TDD(Test-Driven Development) - (3) Espresso, UI 테스트하기"
+                    aria-label="이전: [Android] TDD(Test-Driven Development) - (3) Espresso, UI 테스트하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                    data-tooltip="[Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기"
+                    aria-label="다음: [Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

@@ -354,106 +354,6 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2018/04/04/12_tools/02_gradle/20180404_plugin/"
-                            aria-label=": [Gradle] Gradle Plugin"
-                        >
-                            [Gradle] Gradle Plugin
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-04-04T00:00:00+09:00">
-	
-		    2018/04/04
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Gradle/">Gradle</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p><code>Gradle Plugin</code>은 유용한 Task들의 집합이다. Gradle Plugin을 추가하면 프로젝트를 더 다양한 방법으로 빌드할 수 있다. 간단한 Gradle 프로젝트를 만들면서 Gradle Plugin에 대해 알아보자. </p>
-<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>먼저 디렉토리를 생성하자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir myProject</span><br><span class="line">$ cd myProject</span><br></pre></td></tr></table></figure>
-<p>Gradle 프로젝트로 초기화하기 위하여 <code>gradle init</code>명령어를 입력한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle init</span><br></pre></td></tr></table></figure>
-<p>생성할 프로젝트 정보를 입력해야한다. 일단 아래와 같이 입력하자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Select type of project to generate:</span><br><span class="line">  1: basic</span><br><span class="line">  2: application</span><br><span class="line">  3: library</span><br><span class="line">  4: Gradle plugin</span><br><span class="line">Enter selection (default: basic) [1..4] 1</span><br><span class="line"></span><br><span class="line">Select build script DSL:</span><br><span class="line">  1: Groovy</span><br><span class="line">  2: Kotlin</span><br><span class="line">Enter selection (default: Groovy) [1..2] 1</span><br><span class="line"></span><br><span class="line">Generate build using new APIs and behavior (some features may change in the next minor release)? (default: no) [yes, no] no</span><br><span class="line"></span><br><span class="line">Project name (default: myProject): myProject</span><br></pre></td></tr></table></figure>
-<p>프로젝트가 성공적으로 생성되면 다음과 같이 출력된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; Task :init</span><br><span class="line">Get more help with your project: Learn more about Gradle by exploring our samples at https://docs.gradle.org/7.3.1/samples</span><br></pre></td></tr></table></figure>
-<p>Gradle 프로젝트는 다음과 같은 구조를 가진다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ tree .</span><br><span class="line">.</span><br><span class="line">├── build.gradle</span><br><span class="line">├── settings.gradle</span><br><span class="line">├── gradle</span><br><span class="line">│   └── wrapper</span><br><span class="line">│       ├── gradle-wrapper.jar</span><br><span class="line">│       └── gradle-wrapper.properties</span><br><span class="line">├── gradlew</span><br><span class="line">├── gradlew.bat</span><br><span class="line">└── .gradle</span><br></pre></td></tr></table></figure>
-
-<p>이제 Java 소스코드를 작성해보자. 우선 <code>src/java/main</code> 디렉토리를 생성한다.</p>
-<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> mkdir -p src/java/main</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> src/java/main</span></span><br></pre></td></tr></table></figure>
-<p>이 디렉토리 안에 패키지를 생성한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p com.yologger.app</span><br></pre></td></tr></table></figure>
-<p>디렉토리 구조는 다음과 같다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ tree</span><br><span class="line">.</span><br><span class="line">├── build.gradle</span><br><span class="line">├── gradle</span><br><span class="line">│   └── wrapper</span><br><span class="line">│       ├── gradle-wrapper.jar</span><br><span class="line">│       └── gradle-wrapper.properties</span><br><span class="line">├── gradlew</span><br><span class="line">├── gradlew.bat</span><br><span class="line">├── settings.gradle</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        └── java</span><br><span class="line">            └── com</span><br><span class="line">                └── yologger</span><br><span class="line">                    └── app</span><br><span class="line">                        └── Main.java</span><br></pre></td></tr></table></figure>
-<p><code>Main.java</code>파일을 생성하고 아래와 같이 코드를 작성한다.</p>
-<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello World!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>마지막으로 빌드 스크립트를 작성하자.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 플러그인 적용</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;java&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;application&#x27;</span></span><br><span class="line"></span><br><span class="line">application &#123;</span><br><span class="line">    <span class="comment">// Main 함수가 포함된 클래스 지정</span></span><br><span class="line">    mainClass = <span class="string">&#x27;com.yologger.app.Main&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 다음 명령어로 프로젝트를 빌드할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle compileJava</span><br></pre></td></tr></table></figure>
-<p>다음 명령어로 프로젝트를 실행할 수도 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle run</span><br></pre></td></tr></table></figure>
-
-<h1 id="Gradle-Plugin"><a href="#Gradle-Plugin" class="headerlink" title="Gradle Plugin"></a>Gradle Plugin</h1><p>예제에서 <code>build.gradle</code>파일에 두 개의 플러그인을 적용했다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;java&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;application&#x27;</span></span><br></pre></td></tr></table></figure>
-<p><code>java</code>는 Java 어플리케이션을 컴파일하기 위한 플러그인이다. 이 플러그인은 <code>compileJava</code> 태스크를 포함한다. 따라서 콘솔창에서 다음과 같이 태스크를 호출할 수 있게 된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle compileJava</span><br></pre></td></tr></table></figure>
-<p>java 플러그인이 제공하는 모든 태스크는 <a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/java_plugin.html#java_plugin">이 곳</a>에서 확인할 수 있다.</p>
-<p><code>application</code>은 Java 어플리케이션을 JVM에서 실행시키기 위한 플러그인이다. 이 플러그인은 <code>run</code> 태스크를 포함한다. 따라서 콘솔창에서 다음과 같이 태스크를 호출할 수 있게 된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle run</span><br></pre></td></tr></table></figure>
-<p>이처럼 <code>Gradle Plugin</code>은 기본으로 내장된 태스크 외에도 유용한 태스크 집합을 추가해준다.</p>
-<h1 id="Built-in-Plugin"><a href="#Built-in-Plugin" class="headerlink" title="Built-in Plugin"></a>Built-in Plugin</h1><p>Gradle은 내장된 기본 플러그인을 제공한다. 이를 <code>Built-in Plugin</code>이라고 한다. java, application 플러그인도 Built-in Plugin이며 별도의 설치없이 사용할 수 있다. 모든 Built-in Plugin은 <a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/plugin_reference.html">이 곳</a>에서 확인할 수 있다.</p>
-<h1 id="외부-Plugin-설치"><a href="#외부-Plugin-설치" class="headerlink" title="외부 Plugin 설치"></a>외부 Plugin 설치</h1><p>Built-in Plugin 외에도 외부 플러그인을 설치하고 적용할 수 있다.</p>
-<p>보통 안드로이드 어플리케이션을 개발할 때는 <code>Android</code> 플러그인과 <code>Kotlin Android</code> 플러그인과 설치한다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle (Project level)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        mavenCentral()</span><br><span class="line">    &#125;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        <span class="comment">// Android Gradle Plugin</span></span><br><span class="line">        classpath <span class="string">&quot;com.android.tools.build:gradle:7.0.0&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Kotlin Android Gradle Plugin</span></span><br><span class="line">        classpath <span class="string">&quot;org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>그리고 다음과 같이 플러그인을 적용한다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle (Module level)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;kotlin-android&#x27;</span></span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>스프링 부트 어플리케이션을 개발할 때는  <code>Spring Boot</code> 플러그인을 설치하고 적용한다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        mavenCentral()</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath(<span class="string">&quot;org.springframework.boot:spring-boot-gradle-plugin:$&#123;springBootVersion&#125;&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;org.springframework.boot&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;io.spring.dependency-management&#x27;</span></span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/04/04/12_tools/02_gradle/20180404_plugin/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
                             href="/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
                             aria-label=": [Gradle] Gradle Task"
                         >
@@ -1223,6 +1123,86 @@
                         <p>
                             <a
                                 href="/ko/2018/03/14/04_java/180314_generic_type_erasure/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/03/13/04_java/180313_generic_wildcard/"
+                            aria-label=": [Java] 제너릭의 와일드 카드(Wildcard)"
+                        >
+                            [Java] 제너릭의 와일드 카드(Wildcard)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-03-13T00:00:00+09:00">
+	
+		    2018/03/13
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="와일드-카드"><a href="#와일드-카드" class="headerlink" title="와일드 카드"></a>와일드 카드</h1><p><code>와일드 카드(Wildcard)</code>는 <u>제네릭 클래스의 인스턴스를 함수의 인자로 전달할 때, 그 인스턴스의 타입 파라미터를 제한하는 것</u>을 의미한다. 개념이 어렵기 때문에 예제를 통해 살펴보겠다.</p>
+<h1 id="와일드-카드-와-extends"><a href="#와일드-카드-와-extends" class="headerlink" title="와일드 카드(?)와 extends"></a>와일드 카드(?)와 extends</h1><p>다음과 같은 함수가 있다고 가정하자. 이 함수는 인자로 <code>ArrayList</code>타입의 데이터를 입력받는다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">printElements</span><span class="params">(ArrayList list)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>Person</code>클래스를 선언한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    String name;</span><br><span class="line"></span><br><span class="line">    Person(String name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Person</code>클래스를 상속하는 <code>Player</code>클래스를 선언한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Player</span> <span class="keyword">extends</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    String team;</span><br><span class="line"></span><br><span class="line">    Player(String name, String team) &#123;</span><br><span class="line">        <span class="keyword">super</span>(name);</span><br><span class="line">        <span class="keyword">this</span>.team = team;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 세 개의 <code>ArrayList</code>를 생성하고 메소드의 매개변수로 전달해보자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 제네릭 클래스 ArrayList의 타입 변수로 String, Person, Player가 모두 올 수 있다.</span></span><br><span class="line">ArrayList&lt;String&gt; list1 = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">ArrayList&lt;Person&gt; list2 = <span class="keyword">new</span> ArrayList&lt;Person&gt;();</span><br><span class="line">ArrayList&lt;Player&gt; list3 = <span class="keyword">new</span> ArrayList&lt;Player&gt;();</span><br><span class="line"></span><br><span class="line">printElements(list1);</span><br><span class="line">printElements(list2);</span><br><span class="line">printElements(list3);</span><br></pre></td></tr></table></figure>
+<p>그런데 인자로 전달되는 <code>ArrayList</code>에 저장되는 데이터를 제한할 수 있다. 아래와 같이 <code>물음표(?)</code>와 키워드 <code>extends</code>를 사용하면 된다. 물음표는 <code>와일드카드(Wild Card)</code>라고 불리며, 타입이 아직 정해지지 않았음을 의미한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">printElements</span><span class="params">(ArrayList&lt;? extends Person&gt; list)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>&lt;? extends Person&gt;</code>는 <code>Person</code>객체 또는 <code>Person</code>객체를 상속한 객체를 데이터로 가지고 있는 <code>ArrayList</code>객체만 함수의 인자로 전달될 수 있음을 의미한다. 따라서 아래 코드에서 <code>Person</code>객체를 상속하지 않은 <code>list1</code> 때문에 컴파일 에러가 발생힌다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ArrayList&lt;String&gt; list1 = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">ArrayList&lt;Person&gt; list2 = <span class="keyword">new</span> ArrayList&lt;Person&gt;();</span><br><span class="line">ArrayList&lt;Player&gt; list3 = <span class="keyword">new</span> ArrayList&lt;Player&gt;();</span><br><span class="line"></span><br><span class="line">printElements(list1);   <span class="comment">// 에러</span></span><br><span class="line">printElements(list2);</span><br><span class="line">printElements(list3);</span><br></pre></td></tr></table></figure>
+
+<h1 id="super"><a href="#super" class="headerlink" title="super"></a>super</h1><p>키워드 <code>super</code>를 사용하면 특정 클래스와 부모 클래스만 인자로 제한할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">printElements</span><span class="params">(ArrayList&lt;? <span class="keyword">super</span> Person&gt; list)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ArrayList&lt;String&gt; list1 = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">ArrayList&lt;Person&gt; list2 = <span class="keyword">new</span> ArrayList&lt;Person&gt;();</span><br><span class="line">ArrayList&lt;Player&gt; list3 = <span class="keyword">new</span> ArrayList&lt;Player&gt;();</span><br><span class="line"></span><br><span class="line">printElements(list1);   <span class="comment">// 에러</span></span><br><span class="line">printElements(list2);</span><br><span class="line">printElements(list3);</span><br></pre></td></tr></table></figure>
+
+<h1 id="와일드-카드-lt-gt-의-종류"><a href="#와일드-카드-lt-gt-의-종류" class="headerlink" title="와일드 카드&lt;?&gt;의 종류"></a>와일드 카드&lt;?&gt;의 종류</h1><ul>
+<li><code>&lt;? extends T&gt;</code> 와일드 카드의 상한 제한(upper bound) - T와 그 자손들을 구현한 객체들만 타입 매개변수로 올 수 있다.</li>
+<li><code>&lt;? super T&gt;</code> 와일드 카드의 하한 제한(lower bound) - T와 그 조상들을 구현한 객체들만 타입 매개변수로 올 수 있다.</li>
+<li><code>&lt;?&gt;</code> 타입 매개변수에 제한이 없다.</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/03/13/04_java/180313_generic_wildcard/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

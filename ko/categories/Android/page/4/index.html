@@ -354,6 +354,163 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/"
+                            aria-label=": [구글 지도(Google Maps)] (5) 지도에 내 위치 보여주기"
+                        >
+                            [구글 지도(Google Maps)] (5) 지도에 내 위치 보여주기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-05-05T01:00:00+09:00">
+	
+		    2020/05/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
+<ul>
+<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
+<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
+<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
+<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
+<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
+<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
+<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
+</ul>
+<hr>
+<h1 id="위치-권한"><a href="#위치-권한" class="headerlink" title="위치 권한"></a>위치 권한</h1><p>내 위치 정보를 가져오려면 권한이 필요합니다. <code>AndroidManifest.xml</code>에 권한을 추가합니다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.example_android_google_maps&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.ACCESS_COARSE_LOCATION&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.ACCESS_FINE_LOCATION&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>GoogleMap</code> 객체의 <code>setMyLocationEnable()</code>을 호출하면 지도에 내 현재 위치를 표시할 수 있습니다. 우선 지도의 초기 화면은 시드니로 설정합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> mMap: GoogleMap? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_PERMISSIONS = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(-<span class="number">33.8688</span>, <span class="number">151.2093</span>)</span><br><span class="line">        mMap?.moveCamera(CameraUpdateFactory.newLatLng(sydney))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>위치 정보는 위험 권한이므로 권한을 확인해야합니다. 다음과 같이 권한 관련 코드를 추가합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> mMap: GoogleMap? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_PERMISSIONS = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(-<span class="number">33.8688</span>, <span class="number">151.2093</span>)</span><br><span class="line">        mMap?.moveCamera(CameraUpdateFactory.newLatLng(sydney))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> hasFineLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_FINE_LOCATION)</span><br><span class="line">        <span class="keyword">val</span> hasCoarseLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_COARSE_LOCATION)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED &amp;&amp; hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">            <span class="comment">// 권한이 없을 때 권한 요청</span></span><br><span class="line">            ActivityCompat.requestPermissions(<span class="keyword">this</span>, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_CODE_PERMISSIONS)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 권한이 있을 때</span></span><br><span class="line">            mMap?.setMyLocationEnabled(<span class="literal">true</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onRequestPermissionsResult</span><span class="params">(requestCode: <span class="type">Int</span>, permissions: <span class="type">Array</span>&lt;<span class="type">out</span> <span class="type">String</span>&gt;, grantResults: <span class="type">IntArray</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onRequestPermissionsResult(requestCode, permissions, grantResults)</span><br><span class="line">        <span class="keyword">when</span> (requestCode) &#123;</span><br><span class="line">            REQUEST_CODE_PERMISSIONS -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span>(grantResults.isNotEmpty()) &#123;</span><br><span class="line">                    <span class="keyword">for</span> ((i, permission) <span class="keyword">in</span> permissions.withIndex()) &#123;</span><br><span class="line">                        isPermissionsGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;Permissions denied.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>마지막으로 <code>GoogleMap</code>객체의 <code>setMyLocationEnabled(true)</code>를 호출합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED &amp;&amp; hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">            <span class="comment">// 권한이 없을 때 권한 요청</span></span><br><span class="line">            ActivityCompat.requestPermissions(<span class="keyword">this</span>, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_CODE_PERMISSIONS)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 권한이 있을 때</span></span><br><span class="line">            mMap?.setMyLocationEnabled(<span class="literal">true</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행해봅시다. 초기 화면은 시드니로 설정되어있습니다.<br><img src="1.png"></p>
+<p>지도를 이동시켜 본인의 위치로 이동하면 파란 점을 확인할 수 있습니다. 이 점이 본인의 위치입니다.<br><img src="2.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/"
+                            aria-label=": [구글 지도(Google Maps)] (4) 지도 확대와 축소 (줌-인과 줌-아웃)"
+                        >
+                            [구글 지도(Google Maps)] (4) 지도 확대와 축소 (줌-인과 줌-아웃)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-05-04T01:00:00+09:00">
+	
+		    2020/05/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
+<ul>
+<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
+<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
+<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
+<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
+<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
+<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
+<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
+</ul>
+<hr>
+<h1 id="줌-인-줌-아웃"><a href="#줌-인-줌-아웃" class="headerlink" title="줌-인, 줌-아웃"></a>줌-인, 줌-아웃</h1><p>지도를 확대하는 것을 <code>줌-인(Zoom-in)</code>, 축소하는 것을 <code>줌-아웃(Zoom-out)</code>이라고 합니다. 예제를 만들면서 <code>줌-인</code>과 <code>줌-아웃</code>에 대해 알아보겠습니다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>우선 다음과 같이 두 개의 버튼을 추가합니다.<br><img src="1.png"><br>레이아웃 파일은 다음과 같습니다.</p>
+<figure class="codeblock codeblock--tabbed"><figcaption><span>activity_main.xml</span><ul class="tabs"><li class="tab active">xml</li></ul></figcaption><div class="tabs-content"><figure class="highlight xml" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">".MainActivity"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">fragment</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_fragment_map"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">tools:context</span>=<span class="string">".MapsActivity"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">"com.google.android.gms.maps.SupportMapFragment"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.google.android.material.floatingactionbutton.FloatingActionButton</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_fab_zoom_in"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:clickable</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:srcCompat</span>=<span class="string">"@drawable/ic_baseline_add_24"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_margin</span>=<span class="string">"16dp"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.google.android.material.floatingactionbutton.FloatingActionButton</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_fab_zoom_out"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:clickable</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:srcCompat</span>=<span class="string">"@drawable/ic_baseline_remove_24"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">"@+id/activity_fab_zoom_in"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_margin</span>=<span class="string">"16dp"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure></div></figure>
+
+<p>코드는 다음과 같습니다. 카메라 위치를 바꿀 때는 <code>GoogleMap</code>클래스의 <code>moveCamera()</code>메소드를 호출합니다. 이 때 <code>줌-인</code>을 하려면 <code>CameraUpdateFactory.zoomIn()</code>을 <code>줌-아웃</code>을 하려면 <code>CameraUpdateFactory.zoomOut()</code>을 인자로 전달합니다.</p>
+<figure class="codeblock codeblock--tabbed"><figcaption><span>MainActivity.kt</span><ul class="tabs"><li class="tab active">kotlin</li></ul></figcaption><div class="tabs-content"><figure class="highlight kotlin" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback {</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonZoomIn: FloatingActionButton <span class="keyword">by</span> lazy { findViewById&lt;FloatingActionButton&gt;(R.id.activity_fab_zoom_in) }</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonZoomOut: FloatingActionButton <span class="keyword">by</span> lazy { findViewById&lt;FloatingActionButton&gt;(R.id.activity_fab_zoom_out) }</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> {</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line"></span><br><span class="line">        buttonZoomIn.setOnClickListener {</span><br><span class="line">            mMap.moveCamera(CameraUpdateFactory.zoomIn())</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        buttonZoomOut.setOnClickListener {</span><br><span class="line">            mMap.moveCamera(CameraUpdateFactory.zoomOut())</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> {</span><br><span class="line">        mMap = googleMap</span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(<span class="number">37.5665</span>, <span class="number">126.9780</span>)</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure></div></figure>
+
+<p>이제 (+) 버튼을 누르면 줌-인, (-) 버튼을 누르면 줌-아웃이 됩니다. <code>zoomTo()</code>메소드를 사용하면 특정 줌으로 이동할 수 있습니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/"
                             aria-label=": [구글 지도(Google Maps)] (3) 마커(Marker) 보여주기"
                         >
@@ -1550,175 +1707,6 @@
                         <p>
                             <a
                                 href="/ko/2020/04/02/08_android/07_payment/20200402_GooglePlayBilling_ConsumableProduct/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/04/01/08_android/07_payment/20200401_payment_intro/"
-                            aria-label=": [결제(Payment)] (1) 인앱 결제와 PG 결제"
-                        >
-                            [결제(Payment)] (1) 인앱 결제와 PG 결제
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-04-01T00:00:00+09:00">
-	
-		    2020/04/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Payment/">Payment</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>여섯 개의 포스트에 걸쳐서 안드로이드 앱의 결제 방식에 대해 알아보고있습니다.</p>
-<ol>
-<li><a href="/ko/2020/04/01/08_android/07_payment/20200401_payment_intro/">개요</a></li>
-<li><a href="/ko/2020/04/02/08_android/07_payment/20200402_GooglePlayBilling_ConsumableProduct/">인앱 결제(Google Play Billing API) - 소모품</a></li>
-<li><a href="/ko/2020/04/03/08_android/07_payment/20200403_GooglePlayBilling_NonConsumableProduct/">인앱 결제(Google Play Billing API) - 비소모품</a></li>
-<li><a href="/ko/2020/04/04/08_android/07_payment/20200404_GooglePlayBilling_Subscription/">인앱 결제(Google Play Billing API) - 정기 결제(구독)</a></li>
-<li><a href="/ko/2020/04/05/08_android/07_payment/20200405_pg/">VAN, PG, 간편 결제의 차이점</a></li>
-<li><a href="/ko/2020/04/06/08_android/07_payment/20200406_iamport/">PG 결제 구현하기(아임포트)</a></li>
-</ol>
-<hr>
-<h1 id="결제"><a href="#결제" class="headerlink" title="결제"></a>결제</h1><p>안드로이드 앱에서 결제를 구현하는 방식에는 크게 두 가지가 있습니다.</p>
-<h3 id="1-인앱-결제"><a href="#1-인앱-결제" class="headerlink" title="(1) 인앱 결제"></a>(1) 인앱 결제</h3><p><code>인앱 결제</code>는 <a target="_blank" rel="noopener" href="https://developers.google.com/pay/api/android/overview?hl=ko">구글 결제 API(Google Play Billing API)</a>를 사용하여 앱 내부에서 결제를 진행합니다. 인앱 결제를 사용하면 화면 하단에 다음과 같이 결제 구매 화면이 나타납니다.</p>
-<p><img src="1.png"></p>
-<p>인앱 결제의 거래 수수료는 고객이 결제하는 가격의 30%입니다. 즉, 개발자는 결제 금액의 70%만 수령하고 나머지 30%는 구글이 가져가게 됩니다.</p>
-<h3 id="2-PG-결제"><a href="#2-PG-결제" class="headerlink" title="(2) PG 결제"></a>(2) PG 결제</h3><p><code>PG(Payment Gateway)사</code>는 KG이니시스, 다날, LG유플러스 같이 결제창을 제공하는 회사입니다. PG 결제를 사용하면 다음과 같이 PG사가 제공하는 결제 화면으로 이동하게 됩니다.</p>
-<p><img src="2.png"></p>
-<p>PG 결제는 인앱 결제에 비해 훨씬 낮은 수수료를 부과합니다. (PG사에 따라 수수료는 달라질 수 있으며 보통 3% 내외입니다.)</p>
-<hr>
-<h1 id="무엇을-사용해야하는가"><a href="#무엇을-사용해야하는가" class="headerlink" title="무엇을 사용해야하는가"></a>무엇을 사용해야하는가</h1><p>구글은 2020년 인앱결제 의무화 정책을 시행했습니다. 따라서 앱이 <code>디지털 제품</code>을 거래하면서 앱 내부 결제를 할 때는 무조건 구글 결제 API를 사용해야합니다. 여기서 말하는 <code>디지털 제품</code>는 게임 아이템, 게임 머니, 이모티콘, 웹툰 같은 온라인 제품을 의미합니다. </p>
-<p>이케아, 아마존, 쿠팡 같은 <code>실물 제품</code>은 구글 결제 API를 사용하지 않아도 됩니다. 또한 에어비엔비, 우버, 카카오 택시, 배달의 민족 같은 <code>실제 서비스</code>도 구글 결제 API를 사용하지 않아도 됩니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/04/01/08_android/07_payment/20200401_payment_intro/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/03/07/08_android/00_google_play_console/200307_unpublish_app/"
-                            aria-label=": [Google Play Console] 앱 출시하기 - (7) 앱 게시 취소 및 삭제하기"
-                        >
-                            [Google Play Console] 앱 출시하기 - (7) 앱 게시 취소 및 삭제하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-03-07T01:00:00+09:00">
-	
-		    2020/03/07
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Play-Console/">Google Play Console</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="출시하지-않은-앱-삭제"><a href="#출시하지-않은-앱-삭제" class="headerlink" title="출시하지 않은 앱 삭제"></a>출시하지 않은 앱 삭제</h1><p>내부 테스트, 비공개 테스트, 공개 테스트, 정식 출시를 하지 않은 앱은 구글 플레이 콘솔에서 쉽게 삭제할 수 있습니다. 휴지통 아이콘을 눌러주기만 하면 됩니다.<br><img src="0.png"></p>
-<hr>
-<h1 id="테스트-중인-앱-삭제"><a href="#테스트-중인-앱-삭제" class="headerlink" title="테스트 중인 앱 삭제"></a>테스트 중인 앱 삭제</h1><p>내부 테스트, 비공개 테스트, 공개 테스트 중인 앱 옆에는 휴지통 아이콘이 나타나지 않습니다. 따라서 두 단계를 거쳐 앱을 삭제합니다.</p>
-<h3 id="1-테스트-일시중지"><a href="#1-테스트-일시중지" class="headerlink" title="(1) 테스트 일시중지"></a>(1) 테스트 일시중지</h3><p>우선 테스트를 일시중지 해야합니다.</p>
-<p><b>내부 테스트</b>를 일시중지하려면 <code>Testing &gt; Internal testing</code>으로 이동하여 <code>View release details</code>를 클릭합니다.<br><img src="1.png"><br><code>View track</code>을 클릭합니다.<br><img src="2.png"><br><code>Pause track</code>을 클릭하면 내부 테스트가 일시중지됩니다.<br><img src="3.png"></p>
-<p><b>비공개 테스트</b>를 일시중지하려면 <code>Testing &gt; Closed testing</code>으로 이동하여 일시중지하려는 트랙의 <code>Manager track</code>을 클릭합니다.<br><img src="4.png"></p>
-<p><code>Pause track</code>을 클릭하면 앱이 일시중지됩니다.<br><img src="5.png"></p>
-<p><b>공개 테스트</b>를 일시중지하려면 <code>Testing &gt; Open testing</code>으로 이동합니다. 이후 <code>Pause track</code>을 클릭하면 공개 테스트가 일시중지됩니다.<br><img src="6.png"></p>
-<h3 id="2-구글-플레이-고객센터"><a href="#2-구글-플레이-고객센터" class="headerlink" title="(2) 구글 플레이 고객센터"></a>(2) 구글 플레이 고객센터</h3><p><a target="_blank" rel="noopener" href="https://support.google.com/googleplay/android-developer/gethelp">구글 플레이 콘솔 고객센터(Google Play Console Help)</a>에 접속한 후 <code>시작하기</code>에서 지원이 필요한 사항을 입력합니다.<br><img src="7-ko.png"><br><code>문제 확인하기</code>을 적절하게 입력합니다.<br><img src="8-ko.png"><br><code>문의 옵션</code>은 <code>채팅</code>과 <code>이메일</code>을 선택할 수 있습니다. <code>채팅</code>을 선택해봅시다.<br><img src="9-ko.png"><br>잠시 기다리면 플레이 콘솔 지원팀과 실시간 채팅이 연결됩니다. 이때 삭제하려는 앱의 패키지 이름을 전달하면 앱이 삭제됩니다.<br><img src="10-ko.png"></p>
-<hr>
-<h1 id="정식-출시된-앱-삭제"><a href="#정식-출시된-앱-삭제" class="headerlink" title="정식 출시된 앱 삭제"></a>정식 출시된 앱 삭제</h1><p>정식 출시된 앱은 두 단계를 거쳐 삭제합니다. 우선 앱 게시를 취소합니다. 이후 구글 플레이 고객센터에 앱 삭제를 요청합니다.</p>
-<h3 id="1-앱-게시-취소"><a href="#1-앱-게시-취소" class="headerlink" title="(1) 앱 게시 취소"></a>(1) 앱 게시 취소</h3><div class="alert warning icon"><p>앱 게시를 취소하면 새로운 사용자는 플레이스토어에서 앱을 검색하거나 다운로드할 수 없습니다. 그러나 기존 사용자는 앱을 계속 사용할 수 있습니다.</p>
-</div>
-
-<p><a target="_blank" rel="noopener" href="https://play.google.com/console"><code>구글 플레이 콘솔(Google Play Console)</code></a>에 접속합니다.</p>
-<p><code>왼쪽 사이드바 메뉴 &gt; All apps</code>로 이동합니다. 이 곳에서 출시한 앱 목록을 확인할 수 있습니다. 삭제할 앱을 선택합니다.<br><img src="11.png"></p>
-<p><code>Setup &gt; Advanced settings</code>로 이동합니다.<br><img src="12.png"></p>
-<p><code>App availability</code>를 <code>Unpublished</code>로 변경하고 <code>Save changes</code>버튼을 누르면 앱 게시가 취소됩니다.<br><img src="13.png"></p>
-<div class="alert info icon"><p>변경 사항이 반영되는데 몇 시간이 걸릴 수 있습니다.</p>
-</div>
-<div class="alert info icon"><p>게시 취소된 앱은 삭제하기 전까지 다시 출시할 수 있습니다.</p>
-</div>
-
-
-<h3 id="2-앱-삭제"><a href="#2-앱-삭제" class="headerlink" title="(2) 앱 삭제"></a>(2) 앱 삭제</h3><p>앱은 다음 네 가지 조건을 충족해야만 삭제할 수 있습니다.</p>
-<ol>
-<li>앱에 아무런 문제가 없어야 합니다. (거부, 차단, 일시정지되지 않음)</li>
-<li>앱이 검토 중이면 삭제할 수 없습니다.</li>
-<li>앱이 24시간 동안 게시 취소 상태여야 합니다.</li>
-<li><code>앱 설치 수</code>가 0이어야 합니다.</li>
-</ol>
-<p><code>앱 설치 수</code>는 <code>All apps</code>에서 확인할 수 있습니다.<br><img src="25.png"><br>주의할 점은 개발자 본인이 테스트를 위해 앱을 설치해도 <code>앱 설치 수</code>는 증가합니다. 구글 고객센터에 문의한 결과 <code>앱 설치 수</code>가 0이 아니면 앱 게시를 취소할 수는 있어도 앱을 삭제할 수는 없다고 합니다. 이는 앱을 다운받은 소비자의 권리를 보장하기 위함입니다.</p>
-<p>그럼 <code>앱 설치 수</code>가 0일 때 앱을 삭제하는 방법에 대해 알아보겠습니다. 우선 <a target="_blank" rel="noopener" href="https://support.google.com/googleplay/android-developer/gethelp">구글 플레이 콘솔 고객센터(Google Play Console Help)</a>에 접속합니다.<br><img src="14-ko.png"><br>지원이 필요한 사항을 입력합니다.<br><img src="15-ko.png"><br><code>앱 삭제</code>를 선택합니다.<br><img src="16-ko.png"><br><code>이메일</code>을 선택합니다.<br><img src="17-ko.png"><br><code>충족 사항</code>을 확인합니다.<br><img src="18-ko.png"><br>이름, 성, 이메일 주소, 내 위치, 개발자 이름을 입력합니다. 그리고 <code>개발자 계정 ID</code>를 입력합니다. <code>계정 세부정보 페이지</code>를 선택하면 개발자 계정 ID를 확인할 수 있습니다.<br><img src="19-ko.png"><br><img src="20-ko.png"><br><img src="21-ko.png"><br><code>패키지 이름</code>을 입력합니다.<br><img src="22-ko.png"><br><code>패키지 이름</code>은 <code>구글 플레이 콘솔 &gt; All apps</code>에서 확인할 수 있습니다.<br><img src="23-ko.png"><br>문제 해결에 도움이 되는 <code>스크린샷</code>을 추가합니다. 삭제할 앱의 스크린샷을 첨부하면 끝입니다. 제출 후 처리되는데 며칠이 소요될 수 있습니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/03/07/08_android/00_google_play_console/200307_unpublish_app/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

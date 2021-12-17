@@ -354,6 +354,151 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/09/18/05_kotlin/180918_annotation/"
+                            aria-label=": [Kotlin] 어노테이션(Annotation)"
+                        >
+                            [Kotlin] 어노테이션(Annotation)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-09-18T00:00:00+09:00">
+	
+		    2018/09/18
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<div class="alert success icon"><p>Java의 <a href="/ko/2018/03/16/04_java/180316_annotation/">어노테이션</a>, <a href="/ko/2018/03/17/04_java/180317_annotation_processor/">어노테이션 프로세서</a>에 대한 포스트를 먼저 읽어보시길 권장합니다.</p>
+</div>
+
+<h1 id="어노테이션-클래스-선언방법"><a href="#어노테이션-클래스-선언방법" class="headerlink" title="어노테이션 클래스 선언방법"></a>어노테이션 클래스 선언방법</h1><p>Kotlin에서 어노테이션은 다음과 같이 선언할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">annotation</span> <span class="class"><span class="keyword">class</span> <span class="title">IsAvailable</span></span></span><br></pre></td></tr></table></figure>
+<p>이렇게 선언한 어노테이션은 다음과 같이 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 어노테이션 사용</span></span><br><span class="line">    <span class="meta">@IsAvailable</span> <span class="keyword">var</span> name: String = <span class="string">&quot;name&quot;</span>   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>어노테이션은 데이터를 가질 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">annotation</span> <span class="class"><span class="keyword">class</span> <span class="title">IsAvailable</span></span>(<span class="keyword">val</span> message: String)</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 선언할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">annotation</span> <span class="class"><span class="keyword">class</span> <span class="title">IsAvailable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">val</span> message: String</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>데이터가 있는 어노테이션은 다음과 같이 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="meta">@IsAvailable(<span class="meta-string">&quot;IsNameAvailabe&quot;</span>)</span> <span class="keyword">var</span> name: String = <span class="string">&quot;name&quot;</span>   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="어노테이션의-위치"><a href="#어노테이션의-위치" class="headerlink" title="어노테이션의 위치"></a>어노테이션의 위치</h1><p>우선 어노테이션은 클래스 앞에 붙일 수 있습니다</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@MyAnnotation</span> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>어노테이션은 메소드 앞에도 사용할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MyClass &#123;</span><br><span class="line">    <span class="meta">@MyAnnotation</span> <span class="function"><span class="keyword">fun</span> <span class="title">myMethod</span><span class="params">(myProperty: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>어노테이션을 생성자 앞에 사용하려면 constructor 키워드 명시해야 한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> <span class="meta">@MyAnnotation</span> <span class="keyword">constructor</span></span>(dependency: ... )</span><br></pre></td></tr></table></figure>
+<p>어노테이션은 클래스의 멤버변수 앞에도 붙일 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Inject</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> cat: Cat</span><br></pre></td></tr></table></figure>
+<p>메소드의 매개변수 앞에도 붙일 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">myMethod</span><span class="params">(<span class="meta">@MyAnnotation</span> myProperty: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>함수의 반환값 앞에도 붙일 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">myMethod</span><span class="params">(myProperty: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ( <span class="meta">@MyAnnotation</span> <span class="number">1</span> )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/09/18/05_kotlin/180918_annotation/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/09/17/05_kotlin/180917_destructuring_assignment/"
+                            aria-label=": [Kotlin] 비구조화 할당(구조분해, Destructuring Assignment)이란?"
+                        >
+                            [Kotlin] 비구조화 할당(구조분해, Destructuring Assignment)이란?
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-09-17T00:00:00+09:00">
+	
+		    2018/09/17
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Destructuring-Assignment"><a href="#Destructuring-Assignment" class="headerlink" title="Destructuring Assignment"></a>Destructuring Assignment</h1><p><code>Destructuring Assignment</code>는 한국말로 <code>비구조화 할당</code> 또는 <code>구조분해</code>로 번역됩니다. 용어는 어렵지만 개념은 매우 쉽습니다. 어떤 객체의 데이터를 변수들에 대입하는 기술입니다.</p>
+<p>아래 예제를 살펴봅시다. <code>Person</code>클래스의 멤버변수 name, age를 새로운 변수에 할당하고 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> age: <span class="built_in">Int</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> person = Person(<span class="string">&quot;Paul&quot;</span>, <span class="number">24</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> name = person.name</span><br><span class="line"><span class="keyword">var</span> age = person.age</span><br></pre></td></tr></table></figure>
+<p>이를 <code>Destructuring Declaration</code>을 사용하면 다음과 같이 단축할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> age: <span class="built_in">Int</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> person = Person(<span class="string">&quot;Paul&quot;</span>, <span class="number">24</span>)</span><br><span class="line"><span class="keyword">val</span> (name, age) = person   <span class="comment">// 비구조화 할당</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/09/17/05_kotlin/180917_destructuring_assignment/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/09/16/05_kotlin/180916_type_alias/"
                             aria-label=": [Kotlin] 타입 별칭(Type Alias)"
                         >
@@ -973,162 +1118,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/09/08/05_kotlin/180908_lambda/"
-                            aria-label=": [Kotlin] 람다와 익명함수"
-                        >
-                            [Kotlin] 람다와 익명함수
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-09-08T00:00:00+09:00">
-	
-		    2018/09/08
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="람다"><a href="#람다" class="headerlink" title="람다"></a>람다</h1><p><code>람다(Lambda)</code>는 <code>익명함수(Anonymous Function)</code>라고도 불리며 <u>이름이 없는 함수</u>를 의미합니다. </p>
-<p>람다식을 사용할 때는 <code>&#123;&#125;</code>를 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sayHello: () -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">    println(<span class="string">&quot;Hello.&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">sayHello()</span><br></pre></td></tr></table></figure>
-<p>람다식에 매개변수가 있는 경우 <code>&#123; 인자1, 인자2, ... -&gt; &#125;</code>을 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> printInformation: (name: String, age: <span class="built_in">Int</span>) -&gt; <span class="built_in">Unit</span> = &#123; name: String, age: <span class="built_in">Int</span> -&gt;</span><br><span class="line">    println(<span class="string">&quot;<span class="subst">$&#123;name&#125;</span> is <span class="subst">$&#123;age&#125;</span> years old.&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">printInformation(<span class="string">&quot;Paul&quot;</span>, <span class="number">35</span>)</span><br></pre></td></tr></table></figure>
-<p>반환값이 있는 경우 다음과 같이 사용합니다. 람다식에서 값을 반환할 땐 키워드 <code>return</code>을 사용하지 않아도 마지막 구문이 자동으로 반환됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sum: (a: <span class="built_in">Int</span>, b: <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = &#123; a: <span class="built_in">Int</span>, b: <span class="built_in">Int</span> -&gt;</span><br><span class="line">    a+b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> result = sum(<span class="number">3</span>, <span class="number">5</span>)</span><br><span class="line">println(result)</span><br></pre></td></tr></table></figure>
-<p>람다식도 자동으로 <code>타입 추론</code>이 되므로 <code>매개변수의 자료형</code>과 <code>함수타입</code>을 생략할 수 있습니다. 위 코드와 아래 코드는 동일합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sum = &#123; a, b -&gt;</span><br><span class="line">    a+b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> result = sum(<span class="number">3</span>, <span class="number">5</span>)</span><br><span class="line">println(result)</span><br></pre></td></tr></table></figure>
-<p>매개변수가 한 개인 경우도 살펴봅시다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> printName = &#123; name -&gt;</span><br><span class="line">    println(name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>매개변수</code>와 <code>-&gt;</code>을 생략하고 <code>it</code>로 대체할 수 있습니다. 위 코드와 아래 코드는 동일합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> printName = &#123; </span><br><span class="line">    println(it)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="Trailing"><a href="#Trailing" class="headerlink" title="Trailing"></a>Trailing</h1><p>함수의 맨 마지막 인자가 람다식이라면 <code>괄호()</code>에서 빼내어 밖에 표현할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy(&#123;p: Person -&gt; p.age&#125;) </span><br><span class="line"></span><br><span class="line"><span class="comment">// Trailing</span></span><br><span class="line">people.maxBy() &#123;p: Person -&gt; p.age&#125; </span><br></pre></td></tr></table></figure>
-<p>함수의 인자가 1개고 그 인자가 익명함수라면 <code>괄호()</code>까지 생략할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy &#123;p: Person -&gt; p.age&#125; </span><br></pre></td></tr></table></figure>
-<p>람다의 인자가 1개라면 그 인자는 익명함수 내부에서 <code>it</code>으로 받을 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy &#123;it.age&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>안드로이드 앱에서 버튼과 같은 위젯을 클릭했을 때 처리할 내용을 람다식으로 구현합니다. 아래 코드들은 모두 동일합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 익명 클래스 사용</span></span><br><span class="line">button.setOnClickListener(<span class="keyword">object</span>: View.OnClickListener &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onClick</span><span class="params">(v: <span class="type">View</span>?)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 클릭 시 처리</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 익명클래스의 구현해야 할 매서드가 1개 뿐인 인터페이스는 람다식으로 대체할 수 있다.</span></span><br><span class="line">button.setOnClickListener(&#123; v: View? -&gt;</span><br><span class="line">    <span class="comment">// 클릭 시 처리</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 트레일링</span></span><br><span class="line">button.setOnClickListener() &#123; v: View? -&gt;</span><br><span class="line">    <span class="comment">// 클릭 시 처리</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 파라미터가 하나인 경우, 괄호생략 가능</span></span><br><span class="line">button.setOnClickListener &#123; v: View? -&gt;</span><br><span class="line">    <span class="comment">// 클릭 시 처리</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 자료형 추론</span></span><br><span class="line">button.setOnClickListener &#123; v -&gt;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/09/08/05_kotlin/180908_lambda/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/09/07/05_kotlin/180907_error_handling/"
-                            aria-label=": [Kotlin] 예외 처리(Exception Handling)"
-                        >
-                            [Kotlin] 예외 처리(Exception Handling)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-09-07T00:00:00+09:00">
-	
-		    2018/09/07
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="Throwable"><a href="#Throwable" class="headerlink" title="Throwable"></a>Throwable</h1><p>코틀린은 오류가 발생하면 <code>Error</code>나 <code>Exception</code>을 발생시킵니다. <code>Error</code>와 <code>Exception</code>은 모두 <code>Throwable</code>클래스를 상속받습니다.<br><img src="1.png"></p>
-<h2 id="Error"><a href="#Error" class="headerlink" title="Error"></a>Error</h2><p><code>Error</code>는 코드에서 잡아낼 수 없으며 어플리케이션 자체가 다운됩니다. 대표적으로 <code>OutOfMemoryError</code>, <code>StackOveflowError</code>가 있습니다.</p>
-<h1 id="Exception"><a href="#Exception" class="headerlink" title="Exception"></a>Exception</h1><p><code>Exception</code>은 <code>try-catch</code>구문으로 잡아낼 수 있으며, 프로그램이 다운되지 않도록 처리할 수 있습니다. 대표적으로 값이 <code>null</code>인 변수에 접근할 때 발생하는 <code>NullPointException</code>이 있습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person: Person? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 값이 null인 변수 person에 접근하므로 NullPointException이 발생합니다.</span></span><br><span class="line">    person!!.printName()</span><br><span class="line">&#125; <span class="keyword">catch</span> (exception: NullPointerException) &#123;</span><br><span class="line">    <span class="comment">// 프로그램이 다운되지 않고 catch문이 실행됩니다.</span></span><br><span class="line">    println(<span class="string">&quot;NullPointException has occurred.&quot;</span>)</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">    <span class="comment">// finally 구문은 에러 처리와 상관없이 무조건 실행되는 코드입니다.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>함수에서 <code>try-catch</code>구문을 바로 반환할 수도 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getSomething</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="string">&quot;something&quot;</span></span><br><span class="line">    &#125; <span class="keyword">catch</span>(e: Exception) &#123;</span><br><span class="line">        <span class="string">&quot;nothing&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> something = getSomething()</span><br></pre></td></tr></table></figure>
-
-<p>개발자가 직접 <code>Exception</code>을 정의할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomException</span> <span class="keyword">constructor</span></span>(message: String): Exception(message) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>개발자가 직접 <code>Exception</code>을 발생시킬 수도 있습니다. 이 때는 키워드 <code>throw</code>를 사용합니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 직접 Exception을 발생시킵니다.</span></span><br><span class="line">    <span class="keyword">throw</span> CustomException(<span class="string">&quot;This is custom exception message.&quot;</span>)</span><br><span class="line">&#125; <span class="keyword">catch</span> (exception: CustomException) &#123;</span><br><span class="line">    println(exception.message)</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Exception</code>을 발생시킬 수 있는 메소드에는 <code>@Throws</code> 어노테이션을 붙여 에러 가능성을 표기할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Throws(CustomException::class)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUsers</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> CustomException(<span class="string">&quot;This is CustomException.&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>@Throws</code>어노테이션이 붙은 메소드는 <code>try-catch</code>문 내에서 호출하는 걸 권장합니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    getUsers()</span><br><span class="line">&#125; <span class="keyword">catch</span> (e: CustomException) &#123;</span><br><span class="line">    println(e.message)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/09/07/05_kotlin/180907_error_handling/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1155,7 +1144,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 15 of 23</li>
+        <li class="pagination-number">page 15 of 24</li>
     </ul>
 </div>
 

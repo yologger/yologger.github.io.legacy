@@ -1,0 +1,761 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n안드로이드 스튜디오에서 프로젝트를 만들면 다음과 같은 구조로 디렉토리가 생성된다.여기서 test와 androidTest디렉토리가 테스트를 위해 사용하는 폴더다.두 디렉토리는 다음과 같은 특징이 있다.\n\ntest\n\n이 디렉토리에서 진행되는 테스트는 로컬 단위 테스트(Local unit test)라고 한다.\n이 디렉토리의 테스트 코드는 컴파일 후 로컬 PC의 JVM에서 실행된다.\n로컬 PC에서 실행하기 때문에 테스트 속도가 빠르다.\n보통 Android Framework(android.jar)와 관련없는 순수한 Java 코드만 테스트한다.\nAndroid Framework에 의존적인 \n\n\nandroidTest\n\n이 디렉토리에서 진행하는 테스트는 계측 테스트(Instrumented test)라고 한다.\n이 디렉토리의 테스트 코드는 프로젝트 빌드 후 에뮬레이터나 실제 기기에서 실행된다.\n로컬 PC에서 빌드 후 에뮬레이터나 실제 기기에 설치해야하므로 테스트 속도가 느리다.\nAndroid Framework(android.jar)와 \n\n\n\n로컬 단위 테스트예제를 살펴보자. 다음 경로에 Calculator.kt를 생성하자.\n프로젝트를 생성할 때 함께 생성되는 Calculator.kt를 살펴보자.\nCalculator.kt12345678910package com.yologger.appclass Calculator &#123;    fun plus(a: Int, b: Int): Int &#123;        return a+b    &#125;    fun minus(a: Int, b: Int): Int &#123;        return a-b    &#125;&#125;\n이제 이 클래스가 제대로 구현되었는지 확인해보자. test디렉토리의 ExampleUnitTest.kt를 다음과 같이 작성하자. JUnit을 사용하여 3과 7을 더한 값이 10인지를 테스트하는 코드다. \nExampleUnitTest.kt1234567891011import org.junit.Testimport org.junit.Assert.*class ExampleUnitTest &#123;        @Test    fun test_add() &#123;        val calculator = Calculator()        assertEquals(10, calculator.plus(3, 7))    &#125;&#125;\n화면 왼쪽의 화살표를 클릭하면 테스트를 시작한다.테스트가 성공하면 다음과 같이 출력된다.만약 테스트가 실패하면 다음과 같이 출력된다.\n로컬 단위 테스트의 한계로컬 단위 테스트에서는 Android Framework(android.jar)의 컴포넌트를 테스트할 수 없다. 로컬 단위 테스트는 에뮬레이터나 실제 기기가 아닌 JVM 위에서 실행되기 때문이다. \n예제를 살펴보자. 다음과 같은 MainActivity클래스가 있다.\nMainActivity.kt123456class MainActivity : AppCompatActivity() &#123;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)    &#125;&#125;\n로컬 단위 테스트에서 MainActivity.onCreate()를 테스트해보자.\nMainActivityTest.kt1234567class MainActivityTest &#123;    @Test    fun test_MainActivity_onCreate() &#123;        val mainActivity = MainActivity()        mainActivity.onCreate(null, null)    &#125;&#125;\n테스트를 실행하면 다음과 같은 에러가 발생한다.\n12345678Method getMainLooper in android.os.Looper not mocked. See http://g.co/androidstudio/not-mocked for details.java.lang.RuntimeException: Method getMainLooper in android.os.Looper not mocked. See http://g.co/androidstudio/not-mocked for details.\tat android.os.Looper.getMainLooper(Looper.java)\tat androidx.arch.core.executor.DefaultTaskExecutor.isMainThread(DefaultTaskExecutor.java:77)\tat androidx.arch.core.executor.ArchTaskExecutor.isMainThread(ArchTaskExecutor.java:116)\tat androidx.lifecycle.LifecycleRegistry.enforceMainThreadIfNeeded(LifecycleRegistry.java:316)\tat androidx.lifecycle.LifecycleRegistry.addObserver(LifecycleRegistry.java:172)    ...\n이유는 로컬 단위 테스트에서는 Android Framework와 관련된 컴포넌트에 접근할 때 android.jar가 아닌 android-stubs-src.jar를 사용하기 때문이다.android-stubs-src.jar는 실제 구현부가 없는 빈 껍데기이기 때문에 단위테스트가 제대로 동작하지 않는다. 따라서 Android Framework에 의존성이 있는 코드는 계측 테스트를 사용하거나, Mockito 같은 Mocking 라이브러리를 사용하거나 Robolectric 라이브러리를 사용해야한다.\n참고로 로컬 단위 테스트에서 의존성을 추가할 때는 testImplementation를 사용한다.\n모듈 수준의 buiild.gradle1234dependencies &#123;    // junit 라이브러리를 로컬 단위 테스트에서 사용할 수 있다.    testImplementation &#x27;junit:junit:4.+&#x27;&#125;\n\n\n계측 테스트코드에서 Context객체에 접근하거나 UI를 테스트하는 경우 로컬 단위테스트를 사용할 수 없다. 이러한 경우 계측 테스트를 사용한다.\nEspresso라이브러리를 사용하여 androidTest디렉토리에서 UI를 테스트해보자. 화면을 다음과 같이 구현하자.\nactivity_main.xml12345678910111213141516171819202122232425262728&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    xmlns:tools=&quot;http://schemas.android.com/tools&quot;    android:layout_width=&quot;match_parent&quot;    android:layout_height=&quot;match_parent&quot;    android:orientation=&quot;vertical&quot;    android:gravity=&quot;center&quot;    tools:context=&quot;.MainActivity&quot;&gt;    &lt;EditText        android:id=&quot;@+id/activity_main_editText&quot;        android:layout_width=&quot;300dp&quot;        android:layout_height=&quot;wrap_content&quot;        android:inputType=&quot;text&quot;        android:hint=&quot;Enter input&quot; /&gt;    &lt;Button        android:id=&quot;@+id/activity_main_button&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;        android:text=&quot;Button&quot; /&gt;    &lt;TextView        android:id=&quot;@+id/activity_main_textView&quot;        android:layout_width=&quot;wrap_content&quot;        android:layout_height=&quot;wrap_content&quot;/&gt;&lt;/LinearLayout&gt;\nMainActivity.kt123456789101112131415class MainActivity : AppCompatActivity() &#123;    private val editText: EditText by lazy &#123; findViewById(R.id.activity_main_editText) &#125;    private val button: Button by lazy &#123; findViewById(R.id.activity_main_button) &#125;    private val textView: TextView by lazy &#123; findViewById(R.id.activity_main_textView) &#125;    override fun onCreate(savedInstanceState: Bundle?) &#123;        super.onCreate(savedInstanceState)        setContentView(R.layout.activity_main)        button.setOnClickListener &#123;            textView.text = editText.text        &#125;    &#125;&#125;\nandroidTest디렉토리의 ExampleInstrumentedTest.kt을 다음과 같이 작성한다.\nExampleInstrumentedTest.kt12345678910111213141516171819202122232425262728import androidx.test.espresso.Espresso.onViewimport androidx.test.espresso.action.ViewActions.*import androidx.test.espresso.assertion.ViewAssertions.matchesimport androidx.test.espresso.matcher.ViewMatchers.*import androidx.test.ext.junit.runners.AndroidJUnit4import org.junit.Testimport org.junit.runner.RunWithimport androidx.test.rule.ActivityTestRuleimport org.junit.Rule@RunWith(AndroidJUnit4::class)class ExampleInstrumentedTest &#123;    @get:Rule    val activityRule = ActivityTestRule(MainActivity::class.java)    @Test    fun test_onClick() &#123;        // EditText에 &quot;Hello World!&quot; 입력        onView(withId(R.id.activity_main_editText)).perform(typeText(&quot;Hello World!&quot;))        // 버튼을 클릭하고 키보드 닫음        onView(withId(R.id.activity_main_button)).perform(click(), closeSoftKeyboard())        // TextView의 text 속성이 &quot;Hello World!&quot;인지 확인        onView(withId(R.id.activity_main_textView)).check(matches(withText(&quot;Hello World!&quot;)))    &#125;&#125;\n이제 테스트를 시작하면 자동으로 문자열을 입력한 후 버튼을 클릭한다.테스트가 성공하면 로그에 다음과 같이 출력된다.계측 테스트에서 의존성을 추가할 때는 androidTestImplementation를 사용한다.\n모듈 수준의 buiid.gradle1234dependencies &#123;    // espresso-core 라이브러리를 계측 테스트에서 사용할 수 있다.    androidTestImplementation &#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;&#125;","dateCreated":"2020-10-01T01:00:00+09:00","dateModified":"2021-12-17T21:57:22+09:00","datePublished":"2020-10-01T01:00:00+09:00","description":"","headline":"[Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/","keywords":"Android, TDD"}</script>
+    <meta name="description" content="안드로이드 스튜디오에서 프로젝트를 만들면 다음과 같은 구조로 디렉토리가 생성된다.여기서 test와 androidTest디렉토리가 테스트를 위해 사용하는 폴더다.두 디렉토리는 다음과 같은 특징이 있다.  test  이 디렉토리에서 진행되는 테스트는 로컬 단위 테스트(Local unit test)라고 한다. 이 디렉토리의 테스트 코드는 컴파일 후 로컬 PC의">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="안드로이드 스튜디오에서 프로젝트를 만들면 다음과 같은 구조로 디렉토리가 생성된다.여기서 test와 androidTest디렉토리가 테스트를 위해 사용하는 폴더다.두 디렉토리는 다음과 같은 특징이 있다.  test  이 디렉토리에서 진행되는 테스트는 로컬 단위 테스트(Local unit test)라고 한다. 이 디렉토리의 테스트 코드는 컴파일 후 로컬 PC의">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/3.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/4.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/5.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/6.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/7.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/7-2.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/8.gif">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/9.png">
+<meta property="article:published_time" content="2020-09-30T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-17T12:57:22.158Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="TDD">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/devops"
+                            
+                            rel="noopener"
+                            title="DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-10-01T01:00:00+09:00">
+	
+		    2020/10/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/TDD/">TDD</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<p>안드로이드 스튜디오에서 프로젝트를 만들면 다음과 같은 구조로 디렉토리가 생성된다.<br><img src="1.png"><br><img src="2.png"><br>여기서 <code>test</code>와 <code>androidTest</code>디렉토리가 테스트를 위해 사용하는 폴더다.<br><img src="3.png"><br>두 디렉토리는 다음과 같은 특징이 있다.</p>
+<ul>
+<li><p><code>test</code></p>
+<ul>
+<li>이 디렉토리에서 진행되는 테스트는 <code>로컬 단위 테스트(Local unit test)</code>라고 한다.</li>
+<li>이 디렉토리의 테스트 코드는 컴파일 후 로컬 PC의 <u>JVM</u>에서 실행된다.</li>
+<li>로컬 PC에서 실행하기 때문에 테스트 속도가 빠르다.</li>
+<li>보통 Android Framework(android.jar)와 관련없는 순수한 Java 코드만 테스트한다.</li>
+<li>Android Framework에 의존적인 </li>
+</ul>
+</li>
+<li><p><code>androidTest</code></p>
+<ul>
+<li>이 디렉토리에서 진행하는 테스트는 <code>계측 테스트(Instrumented test)</code>라고 한다.</li>
+<li>이 디렉토리의 테스트 코드는 프로젝트 빌드 후 <u>에뮬레이터</u>나 <u>실제 기기</u>에서 실행된다.</li>
+<li>로컬 PC에서 빌드 후 에뮬레이터나 실제 기기에 설치해야하므로 테스트 속도가 느리다.</li>
+<li>Android Framework(android.jar)와 </li>
+</ul>
+</li>
+</ul>
+<h1 id="로컬-단위-테스트"><a href="#로컬-단위-테스트" class="headerlink" title="로컬 단위 테스트"></a>로컬 단위 테스트</h1><p>예제를 살펴보자. 다음 경로에 <code>Calculator.kt</code>를 생성하자.<br><img src="4.png"></p>
+<p>프로젝트를 생성할 때 함께 생성되는 <code>Calculator.kt</code>를 살펴보자.</p>
+<figure class="highlight kotlin"><figcaption><span>Calculator.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Calculator</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a+b</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a-b</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 이 클래스가 제대로 구현되었는지 확인해보자. <code>test</code>디렉토리의 <code>ExampleUnitTest.kt</code>를 다음과 같이 작성하자. <a href="/ko/2020/10/02/08_android/13_tdd/20201002_junit/"><code>JUnit</code></a>을 사용하여 3과 7을 더한 값이 10인지를 테스트하는 코드다. </p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.Assert.*</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_add</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">        assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>화면 왼쪽의 화살표를 클릭하면 테스트를 시작한다.<br><img src="5.png"><br>테스트가 성공하면 다음과 같이 출력된다.<br><img src="6.png"><br>만약 테스트가 실패하면 다음과 같이 출력된다.<br><img src="7.png"></p>
+<h1 id="로컬-단위-테스트의-한계"><a href="#로컬-단위-테스트의-한계" class="headerlink" title="로컬 단위 테스트의 한계"></a>로컬 단위 테스트의 한계</h1><p>로컬 단위 테스트에서는 Android Framework(android.jar)의 컴포넌트를 테스트할 수 없다. 로컬 단위 테스트는 에뮬레이터나 실제 기기가 아닌 JVM 위에서 실행되기 때문이다. </p>
+<p>예제를 살펴보자. 다음과 같은 <code>MainActivity</code>클래스가 있다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>로컬 단위 테스트에서 <code>MainActivity.onCreate()</code>를 테스트해보자.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivityTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivityTest</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_MainActivity_onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> mainActivity = MainActivity()</span><br><span class="line">        mainActivity.onCreate(<span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>테스트를 실행하면 다음과 같은 에러가 발생한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Method getMainLooper in android.os.Looper not mocked. See http://g.co/androidstudio/not-mocked for details.</span><br><span class="line">java.lang.RuntimeException: Method getMainLooper in android.os.Looper not mocked. See http://g.co/androidstudio/not-mocked for details.</span><br><span class="line">	at android.os.Looper.getMainLooper(Looper.java)</span><br><span class="line">	at androidx.arch.core.executor.DefaultTaskExecutor.isMainThread(DefaultTaskExecutor.java:77)</span><br><span class="line">	at androidx.arch.core.executor.ArchTaskExecutor.isMainThread(ArchTaskExecutor.java:116)</span><br><span class="line">	at androidx.lifecycle.LifecycleRegistry.enforceMainThreadIfNeeded(LifecycleRegistry.java:316)</span><br><span class="line">	at androidx.lifecycle.LifecycleRegistry.addObserver(LifecycleRegistry.java:172)</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>이유는 로컬 단위 테스트에서는 Android Framework와 관련된 컴포넌트에 접근할 때 <code>android.jar</code>가 아닌 <code>android-stubs-src.jar</code>를 사용하기 때문이다.<br><img src="7-2.png"><br><code>android-stubs-src.jar</code>는 실제 구현부가 없는 빈 껍데기이기 때문에 단위테스트가 제대로 동작하지 않는다. 따라서 <u>Android Framework에 의존성이 있는 코드는 계측 테스트를 사용</u>하거나, <u><a href="/ko/2020/10/04/08_android/13_tdd/20201004_mockito/">Mockito</a> 같은 Mocking 라이브러리를 사용</u>하거나 <u><a href="/ko/2020/10/06/08_android/13_tdd/20201005_robolectric/">Robolectric</a> 라이브러리</u>를 사용해야한다.</p>
+<p>참고로 로컬 단위 테스트에서 의존성을 추가할 때는 <code>testImplementation</code>를 사용한다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 buiild.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// junit 라이브러리를 로컬 단위 테스트에서 사용할 수 있다.</span></span><br><span class="line">    testImplementation <span class="string">&#x27;junit:junit:4.+&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="계측-테스트"><a href="#계측-테스트" class="headerlink" title="계측 테스트"></a>계측 테스트</h1><p>코드에서 <code>Context</code>객체에 접근하거나 UI를 테스트하는 경우 로컬 단위테스트를 사용할 수 없다. 이러한 경우 계측 테스트를 사용한다.</p>
+<p><a href="/ko/2020/10/03/08_android/13_tdd/20201003_espresso/"><code>Espresso</code></a>라이브러리를 사용하여 <code>androidTest</code>디렉토리에서 UI를 테스트해보자. 화면을 다음과 같이 구현하자.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:gravity</span>=<span class="string">&quot;center&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">EditText</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_editText&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;300dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:inputType</span>=<span class="string">&quot;text&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:hint</span>=<span class="string">&quot;Enter input&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_button&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_textView&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> editText: EditText <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_editText) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> textView: TextView <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_textView) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            textView.text = editText.text</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>androidTest</code>디렉토리의 <code>ExampleInstrumentedTest.kt</code>을 다음과 같이 작성한다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleInstrumentedTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> androidx.test.espresso.Espresso.onView</span><br><span class="line"><span class="keyword">import</span> androidx.test.espresso.action.ViewActions.*</span><br><span class="line"><span class="keyword">import</span> androidx.test.espresso.assertion.ViewAssertions.matches</span><br><span class="line"><span class="keyword">import</span> androidx.test.espresso.matcher.ViewMatchers.*</span><br><span class="line"><span class="keyword">import</span> androidx.test.ext.junit.runners.AndroidJUnit4</span><br><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.runner.RunWith</span><br><span class="line"><span class="keyword">import</span> androidx.test.rule.ActivityTestRule</span><br><span class="line"><span class="keyword">import</span> org.junit.Rule</span><br><span class="line"></span><br><span class="line"><span class="meta">@RunWith(AndroidJUnit4::class)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleInstrumentedTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@get:Rule</span></span><br><span class="line">    <span class="keyword">val</span> activityRule = ActivityTestRule(MainActivity::<span class="keyword">class</span>.java)</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_onClick</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// EditText에 &quot;Hello World!&quot; 입력</span></span><br><span class="line">        onView(withId(R.id.activity_main_editText)).perform(typeText(<span class="string">&quot;Hello World!&quot;</span>))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 버튼을 클릭하고 키보드 닫음</span></span><br><span class="line">        onView(withId(R.id.activity_main_button)).perform(click(), closeSoftKeyboard())</span><br><span class="line"></span><br><span class="line">        <span class="comment">// TextView의 text 속성이 &quot;Hello World!&quot;인지 확인</span></span><br><span class="line">        onView(withId(R.id.activity_main_textView)).check(matches(withText(<span class="string">&quot;Hello World!&quot;</span>)))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 테스트를 시작하면 자동으로 문자열을 입력한 후 버튼을 클릭한다.<br><img src="8.gif"><br>테스트가 성공하면 로그에 다음과 같이 출력된다.<br><img src="9.png"><br>계측 테스트에서 의존성을 추가할 때는 <code>androidTestImplementation</code>를 사용한다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 buiid.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// espresso-core 라이브러리를 계측 테스트에서 사용할 수 있다.</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Android/" rel="tag">Android</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/TDD/" rel="tag">TDD</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                    data-tooltip="[Android] TDD(Test-Driven Development) - (2) JUnit이란?"
+                    aria-label="이전: [Android] TDD(Test-Driven Development) - (2) JUnit이란?"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                    aria-label="다음: [Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                    data-tooltip="[Android] TDD(Test-Driven Development) - (2) JUnit이란?"
+                    aria-label="이전: [Android] TDD(Test-Driven Development) - (2) JUnit이란?"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                    data-tooltip="[Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                    aria-label="다음: [Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

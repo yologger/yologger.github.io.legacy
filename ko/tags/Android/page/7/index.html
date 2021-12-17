@@ -354,6 +354,185 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/"
+                            aria-label=": [Android] 인텐트 필터(Intent Filter)"
+                        >
+                            [Android] 인텐트 필터(Intent Filter)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-23T01:00:00+09:00">
+	
+		    2019/06/23
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="인텐트-필터"><a href="#인텐트-필터" class="headerlink" title="인텐트 필터"></a>인텐트 필터</h1><p>우리는 이전 포스트에서 음악 플레이어 앱을 실행하기 위해 암시적 인텐트를 전송했습니다. 그렇다면 음악 플레이어 앱에서는 암시적 인텐트가 자신과 관련되었는지 어떻게 식별할까요? 이는 음악 플레이어 앱 안에 <code>인텐트 필터(Intent Filter)</code>가 정의되어있기 때문입니다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>우리는 세 개의 앱을 만들 것입니다. </p>
+<ol>
+<li>intent_sender</li>
+<li>intent_receiver</li>
+<li>intent_acceptor</li>
+</ol>
+<p><code>intent_sender</code>는 암시적 인텐트를 생성하여 안드로이드 시스템에 발송합니다. <code>intent_receiver</code>와 <code>intent_acceptor</code>에는 인텐트 필터를 등록합니다.<br><img src="1.png"></p>
+<h3 id="1-intent-sender"><a href="#1-intent-sender" class="headerlink" title="(1) intent_sender"></a>(1) intent_sender</h3><p>우선 <code>intent_sender</code>라는 프로젝트를 생성합시다. 이 프로젝트는 버튼을 클릭하면 인텐트를 생성하여 안드로이드 시스템에 전달합니다. 레이아웃 코드는 다음과 같습니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/button&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Send Intent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintVertical_bias</span>=<span class="string">&quot;0.48&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<p>화면은 다음과 같습니다.<br><img src="2.png"></p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 인텐트 생성</span></span><br><span class="line">            <span class="keyword">var</span> intent = Intent()</span><br><span class="line">            <span class="comment">// 액션 추가</span></span><br><span class="line">            intent.action = <span class="string">&quot;my_action&quot;</span></span><br><span class="line">            <span class="comment">// 액티비티 시작</span></span><br><span class="line">            startActivity(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-intent-receiver"><a href="#2-intent-receiver" class="headerlink" title="(2) intent_receiver"></a>(2) intent_receiver</h3><p><code>intent_receiver</code>라는 프로젝트를 생성합시다. 이 앱에 <code>IntentReceiverActivity</code>액티비티를 생성하고 레이아웃을 다음과 같이 구성합니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.IntentReceiverActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/textView&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Intent Receiver Activity&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>화면은 다음과 같습니다.<br><img src="3.png"></p>
+<p><code>intent_receiver</code>프로젝트의 <code>AndroidManifest.xml</code>에 다음과 같이 인텐트 필터를 등록합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.intent_receiver&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Intent_receiver&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.IntentReceiverActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;my_action&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>인텐트 필터를 등록할 때는 <code>&lt;intent-filter&gt;</code>태그를 사용합니다. 그 안에 <code>&lt;action&gt;</code>태그를 사용해서 액션을 등록합니다. <code>&lt;category&gt;</code>태그는 카테고리라고 하는데 뒤에서 다시 설명하겠습니다.</p>
+<h3 id="3-intent-acceptor"><a href="#3-intent-acceptor" class="headerlink" title="(3) intent_acceptor"></a>(3) intent_acceptor</h3><p><code>intent_acceptor</code>라는 프로젝트를 생성합시다. 이 앱에 <code>IntentAcceptorActivity</code>액티비티를 생성하고 레이아웃을 다음과 같이 구성합니다.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.IntentAcceptorActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/textView&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Intent Acceptor Activity&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintStart_toStartOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>화면은 다음과 같습니다.<br><img src="4.png"></p>
+<p><code>intent_acceptor</code>프로젝트의 <code>AndroidManifest.xml</code>에 다음과 같이 인텐트 필터를 등록합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.intent_accepter&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Intent_accepter&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.IntentAcceptorActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;my_action&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-암시적-인텐트-보내기"><a href="#4-암시적-인텐트-보내기" class="headerlink" title="(4) 암시적 인텐트 보내기"></a>(4) 암시적 인텐트 보내기</h3><p>이제 세 개의 앱을 안드로이드 시스템에 설치합니다. 그리고 <code>intent_sender</code> 앱을 실행합니다.<br><img src="5.png"></p>
+<p>이제 버튼을 클릭하면 다음과 같이 my_action을 처리할 수 있는 앱을 보여줍니다.<br><img src="6.png"></p>
+<hr>
+<h1 id="카테고리"><a href="#카테고리" class="headerlink" title="카테고리"></a>카테고리</h1><p>우리는 암시적 인텐트를 식별하기 위해 인텐트 필터에 액션을 등록했습니다. </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;my_action&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>그렇다면 카테고리는 무엇일까요? <code>카테고리(Category)</code>는 인텐트를 더욱 정교하게 필터링하고 식별하는데 사용합니다. 예제로 돌아와봅시다.</p>
+<p>우선 intent_sender 프로젝트에서 인텐트에 카테고리를 추가합니다. 카테고리를 추가할 때는 <code>addCategory()</code>메소드를 사용합니다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">var</span> intent = Intent()</span><br><span class="line">            intent.action = <span class="string">&quot;my_action&quot;</span></span><br><span class="line">            <span class="comment">// 카테고리 추가 </span></span><br><span class="line">            intent.addCategory(<span class="string">&quot;my_category&quot;</span>)</span><br><span class="line">            startActivity(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>intent_receiver의 <code>AndroidManifest.xml</code>에 카테고리를 추가합니다. intent_acceptor 프로젝트에는 카테고리를 추가하지 않습니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.intent_receiver&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Intent_receiver&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.IntentReceiverActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;custom_action&quot;</span>/&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span>/&gt;</span></span><br><span class="line">                <span class="comment">&lt;!-- 카테고리 추가 --&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;my_category&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>이제 intent_sender를 실행하고 버튼을 누르면 intent_receiver 앱만 실행됩니다. 이처럼 카테고리는 인텐트를 더욱 정교하게 필터링하고 식별하는데 사용할 수 있습니다. </p>
+<h1 id="android-intent-category-DEFAULT"><a href="#android-intent-category-DEFAULT" class="headerlink" title="android.intent.category.DEFAULT"></a>android.intent.category.DEFAULT</h1><p>암시적 인텐트를 생성할 때 카테고리를 추가하지 않아도 자동으로 <code>android.intent.category.DEFAULT</code> 카테고리가 추가됩니다. 따라서 인텐트 필터에서 반드시 <code>&lt;category android:name=&quot;android.intent.category.DEFAULT&quot;/&gt;</code>를 추가해야합니다.</p>
+<h1 id="android-intent-action-Main"><a href="#android-intent-action-Main" class="headerlink" title="android.intent.action.Main"></a>android.intent.action.Main</h1><p>안드로이드 스튜디오에서 프로젝트를 생성하면 <code>MainActivity.kt</code>가 기본으로 생성됩니다. 이 액티비티의 인텐트 필터도 다음과 같이 자동으로 생성됩니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManifest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.intent_receiver&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Intent_receiver&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.MAIN&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.LAUNCHER&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>android.intent.action.MAIN</code> 액션과 <code>android.intent.category.LAUNCHER</code> 카테고리는 앱을 실행했을 때 처음 실행할 액티비티를 지정하는데 사용됩니다. 앱 아이콘을 클릭하여 앱을 실행하면 안드로이드 시스템이 <code>android.intent.action.MAIN</code> 액션과 <code>android.intent.category.LAUNCHER</code> 카테고리가 등록된 액티비티를 실행합니다. 만약 위의 액션과 카테고리를 등록한 액티비티가 없다면 오류가 발생합니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/23/08_android/01_android_platform/190623_intent_filter/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/06/22/08_android/01_android_platform/190622_implicit_intent/"
+                            aria-label=": [Android] 암시적 인텐트(Implicit Intent)"
+                        >
+                            [Android] 암시적 인텐트(Implicit Intent)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-06-22T01:00:00+09:00">
+	
+		    2019/06/22
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="암시적-인텐트"><a href="#암시적-인텐트" class="headerlink" title="암시적 인텐트"></a>암시적 인텐트</h1><p><code>암시적 인텐트</code>는 수행할 <u>액션</u>과 <u>실행할 액티비티에 의해 처리되는 데이터</u> 및 <u>데이터 타입</u>을 지정하여 다른 앱의 액티비티를 실행시킵니다. 실행할 액티비티에 의해 처리되는 데이터 및 데이터 타입은 <a href="/ko/2019/06/15/08_android/01_android_platform/190615_uri_urimatcher/"><code>Uri</code></a>클래스를 사용하여 정의합니다.</p>
+<h4 id="1-전화-앱-예제"><a href="#1-전화-앱-예제" class="headerlink" title="(1) 전화 앱 예제"></a>(1) 전화 앱 예제</h4><p>우선 전화번호 데이터를 처리할 수 있는 앱을 실행해보겠습니다. 아래 코드를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> intent = Intent()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 액션 설정</span></span><br><span class="line">intent.action = Intent.ACTION_DIAL</span><br><span class="line"></span><br><span class="line"><span class="comment">// 수신 액티비티에 의해 처리될 데이터 설정</span></span><br><span class="line">intent.<span class="keyword">data</span> = Uri.parse(<span class="string">&quot;tel:02-111-1111&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 액티비티 실행</span></span><br><span class="line">startActivity(intent)</span><br></pre></td></tr></table></figure>
+
+<p><code>Intent.ACTION_DIAL</code>가 액션이고 <code>Uri.parse(&quot;tel:02-111-1111&quot;)</code>가 실행할 액티비티에 의해 처리되는 데이터 및 데이터의 타입입니다. 안드로이드 시스템은 설치된 앱을 살펴보고 <code>Intent.ACTION_DIAL</code>액션과 <code>tel:02-111-1111</code>데이터를 처리할 수 있는 앱을 실행합니다. </p>
+<p>위 구문은 아래와 같이 단축할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_DIAL, Uri.parse(<span class="string">&quot;tel:02-111-1111&quot;</span>))</span><br><span class="line">startActivity(intent)</span><br></pre></td></tr></table></figure>
+
+<p>전화 앱은 <code>Intent.ACTION_DIAL</code>액션과 <code>Uri</code>데이터을 처리할 수 있는 앱입니다.<br><img src="1.png"><br>따라서 다음과 같이 전화 앱이 실행되고, 데이터가 처리되어 화면에 출력됩니다.<br><img src="2.png"></p>
+<h4 id="2-웹-브라우저-앱-예제"><a href="#2-웹-브라우저-앱-예제" class="headerlink" title="(2) 웹 브라우저 앱 예제"></a>(2) 웹 브라우저 앱 예제</h4><p>예제를 하나 더 살펴봅시다. 웹 브라우저를 실행시키는 암시적 인텐트 예제입니다. <code>Intent.ACTION_VIEW</code>가 액션이고 <code>Uri.parse(&quot;http://www.google.com&quot;)</code>가 실행할 액티비티에 의해 처리되는 데이터 및 데이터 타입입니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_VIEW, Uri.parse(<span class="string">&quot;http://www.google.com&quot;</span>))</span><br><span class="line">startActivity(intent)</span><br></pre></td></tr></table></figure>
+
+<p>이제 앱을 실행하면 다음과 같은 대화상자가 나옵니다. 액션과 데이터를 처리할 수 있는 앱이 2개 이상인 경우 다음과 같이 대화상자가 나오게 됩니다.<br><img src="3.png"><br>인텐트를 처리할 수 있는 앱이 없는 경우 안드로이드 시스템은 <code>ActivityNotFoundException</code>을 발생시킵니다. 따라서 다음과 같이 예외 처리를 할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    startActivity(intent)</span><br><span class="line">&#125; <span class="keyword">catch</span> (e: ActivityNotFoundException) &#123;</span><br><span class="line">    <span class="comment">// 예외 처리</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-오디오-플레이어-앱-예제"><a href="#3-오디오-플레이어-앱-예제" class="headerlink" title="(3) 오디오 플레이어 앱 예제"></a>(3) 오디오 플레이어 앱 예제</h4><p>버튼을 누르면 오디오 플레이어 앱을 실행하는 예제입니다.<br><img src="5.png"><br>안드로이드 시스템에는 현재 두 개의 오디오 플레이어 앱이 설치되어 있습니다.<br><img src="6.png"><br><code>Intent.createChooser()</code>메소드를 사용하면 오디오 플레이어를 처리할 수 있는 앱이 여러 개일 때 선택할 수 있는 대화상자를 표시할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById&lt;Button&gt;(R.id.button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> intent = Intent(Intent.ACTION_VIEW)</span><br><span class="line">            <span class="keyword">var</span> uri = Uri.parse(<span class="string">&quot;content:///sdcard/Download/music.mp3&quot;</span>)</span><br><span class="line">            intent.setDataAndType(uri, <span class="string">&quot;audio/mp3&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Chooser 생성</span></span><br><span class="line">            <span class="keyword">val</span> chooser = Intent.createChooser(intent, <span class="string">&quot;Open with&quot;</span>)</span><br><span class="line"></span><br><span class="line">            startActivity(chooser)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 버튼을 누르면 다음과 같이 대화창이 나옵니다.<br><img src="7.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/06/22/08_android/01_android_platform/190622_implicit_intent/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/06/21/08_android/01_android_platform/190621_intent_flag/"
                             aria-label=": [Android] Intent flag"
                         >
@@ -1153,149 +1332,6 @@
                         <p>
                             <a
                                 href="/ko/2019/06/14/08_android/01_android_platform/190614_adb/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/13/08_android/01_android_platform/190613_compileSdkVersion_minSdkVersion_targetSdkVersion/"
-                            aria-label=": [Android] compileSdkVersion, minSdkVersion, targetSdkVersion 차이점"
-                        >
-                            [Android] compileSdkVersion, minSdkVersion, targetSdkVersion 차이점
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-13T01:00:00+09:00">
-	
-		    2019/06/13
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="1-compileSdkVersion"><a href="#1-compileSdkVersion" class="headerlink" title="(1) compileSdkVersion"></a>(1) compileSdkVersion</h1><p>안드로이드 스튜디오에서 앱을 빌드할 때 어떤 SDK 버전을 사용할 것인지 지정합니다. 즉 <code>comileSdkVersion</code>은 지원할 수 있는 가장 높은 버전을 의미합니다.</p>
-<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>안드로이드 스튜디오의 SDK Manager에 해당 SDK가 설치되어있어야 합니다.<br><img src="0.png"></p>
-<h1 id="2-minSdkVersion"><a href="#2-minSdkVersion" class="headerlink" title="(2) minSdkVersion"></a>(2) minSdkVersion</h1><p>최소 지원 SDK 버전을 의미합니다. 즉 해당 버전 이하의 안드로이드 운영체제가 설치된 기기에서는 앱을 설치할 수 없습니다.</p>
-<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="3-targetSdkVersion"><a href="#3-targetSdkVersion" class="headerlink" title="(3) targetSdkVersion"></a>(3) targetSdkVersion</h1><p>앱을 실제 기기에서 실행할 때 어떤 SDK 버전을 사용할지 지정합니다. 기능은 똑같아도 SDK 버전에 따라 다르게 동작하는 API도 있습니다. 이때는 <code>targetSdkVersion</code>에 맞는 API를 사용하게 됩니다.</p>
-<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        targetSdkVersion <span class="number">27</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>targetSdkVersion</code>을 지정하지 않으면 기본 값은 <code>minSdkVersion</code>과 동일하게 적용됩니다. </p>
-<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>모듈 수준의 <code>build.gradle</code>파일에서 다음과 같이 SDK 버전 설정을 설정합니다.</p>
-<figure class="highlight groovy"><figcaption><span>모듈 수준의 build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        minSdkVersion <span class="number">25</span></span><br><span class="line">        targetSdkVersion <span class="number">27</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>이는 SDK 버전이 25 이상 30 이하에서만 이 앱이 실행될 수 있음을 의미합니다. 또한 실제 동작은 27 버전으로 동작하게 됩니다. 보통 실무에서는 </p>
-<div class="alert warning icon"><p>minSdkVersion &lt;= targetSdkVersion == compileSdkVersion</p>
-</div>
-
-<p>로 SDK 버전을 설정합니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/13/08_android/01_android_platform/190613_compileSdkVersion_minSdkVersion_targetSdkVersion/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/12/08_android/01_android_platform/190612_sdk_version/"
-                            aria-label=": [Android] 런타임에서 SDK 버전 확인하기"
-                        >
-                            [Android] 런타임에서 SDK 버전 확인하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-12T01:00:00+09:00">
-	
-		    2019/06/12
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="런타임에서-현재-기기의-SDK-버전-확인하기"><a href="#런타임에서-현재-기기의-SDK-버전-확인하기" class="headerlink" title="런타임에서 현재 기기의 SDK 버전 확인하기"></a>런타임에서 현재 기기의 SDK 버전 확인하기</h1><p>런타임에서 현재 기기의 SDK 버전을 확인할 수 있습니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        println(Build.VERSION.SDK_INT)  <span class="comment">// 기기의 SDK Version 확인</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;      </span><br></pre></td></tr></table></figure>
-<p>안드로이드 API에는 SDK의 버전이 상수 값으로 정의되어있습니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        println(Build.VERSION_CODES.BASE)                   <span class="comment">// 1</span></span><br><span class="line">        println(Build.VERSION_CODES.BASE_1_1)               <span class="comment">// 2</span></span><br><span class="line">        println(Build.VERSION_CODES.CUPCAKE)                <span class="comment">// 3</span></span><br><span class="line">        println(Build.VERSION_CODES.DONUT)                  <span class="comment">// 4</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR)                 <span class="comment">// 5</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR_0_1)             <span class="comment">// 6</span></span><br><span class="line">        println(Build.VERSION_CODES.ECLAIR_MR1)             <span class="comment">// 7</span></span><br><span class="line">        println(Build.VERSION_CODES.FROYO)                  <span class="comment">// 8</span></span><br><span class="line">        println(Build.VERSION_CODES.GINGERBREAD)            <span class="comment">// 9</span></span><br><span class="line">        println(Build.VERSION_CODES.GINGERBREAD_MR1)        <span class="comment">// 10</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB)              <span class="comment">// 11</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB_MR1)          <span class="comment">// 12</span></span><br><span class="line">        println(Build.VERSION_CODES.HONEYCOMB_MR2)          <span class="comment">// 13</span></span><br><span class="line">        println(Build.VERSION_CODES.ICE_CREAM_SANDWICH)     <span class="comment">// 14</span></span><br><span class="line">        println(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) <span class="comment">// 15</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN)             <span class="comment">// 16</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN_MR1)         <span class="comment">// 17</span></span><br><span class="line">        println(Build.VERSION_CODES.JELLY_BEAN_MR2)         <span class="comment">// 18</span></span><br><span class="line">        println(Build.VERSION_CODES.KITKAT)                 <span class="comment">// 19</span></span><br><span class="line">        println(Build.VERSION_CODES.KITKAT_WATCH)           <span class="comment">// 20</span></span><br><span class="line">        println(Build.VERSION_CODES.LOLLIPOP)               <span class="comment">// 21</span></span><br><span class="line">        println(Build.VERSION_CODES.LOLLIPOP_MR1)           <span class="comment">// 22</span></span><br><span class="line">        println(Build.VERSION_CODES.M)                      <span class="comment">// 23</span></span><br><span class="line">        println(Build.VERSION_CODES.N)                      <span class="comment">// 24</span></span><br><span class="line">        println(Build.VERSION_CODES.N_MR1)                  <span class="comment">// 25</span></span><br><span class="line">        println(Build.VERSION_CODES.O)                      <span class="comment">// 26</span></span><br><span class="line">        println(Build.VERSION_CODES.O_MR1)                  <span class="comment">// 27</span></span><br><span class="line">        println(Build.VERSION_CODES.P)                      <span class="comment">// 28</span></span><br><span class="line">        println(Build.VERSION_CODES.Q)                      <span class="comment">// 29</span></span><br><span class="line">        println(Build.VERSION_CODES.R)                      <span class="comment">// 30</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
-
-
-
-
-<p>비교문을 사용하여 버전에 따른 분기처리를 할 수 있습니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.M) &#123;</span><br><span class="line">    <span class="comment">// do something when os version is lower than Marshmallow(23).</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// do something when os version is equal or higher than Marshmallow(23).</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/12/08_android/01_android_platform/190612_sdk_version/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

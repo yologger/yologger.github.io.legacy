@@ -354,6 +354,81 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/07/10/08_android/01_android_platform/190710_fragment_lifecycle/"
+                            aria-label=": [Android] Fragment - (4) 프래그먼트 생명주기"
+                        >
+                            [Android] Fragment - (4) 프래그먼트 생명주기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-07-10T01:00:00+09:00">
+	
+		    2019/07/10
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="프래그먼트의-생명주기-함수"><a href="#프래그먼트의-생명주기-함수" class="headerlink" title="프래그먼트의 생명주기 함수"></a>프래그먼트의 생명주기 함수</h1><p>프래그먼트로 액티비티와 마찬가지로 생명주기 함수를 가지고 있습니다.<br><img src="1.png"></p>
+<h3 id="1-onAttach"><a href="#1-onAttach" class="headerlink" title="(1) onAttach()"></a>(1) onAttach()</h3><p>프래그먼트는 액티비티 위에서 동작합니다. 따라서 액티비티와 연관된 생명주기 함수를 가집니다. <code>onAttach()</code>는 액티비티와 프래그먼트가 연관될 때 호출됩니다.</p>
+<h3 id="2-onCreate"><a href="#2-onCreate" class="headerlink" title="(2) onCreate()"></a>(2) onCreate()</h3><p>프래그먼트의 인스턴스가 생성될 때 호출됩니다.</p>
+<p>액티비티의 <code>onCreate()</code>와 마찬가지로 초기화 작업을 이 곳에서 실행하면 됩니다. 다만 프래그먼트의 <code>onCreate()</code>에서는 <code>뷰(View)</code>와 관련된 UI 작업을 수행할 수 없습니다. 루트 뷰가 아직 인플레이트되지 않았기 때문입니다.</p>
+<h3 id="3-onCreateView"><a href="#3-onCreateView" class="headerlink" title="(3) onCreateView()"></a>(3) onCreateView()</h3><p>프래그먼트의 <code>루트 뷰(Root View)</code>를 인플레이트하여 반환합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FragmentA</span> : <span class="type">Fragment</span></span>() &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreateView</span><span class="params">(inflater: <span class="type">LayoutInflater</span>, container: <span class="type">ViewGroup</span>?, savedInstanceState: <span class="type">Bundle</span>?)</span></span>: View? &#123;</span><br><span class="line">        <span class="comment">// Inflate the layout for this fragment</span></span><br><span class="line">        <span class="keyword">val</span> rootView: View = inflater.inflate(R.layout.fragment_a, container, <span class="literal">false</span>)</span><br><span class="line">        <span class="keyword">return</span> rootView</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-onViewCreated"><a href="#4-onViewCreated" class="headerlink" title="(4) onViewCreated()"></a>(4) onViewCreated()</h3><p>프래그먼트의 루트 뷰와 자식 뷰가 화면에 그려진 후 호출됩니다. 이 메소드에서부터는 <code>getView()</code>나 <code>requireView()</code>를 통해 프래그먼트의 루트 뷰에 접근할 수 있습니다. 또한 루트 뷰의 <code>findViewById()</code>를 사용하여 자식 뷰에 접근할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FragmentB</span> : <span class="type">Fragment</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreateView</span><span class="params">(inflater: <span class="type">LayoutInflater</span>, container: <span class="type">ViewGroup</span>?, savedInstanceState: <span class="type">Bundle</span>?)</span></span>: View? &#123;</span><br><span class="line">        <span class="comment">// Inflate the layout for this fragment</span></span><br><span class="line">        <span class="keyword">val</span> view = inflater.inflate(R.layout.fragment_b, container, <span class="literal">false</span>)</span><br><span class="line">        <span class="keyword">return</span> view</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onViewCreated</span><span class="params">(view: <span class="type">View</span>, savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onViewCreated(view, savedInstanceState)</span><br><span class="line">        <span class="keyword">val</span> rootView = requireView()</span><br><span class="line">        <span class="keyword">val</span> textView = rootView.findViewById&lt;TextView&gt;(R.id.fragment_b_tv)</span><br><span class="line">        textView.setText(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-onStart"><a href="#5-onStart" class="headerlink" title="(5) onStart()"></a>(5) onStart()</h3><p>액티비티의 <code>onStart()</code>와 유사합니다. 프래그먼트가 시작될 때 호출되며, 사용자에게 프래그먼트가 보여집니다.</p>
+<h3 id="6-onResume"><a href="#6-onResume" class="headerlink" title="(6) onResume()"></a>(6) onResume()</h3><p>액티비티의 <code>onResume()</code>과 유사합니다. 프래그먼트가 사용자와 상호작용할 수 있을 때 호출됩니다.</p>
+<h3 id="7-onPause"><a href="#7-onPause" class="headerlink" title="(7) onPause()"></a>(7) onPause()</h3><p>액티비티의 <code>onPause()</code>와 유사합니다. 프래그먼트가 사용자와 상호작용할 수 없을 때 호출됩니다.</p>
+<h3 id="8-onStop"><a href="#8-onStop" class="headerlink" title="(8) onStop()"></a>(8) onStop()</h3><p>액티비티의 <code>onStop()</code>과 유사합니다. 프래그먼트가 다른 프래그먼트나 액티비티에 의해 가려졌을 때 호출됩니다.</p>
+<h3 id="9-onDestroyView"><a href="#9-onDestroyView" class="headerlink" title="(9) onDestroyView()"></a>(9) onDestroyView()</h3><p>프래그먼트의 루트 뷰가 제거될 때 호출됩니다. <code>프래그먼트 백 스택(Fragment Back Stack)</code>을 사용하면 프래그먼트의 인스턴스는 삭제하지 않고 재사용하는데, 이 때는 <code>onDestroy()</code>가 아니라 <code>onDestroyView()</code>까지만 호출됩니다. 이후 프래그먼트를 재사용하면 <code>onCreate()</code>가 아니라 <code>onCreateView()</code>를 실행합니다.</p>
+<h3 id="10-onDestroy"><a href="#10-onDestroy" class="headerlink" title="(10) onDestroy()"></a>(10) onDestroy()</h3><p>프래그먼트의 뷰가 제거된 후, 프래그먼트의 인스턴스가 소멸할 때 호출됩니다. 프래그먼트 백 스택을 사용하지 않으면, 프래그먼트의 뷰 뿐만 아니라 인스턴스까지 삭제됩니다. 또한 <code>onDestroyView()</code> 이후 <code>onDestroy()</code>까지 호출됩니다.</p>
+<h3 id="11-onDetach"><a href="#11-onDetach" class="headerlink" title="(11) onDetach()"></a>(11) onDetach()</h3><p>프래그먼트가 소멸되고, 액티비티와의 연결도 끊어질 때 호출됩니다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/07/10/08_android/01_android_platform/190710_fragment_lifecycle/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/07/09/08_android/01_android_platform/190709_fragment_backstack/"
                             aria-label=": [Android] Fragment - (3) 프래그먼트 백 스택(Fragment Back Stack)"
                         >
@@ -1193,111 +1268,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/06/27/08_android/01_android_platform/190627_async_nonblocking/"
-                            aria-label=": [Android] 비동기, 논블로킹, runOnUiThread()"
-                        >
-                            [Android] 비동기, 논블로킹, runOnUiThread()
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-06-27T01:00:00+09:00">
-	
-		    2019/06/27
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Android-Platform/">Android Platform</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="블로킹과-논블로킹"><a href="#블로킹과-논블로킹" class="headerlink" title="블로킹과 논블로킹"></a>블로킹과 논블로킹</h1><h3 id="1-블로킹-Blocking"><a href="#1-블로킹-Blocking" class="headerlink" title="(1) 블로킹(Blocking)"></a>(1) 블로킹(Blocking)</h3><p><code>함수 A</code>에서 <code>함수 B</code>를 호출한다고 가정합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">A</span><span class="params">()</span></span> &#123;</span><br><span class="line">    B()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>함수 A</code>는 <code>함수 B</code>가 끝날 때 까지 <u>기다리게 됩니다</u>. 이를 <code>함수 A</code>가 <code>블로킹(Blocking)</code>되었다고 합니다.<br><img src="1.png"><br>즉, <code>함수 A</code>는 <code>함수 B</code>가 함수가 종료되었다는 의미의 <code>return</code>를 호출하기 전까지 기다리게 됩니다.</p>
-<h3 id="2-논블로킹-Non-blocking"><a href="#2-논블로킹-Non-blocking" class="headerlink" title="(2) 논블로킹(Non-blocking)"></a>(2) 논블로킹(Non-blocking)</h3><p><code>함수 A</code>에서 <code>함수 B</code>를 호출한다고 가정합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">A</span><span class="params">()</span></span> &#123;</span><br><span class="line">    B()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>함수 A</code>는 <code>함수 B</code>를 호출한 후 <u>기다리지 않고</u> 자신의 실행 흐름을 수행합니다.<br><img src="2.png"><br>이를 <code>함수 A</code>가 <code>논블로킹(Non-Blocking)</code>되었다고 합니다.</p>
-<hr>
-<h1 id="동기와-비동기"><a href="#동기와-비동기" class="headerlink" title="동기와 비동기"></a>동기와 비동기</h1><h3 id="1-동기-Synchronous"><a href="#1-동기-Synchronous" class="headerlink" title="(1) 동기(Synchronous)"></a>(1) 동기(Synchronous)</h3><p><code>함수 A</code>에서 <code>함수 B</code>를 호출한다고 가정합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">A</span><span class="params">()</span></span> &#123;</span><br><span class="line">    B()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>동기식 모델에서 <code>함수 A</code>는 <code>함수 B</code>가 끝날 때 까지 기다리게 됩니다. </p>
-<p><img src="3.png"><br>이 때문에 <code>함수 A</code>와 <code>함수 B</code> 사이에 <u>연관성</u>있다고 하며, 두 함수가 <u>동기화 되었다고</u> 합니다.</p>
-<h3 id="2-비동기-Asynchronous"><a href="#2-비동기-Asynchronous" class="headerlink" title="(2) 비동기(Asynchronous)"></a>(2) 비동기(Asynchronous)</h3><p><code>함수 A</code>에서 <code>함수 B</code>를 호출한다고 가정합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">A</span><span class="params">()</span></span> &#123;</span><br><span class="line">    B()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>함수 A</code>는 <code>함수 B</code>가 호출된 후 <code>함수 B</code>가 끝나든 말든 신경쓰지 않고 자신의 일을 수행합니다. </p>
-<p><img src="4.png"><br>이 때문에 <code>함수 A</code>와 <code>함수 B</code> 사이에 <u>연관성</u>이 없다고 하며, 두 함수가 <u>동기화되지 않았다</u>고 합니다.</p>
-<hr>
-<h1 id="관점의-차이"><a href="#관점의-차이" class="headerlink" title="관점의 차이"></a>관점의 차이</h1><p>위 예제를 살펴보면 동기는 블로킹과 비슷하고 비동기와 논블로킹이 비슷하다는게 느껴지시나요? 결국 동기/비동기, 블로킹/논블로킹의 차이는 상황을 어떠한 <u>관점</u>에서 바라보는지에 있습니다. 이 때문에 컴퓨터공학에서는 보통 소프트웨어의 실행 흐름을 두 가지로 구분합니다. </p>
-<ul>
-<li>동기-블로킹 모델</li>
-<li>비동기-논블로킹 모델</li>
-</ul>
-<h3 id="1-동기-블로킹-모델"><a href="#1-동기-블로킹-모델" class="headerlink" title="(1) 동기-블로킹 모델"></a>(1) 동기-블로킹 모델</h3><p><code>함수 A</code>에서 <code>함수 B</code>를 호출한다고 가정합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">A</span><span class="params">()</span></span> &#123;</span><br><span class="line">    B()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">B</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>동기-블로킹 모델에서 <code>함수 A</code>는 <code>함수 B</code>가 <code>return</code>을 호출하여 자신을 종료할 때 까지 기다립니다.</p>
-<h3 id="2-비동기-논블로킹"><a href="#2-비동기-논블로킹" class="headerlink" title="(2) 비동기-논블로킹"></a>(2) 비동기-논블로킹</h3><p><code>함수 A</code>에서 <code>함수 B</code>를 호출한다고 가정합시다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">A</span><span class="params">()</span></span> &#123;</span><br><span class="line">    B()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">B</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>프로그래밍 언어에 따라 비동기-논블로킹 모델을 구현하는 방법이 다를 수 있습니다. Java나 Kotlin에서 비동기-논블로킹 모델을 사용한다는 것은 <a href="/ko/2019/06/26/08_android/01_android_platform/190626_thread/">멀티 스레드</a>를 사용한다는 의미입니다. Java나 Kotlin에서는 매인 스레드에서 두 개의 실행 흐름을 동시에 수행할 수 없기 때문입니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">A</span><span class="params">()</span></span> &#123;</span><br><span class="line">    B()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">B</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> runnable = Runnable &#123;</span><br><span class="line">        <span class="comment">// 다른 스레드에서 실행</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> thread = Thread(runnable)</span><br><span class="line">    thread.start()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>비동기-논블로킹 모델에서 <code>함수 A</code>는 <code>함수 B</code>가 언제 끝날 지 알 수 없습니다. 두 함수는 동기화되지 않았기 때문입니다. 따라서 보통 <code>함수 A</code>는 <code>함수 B</code>에게 <u>적절한 시점에 특정한 함수나 람다를 호출해달라고 함수 또는 람다식을 전달</u>하게 되며, 이를 <code>콜백</code>라고 합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">A</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 콜백</span></span><br><span class="line">    <span class="keyword">var</span> callback = &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 함수 B를 호출하면서 콜백을 함께 전달</span></span><br><span class="line">    B(callback)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">B</span><span class="params">(callback: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> runnable = Runnable &#123;</span><br><span class="line">        <span class="comment">// 적절한 시점에 콜백 호출</span></span><br><span class="line">        callback()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> thread = Thread(runnable)</span><br><span class="line">    thread.start()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="runOnUiThread"><a href="#runOnUiThread" class="headerlink" title="runOnUiThread()"></a>runOnUiThread()</h1><p>안드로이드에서 비동기-논블로킹 작업을 수행한 후, UI를 변경한다고 가정합시다. <u>안드로이드에서는 매인 스래드에서만 UI를 변경할 수 있습니다</u>. 따라서 비동기-논블로킹 작업 후 매인 스레드에서 UI를 변경하도록 코드를 수정해야합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span>: <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">a</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// 콜백 함수</span></span><br><span class="line">        <span class="keyword">var</span> callback = &#123;</span><br><span class="line">            runOnUiThread &#123;</span><br><span class="line">                <span class="comment">// UI 변경</span></span><br><span class="line">                textView.text = <span class="string">&quot;New Text&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 함수 B를 호출하면서 콜백을 함께 전달</span></span><br><span class="line">        b(callback)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">b</span><span class="params">(callback: () -&gt; ())</span></span> &#123;</span><br><span class="line">        <span class="keyword">var</span> runnable = Runnable &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">            callback()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">var</span> thread = Thread(runnable)</span><br><span class="line">        thread.start()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>AppCompatActivity</code>클래스에 정의된 <code>runOnUiThread()</code>는 인자로 전달된 람다를 매인 스레드에서 실행합니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> void runOnUiThread(Runnable action) &#123;</span><br><span class="line">        <span class="keyword">if</span> (Thread.currentThread() != mUiThread) &#123;</span><br><span class="line">            mHandler.post(action);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            action.run();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h1 id="안드로이드에서의-비동기-처리"><a href="#안드로이드에서의-비동기-처리" class="headerlink" title="안드로이드에서의 비동기 처리"></a>안드로이드에서의 비동기 처리</h1><p>안드로이드에서 비동기/논블로킹 모델을 구현하는 방법에는 여러가지가 있습니다. 대표적인 네 가지 방법은 다음과 같습니다.</p>
-<ul>
-<li>멀티 스레드</li>
-<li>AsycnTask</li>
-<li>ReactiveX (RxJava, RxKotlin)</li>
-<li>Coroutine</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/06/27/08_android/01_android_platform/190627_async_nonblocking/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1324,7 +1294,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 8 of 23</li>
+        <li class="pagination-number">page 8 of 24</li>
     </ul>
 </div>
 
