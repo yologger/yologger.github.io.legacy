@@ -1218,6 +1218,96 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/06/07/12_tools/03_git/20200607_git_pull_request/"
+                            aria-label=": [Git, GitHub] (7) Pull Request"
+                        >
+                            [Git, GitHub] (7) Pull Request
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-07T00:00:00+09:00">
+	
+		    2020/06/07
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Pull-Request"><a href="#Pull-Request" class="headerlink" title="Pull Request"></a>Pull Request</h1><div class="alert info"><p>예제에서 <code>yologger-dev</code>가 원본 저장소의 <u>Owner</u>다.<br><code>yologger</code>는 원본 저장소를 Fork하여 수정하는 <u>Contributer</u>다.</p>
+</div>
+
+<h3 id="1-fork"><a href="#1-fork" class="headerlink" title="(1) fork"></a>(1) fork</h3><p>원본 저장소를 자신의 저장소로 Fork한다.<br><img src="1.png"><br>Fork를 하면 내 저장소에도 동일한 프로젝트가 생성된다.<br><img src="2.png"></p>
+<h3 id="2-clone"><a href="#2-clone" class="headerlink" title="(2) clone"></a>(2) clone</h3><p>Fork한 저장소를 clone한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir project</span><br><span class="line"></span><br><span class="line">$ cd project</span><br><span class="line"></span><br><span class="line">// git clone [REMOTE_REPO_URL] [DIR_NAME]</span><br><span class="line">$ git clone https://github.com/yologger/project.git .</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-remote-저장소-설정"><a href="#3-remote-저장소-설정" class="headerlink" title="(3) remote 저장소 설정"></a>(3) remote 저장소 설정</h3><p>clone한 프로젝트(Fork한 프로젝트)와 연결된 원격 저장소를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git remote --v</span><br><span class="line">origin	https://github.com/yologger/project.git (fetch)</span><br><span class="line">origin	https://github.com/yologger/project.git (push)</span><br></pre></td></tr></table></figure>
+<p><code>origin</code>은 원본 저장소가 아닌 <u>Fork한 저장소</u>와의 연결이다. <code>Pull Request</code>를 사용하려면 <u>원본 저장소</u>와의 연결을 추가해야한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 원본 저장소와의 연결 추가</span><br><span class="line">$ git remote add upstream https://github.com/yologger-dev/project.git</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git remove -v</span><br><span class="line">// Fork한 저장소와의 연결</span><br><span class="line">origin	https://github.com/yologger/project.git (fetch)</span><br><span class="line">origin	https://github.com/yologger/project.git (push)</span><br><span class="line">// 원본 저장소와의 연결</span><br><span class="line">upstream	https://github.com/yologger-dev/project.git (fetch)</span><br><span class="line">upstream	https://github.com/yologger-dev/project.git (push)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Branch-생성"><a href="#4-Branch-생성" class="headerlink" title="(4) Branch 생성"></a>(4) Branch 생성</h3><p>이제 작업을 하기 위해 새로운 branch를 생성해야한다. <code>develop</code> branch를 생성하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// &#x27;develop&#x27; branch 생성</span><br><span class="line">$ git branch develop</span><br><span class="line">* master</span><br><span class="line">  develop</span><br><span class="line"></span><br><span class="line">// &#x27;develop&#x27; branch로 이동</span><br><span class="line">$ git checkout develop </span><br></pre></td></tr></table></figure>
+
+<h3 id="5-작업-수행-후-add-commit"><a href="#5-작업-수행-후-add-commit" class="headerlink" title="(5) 작업 수행 후 add, commit"></a>(5) 작업 수행 후 add, commit</h3><p><code>develop</code> branch에서 <code>c.txt</code>를 추가하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vim c.txt</span><br><span class="line">c</span><br></pre></td></tr></table></figure>
+<p>그리고 add, commit 한다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add -A</span><br><span class="line"></span><br><span class="line">$ git commit -m <span class="string">&quot;Create c.txt&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-push"><a href="#6-push" class="headerlink" title="(6) push"></a>(6) push</h3><p>원본 원격 저장소가 아니라 <u>Fork한 원격 저장소</u>에 Push한다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 저장소 확인</span><br><span class="line">$ git remote</span><br><span class="line">origin</span><br><span class="line">upstream</span><br><span class="line"></span><br><span class="line">// 포크한 원격 저장소에 push</span><br><span class="line">$ git push [저장소명] [BRANCH_NAME]</span><br><span class="line">$ git push origin develop</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-Pull-Request-보내기"><a href="#7-Pull-Request-보내기" class="headerlink" title="(7) Pull Request 보내기"></a>(7) Pull Request 보내기</h3><p>Contributer의 Fork 원격 저장소에 ‘Compare &amp; pull request’ 버튼이 활성화된다. 이 버튼을 클릭하자<br><img src="3.png"><br>코멘트를 남기고 Create pull request 버튼을 클릭하면 Pull Request가 전송된다.<br><img src="4.png"></p>
+<h3 id="8-Pull-Request-승인-거절하기"><a href="#8-Pull-Request-승인-거절하기" class="headerlink" title="(8) Pull Request 승인 / 거절하기"></a>(8) Pull Request 승인 / 거절하기</h3><p>Owner는 Pull Request를 확인할 수 있다.<br><img src="5.png"><br>원본 저장소 주인 역시 코멘트를 남길 수 있다. 보통 이 단계에서 <code>Code Review</code>를 진행한다.<br><img src="6.png"><br>문제가 없으면 <code>Merge pull request</code>를 눌러 병합한다. 물론 문제가 있다면 <code>Reject</code>할 수도 있다.<br><img src="7.png"><br><img src="8.png"></p>
+<h3 id="9-Fork한-원격-저장소-업데이트"><a href="#9-Fork한-원격-저장소-업데이트" class="headerlink" title="(9) Fork한 원격 저장소 업데이트"></a>(9) Fork한 원격 저장소 업데이트</h3><p>Owner가 Merge를 승인하면 Contribute도 Fork한 저장소를 업데이트할 수 있다. <code>Fetch upstream</code>을 누른 후 <code>Fetch and merge</code>버튼을 클릭하면 된다.<br><img src="9.png"><br>Fork한 저장소가 업데이트된 것을 확인할 수 있다.<br><img src="10.png"></p>
+<h3 id="10-로컬-저장소-업데이트"><a href="#10-로컬-저장소-업데이트" class="headerlink" title="(10) 로컬 저장소 업데이트"></a>(10) 로컬 저장소 업데이트</h3><p>이제 원격 저장소를 pull하여 로컬 저장소의 main branch를 업데이트한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// &#x27;main&#x27; branch로 이동</span><br><span class="line">$ git checkout main</span><br><span class="line"></span><br><span class="line">// &#x27;main&#x27; brnach 업데이트</span><br><span class="line">$ git pull upstream main</span><br></pre></td></tr></table></figure>
+<p>작업하던 <code>develop</code> branch는 삭제한다.<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> $ git branch</span><br><span class="line">* main</span><br><span class="line">develop</span><br><span class="line"></span><br><span class="line">$ git branch -d develop</span><br></pre></td></tr></table></figure><br>로컬 저장소의 ‘main’ branch를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">README.md a.txt     b.txt     c.txt</span><br></pre></td></tr></table></figure>
+<p>로컬 저장소의 ‘main’ branch에도 변경이 반영되어있다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/07/12_tools/03_git/20200607_git_pull_request/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/"
                             aria-label=": [Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기"
                         >
@@ -1279,79 +1369,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/06/05/08_android/11_notification/200605_remote_notification/"
-                            aria-label=": [Android] 알림(Notification) - (5) 원격 알림"
-                        >
-                            [Android] 알림(Notification) - (5) 원격 알림
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-06-05T01:00:00+09:00">
-	
-		    2020/06/05
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="원격-알림"><a href="#원격-알림" class="headerlink" title="원격 알림"></a>원격 알림</h1><p><code>구글 파이어베이스</code>의 <code>클라우드 메시징(Cloud Messaging)</code>서비스를 사용하면 <code>원격 알림(Remote Notification)</code>을 구현할 수 있습니다.</p>
-<h1 id="1-파이어베이스-프로젝트-만들기"><a href="#1-파이어베이스-프로젝트-만들기" class="headerlink" title="1. 파이어베이스 프로젝트 만들기"></a>1. 파이어베이스 프로젝트 만들기</h1><p>우선 <a target="_blank" rel="noopener" href="https://firebase.google.com/?hl=ko">파이어베이스</a>에 접속하여 로그인합니다. 계정이 없다면 회원가입을 먼저 합니다. 이후 오른쪽 상단의 <code>Go to console</code>을 클릭합니다.<br><img src="1.png"><br><code>Add Project</code>를 클릭하여 <code>파이어베이스 프로젝트</code>를 생성합니다.<br><img src="2-ko.png"></p>
-<p>프로젝트 이름을 입력하고 계속을 누릅니다.<br><img src="3.png"><br>구글 에널리틱스를 사용할 것인지를 물어봅니다. 이때는 구글 에널리틱스 계정이 필요합니다. 일단 사용하지 않음을 선택하고 프로젝트를 생성합시다.<br><img src="4.png"><br>프로젝트가 정상적으로 생성되면 다음과 같은 화면이 나옵니다.<br><img src="5.png"></p>
-<h1 id="2-안드로이드-스튜디오-프로젝트와-파이어베이스-프로젝트-연동"><a href="#2-안드로이드-스튜디오-프로젝트와-파이어베이스-프로젝트-연동" class="headerlink" title="2. 안드로이드 스튜디오 프로젝트와 파이어베이스 프로젝트 연동"></a>2. 안드로이드 스튜디오 프로젝트와 파이어베이스 프로젝트 연동</h1><p>이제 <code>안드로이드 스튜디오 프로젝트</code>에서 <code>Tool &gt; Firebase</code>를 선택합니다.<br><img src="6.png"><br>오른쪽 패널의 <code>Assistant</code> 도구 창에서 <code>Cloud Messaging</code> 항목을 찾습니다. 그리고 <code>Set up Firebase Cloud Messaging</code>을 클릭합니다.<br><img src="7.png"><br><code>Connect to Firebase</code>를 눌러 안드로이드 스튜디오 프로젝트와 파이어베이스 프로젝트를 연결합니다. 다음과 같은 화면이 나오면 정상적으로 연결된 것입니다.<br><img src="8.png"><br>두 프로젝트가 연결되면 자동으로 <code>google-services.json</code>파일이 생성됩니다. 이 파일은 Firebase에서 안드로이드 프로젝트를 고유하게 식별하는 정보가 담겨있습니다. 프로젝트 도구창을 <code>Android 뷰</code>에서 <code>Project 뷰</code>로 전환합니다.<br><img src="9.png"><br>프로젝트의 <code>app 모듈</code> 아래에서 <code>google-service.json</code>파일을 확인할 수 있습니다.<br><img src="10.png"></p>
-<h1 id="3-파이어베이스-라이브러리-추가"><a href="#3-파이어베이스-라이브러리-추가" class="headerlink" title="3. 파이어베이스 라이브러리 추가"></a>3. 파이어베이스 라이브러리 추가</h1><p>이제 <code>파이어베이스 라이브러리</code>를 안드로이드 스튜디오 프로젝트에 추가해야합니다. 다시<br>오른쪽 패널의 <code>Assistant</code> 도구 창에서 <code>Cloud Messaging</code> 항목을 찾습니다. 그리고 <code>Set up Firebase Cloud Messaging</code>을 클릭합니다.<br><img src="7.png"><br><code>Add FCM to your app</code>을 클릭합니다.<br><img src="11.png"><br>프로젝트에 추가되는 것들은 다음과 같습니다. 우선 프로젝트 수준의 <code>build.gradle</code>에 <code>구글 서비스 라이브러리</code>가 추가됩니다.</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath <span class="string">&#x27;com.google.gms:google-services:4.3.8&#x27;</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>모듈 수준의 <code>build.gradle</code>에는 <code>Firebase 메시징 라이브러리</code>와 <code>구글 서비스 라이브러리 플러그인</code>이 추가됩니다.</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.google.gms.google-services&#x27;</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">&#x27;com.google.firebase:firebase-messaging:22.0.0&#x27;</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="4-알림-보내기"><a href="#4-알림-보내기" class="headerlink" title="4. 알림 보내기"></a>4. 알림 보내기</h1><p>앱을 실제 기기나 에뮬레이터에서 실행합니다. 그리고 <code>홈 버튼</code>을 눌러서 앱이 <code>백그라운드</code>에서 실행되도록 합니다. 앱이 실행 중이지 않거나 백그라운드에 있을 때만 원격 알림을 수신하기 때문입니다.</p>
-<p>파이어베이스 콘솔에 접속하여 앞에서 생성한 프로젝트를 선택합니다.<br><img src="12.png"><br>왼쪽 사이드 바 메뉴에서 <code>Cloud Messaging</code>을 선택합니다.<br><img src="13.png"><br><code>Send your first message</code>를 클릭합니다.<br><img src="14.png"><br>다음과 같이 <code>알림 제목</code>과 <code>알림 텍스트</code>를 입력합니다. <code>알림 이미지</code>와 <code>알림 이름</code>은 선택사항입니다. 오른 쪽에서 어떻게 알림이 나올 지 확인할 수 있습니다. 이후 <code>Next</code>버튼을 누릅니다.<br><img src="15.png"><br>이제 어떤 앱과 어떤 사용자에게 알림을 보낼 지 설정합니다. <code>User segment</code>로 설정하면 앱의 모든 사용자에게 알림이 전송됩니다. 또한 어떤 앱에 알림을 보낼지 앱도 선택하고 <code>Next</code> 버튼을 누릅니다.<br><img src="16.png"><br>알림을 언제 보낼지를 설정할 수 있습니다. <code>Now</code>로 설정하고 <code>Next</code>버튼을 누릅니다.<br><img src="17.png"><br><code>Additional options</code>는 선택사항입니다. 일단 비워두고 <code>Review</code>버튼을 누릅니다.<br><img src="18.png"><br>이제 검토창에서 게시를 누르면 알림이 발송됩니다.<br><img src="19.png"><br>알림을 클릭하면 백그라운드 상태이던 앱이 포그라운드로 실행됩니다.</p>
-<h1 id="4-알림에-데이터-포함시키기"><a href="#4-알림에-데이터-포함시키기" class="headerlink" title="4. 알림에 데이터 포함시키기"></a>4. 알림에 데이터 포함시키기</h1><p>알림을 보낼 때 <code>키-값</code> 형태의 데이터를 추가할 수 있습니다. <code>Additional Option</code> 항목에서 데이터를 추가할 수 있습니다.<br><img src="20.png"><br>앱이 백그라운드에 진입하면 <code>onPause()</code>메소드가 호출됩니다. 알림을 클릭하여 앱이 포그라운드 상태로 변하면 <code>onRestart() &gt; onStart() &gt; onResume()</code>메소드가 순서대로 실행됩니다. 이 메소드 중 한 곳에서 데이터를 읽어올 수 있습니다. 데이터를 전달받아 토스트 메시지로 화면에 출력하겠습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onStart</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onStart()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> extras = intent.extras</span><br><span class="line"></span><br><span class="line">        extras?.run &#123;</span><br><span class="line">            <span class="keyword">val</span> name = getString(<span class="string">&quot;name&quot;</span>)</span><br><span class="line">            <span class="keyword">val</span> nation = getString(<span class="string">&quot;nation&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> (name != <span class="literal">null</span> &amp;&amp; nation != <span class="literal">null</span>) &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;<span class="subst">$&#123;name&#125;</span> comes from <span class="subst">$&#123;nation&#125;</span>. &quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 앱을 실행하고 백그라운드 모드로 변경한 후 알림을 전송합시다. 알림을 클릭하면 다음과 같이 토스트 메시지가 나옵니다.<br><img src="21.png"></p>
-<hr>
-<h1 id="마치며"><a href="#마치며" class="headerlink" title="마치며"></a>마치며</h1><p>이번 포스트에서는 <code>원격 알림(Remote Notification)</code>에 대해 알아봤습니다. 다음 포스트에서는 <a href="/ko/2020/02/06/android/006_01_notification/200206-remote-notification-foreground/">포그라운드 상태에서 원격 알림을 받는 방법</a>에 대해 알아보겠습니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/06/05/08_android/11_notification/200605_remote_notification/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1378,7 +1395,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 2 of 6</li>
+        <li class="pagination-number">page 2 of 7</li>
     </ul>
 </div>
 

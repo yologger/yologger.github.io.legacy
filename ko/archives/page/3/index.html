@@ -435,6 +435,96 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/06/07/12_tools/03_git/20200607_git_pull_request/"
+                            aria-label=": [Git, GitHub] (7) Pull Request"
+                        >
+                            [Git, GitHub] (7) Pull Request
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-07T00:00:00+09:00">
+	
+		    2020/06/07
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Pull-Request"><a href="#Pull-Request" class="headerlink" title="Pull Request"></a>Pull Request</h1><div class="alert info"><p>예제에서 <code>yologger-dev</code>가 원본 저장소의 <u>Owner</u>다.<br><code>yologger</code>는 원본 저장소를 Fork하여 수정하는 <u>Contributer</u>다.</p>
+</div>
+
+<h3 id="1-fork"><a href="#1-fork" class="headerlink" title="(1) fork"></a>(1) fork</h3><p>원본 저장소를 자신의 저장소로 Fork한다.<br><img src="1.png"><br>Fork를 하면 내 저장소에도 동일한 프로젝트가 생성된다.<br><img src="2.png"></p>
+<h3 id="2-clone"><a href="#2-clone" class="headerlink" title="(2) clone"></a>(2) clone</h3><p>Fork한 저장소를 clone한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir project</span><br><span class="line"></span><br><span class="line">$ cd project</span><br><span class="line"></span><br><span class="line">// git clone [REMOTE_REPO_URL] [DIR_NAME]</span><br><span class="line">$ git clone https://github.com/yologger/project.git .</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-remote-저장소-설정"><a href="#3-remote-저장소-설정" class="headerlink" title="(3) remote 저장소 설정"></a>(3) remote 저장소 설정</h3><p>clone한 프로젝트(Fork한 프로젝트)와 연결된 원격 저장소를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git remote --v</span><br><span class="line">origin	https://github.com/yologger/project.git (fetch)</span><br><span class="line">origin	https://github.com/yologger/project.git (push)</span><br></pre></td></tr></table></figure>
+<p><code>origin</code>은 원본 저장소가 아닌 <u>Fork한 저장소</u>와의 연결이다. <code>Pull Request</code>를 사용하려면 <u>원본 저장소</u>와의 연결을 추가해야한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 원본 저장소와의 연결 추가</span><br><span class="line">$ git remote add upstream https://github.com/yologger-dev/project.git</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git remove -v</span><br><span class="line">// Fork한 저장소와의 연결</span><br><span class="line">origin	https://github.com/yologger/project.git (fetch)</span><br><span class="line">origin	https://github.com/yologger/project.git (push)</span><br><span class="line">// 원본 저장소와의 연결</span><br><span class="line">upstream	https://github.com/yologger-dev/project.git (fetch)</span><br><span class="line">upstream	https://github.com/yologger-dev/project.git (push)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Branch-생성"><a href="#4-Branch-생성" class="headerlink" title="(4) Branch 생성"></a>(4) Branch 생성</h3><p>이제 작업을 하기 위해 새로운 branch를 생성해야한다. <code>develop</code> branch를 생성하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// &#x27;develop&#x27; branch 생성</span><br><span class="line">$ git branch develop</span><br><span class="line">* master</span><br><span class="line">  develop</span><br><span class="line"></span><br><span class="line">// &#x27;develop&#x27; branch로 이동</span><br><span class="line">$ git checkout develop </span><br></pre></td></tr></table></figure>
+
+<h3 id="5-작업-수행-후-add-commit"><a href="#5-작업-수행-후-add-commit" class="headerlink" title="(5) 작업 수행 후 add, commit"></a>(5) 작업 수행 후 add, commit</h3><p><code>develop</code> branch에서 <code>c.txt</code>를 추가하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vim c.txt</span><br><span class="line">c</span><br></pre></td></tr></table></figure>
+<p>그리고 add, commit 한다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add -A</span><br><span class="line"></span><br><span class="line">$ git commit -m <span class="string">&quot;Create c.txt&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-push"><a href="#6-push" class="headerlink" title="(6) push"></a>(6) push</h3><p>원본 원격 저장소가 아니라 <u>Fork한 원격 저장소</u>에 Push한다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 저장소 확인</span><br><span class="line">$ git remote</span><br><span class="line">origin</span><br><span class="line">upstream</span><br><span class="line"></span><br><span class="line">// 포크한 원격 저장소에 push</span><br><span class="line">$ git push [저장소명] [BRANCH_NAME]</span><br><span class="line">$ git push origin develop</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-Pull-Request-보내기"><a href="#7-Pull-Request-보내기" class="headerlink" title="(7) Pull Request 보내기"></a>(7) Pull Request 보내기</h3><p>Contributer의 Fork 원격 저장소에 ‘Compare &amp; pull request’ 버튼이 활성화된다. 이 버튼을 클릭하자<br><img src="3.png"><br>코멘트를 남기고 Create pull request 버튼을 클릭하면 Pull Request가 전송된다.<br><img src="4.png"></p>
+<h3 id="8-Pull-Request-승인-거절하기"><a href="#8-Pull-Request-승인-거절하기" class="headerlink" title="(8) Pull Request 승인 / 거절하기"></a>(8) Pull Request 승인 / 거절하기</h3><p>Owner는 Pull Request를 확인할 수 있다.<br><img src="5.png"><br>원본 저장소 주인 역시 코멘트를 남길 수 있다. 보통 이 단계에서 <code>Code Review</code>를 진행한다.<br><img src="6.png"><br>문제가 없으면 <code>Merge pull request</code>를 눌러 병합한다. 물론 문제가 있다면 <code>Reject</code>할 수도 있다.<br><img src="7.png"><br><img src="8.png"></p>
+<h3 id="9-Fork한-원격-저장소-업데이트"><a href="#9-Fork한-원격-저장소-업데이트" class="headerlink" title="(9) Fork한 원격 저장소 업데이트"></a>(9) Fork한 원격 저장소 업데이트</h3><p>Owner가 Merge를 승인하면 Contribute도 Fork한 저장소를 업데이트할 수 있다. <code>Fetch upstream</code>을 누른 후 <code>Fetch and merge</code>버튼을 클릭하면 된다.<br><img src="9.png"><br>Fork한 저장소가 업데이트된 것을 확인할 수 있다.<br><img src="10.png"></p>
+<h3 id="10-로컬-저장소-업데이트"><a href="#10-로컬-저장소-업데이트" class="headerlink" title="(10) 로컬 저장소 업데이트"></a>(10) 로컬 저장소 업데이트</h3><p>이제 원격 저장소를 pull하여 로컬 저장소의 main branch를 업데이트한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// &#x27;main&#x27; branch로 이동</span><br><span class="line">$ git checkout main</span><br><span class="line"></span><br><span class="line">// &#x27;main&#x27; brnach 업데이트</span><br><span class="line">$ git pull upstream main</span><br></pre></td></tr></table></figure>
+<p>작업하던 <code>develop</code> branch는 삭제한다.<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> $ git branch</span><br><span class="line">* main</span><br><span class="line">develop</span><br><span class="line"></span><br><span class="line">$ git branch -d develop</span><br></pre></td></tr></table></figure><br>로컬 저장소의 ‘main’ branch를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">README.md a.txt     b.txt     c.txt</span><br></pre></td></tr></table></figure>
+<p>로컬 저장소의 ‘main’ branch에도 변경이 반영되어있다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/07/12_tools/03_git/20200607_git_pull_request/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/"
                             aria-label=": [Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기"
                         >
@@ -483,6 +573,120 @@
                         <p>
                             <a
                                 href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/06/06/12_tools/03_git/20200606_git_clone_fetch_pull/"
+                            aria-label=": [Git, GitHub] (6) git clone, fetch, pull"
+                        >
+                            [Git, GitHub] (6) git clone, fetch, pull
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-06T00:00:00+09:00">
+	
+		    2020/06/06
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="git-clone"><a href="#git-clone" class="headerlink" title="git clone"></a>git clone</h1><p><code>git clone</code> 명령어를 사용하면 원격 저장소에서 관리하는 프로젝트를 로컬 PC에 동일하게 복사할 수 있다.</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/square/retrofit"><code>Retrofit</code></a> 안드로이드에서 HTTP 통신을 할 때 사용하는 라이브러리다. <code>git clone</code>명령어를 사용하여 이 라이브러리를 로컬 PC에 복사해보자.</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/square/retrofit">https://github.com/square/retrofit</a>에 접속한 후 <code>Code</code>버튼을 눌러 원격 저장소의 URL을 복사한다.<br><img src="1.png"><br>로컬 PC에서 <code>myRetrofit</code> 디렉토리를 생성한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir myRetrofit</span><br><span class="line">$ cd myRetroft</span><br></pre></td></tr></table></figure>
+<p><code>git clone</code>은 다음과 같이 사용한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git clone &lt;repository_url&gt; &lt;local_directory&gt;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 작성하면 Retrofit을 현재 위치(<code>.</code>)에 다운받는다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git clone https://github.com/square/retrofit.git .</span><br></pre></td></tr></table></figure>
+<p><code>ls</code>명령어를 실행하면 원격 저장소의 모든 파일이 다운된 것을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">BUG-BOUNTY.md       README.md           deploy_website.sh   gradlew             retrofit-adapters   samples</span><br><span class="line">CHANGELOG.md        RELEASING.md        gradle              gradlew.bat         retrofit-converters settings.gradle</span><br><span class="line">LICENSE.txt         build.gradle        gradle.properties   retrofit            retrofit-mock       website</span><br></pre></td></tr></table></figure>
+
+<h1 id="git-fetch"><a href="#git-fetch" class="headerlink" title="git fetch"></a>git fetch</h1><p>프로젝트를 생성하고 <code>a.txt</code>를 추가하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 디렉토리 생성</span><br><span class="line">$ mkdir myProject</span><br><span class="line"></span><br><span class="line">// 디렉토리로 이동</span><br><span class="line">$ cd myProject</span><br><span class="line"></span><br><span class="line">// 초기화</span><br><span class="line">$ git init</span><br><span class="line"></span><br><span class="line">// 파일 생성</span><br><span class="line">$ vim a.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a</span><br></pre></td></tr></table></figure>
+<p>Add, Commit을 한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add -A</span><br><span class="line">$ git commit</span><br><span class="line">Create a.txt</span><br></pre></td></tr></table></figure>
+<p>원격 저장소와의 연결을 만들고 Push 한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 원격 저장소와의 연결 생성</span><br><span class="line">$ git remote add origin https://github.com/yologger/myProject.git</span><br><span class="line"></span><br><span class="line">// 원격 저장소에 master 브랜치 Push</span><br><span class="line">$ git push origin master</span><br></pre></td></tr></table></figure>
+<p>원격 저장소를 확인해보자.<br><img src="2.png"><br>로그도 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 8f36173735313143c654a95ca80b22f00fe490c9 (HEAD -&gt; master, origin/master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:04:57 2021 +0900</span><br><span class="line"></span><br><span class="line">    Create a.txt</span><br></pre></td></tr></table></figure>
+<p>이제 원격 저장소에서 <code>b.txt</code>를 추가하자.<br><img src="3.png"><br>다시 터미널로 돌아와서 <code>a.txt</code>를 수정하고 Commit 하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ text a.txt</span><br><span class="line">a</span><br><span class="line">aa // 추가된 부분</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git add -A</span><br><span class="line">$ git commit -m &quot;Update a.txt&quot;</span><br></pre></td></tr></table></figure>
+<p>상태를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 987ae40f10f4e2794115e25b4db35526a214850a (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:14:39 2021 +0900</span><br><span class="line"></span><br><span class="line">    Update a.txt</span><br><span class="line"></span><br><span class="line">commit 8f36173735313143c654a95ca80b22f00fe490c9 (origin/master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:04:57 2021 +0900</span><br><span class="line"></span><br><span class="line">    Create a.txt</span><br></pre></td></tr></table></figure>
+<p>이제 다시 Commit을 하면 다음과 같은 에러가 발생한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ git push origin master</span><br><span class="line">To https://github.com/yologger/myProject.git</span><br><span class="line"> ! [rejected]        master -&gt; master (fetch first)</span><br><span class="line">error: 레퍼런스를 &#x27;https://github.com/yologger/myProject.git&#x27;에 푸시하는데 실패했습니다.</span><br><span class="line">힌트: 리모트에 로컬에 없는 사항이 들어 있으므로 업데이트가</span><br><span class="line">힌트: 거부되었습니다. 이 상황은 보통 또 다른 저장소에서 같은</span><br><span class="line">힌트: 저장소로 푸시할 때 발생합니다.  푸시하기 전에</span><br><span class="line">힌트: (&#x27;git pull ...&#x27; 등 명령으로) 리모트 변경 사항을 먼저</span><br><span class="line">힌트: 포함해야 합니다.</span><br><span class="line">힌트: 자세한 정보는 &#x27;git push --help&#x27;의 &quot;Note about fast-forwards&#x27; 부분을</span><br><span class="line">힌트: 참고하십시오.</span><br></pre></td></tr></table></figure>
+<p>이는 Remote Repository와 Local Repository의 스냅샷이 다르기 때문이다.<br><img src="4.png"><br>따라서 Remote Resository의 변경사항을 Local Repository에 적용한 후, 다시 Push를 해야한다. 이때 <code>git fetch</code>명령어를 사용할 수 있다. <code>git fetch</code>는 다음과 같이 실행한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// git fetch &lt;connection&gt;</span><br><span class="line">$ git fetch origin</span><br><span class="line">remote: Enumerating objects: 4, done.</span><br><span class="line">remote: Counting objects: 100% (4/4), done.</span><br><span class="line">remote: Compressing objects: 100% (2/2), done.</span><br><span class="line">remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0</span><br><span class="line">오브젝트 묶음 푸는 중: 100% (3/3), 633 bytes | 316.00 KiB/s, 완료.</span><br><span class="line">https://github.com/yologger/myProject URL에서</span><br><span class="line">   8f36173..ca89a89  master     -&gt; origin/master</span><br></pre></td></tr></table></figure>
+<p>출력 결과 하단을 보면  <code>origin/master</code> branch를 확인할 수 있다. 이 branch와 로컬 리포지토리의 <code>master</code> branch를 비교하면 어떤 부분이 다른지 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ git diff ...origin/master</span><br><span class="line">diff --git a/b.txt b/b.txt</span><br><span class="line">new file mode 100644</span><br><span class="line">index 0000000..6178079</span><br><span class="line">--- /dev/null</span><br><span class="line">+++ b/b.txt</span><br><span class="line">@@ -0,0 +1 @@</span><br><span class="line">+b</span><br></pre></td></tr></table></figure>
+<p>이 branch로 checkout하면 원격 저장소에 어떠한 변화가 있는지 로그를 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout origin/master</span><br><span class="line">$ git log</span><br><span class="line">commit ca89a897d5eb11fab800050668c566fe369fa8c8 (HEAD, origin/master)</span><br><span class="line">Author: YOLOGGER &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:12:03 2021 +0900</span><br><span class="line"></span><br><span class="line">    Create b.txt</span><br><span class="line"></span><br><span class="line">commit 8f36173735313143c654a95ca80b22f00fe490c9</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:04:57 2021 +0900</span><br><span class="line"></span><br><span class="line">    Create a.txt</span><br></pre></td></tr></table></figure>
+<p>다시 <code>master</code> branch로 돌아가서 <code>origin/master</code>를 병합하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br><span class="line"></span><br><span class="line">$ git merge origin/master </span><br><span class="line">Merge made by the &#x27;recursive&#x27; strategy.</span><br><span class="line"> b.txt | 1 +</span><br><span class="line"> 1 file changed, 1 insertion(+)</span><br><span class="line"> create mode 100644 b.txt</span><br></pre></td></tr></table></figure>
+<p><code>ls</code>명령어를 입력하면 원격 저장소에서 추가한 <code>b.txt</code>가 로컬 저장소에 Merge된 것을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">a.txt b.txt</span><br></pre></td></tr></table></figure>
+<p>이제 다시 Push를 시도해보자. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ git push origin master</span><br><span class="line">오브젝트 나열하는 중: 9, 완료.</span><br><span class="line">오브젝트 개수 세는 중: 100% (8/8), 완료.</span><br><span class="line">Delta compression using up to 8 threads</span><br><span class="line">오브젝트 압축하는 중: 100% (3/3), 완료.</span><br><span class="line">오브젝트 쓰는 중: 100% (5/5), 517 bytes | 517.00 KiB/s, 완료.</span><br><span class="line">Total 5 (delta 0), reused 0 (delta 0), pack-reused 0</span><br><span class="line">To https://github.com/yologger/myProject.git</span><br><span class="line">   ca89a89..3671b58  master -&gt; master</span><br></pre></td></tr></table></figure>
+<p>Push에 성공하였다.</p>
+<h1 id="git-pull"><a href="#git-pull" class="headerlink" title="git pull"></a>git pull</h1><p><code>git pull</code>은 <code>git fetch</code>와 <code>git merge</code>를 합친 것이다.</p>
+<p>원격 저장소에 <code>c.txt</code>를 추가해보자.<br><img src="5.png"></p>
+<p>이제 터미널에서 다음과 같이 <code>git pull</code>을 호출한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// git pull &lt;connection_name&gt; &lt;branch_name&gt;</span><br><span class="line">$ git pull origin master</span><br></pre></td></tr></table></figure>
+<p>로그를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">commit 84b2a4fdccd369d9dd49756ed0859c51acdb642f (HEAD -&gt; master, origin/master)</span><br><span class="line">Author: YOLOGGER &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:36:31 2021 +0900</span><br><span class="line"></span><br><span class="line">    Create c.txt</span><br><span class="line"></span><br><span class="line">commit 3671b5831a882ee6fbea9e017a94e85f9d171a8e</span><br><span class="line">Merge: 987ae40 ca89a89</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:31:24 2021 +0900</span><br><span class="line"></span><br><span class="line">    Merge remote-tracking branch &#x27;origin/master&#x27;</span><br><span class="line"></span><br><span class="line">commit 987ae40f10f4e2794115e25b4db35526a214850a</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:14:39 2021 +0900</span><br><span class="line"></span><br><span class="line">    Update a.txt</span><br><span class="line"></span><br><span class="line">commit ca89a897d5eb11fab800050668c566fe369fa8c8</span><br><span class="line">Author: YOLOGGER &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:12:03 2021 +0900</span><br><span class="line"></span><br><span class="line">    Create b.txt</span><br><span class="line"></span><br><span class="line">commit 8f36173735313143c654a95ca80b22f00fe490c9</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Dec 21 04:04:57 2021 +0900</span><br><span class="line"></span><br><span class="line">    Create a.txt</span><br></pre></td></tr></table></figure>
+<p><code>ls</code>명령어를 실행해보자. 원격 저장소에서 추가한 <code>c.txt</code>가 로컬 저장소에 추가되었다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">a.txt b.txt c.txt</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="GitHub을-통한-협업-과정"><a href="#GitHub을-통한-협업-과정" class="headerlink" title="GitHub을 통한 협업 과정"></a>GitHub을 통한 협업 과정</h1><p><code>GitHub</code>을 통한 일반적인 협업 과정은 다음과 같다.</p>
+<ol>
+<li>보통 프로젝트에 처음 투입되는 개발자는 <code>git clone</code>명령어를 사용하여 로컬 PC에 프로젝트를 구성한다.</li>
+<li>A 개발자는 작업을 마치고 <code>git push</code>를 통해 변경 내용을 원격 저장소에 반영시킨다.</li>
+<li>B 개발자는 작업을 시작하기 전, 다른 개발자가 원격 저장소에 반영한 변경 내용을 본인의 로컬 PC에 반영해야 한다. 이 때 <code>git pull</code> 명령어를 사용한다.</li>
+</ol>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/06/12_tools/03_git/20200606_git_clone_fetch_pull/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -578,6 +782,102 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/06/05/12_tools/03_git/20200605_git_tag/"
+                            aria-label=": [Git, GitHub] (5) git tag"
+                        >
+                            [Git, GitHub] (5) git tag
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-05T00:00:00+09:00">
+	
+		    2020/06/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Tag"><a href="#Tag" class="headerlink" title="Tag"></a>Tag</h1><p><code>Tag</code>를 사용하면 특정 Commit에 버전을 부여할 수 있다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>프로젝트 초기 상태는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 3acd7d616ddc0e7243e37b03702434b714501f96 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:53 2021 +0900</span><br><span class="line"></span><br><span class="line">    2nd commit</span><br><span class="line"></span><br><span class="line">commit 62186ec237d90bc4de2fb0fc93d0d943f7ed1981</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:21 2021 +0900</span><br><span class="line"></span><br><span class="line">    1st commit</span><br></pre></td></tr></table></figure>
+<p>ID가 <code>3acd7d616ddc0e7243e37b03702434b714501f96</code>인 Commit에 Tag를 추가해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git tag 0.0.1 3acd7d616ddc0e7243e37b03702434b714501f96</span><br></pre></td></tr></table></figure>
+<p>다시 한번 로그를 확인해보자. Tag가 추가된 것을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 3acd7d616ddc0e7243e37b03702434b714501f96 (HEAD -&gt; master, tag: 0.0.1)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:53 2021 +0900</span><br><span class="line"></span><br><span class="line">    2nd commit</span><br><span class="line"></span><br><span class="line">commit 62186ec237d90bc4de2fb0fc93d0d943f7ed1981</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:21 2021 +0900</span><br><span class="line"></span><br><span class="line">    1st commit</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>추가된 모든 태그를 조회할 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git tag</span><br><span class="line">0.0.1</span><br></pre></td></tr></table></figure>
+<p>새롭게 Commit을 해도 Tag는 그대로 남아있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git commit -m &quot;3rd commit&quot;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 034de53ee5df7e265fbe8c65458b17b501c1da01 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:24:37 2021 +0900</span><br><span class="line"></span><br><span class="line">    3rd commit</span><br><span class="line"></span><br><span class="line">commit 3acd7d616ddc0e7243e37b03702434b714501f96 (tag: 0.0.1)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:53 2021 +0900</span><br><span class="line"></span><br><span class="line">    2nd commit</span><br><span class="line"></span><br><span class="line">commit 62186ec237d90bc4de2fb0fc93d0d943f7ed1981</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:21 2021 +0900</span><br><span class="line"></span><br><span class="line">    1st commit</span><br></pre></td></tr></table></figure>
+<p>Tag를 사용하여 특정 버전으로 이동할 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout 0.0.1</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 3acd7d616ddc0e7243e37b03702434b714501f96 (HEAD, tag: 0.0.1)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:53 2021 +0900</span><br><span class="line"></span><br><span class="line">    2nd commit</span><br><span class="line"></span><br><span class="line">commit 62186ec237d90bc4de2fb0fc93d0d943f7ed1981</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:21 2021 +0900</span><br><span class="line"></span><br><span class="line">    1st commit</span><br></pre></td></tr></table></figure>
+<p>다시 최신 Commit으로 이동해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 034de53ee5df7e265fbe8c65458b17b501c1da01 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:24:37 2021 +0900</span><br><span class="line"></span><br><span class="line">    3rd commit</span><br><span class="line"></span><br><span class="line">commit 3acd7d616ddc0e7243e37b03702434b714501f96 (tag: 0.0.1)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:53 2021 +0900</span><br><span class="line"></span><br><span class="line">    2nd commit</span><br><span class="line"></span><br><span class="line">commit 62186ec237d90bc4de2fb0fc93d0d943f7ed1981</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:21 2021 +0900</span><br><span class="line"></span><br><span class="line">    1st commit</span><br></pre></td></tr></table></figure>
+
+<h1 id="Tag에-추가-정보-입력하기"><a href="#Tag에-추가-정보-입력하기" class="headerlink" title="Tag에 추가 정보 입력하기"></a>Tag에 추가 정보 입력하기</h1><p>Tag를 추가할 때 추가 정보를 입력할 수도 있다.</p>
+<p>초기 상태는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 5f7df8c2b982b094ddca62183fc0b02c1ce497e4 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:30:12 2021 +0900</span><br><span class="line"></span><br><span class="line">    4th commit</span><br><span class="line"></span><br><span class="line">commit 034de53ee5df7e265fbe8c65458b17b501c1da01</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:24:37 2021 +0900</span><br><span class="line"></span><br><span class="line">    3rd commit</span><br><span class="line"></span><br><span class="line">commit 3acd7d616ddc0e7243e37b03702434b714501f96 (tag: 0.0.1)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:53 2021 +0900</span><br><span class="line"></span><br><span class="line">    2nd commit</span><br><span class="line"></span><br><span class="line">commit 62186ec237d90bc4de2fb0fc93d0d943f7ed1981</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:21 2021 +0900</span><br><span class="line"></span><br><span class="line">    1st commit</span><br></pre></td></tr></table></figure>
+<p>추가 정보는 다음과 같은 형태로 입력한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git tag -a &lt;TAG_NAME&gt; -m &quot;MESSAGE&quot; &lt;COMMIT_ID&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git tag -a 0.0.2 -m &quot;Fix bug&quot; 5f7df8c2b982b094ddca62183fc0b02c1ce497e4</span><br></pre></td></tr></table></figure>
+<p>로그를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 5f7df8c2b982b094ddca62183fc0b02c1ce497e4 (HEAD -&gt; master, tag: 0.0.2)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:30:12 2021 +0900</span><br><span class="line"></span><br><span class="line">    4th commit</span><br><span class="line"></span><br><span class="line">commit 034de53ee5df7e265fbe8c65458b17b501c1da01</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:24:37 2021 +0900</span><br><span class="line"></span><br><span class="line">    3rd commit3rd commit3rd commit</span><br><span class="line"></span><br><span class="line">commit 3acd7d616ddc0e7243e37b03702434b714501f96 (tag: 0.0.1)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:53 2021 +0900</span><br><span class="line"></span><br><span class="line">    2nd commit</span><br><span class="line"></span><br><span class="line">commit 62186ec237d90bc4de2fb0fc93d0d943f7ed1981</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 22:20:21 2021 +0900</span><br><span class="line"></span><br><span class="line">    1st commit</span><br></pre></td></tr></table></figure>
+<p>모든 Tag를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git tag</span><br><span class="line">0.0.1</span><br><span class="line">0.0.2 </span><br></pre></td></tr></table></figure>
+<p>추가 정보는 다음과 같이 확인한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ git tag -v 0.0.2</span><br><span class="line">object 5f7df8c2b982b094ddca62183fc0b02c1ce497e4</span><br><span class="line">type commit</span><br><span class="line">tag 0.0.2</span><br><span class="line">tagger yologger &lt;yologger1013@gmail.com&gt; 1633440702 +0900</span><br><span class="line"></span><br><span class="line">Fix bug</span><br><span class="line">error: no signature found</span><br></pre></td></tr></table></figure>
+
+<h1 id="Tag-삭제"><a href="#Tag-삭제" class="headerlink" title="Tag 삭제"></a>Tag 삭제</h1><p><code>-d</code>옵션을 사용하면 Tag를 삭제할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// 모든 태그 조회</span><br><span class="line">$ git tag</span><br><span class="line">0.0.1</span><br><span class="line">0.0.2</span><br><span class="line"></span><br><span class="line">// 태그 삭제</span><br><span class="line">$ git tag -d 0.0.2</span><br></pre></td></tr></table></figure>
+
+<h1 id="GitHub에-Tag-업로드-하기"><a href="#GitHub에-Tag-업로드-하기" class="headerlink" title="GitHub에 Tag 업로드 하기"></a>GitHub에 Tag 업로드 하기</h1><p>Branch를 GitHub에 Push해도 Commit만 올라갈 뿐 Tag는 올라가지 않는다.<br><img src="1.png"><br>Tag는 다음과 같이 업로드 할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git push --tags</span><br></pre></td></tr></table></figure>
+<p><img src="2.png"><br><code>Tags 탭</code>을 클릭하면 자세한 내용을 확인할 수 있다.<br><img src="3.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/05/12_tools/03_git/20200605_git_tag/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/06/04/08_android/11_notification/200604_notification_group/"
                             aria-label=": [Android] 알림(Notification) - (4) 알림 메시지 묶기"
                         >
@@ -620,6 +920,126 @@
                         <p>
                             <a
                                 href="/ko/2020/06/04/08_android/11_notification/200604_notification_group/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/06/04/12_tools/03_git/20200604_github_remote_push_gitignore/"
+                            aria-label=": [Git, GitHub] (4) GitHub란? - git remote, git push, gitignore 파일"
+                        >
+                            [Git, GitHub] (4) GitHub란? - git remote, git push, gitignore 파일
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-04T00:00:00+09:00">
+	
+		    2020/06/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="목차"><a href="#목차" class="headerlink" title="목차"></a>목차</h1><ul>
+<li><a href="#GitHub">GitHub</a></li>
+<li><a href="#GitHub%EC%97%90-%EC%9B%90%EA%B2%A9-%EC%A0%80%EC%9E%A5%EC%86%8C-%EC%83%9D%EC%84%B1%ED%95%98%EA%B8%B0">GitHub에 원격 저장소 생성하기</a></li>
+<li><a href="#git-remote">git remote</a></li>
+<li><a href="#git-push">git push</a></li>
+<li><a href="#gitignore">gitignore 파일</a></li>
+</ul>
+<hr>
+<h1 id="GitHub"><a href="#GitHub" class="headerlink" title="GitHub"></a>GitHub</h1><p><code>GitHub</code>는 원격 분산 버전관리 시스템이다. <code>Git</code>과는 다음과 같은 차이가 있다.</p>
+<table>
+<thead>
+<tr>
+<th>Git</th>
+<th>GitHub</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>로컬 저장소에 버전을 관리한다.</td>
+<td>원격 저장소에서 버전을 관리한다.</td>
+</tr>
+<tr>
+<td></td>
+<td>여러 개발자가 함께 협업할 수 있다.</td>
+</tr>
+</tbody></table>
+<p>GitHub에서 버전을 관리하는 과정은 다음과 같다.<br><img src="1.png"></p>
+<h1 id="GitHub에-원격-저장소-생성하기"><a href="#GitHub에-원격-저장소-생성하기" class="headerlink" title="GitHub에 원격 저장소 생성하기"></a>GitHub에 원격 저장소 생성하기</h1><p>GitHub에 소스 코드를 업로드하려면 <code>원격 저장소(Remote Repository)</code>를 생성해야한다. <a target="_blank" rel="noopener" href="https://github.com/">https://github.com/</a>에 접속하여 <code>New</code> 버튼을 클릭하여 원격 저장소를 생성할 수 있다.<br><img src="2.png"><br>원격 저장소 이름, 설명, 공개 범위를 입력하고 <code>Create repository</code>을 누르면 원격 저장소가 생성된다.<br><img src="3.png"><br>원격 저장소가 생성되면 저장소 URL이 생성된다. 원격 저장소에 소스 코드를 업로드할 때 이 URL을 사용한다.<br><img src="4.png"></p>
+<h1 id="git-remote"><a href="#git-remote" class="headerlink" title="git remote"></a>git remote</h1><p><code>git remote</code>명령어를 사용하면 로컬 저장소와 원격 저장소 사이의 연결을 생성할 수 있다.</p>
+<p>현재 로컬 저장소의 상태는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 87e3f71ded76107c3c10abfe176b4ba9064195a9 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 18:31:38 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add b.txt</span><br><span class="line"></span><br><span class="line">commit 41f83d2e830455d23299b86856a3ecf6195d46d4</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 16:55:06 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add a.txt</span><br></pre></td></tr></table></figure>
+<p>원격 저장소에 파일을 업로드하려면 먼저 <code>READMD.md</code>파일을 생성해야한다. 이 파일에는 프로젝트의 설명을 작성한다. <code>READMD.md</code> 파일을 생성하고 적절하게 작성한 후 Commit 하자.</p>
+<figure class="highlight plaintext"><figcaption><span>README.md</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">This is README.md</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add -A</span><br><span class="line">$ git commit</span><br><span class="line">Add README.md</span><br></pre></td></tr></table></figure>
+<p>현재 상태를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit a09ef71ded76107c3c10abfe176b4ba9064195a9 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 18:37:38 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add READMD.md</span><br><span class="line"></span><br><span class="line">commit 87e3f71ded76107c3c10abfe176b4ba9064195a9</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 18:31:38 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add b.txt</span><br><span class="line"></span><br><span class="line">commit 41f83d2e830455d23299b86856a3ecf6195d46d4</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 16:55:06 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add a.txt</span><br></pre></td></tr></table></figure>
+
+<p>이제 URL을 통해 원격 저장소와의 연결을 만들어야한다. 이때 <code>git remote</code> 명령어를 사용한다. 연결의 이름은 특별한 경우가 아니면 <code>origin</code>을 사용한다. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// git remote add &lt;connection_name&gt; &lt;url&gt;</span><br><span class="line">$ git remote add origin https://github.com/yologger/myProject.git</span><br></pre></td></tr></table></figure>
+<p>연결은 다음과 같이 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git remote</span><br><span class="line">origin</span><br></pre></td></tr></table></figure>
+<p>연결 이름을 변경할 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git remote rename &lt;old_name&gt; &lt;new_name&gt;</span><br></pre></td></tr></table></figure>
+<p>연결을 삭제할 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git remote remove &lt;connection_name&gt;</span><br></pre></td></tr></table></figure>
+
+<h1 id="git-push"><a href="#git-push" class="headerlink" title="git push"></a>git push</h1><p>연결이 생성되면 파일을 업로드할 수 있다. 먼저 현재 branch를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git branch</span><br><span class="line">* master</span><br></pre></td></tr></table></figure>
+<p><code>git push</code>명령어로 <code>master</code> branch를 업로드하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// git push -u &lt;connection_name&gt; &lt;branch&gt;</span><br><span class="line">git push -u origin master</span><br></pre></td></tr></table></figure>
+
+<p>이제 <a target="_blank" rel="noopener" href="https://github.com/">https://github.com/</a>에 접속하여 해당 원격 저장소에 접속해보자. 파일이 업로드된 것을 확인할 수 있다.<br><img src="5.png"></p>
+<p>콘솔에서 로그를 확인해보자. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit a09ef71ded76107c3c10abfe176b4ba9064195a9 (HEAD -&gt; master, origin/master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 18:37:38 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add READMD.md</span><br><span class="line"></span><br><span class="line">commit 87e3f71ded76107c3c10abfe176b4ba9064195a9</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 18:31:38 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add b.txt</span><br><span class="line"></span><br><span class="line">commit 41f83d2e830455d23299b86856a3ecf6195d46d4</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 16:55:06 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add a.txt</span><br></pre></td></tr></table></figure>
+<p>마지막 Commit의 ID 뒷 부분에 <code>origin/master</code>가 추가되었다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">commit a09ef71ded76107c3c10abfe176b4ba9064195a9 (HEAD -&gt; master, origin/master)</span><br></pre></td></tr></table></figure>
+<p>이것은 해당 Commit이 <code>origin</code> 연결로 push 되었음을 의미한다.</p>
+<h1 id="gitignore"><a href="#gitignore" class="headerlink" title="gitignore"></a>gitignore</h1><p><code>.gitignore</code>파일을 사용하면 원격 저장소에 Push할 때 특정 파일은 무시할 수 있다.</p>
+<p>아래 상태에서</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">a.txt  b.txt  c.txt  d.txt  e.txt</span><br></pre></td></tr></table></figure>
+<p><code>.gitignore</code>파일을 다음과 같이 작성하면</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ vim .gitignore</span><br><span class="line">a.txt</span><br><span class="line">b.txt</span><br></pre></td></tr></table></figure>
+<p>원격 저장소에 Push할 때 a.txt, b.txt가 업로드되지 않게 된다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/04/12_tools/03_git/20200604_github_remote_push_gitignore/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -708,23 +1128,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2020/06/02/08_android/11_notification/200602_notification_start_activity/"
-                            aria-label=": [Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                            href="/ko/2020/06/03/12_tools/03_git/20200603_git_checkout_branch_merge/"
+                            aria-label=": [Git, GitHub] (3) git checkout, branch, merge"
                         >
-                            [Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기
+                            [Git, GitHub] (3) git checkout, branch, merge
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2020-06-02T01:00:00+09:00">
+    <time datetime="2020-06-03T00:00:00+09:00">
 	
-		    2020/06/02
+		    2020/06/03
     	
     </time>
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
 
 
     
@@ -734,329 +1154,109 @@
             
                 <div class="postShorten-content">
                     <hr>
-<h1 id="알림에서-액티비티-시작시키기"><a href="#알림에서-액티비티-시작시키기" class="headerlink" title="알림에서 액티비티 시작시키기"></a>알림에서 액티비티 시작시키기</h1><p>현재는 알림 패널에서 알림을 클릭해도 아무 일이 일어나지 않습니다.<br><img src="1.png"><br>알림을 클릭했을 때 특정 액티비티가 실행되도록 할 수 있습니다.<br><img src="2.png"></p>
-<p>우선 실행할 액티비티를 포함하는 명시적 인텐트를 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> resultIntent = Intent(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, ResultActivity::<span class="keyword">class</span>.java)</span><br></pre></td></tr></table></figure>
-<p>그리고 이 인텐트를 <code>PendingIntent</code>에 포함시킵니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> REQUEST_CODE = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> pendingIntent = PendingIntent.getActivity(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, REQUEST_CODE, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)</span><br></pre></td></tr></table></figure>
-<p>마지막으로 <code>NotificationBuilder</code>클래스의 <code>setContentIntent()</code>메소드를 호출하면서 인자로 pendingIntent를 전달합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationBuilder.setContentIntent(pendingIntent)</span><br></pre></td></tr></table></figure>
-<p>전체 코드는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> REQUEST_CODE = <span class="number">1</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line">                <span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">                notificationChannel.description = channelDescription</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">                notificationManager.createNotificationChannel(notificationChannel)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                        .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                        .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> resultIntent = Intent(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, ResultActivity::<span class="keyword">class</span>.java)</span><br><span class="line">                <span class="keyword">val</span> pendingIntent = PendingIntent.getActivity(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, REQUEST_CODE, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)</span><br><span class="line">                notificationBuilder.setContentIntent(pendingIntent)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification = notificationBuilder.build()</span><br><span class="line"></span><br><span class="line">                notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 알림 패널에서 알림을 클릭하면 <code>ResultActivity</code>가 실행됩니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/06/02/08_android/11_notification/200602_notification_start_activity/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
-                            aria-label=": [Android] 알림(Notification) - (1) 로컬 알림"
-                        >
-                            [Android] 알림(Notification) - (1) 로컬 알림
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-06-01T01:00:00+09:00">
-	
-		    2020/06/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="알림"><a href="#알림" class="headerlink" title="알림"></a>알림</h1><p><code>알림(Notification)</code>은 앱이 실행되고 있지 않거나 백그라운드 상태일 때 메시지를 전달하는 방법을 제공합니다. 문자 앱이나 Gmail 앱이 대표적인 알림입니다.</p>
-<p>알림이 생성되면 화면 위쪽 <code>상태 바</code>에 아이콘으로 나타납니다.<br><img src="1.png"></p>
-<p>상태 바를 끌어내리면 <code>알림 패널</code>에서 알림의 자세한 내용을 확인할 수 있습니다.<br><img src="2.png"></p>
-<h1 id="알림의-종류"><a href="#알림의-종류" class="headerlink" title="알림의 종류"></a>알림의 종류</h1><p>알림에는 두 종류가 있습니다.</p>
-<ol>
-<li>로컬 알림(Local Notification)</li>
-<li>원격 알림(Remote Notification)</li>
-</ol>
-<h1 id="로컬-알림"><a href="#로컬-알림" class="headerlink" title="로컬 알림"></a>로컬 알림</h1><p><code>로컬 알림(Local Notification)</code>은 기기에서 실행 중인 앱에서 생성됩니다. 버튼을 누르면 로컬 알림을 전송하는 예제를 만들어봅시다.</p>
-<p><code>NotificationCompat.Builder</code>객체를 사용하면 알림을 생성할 수 있습니다. 우선 <code>NotificationBuilder</code>객체를 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p><code>setSmallIcon()</code>메소드를 사용하면 알림의 아이콘을 설정할 수 있습니다. <code>setContentTitle()</code>메소드를 사용하면 알림의 제목을 설정할 수 있으며, <code>setContentText()</code>메소드를 사용하면 알림의 본문을 설정할 수 있습니다.</p>
-<p>이제 <code>NotificationBuilder</code>객체의 <code>build()</code>메소드를 사용하여 알림을 생성합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notification = notificationBuilder.build()</span><br></pre></td></tr></table></figure>
-<p>알림을 보내기 위해서는 <code>NotificationManager</code>객체가 필요합니다. 시스템 서비스에서 다음과 같이 <code>NotificationManager</code>객체를 가져옵니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br></pre></td></tr></table></figure>
-<p>마지막으로 <code>NotificationManager</code>객체의 <code>notify()</code>메소드를 사용하여 알람을 전송합니다. 이때 메소드의 첫 번째 인자로 <code>알림의 ID</code>를 나타내는 임의의 정수값을 전달합니다. <code>알람 ID</code>는 안드로이드 시스템이 알림을 구분하는데 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationManager.notify(NOTIFICATION_ID, notification)</span><br></pre></td></tr></table></figure>
-<p>완성된 코드는 다음과 같습니다. 버튼을 누르면 알림을 전송합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">                    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">val</span> notification = notificationBuilder.build()         </span><br><span class="line"></span><br><span class="line">            <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line"></span><br><span class="line">            notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 앱을 실행하고 버튼을 눌러봅니다.<br><img src="3.png"><br>상단 상태 바에 알림 아이콘이 생성됩니다.<br><img src="4.png"><br>상태 바를 아래로 쓸어내리면 알림을 확인할 수 있습니다.<br><img src="5.png"></p>
-<h1 id="Oreo-버전에서의-알림"><a href="#Oreo-버전에서의-알림" class="headerlink" title="Oreo 버전에서의 알림"></a>Oreo 버전에서의 알림</h1><p><code>안드로이드 API 26 (Oreo)</code>부터는 알림을 사용하는 방식이 변경되었습니다. 따라서 버전에 따른 분기처리를 해야합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line">    <span class="comment">// 오레오 버전 이상</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 오레오 이전 버전</span></span><br><span class="line">    <span class="comment">// 위 코드와 동일</span></span><br><span class="line">    <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">            .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">            .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">            .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification = notificationBuilder.build()         </span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line"></span><br><span class="line">    notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Oreo</code> 이후 버전부터는 알림을 사용할 때 <code>Notification Channel</code>을 지정해야합니다.</p>
-<h1 id="Notification-Channel"><a href="#Notification-Channel" class="headerlink" title="Notification Channel"></a>Notification Channel</h1><p><code>Oreo</code> 이하 버전에서는 모든 알림이 하나의 <code>Notification Channel</code>로 관리됐습니다. 이 때문에 스마트폰에 알림이 쌓이길 원하지 않아 알림을 끄면, 모든 알림을 받을 수 없었습니다.</p>
-<p><code>Oreo</code> 버전부터는 알림을 여러 채널 별로 분리하여 사용자가 <code>확인하고 싶은 알림</code>과 <code>보고싶지 않은 알림</code>을 직접 설정할 수 있습니다. 각 채널별 수신 여부 외에도 잠금화면 표시 여부, 소리 설정, 진동 설정 등 여러 옵션을 세밀하게 설정할 수 있습니다.</p>
-<p>우선 다음과 같이 <code>NotificationChannel</code> 객체를 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line"><span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line"><span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line"><span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">notificationChannel.description = channelDescription</span><br></pre></td></tr></table></figure>
-<p><code>NotificationChannel</code>객체를 생성할 때 사용하는 <code>id</code>, <code>name</code>, <code>importance</code>, <code>description</code>은 다음과 같습니다.</p>
-<ul>
-<li>id: 각 채널을 구분할 수 있는 고유한 값</li>
-<li>name: 사용자에게 표시되는 채널의 이름</li>
-<li>description: 채널에 대한 설명, 특정 채널 설정 창에서 표시됩니다.</li>
-<li>importance: 알림에 대한 중요도, 이 값에 따라 알림이 다르게 똥작합니다. importance 값에 따른 동작은 <a target="_blank" rel="noopener" href="https://developer.android.com/training/notify-user/channels#importance">이 곳</a>에서 확인할 수 있습니다.</li>
-</ul>
-<p><code>Notification Manager</code>에 채널을 등록합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">notificationManager.createNotificationChannel(notificationChannel)</span><br></pre></td></tr></table></figure>
-<p><code>NotificationBuilder</code>를 생성합니다. 이 때 <code>Builer()</code>의 두 번째 인자로 채널의 <code>id</code>를 전달합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p><code>Notification</code>을 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notification = notificationBuilder.build()</span><br></pre></td></tr></table></figure>
-<p><code>NotificationManager</code>의 <code>notify()</code>메소드를 호출하여 알림을 전송합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationManager.notify(NOTIFICATION_ID, notification)</span><br></pre></td></tr></table></figure>
-<p>전체 코드는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line">                <span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">                notificationChannel.description = channelDescription</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">                notificationManager.createNotificationChannel(notificationChannel)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                        .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                        .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification = notificationBuilder.build()</span><br><span class="line"></span><br><span class="line">                notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 오레오 이전 버전</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 앱을 실행하고 버튼을 클릭합시다.<br><img src="6.png"><br>다음과 같이 화면에 알림 상자가 나오며, 상태바에 알림 아이콘이 생성됩니다.<br><img src="7.png"><br>상태 바를 아래로 쓸어내리면 자세한 내용을 확인할 수 있습니다.<br><img src="8.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/06/01/08_android/11_notification/200601_local_notification/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/05/15/08_android/09_google_admob/200515_google_admob/"
-                            aria-label=": [구글 애드몹(Google AdMob)] 앱에 광고 넣기"
-                        >
-                            [구글 애드몹(Google AdMob)] 앱에 광고 넣기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-05-15T01:00:00+09:00">
-	
-		    2020/05/15
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-AdMob/">Google AdMob</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="구글-애드몹"><a href="#구글-애드몹" class="headerlink" title="구글 애드몹"></a>구글 애드몹</h1><p><code>구글 애드몹(Google AdMob)</code>을 사용하면 안드로이드 어플리케이션에 광고를 추가할 수 있습니다.</p>
-<h2 id="1-회원가입-및-로그인"><a href="#1-회원가입-및-로그인" class="headerlink" title="(1) 회원가입 및 로그인"></a>(1) 회원가입 및 로그인</h2><p>우선 <a target="_blank" rel="noopener" href="https://admob.google.com/intl/ko/home/">구글 애드몹</a>에 접속합니다. 계정이 없으면 회원가입을 하고 로그인합니다.<br><img src="1-ko.png"></p>
-<h2 id="2-앱-추가"><a href="#2-앱-추가" class="headerlink" title="(2) 앱 추가"></a>(2) 앱 추가</h2><p>이제 첫 화면에서 <code>앱 &gt; 앱 추가</code>로 이동합니다.<br><img src="2-ko.png"></p>
-<p>우선 <code>플랫폼</code>은 <code>Android</code>로 선택합니다.<br><img src="3-ko.png"></p>
-<p>그리고 <code>지원되는 앱 스토어에 앱이 등록되어있나요?</code>는 <code>아니요</code>로 선택합니다. </p>
-<blockquote>
-<p>앱이 구글 플레이스토어에 출시되었고 애드몹을 통해 수익을 창출할 예정이라면, 플레이스토어의 앱과 애드몹을 연결해야합니다. 이번 포스트에서는 테스트용 광고를 게재할 것이므로 ‘아니요’로 선택합니다. (만약 이미 플레이스토어에 앱을 출시한 상태라면 ‘예’를 선택합니다.)</p>
-</blockquote>
-<p><img src="4-ko.png"></p>
-<p><code>앱 이름</code>을 입력하고 <code>앱 추가</code> 버튼을 클릭합니다.<br><img src="5-ko.png"><br>다음 화면이 나오면 정상적으로 앱이 추가된 것입니다.<br><img src="6-ko.png"><br>왼쪽 사이드 바 메뉴에서 <code>홈 &gt; 모든 앱 보기</code>로 이동합니다.<br><img src="7-ko.png"><br>이 곳에서 <code>앱 ID</code>를 확인할 수 있습니다. <code>앱 ID</code>는 <code>ca-app-pub-xxxxxxxxxxxx~yyyyyyyy</code>와 같은 형식입니다.<br><img src="8-ko.png"></p>
-<h2 id="3-광고-단위-추가"><a href="#3-광고-단위-추가" class="headerlink" title="(3) 광고 단위 추가"></a>(3) 광고 단위 추가</h2><p>앱 안에는 여러가지의 광고가 있을 수도 있습니다. 이 광고 각각을 <code>광고 단위</code>라고 합니다. 각 광고를 구분하기 위해 광고 단위에는 <code>광고 단위 ID</code>가 부여됩니다.</p>
-<p><code>앱 &gt; 모든 앱 보기</code>에서 생성된 앱을 클릭합니다.<br><img src="9-ko.png"><br><code>광고 단위 추가</code>를 클릭합니다.<br><img src="10-ko.png"><br>생성할 광고의 종류를 선택할 수 있습니다. <code>배너</code> 광고를 생성해보겠습니다.<br><img src="11-ko.png"><br><code>광고 단위 이름</code>을 입력합니다.<br><img src="12-ko.png"><br>다음과 같은 화면이 나오면 정상적으로 광고 단위가 생성된 것입니다.<br><img src="13-ko.png"><br>왼쪽 사이드 바 메뉴에서 <code>앱 &gt; 광고 단위</code>로 이동하면 생성된 <code>광고 단위</code>와 <code>광고 단위 ID</code>를 확인할 수 있습니다.<br><img src="14-ko.png"></p>
-<h2 id="4-의존성-추가"><a href="#4-의존성-추가" class="headerlink" title="(4) 의존성 추가"></a>(4) 의존성 추가</h2><p>모듈 수준의 <code>build.gradle</code> 파일에 의존성을 추가해줍니다.</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    implementation <span class="string">&#x27;com.google.android.gms:play-services-ads:19.1.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 <code>AndroidManifest.xml</code>을 수정합시다. <code>&lt;meta-data&gt;</code>태그를 사용하여 위에서 발급받은 <code>앱 ID</code>를 추가합니다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>AndroidManifest.xml</span><ul class="tabs"><li class="tab active">xml</li></ul></figcaption><div class="tabs-content"><figure class="highlight xml" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">"com.yologger.google_admob"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:allowBackup</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">"@mipmap/ic_launcher"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">"@string/app_name"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">"@mipmap/ic_launcher_round"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">"@style/Theme.Googleadmob"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:name</span>=<span class="string">"com.google.android.gms.ads.APPLICATION_ID"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:value</span>=<span class="string">"your_app_id"</span>/&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- .. --&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-<h2 id="5-코드-작성"><a href="#5-코드-작성" class="headerlink" title="(5) 코드 작성"></a>(5) 코드 작성</h2><p>가장 먼저 <code>MobileAds</code>클래스의 <code>initialize()</code>메소드를 통해 에드몹 관련 초기화를 해야합니다. <code>onCreate()</code> 메서드에서 이 메소드를 호출합시다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>MainActivity.kt</span><ul class="tabs"><li class="tab active">kotlin</li></ul></figcaption><div class="tabs-content"><figure class="highlight kotlin" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() {</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> {</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        MobileAds.initialize(<span class="keyword">this</span>, <span class="keyword">object</span> : OnInitializationCompleteListener {</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onInitializationComplete</span><span class="params">(p0: <span class="type">InitializationStatus</span>?)</span></span> {</span><br><span class="line">                <span class="comment">// 초기화가 완료되었을 때 수행할 코드</span></span><br><span class="line">            }</span><br><span class="line">        })</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-<p>이제 <code>MainActivity</code>의 레이아웃 파일에 <code>AdView</code>를 추가합니다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>activity_main.xml</span><ul class="tabs"><li class="tab active">xml</li></ul></figcaption><div class="tabs-content"><figure class="highlight xml" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">".MainActivity"</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">com.google.android.gms.ads.AdView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_adview"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:ads</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">ads:adSize</span>=<span class="string">"BANNER"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">ads:adUnitId</span>=<span class="string">"ca-app-pub-3940256099942544/6300978111"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">ads:layout_constraintStart_toStartOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">ads:layout_constraintEnd_toEndOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">"parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">com.google.android.gms.ads.AdView</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-<p><code>adSize</code>속성을 사용하면 광고의 크기를 설정할 수 있습니다. <code>adSize</code>속성 값은 다음과 같습니다.</p>
-<table>
-<thead>
-<tr>
-<th>크기</th>
-<th>설명</th>
-<th>사용 가능 여부</th>
-<th>AdSize 상수</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>320x50</td>
-<td>배너</td>
-<td>휴대전화 및 태블릿</td>
-<td>BANNER</td>
-</tr>
-<tr>
-<td>320x100</td>
-<td>대형 배너</td>
-<td>휴대전화 및 태블릿</td>
-<td>LAEGE_BANNER</td>
-</tr>
-<tr>
-<td>300x250</td>
-<td>IAB 중간 직사각형</td>
-<td>휴대전화 및 태블릿</td>
-<td>MEDIUM_RECTANGLE</td>
-</tr>
-<tr>
-<td>468x60</td>
-<td>IAB 전체 크기 배너</td>
-<td>태블릿</td>
-<td>FULL_BANNER</td>
-</tr>
-<tr>
-<td>728x90</td>
-<td>IAB 리더보드</td>
-<td>태블릿</td>
-<td>LEADERBOARD</td>
-</tr>
-</tbody></table>
-<p>물론 코드에서도 다음과 같이 배너 크기를 설정할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> adSize = AdSize(<span class="number">300</span>, <span class="number">50</span>)</span><br></pre></td></tr></table></figure>
-<p><code>adUnitId속성</code>에는 <code>광고 유닛 ID</code>를 입력하면 됩니다.</p>
-<div class="alert warning icon"><p>광고는 앱이 플레이스토어에 출시된 후에만 표시됩니다. 따라서 테스트 단계에서는 <u>테스트용 광고 유닛 ID</u>를 사용해야합니다. <u>테스트용 광고 유닛의 ID</u>는 <a target="_blank" rel="noopener" href="https://developers.google.com/admob/android/test-ads?hl=ko">이 곳</a>에서 확인할 수 있습니다.</p>
-</div>
-
-<p>이제 광고를 읽어와 <code>AdView</code> 영역에 표시합니다. 이때 <code>AdRequest</code>클래스와 <code>AdView</code>클래스의 <code>loadAd()</code>메소드를 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> adView: AdView</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        MobileAds.initialize(<span class="keyword">this</span>, <span class="keyword">object</span>: OnInitializationCompleteListener &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onInitializationComplete</span><span class="params">(p0: <span class="type">InitializationStatus</span>?)</span></span> &#123;</span><br><span class="line">                <span class="comment">// 초기화가 완료되었을 때 수행할 코드</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line">        adView = findViewById(R.id.activity_main_adview)</span><br><span class="line">        <span class="keyword">var</span> adRequest = AdRequest.Builder().build()</span><br><span class="line">        adView.loadAd(adRequest)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 앱을 실행하면 하단에서 광고 배너를 확인할 수 있습니다.<br><img src="15-ko.png"></p>
-<p><code>AdView</code> 객체에는 광고의 생명 주기 리스너도 붙여줄 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">adView.adListener = <span class="keyword">object</span>: AdListener() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onAdLoaded</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Code to be executed when an ad finishes loading.</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onAdFailedToLoad</span><span class="params">(adError : <span class="type">LoadAdError</span>)</span></span> &#123;</span><br><span class="line">        <span class="comment">// Code to be executed when an ad request fails.</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onAdOpened</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Code to be executed when an ad opens an overlay that</span></span><br><span class="line">        <span class="comment">// covers the screen.</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onAdClicked</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Code to be executed when the user clicks on an ad.</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onAdClosed</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Code to be executed when the user is about to return</span></span><br><span class="line">        <span class="comment">// to the app after tapping on an ad.</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/05/15/08_android/09_google_admob/200515_google_admob/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/"
-                            aria-label=": [구글 지도(Google Maps)] (7) 맵 컨트롤"
-                        >
-                            [구글 지도(Google Maps)] (7) 맵 컨트롤
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-05-07T01:00:00+09:00">
-	
-		    2020/05/07
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
-<ul>
-<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
-<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
-<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
-<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
-<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
-<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
-<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
+<h1 id="목차"><a href="#목차" class="headerlink" title="목차"></a>목차</h1><ul>
+<li><a href="#git-checkout">git checkout</a></li>
+<li><a href="#git-branch">git branch</a></li>
+<li><a href="#git-merge">git merge</a></li>
+<li><a href="#Conflict">Conflict</a></li>
 </ul>
 <hr>
-<h1 id="맵-컨트롤"><a href="#맵-컨트롤" class="headerlink" title="맵 컨트롤"></a>맵 컨트롤</h1><p>우리는 이전 포스트에서 <code>줌 인 버튼</code>과 <code>줌 아웃 버튼</code>, <code>내 위치 버튼</code>을 직접 만들고 구현했습니다. 구글 맵 API는 이러한 기능을 위한 여러 <code>컨트롤</code>을 자체적으로 제공합니다. <code>UiSetting</code>클래스의 <code>setZoomControlsEnable(true)</code>메소드를 사용하면 됩니다.</p>
-<p>우선 <code>GoogleMap</code>객체에서 <code>UiSettings</code>객체를 가져옵니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> mapSettings: MapSettings? = mMap?.uiSettings</span><br></pre></td></tr></table></figure>
-<p>그리고 <code>setZoomControlsEnable(true)</code>메소드를 호출합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mapSettings?.setZoomControlsEnabled(<span class="literal">true</span>)</span><br></pre></td></tr></table></figure>
-<p>앱을 실행하면 <code>줌-인</code>과 <code>줌-아웃 버튼</code>, <code>현재 내 위치 버튼</code>이 나타납니다.<br><img src="1.png"></p>
-<p>내 위치 버튼에서 위치 정보를 사용하므로 권한 설정 코드가 필요합니다. 전체 코드는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> mMap: GoogleMap? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_PERMISSIONS = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        mMap = googleMap</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 초기 위치 설정</span></span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(-<span class="number">33.8688</span>, <span class="number">151.2093</span>)</span><br><span class="line">        mMap?.moveCamera(CameraUpdateFactory.newLatLng(sydney))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> hasFineLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_FINE_LOCATION)</span><br><span class="line">        <span class="keyword">val</span> hasCoarseLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_COARSE_LOCATION)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED &amp;&amp; hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">            ActivityCompat.requestPermissions(<span class="keyword">this</span>, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_CODE_PERMISSIONS)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// MapSettings 객체 가져오기</span></span><br><span class="line">            <span class="keyword">val</span> mapSettings: MapSettings? = mMap?.uiSettings</span><br><span class="line"></span><br><span class="line">            mapSettings?.run &#123;</span><br><span class="line">                <span class="comment">// 컨트롤 보여주기</span></span><br><span class="line">                setZoomControlsEnabled(<span class="literal">true</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onRequestPermissionsResult</span><span class="params">(requestCode: <span class="type">Int</span>, permissions: <span class="type">Array</span>&lt;<span class="type">out</span> <span class="type">String</span>&gt;, grantResults: <span class="type">IntArray</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onRequestPermissionsResult(requestCode, permissions, grantResults)</span><br><span class="line">        <span class="keyword">when</span> (requestCode) &#123;</span><br><span class="line">            REQUEST_CODE_PERMISSIONS -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span>(grantResults.isNotEmpty()) &#123;</span><br><span class="line">                    <span class="keyword">for</span> ((i, permission) <span class="keyword">in</span> permissions.withIndex()) &#123;</span><br><span class="line">                        isPermissionsGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;Permissions denied.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="git-checkout"><a href="#git-checkout" class="headerlink" title="git checkout"></a>git checkout</h1><p><code>git checkout</code>명령어를 사용하면 <code>Head</code>를 특정 Commit으로 옮길 수 있다.</p>
+<p>현재 <code>master</code> Branch의 Commit 내역은 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 44444 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br><span class="line"></span><br><span class="line">commit 33333</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:45 2021 +0900</span><br><span class="line"></span><br><span class="line">    3</span><br><span class="line"></span><br><span class="line">commit 22222</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:25 2021 +0900</span><br><span class="line"></span><br><span class="line">    2</span><br><span class="line"></span><br><span class="line">commit 11111</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:07 2021 +0900</span><br><span class="line"></span><br><span class="line">    1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Branch의 <u>가장 최근 Commit</u>에는 <u>Branch 이름</u>이 표시된다. 다음 결과는 Commit ID가 44444인 Commit이 가장 최근 Commit이라는 의미다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">commit 44444 (master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br></pre></td></tr></table></figure>
+<p>현재 작업 중인 Commit에는 <code>HEAD</code>포인터가 표시된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">commit 44444 (HEAD)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br></pre></td></tr></table></figure>
+<p>다음 결과물은 <code>master</code> Branch의 가장 최근 Commit의 ID가 44444이며, 현재 이 Commit에서 작업 중이라는 의미다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">commit 44444 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>git checkout</code>명령어와 <code>Commit ID</code>를 이용하여 특정 Commit으로 이동해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// Commit ID 22222로 Head 이동</span><br><span class="line">$ git checkout 22222</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 22222 (HEAD)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:25 2021 +0900</span><br><span class="line"></span><br><span class="line">    2</span><br><span class="line"></span><br><span class="line">commit 11111</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:07 2021 +0900</span><br><span class="line"></span><br><span class="line">    1</span><br></pre></td></tr></table></figure>
+<p>다시 최신 Commit으로 돌아갈 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 최신 commit으로 돌아가기</span><br><span class="line">$ git checkout master</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 44444 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br><span class="line"></span><br><span class="line">commit 33333</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:45 2021 +0900</span><br><span class="line"></span><br><span class="line">    3</span><br><span class="line"></span><br><span class="line">commit 22222</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:25 2021 +0900</span><br><span class="line"></span><br><span class="line">    2</span><br><span class="line"></span><br><span class="line">commit 11111</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:07 2021 +0900</span><br><span class="line"></span><br><span class="line">    1</span><br></pre></td></tr></table></figure>
+
+<p>N단계 이전으로 Head를 옮길 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 두 단계 이전으로 이동 </span><br><span class="line">$ git checkout HEAD~2</span><br><span class="line"></span><br><span class="line">$ git log</span><br><span class="line">commit 22222 (HEAD)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:25 2021 +0900</span><br><span class="line"></span><br><span class="line">    2</span><br><span class="line"></span><br><span class="line">commit 11111</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:07 2021 +0900</span><br><span class="line"></span><br><span class="line">    1</span><br></pre></td></tr></table></figure>
+
+<h1 id="git-branch"><a href="#git-branch" class="headerlink" title="git branch"></a>git branch</h1><p>Branch를 사용하면 작업 공간을 분기할 수 있다.</p>
+<p>우선 작업 공간의 초기 상태를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<p><code>git branch</code>명령어로 현재 작업 중인 Branch를 확인할 수 있다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 현재 Branch 확인</span><br><span class="line">$ git branch</span><br><span class="line">* master</span><br></pre></td></tr></table></figure>
+<p>새로운 Branch를 생성해보자</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 이름이 develop인 branch 생성</span><br><span class="line">$ git branch develop</span><br></pre></td></tr></table></figure>
+<p>두 개의 Branch(<code>develop</code>, <code>master</code>)가 존재하며, 현재 <code>master</code> Branch에서 작업하고 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 현재 작업 중인 branch 확인</span><br><span class="line">$ git branch</span><br><span class="line">  develop</span><br><span class="line">* master</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master, develop)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<p><code>git checkout</code>명령어를 이용하면 Branch를 이동할 수 있다. <code>develop</code> Branch로 이동해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// branch 이동</span><br><span class="line">$ git checkout develop</span><br><span class="line">&#x27;develop&#x27; 브랜치로 전환합니다</span><br><span class="line"></span><br><span class="line">$ git branch</span><br><span class="line">* develop</span><br><span class="line">  master</span><br></pre></td></tr></table></figure>
+<p><code>HEAD</code>가 <code>develop</code> Branch로 이동했다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; develop, master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<p><code>develop</code> Branch에서 Commit을 해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git branch</span><br><span class="line">* develop</span><br><span class="line">  master</span><br><span class="line"></span><br><span class="line">$ git commit</span><br><span class="line">Third commit</span><br></pre></td></tr></table></figure>
+<p>로그를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit f3ecc9c5c0aab5deb00955184b497d44f5175c48 (HEAD -&gt; develop)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:03:57 2021 +0900</span><br><span class="line"></span><br><span class="line">    Third commit</span><br><span class="line"></span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<p>다시 <code>master</code> Branch로 이동해서 Commit을 해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master </span><br><span class="line">&#x27;master&#x27; 브랜치로 전환합니다</span><br><span class="line"></span><br><span class="line">$ git log</span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git commit</span><br><span class="line">Third commit</span><br></pre></td></tr></table></figure>
+<p>이제 로그를 확인해보자. <code>git log</code>명령어에 <code>--branches</code>와 <code>--graph</code>옵션을 추가하면 시각적으로 Branch를 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ git log --branches --graph</span><br><span class="line">* commit 043b07324fb44cdbea4f6ef4539bcb52ad895a4f (HEAD -&gt; master)</span><br><span class="line">| Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| Date:   Tue Oct 5 20:10:27 2021 +0900</span><br><span class="line">| </span><br><span class="line">|     Third commit</span><br><span class="line">|   </span><br><span class="line">| * commit f3ecc9c5c0aab5deb00955184b497d44f5175c48 (develop)</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Tue Oct 5 20:03:57 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Third commit</span><br><span class="line">| </span><br><span class="line">* commit 90a9a879c5b45ae392a6b434a8cb75e823546374</span><br><span class="line">| Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line">| </span><br><span class="line">|     Second commit</span><br><span class="line">| </span><br><span class="line">* commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line">  </span><br><span class="line">      First commit</span><br></pre></td></tr></table></figure>
+
+<h1 id="git-merge"><a href="#git-merge" class="headerlink" title="git merge"></a>git merge</h1><p>두 개의 Branch를 합치는 작업을 <code>Merge</code>라 한다.</p>
+<p>예제를 살펴보자. 초기 상태는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 49ff46662071c4c4576aac8c0aca98f34058c919 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 22:38:48 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add a.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">function do()</span><br></pre></td></tr></table></figure>
+<p><code>develop</code> branch를 생성하고 <code>a.txt</code>를 다음과 같이 수정한 후 Commit하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ git branch develop</span><br><span class="line">$ git checkout develop </span><br><span class="line">$ vim a.txt</span><br><span class="line">function develop()  // 추가된 부분</span><br><span class="line">function do()</span><br><span class="line"></span><br><span class="line">$ git add -A</span><br><span class="line">$ git commit</span><br><span class="line">Update a.txt</span><br><span class="line">: Add function &#x27;develop()&#x27;</span><br></pre></td></tr></table></figure>
+<p><code>master</code> branch로 돌아가서 <code>a.txt</code>를 다르게 수정한 후 Commit하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br><span class="line">$ vim a.txt</span><br><span class="line">function do()</span><br><span class="line">function master()  // 추가된 부분</span><br><span class="line"></span><br><span class="line">$ git add -A</span><br><span class="line">$ git commit</span><br><span class="line">Update a.txt</span><br><span class="line">: Add function &#x27;master()&#x27;</span><br></pre></td></tr></table></figure>
+<p>로그를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ git log --branches --graph</span><br><span class="line">* commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa (HEAD -&gt; master)</span><br><span class="line">| Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| Date:   Mon Dec 20 22:46:14 2021 +0900</span><br><span class="line">| </span><br><span class="line">|     Update a.txt</span><br><span class="line">|     : Add function &#x27;master()&#x27;</span><br><span class="line">|   </span><br><span class="line">| * commit 6ea93029db54ab2d98a81924241395fd3ffd654f (develop)</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 22:44:06 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt</span><br><span class="line">|       : Add function &#x27;develop()&#x27;</span><br><span class="line">| </span><br><span class="line">* commit 49ff46662071c4c4576aac8c0aca98f34058c919</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 22:38:48 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<p>이제 <code>develop</code>을 <code>master</code>에 병합해보자. <code>master</code>로 이동한 후 다음 명령어를 입력한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// master로 이동</span><br><span class="line">$ git checkout master</span><br><span class="line"></span><br><span class="line">// develop을 master에 merge</span><br><span class="line">$ git merge develop</span><br></pre></td></tr></table></figure>
+<p>로그를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">*   commit 1ac36964707e4b6bcf594d864728ce1fc473b5cf (HEAD -&gt; master)</span><br><span class="line">|\  Merge: 9f265d2 6ea9302</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:48:47 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Merge branch &#x27;develop&#x27;</span><br><span class="line">| | </span><br><span class="line">| * commit 6ea93029db54ab2d98a81924241395fd3ffd654f (develop)</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:44:06 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Update a.txt</span><br><span class="line">| |     : Add function &#x27;develop()&#x27;</span><br><span class="line">| | </span><br><span class="line">* | commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 22:46:14 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt</span><br><span class="line">|       : Add function &#x27;master()&#x27;</span><br><span class="line">| </span><br><span class="line">* commit 49ff46662071c4c4576aac8c0aca98f34058c919</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 22:38:48 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<p><code>a.txt</code>를 확인해보자</p>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function branch()   // branch에서 추가</span><br><span class="line">function do()</span><br><span class="line">function master()   // master에서 추가</span><br></pre></td></tr></table></figure>
+<p>이제 다 사용한 <code>develop</code> branch를 삭제하자. <code>master</code> branch에서 다음 명령어를 실행한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// master로 이동</span><br><span class="line">$ git checkout master</span><br><span class="line"></span><br><span class="line">// develop 삭제</span><br><span class="line">$ git branch -d develop</span><br></pre></td></tr></table></figure>
+<p><code>develop</code> branch가 삭제되었는지 로그를 다시 한 번 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">$ git log --branches --graph</span><br><span class="line">*   commit 1ac36964707e4b6bcf594d864728ce1fc473b5cf (HEAD -&gt; master)</span><br><span class="line">|\  Merge: 9f265d2 6ea9302</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:48:47 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Merge branch &#x27;develop&#x27;</span><br><span class="line">| | </span><br><span class="line">| * commit 6ea93029db54ab2d98a81924241395fd3ffd654f</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:44:06 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Update a.txt</span><br><span class="line">| |     : Add function &#x27;develop()&#x27;</span><br><span class="line">| | </span><br><span class="line">* | commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 22:46:14 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt</span><br><span class="line">|       : Add function &#x27;master()&#x27;</span><br><span class="line">| </span><br><span class="line">* commit 49ff46662071c4c4576aac8c0aca98f34058c919</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 22:38:48 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Conflict"><a href="#Conflict" class="headerlink" title="Conflict"></a>Conflict</h1><p>두 Branch를 Merge하는 과정에 불일치가 발생할 수 있다. 이를 <code>Conflict</code>라고 한다.</p>
+<p>예제를 살펴보자. 초기 상태는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">* commit bbb7ca7cf73c3022b5bcf0df80b922021935780c</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 22:11:40 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">a.txt</span><br><span class="line"></span><br><span class="line">$ vim a.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">function do()</span><br></pre></td></tr></table></figure>
+<p>이제 <code>develop</code>branch를 만들고 <code>a.txt</code>를 다음과 같이 수정한 후 Commit한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git branch develop</span><br><span class="line">$ git checkout develop</span><br><span class="line">$ vim a.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">funtion do(develop)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git commit</span><br><span class="line">Update a.txt</span><br><span class="line">: add parameter &#x27;develop&#x27;</span><br></pre></td></tr></table></figure>
+<p>다시 <code>master</code>branch로 돌아와서 <code>a.txt</code>를 다음과 같이 수정한 후 Commit한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br><span class="line">$ vim a.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">funtion do(develop)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git commit</span><br><span class="line">Update a.txt</span><br><span class="line">: add parameter &#x27;develop&#x27;</span><br></pre></td></tr></table></figure>
+<p>이제 로그를 확인해보자</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ git log --branches --graph</span><br><span class="line">* commit 8a452009b15e4c9cb251c5697c23d94c3b6c64d6 (HEAD -&gt; master)</span><br><span class="line">| Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| Date:   Mon Dec 20 21:53:57 2021 +0900</span><br><span class="line">| </span><br><span class="line">|     Update a.txt</span><br><span class="line">|     : add parameter &#x27;master&#x27;</span><br><span class="line">|   </span><br><span class="line">| * commit 906f9ea289a238eb72b3aead3de918e053f5e3b7 (develop)</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 21:50:41 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt</span><br><span class="line">|       : add parameter &#x27;develop&#x27;</span><br><span class="line">| </span><br><span class="line">* commit bbb7ca7cf73c3022b5bcf0df80b922021935780c</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 21:47:50 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<p><code>master</code>에서 <code>develop</code>을 Merge해보자. <code>a.txt</code>에서 Conflict가 발생한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ git branch</span><br><span class="line">* master</span><br><span class="line">  develop</span><br><span class="line"></span><br><span class="line">$ git merge develop</span><br><span class="line">Auto-merging a.txt</span><br><span class="line">CONFLICT (content): Merge conflict in a.txt</span><br><span class="line">Automatic merge failed; fix conflicts and then commit the result. </span><br></pre></td></tr></table></figure>
+<p><code>a.txt</code>를 열어보면 어디에서 Conflict가 발생했는지 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ cat a.txt</span><br><span class="line">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span><br><span class="line">function do(master)         // Head(master) branch에서의 a.txt</span><br><span class="line">=======</span><br><span class="line">function do(develop)        // develop branch에서의 a.txt</span><br><span class="line">&gt;&gt;&gt;&gt;&gt;&gt;&gt; develop</span><br></pre></td></tr></table></figure>
+<p>Conflict를 해결하려면 <code>a.txt</code>를 직접 수정하고 다시 Commit해야한다. <code>a.txt</code>를 다음과 같이 수정하자.</p>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">function(master, develop)</span><br></pre></td></tr></table></figure>
+<p>다시 Commit해준다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add</span><br><span class="line">$ git commit</span><br><span class="line">[master 9384313] Merge branch &#x27;develop&#x27;</span><br></pre></td></tr></table></figure>
+<p>마지막으로 <code>master</code>에서 다 사용한 <code>develop</code> branch를 삭제한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br><span class="line">$ git branch -d develop</span><br></pre></td></tr></table></figure>
+<p>결과를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">*   commit 9384313dcb041f1dc73a6862b2bd8de883da4c21 (HEAD -&gt; master)</span><br><span class="line">|\  Merge: 8a45200 906f9ea</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:02:19 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Merge branch &#x27;develop&#x27;</span><br><span class="line">| | </span><br><span class="line">| * commit 906f9ea289a238eb72b3aead3de918e053f5e3b7</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 21:50:41 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Update a.txt</span><br><span class="line">| |     : add parameter &#x27;develop&#x27;</span><br><span class="line">| | </span><br><span class="line">* | commit 8a452009b15e4c9cb251c5697c23d94c3b6c64d6</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 21:53:57 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt:</span><br><span class="line">|       add parameter &#x27;master&#x27;</span><br><span class="line">| </span><br><span class="line">* commit bbb7ca7cf73c3022b5bcf0df80b922021935780c</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 21:47:50 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<p><code>a.txt</code>도 확인해보자.</p>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">function(master, develop)</span><br></pre></td></tr></table></figure>
                     
                         
 
@@ -1065,93 +1265,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/"
-                            aria-label=": [구글 지도(Google Maps)] (6) 내 위치로 카메라 이동하기"
-                        >
-                            [구글 지도(Google Maps)] (6) 내 위치로 카메라 이동하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-05-06T01:00:00+09:00">
-	
-		    2020/05/06
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
-<ul>
-<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
-<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
-<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
-<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
-<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
-<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
-<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
-</ul>
-<hr>
-<h1 id="위치-권한"><a href="#위치-권한" class="headerlink" title="위치 권한"></a>위치 권한</h1><p>내 위치 정보를 가져오려면 권한이 필요합니다. <code>AndroidManifest.xml</code>에 권한을 추가합니다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.example_android_google_maps&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.ACCESS_COARSE_LOCATION&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.ACCESS_FINE_LOCATION&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><code>시스템 서비스</code>의 <code>LocationManager</code>를 사용하면 현재 위치를 가져올 수 있습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> locationManager = getSystemService(Context.LOCATION_SERVICE) <span class="keyword">as</span> LocationManager</span><br></pre></td></tr></table></figure>
-<p>위치는 두 가지 방법으로 가져올 수 있습니다.</p>
-<h3 id="1-GPS-기반의-위치"><a href="#1-GPS-기반의-위치" class="headerlink" title="(1) GPS 기반의 위치"></a>(1) GPS 기반의 위치</h3><p>인공위성으로 현재 위치를 알아냅니다. GPS로 위치를 알아낼 수 있는지 여부는 다음과 같이 확인할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (isGPSEnable) &#123;</span><br><span class="line">    <span class="keyword">val</span> location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="2-NETWORK-기반의-위치"><a href="#2-NETWORK-기반의-위치" class="headerlink" title="(2) NETWORK 기반의 위치"></a>(2) NETWORK 기반의 위치</h3><p>기기 주변의 Cell Tower나 Wi-Fi Access Point로 현재 위치를 알아냅니다. 네트워크로 위치를 알아낼 수 있는지의 여부는 다음과 같이 확인할 수 있습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (isNetworkEnabled) &#123;</span><br><span class="line">    <span class="keyword">val</span> location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>버튼을 눌렀을 때 권한을 체크하고, 권한이 있으면 현재 위치로 이동하는 예제입니다.<br><img src="1.png"><br>위치 정보는 위험 권한이므로 런타임에서 권한 체크를 해야합니다. 버튼을 눌렀을 때 권한을 먼저 확인합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> mMap: GoogleMap? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonCurrentLocation: FloatingActionButton <span class="keyword">by</span> lazy &#123; findViewById&lt;FloatingActionButton&gt;(R.id.activity_fab_current_location) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_PERMISSIONS = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 버튼을 눌렀을 때</span></span><br><span class="line">        buttonCurrentLocation.setOnClickListener &#123;</span><br><span class="line">            moveToCurrentPosition()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">moveToCurrentPosition</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> hasFineLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_FINE_LOCATION)</span><br><span class="line">        <span class="keyword">val</span> hasCoarseLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_COARSE_LOCATION)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED &amp;&amp; hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">            <span class="comment">// 권한이 없을 경우 권한 요청</span></span><br><span class="line">            ActivityCompat.requestPermissions(<span class="keyword">this</span>, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_CODE_PERMISSIONS)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 권한이 있을 경우</span></span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(-<span class="number">33.8688</span>, <span class="number">151.2093</span>)</span><br><span class="line">        mMap.addMarker(MarkerOptions().position(sydney).title(<span class="string">&quot;Marker in Sydney&quot;</span>))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onRequestPermissionsResult</span><span class="params">(requestCode: <span class="type">Int</span>, permissions: <span class="type">Array</span>&lt;<span class="type">out</span> <span class="type">String</span>&gt;, grantResults: <span class="type">IntArray</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onRequestPermissionsResult(requestCode, permissions, grantResults)</span><br><span class="line">        <span class="keyword">when</span> (requestCode) &#123;</span><br><span class="line">            REQUEST_CODE_PERMISSIONS -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span>(grantResults.isNotEmpty()) &#123;</span><br><span class="line">                    <span class="keyword">for</span> ((i, permission) <span class="keyword">in</span> permissions.withIndex()) &#123;</span><br><span class="line">                        isPermissionsGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;Permissions denied.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>이제 권한이 있으면 <code>LocationManager</code>클래스의 <code>getLastKnownLocation()</code>메소드를 호출하여 현재 위치를 가져올 수 있습니다. <code>GoogleMap</code>클래스의 <code>moveCamera()</code>에 위치 정보를 전달하면 구글 지도의 위치를 현재 위치로 이동시킬 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">moveToCurrentPosition</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> hasFineLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_FINE_LOCATION)</span><br><span class="line">        <span class="keyword">val</span> hasCoarseLocationPermission = ActivityCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.ACCESS_COARSE_LOCATION)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED &amp;&amp; hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">            <span class="comment">// 권한이 없으면 권한 요청</span></span><br><span class="line">            ActivityCompat.requestPermissions(<span class="keyword">this</span>, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_CODE_PERMISSIONS)</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 권한이 있으면 위치정보 가져오기</span></span><br><span class="line">            <span class="keyword">val</span> locationManager = getSystemService(Context.LOCATION_SERVICE) <span class="keyword">as</span> LocationManager</span><br><span class="line">            <span class="keyword">val</span> isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)</span><br><span class="line">            <span class="keyword">val</span> isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (isGPSEnable) &#123;</span><br><span class="line">                <span class="keyword">val</span> location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)</span><br><span class="line">                location?.run &#123;</span><br><span class="line">                    <span class="keyword">val</span> latitude = location.latitude</span><br><span class="line">                    <span class="keyword">val</span> longitude  = location.longitude</span><br><span class="line">                    <span class="keyword">val</span> myLocation = LatLng(latitude, longitude)</span><br><span class="line">                    mMap?.moveCamera(CameraUpdateFactory.newLatLng(myLocation))</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (isNetworkEnabled) &#123;</span><br><span class="line">                <span class="keyword">val</span> location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)</span><br><span class="line">                location?.run &#123;</span><br><span class="line">                    <span class="keyword">val</span> latitude = location.latitude</span><br><span class="line">                    <span class="keyword">val</span> longitude  = location.longitude</span><br><span class="line">                    <span class="keyword">val</span> myLocation = LatLng(latitude, longitude)</span><br><span class="line">                    mMap?.moveCamera(CameraUpdateFactory.newLatLng(myLocation))</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                Toast.makeText(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, <span class="string">&quot;Your device doesn&#x27;t support location service.&quot;</span>, Toast.LENGTH_SHORT).show()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ... </span></span><br></pre></td></tr></table></figure>
-<p>이제 버튼을 누르고 권한을 허락하면 현재 위치로 지도가 이동합니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/#post-footer"
+                                href="/ko/2020/06/03/12_tools/03_git/20200603_git_checkout_branch_merge/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
