@@ -354,6 +354,228 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/06/01/12_tools/01_maven/20180601_maven_project/"
+                            aria-label=": [Maven] Maven 프로젝트 생성하기"
+                        >
+                            [Maven] Maven 프로젝트 생성하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-06-01T00:00:00+09:00">
+	
+		    2018/06/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Maven/">Maven</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>MacOS 환경에서는 <code>Homebrew</code>를 통해 Maven을 설치할 수 있다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ brew install maven</span><br></pre></td></tr></table></figure>
+<p>설치된 Maven의 버전을 확인해보자</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn -version</span><br></pre></td></tr></table></figure>
+<p>Homebrew의 <code>brew info</code>를 통해 설치경로 등의 패키지 정보를 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ brew info maven</span><br><span class="line">maven: stable 3.8.4 (bottled)</span><br><span class="line">Java-based project management</span><br><span class="line">https://maven.apache.org/</span><br><span class="line">Conflicts with:</span><br><span class="line">  mvnvm (because also installs a &#x27;mvn&#x27; executable)</span><br><span class="line">/usr/local/Cellar/maven/3.8.4 (79 files, 10MB) *</span><br><span class="line">  Poured from bottle on 2021-12-07 at 14:40:40</span><br><span class="line">From: https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/maven.rb</span><br><span class="line">License: Apache-2.0</span><br><span class="line">==&gt; Dependencies</span><br><span class="line">Required: openjdk ✔</span><br><span class="line">==&gt; Analytics</span><br><span class="line">install: 77,619 (30 days), 215,451 (90 days), 673,523 (365 days)</span><br><span class="line">install-on-request: 77,149 (30 days), 213,878 (90 days), 668,836 (365 days)</span><br></pre></td></tr></table></figure>
+
+<h1 id="Maven-프로젝트-생성하기"><a href="#Maven-프로젝트-생성하기" class="headerlink" title="Maven 프로젝트 생성하기"></a>Maven 프로젝트 생성하기</h1><p>프로젝트를 위한 디렉토리를 생성한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/yologger/workspace</span><br><span class="line"></span><br><span class="line">$ mkdir maven_project</span><br></pre></td></tr></table></figure>
+<p>프로젝트의 루트 디렉토리에 <code>pom.xml</code>파일을 생성한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ cd maven _project</span><br><span class="line"></span><br><span class="line">$ touch pom.xml</span><br></pre></td></tr></table></figure>
+<p>모든 Maven 프로젝트는 <code>pom.xml</code>파일을 포함해야하며, 다음 내용을 필수적으로 포함해야한다.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.yologger.app<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven_project<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>maven_project<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://maven.apache.org<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.7.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>&lt;project&gt;</code>: 최상위 태그</li>
+<li><code>&lt;modelVersion&gt;</code>: pom.xml 파일의 버전이며, 항상 4.0.0 값으로 설정한다.</li>
+<li><code>&lt;groupId&gt;</code>: 조직의 고유 id를 입력한다. 보통 조직 도메인 네임의 역순을 입력한다.</li>
+<li><code>&lt;artifactId&gt;</code>: 애플리케이션을 구분하는 고유 id를 입력한다.</li>
+<li><code>&lt;version&gt;</code>: 해당 artifact의 버전을 입력한다.</li>
+<li><code>&lt;packaging&gt;</code>: 어떤 파일 형식으로 패키징할지 정의한다. jar, war, exe 등이 올 수 있다.</li>
+<li><code>&lt;name&gt;</code>: 애플리케이션의 이름을 입력한다.</li>
+<li><code>&lt;build&gt;</code>: 빌드 시 사용할 옵션을 입력한다.</li>
+<li><code>&lt;plugins&gt;</code>: 플러그인은 Maven이 애플리케이션을 빌드할 때 사용하는 도구다. 이 태그 안에 사용할 플러그인을 나열한다. 모든 Maven 플러그인은 <a target="_blank" rel="noopener" href="https://maven.apache.org/plugins/index.html">이 곳</a>에서 확인할 수 있다.</li>
+</ul>
+<p><code>maven-compiler-plugin</code>는 소스코드를 컴파일 할 때 사용되는 플러그인이다. <code>&lt;source&gt;</code>태그에는 소스코드의 Java 버전을 입력하고 <code>&lt;target&gt;</code>태그에는 생성될 class파일의 Java 버전을 입력한다.</p>
+<p>그 다음 <code>src/main/java</code> 디렉토리를 생성하고 <code>App.java</code>파일을 생성하자. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello Maven Project!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>명령어를 입력하여 빌드 파일이 저장되는 디렉토리를 비운다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn clean</span><br></pre></td></tr></table></figure>
+<p>프로젝트를 빌드한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn compile</span><br></pre></td></tr></table></figure>
+<p>빌드가 완료되면 <code>target</code> 디렉토리에 결과물이 생성된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">pom.xml </span><br><span class="line">src</span><br><span class="line">target</span><br></pre></td></tr></table></figure>
+<p>이제 클래스 파일을 실행할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ java -classpath target/classes App</span><br><span class="line">Hello Maven Project! </span><br></pre></td></tr></table></figure>
+<h1 id="패키징"><a href="#패키징" class="headerlink" title="패키징"></a>패키징</h1><p><code>패키징(Packaging)</code>이란 프로젝트를 쉽게 배포할 수 있도록 <code>jar</code>, <code>war</code>, <code>zip</code> 형태로 빌드하는 것이다. <code>mvn package</code> 명령어를 사용하면 프로젝트를 패키징할 수 있다. <code>jar</code>파일로 패키징하려면 pom.xml에 <code>maven_jar_plugin</code>플러그인을 추가해야한다.</p>
+<figure class="highlight xml"><figcaption><span>pom.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- .. --&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- .. --&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-jar-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">archive</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">manifest</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">addClasspath</span>&gt;</span>true<span class="tag">&lt;/<span class="name">addClasspath</span>&gt;</span>  </span><br><span class="line">                <span class="tag">&lt;<span class="name">classpathPrefix</span>&gt;</span>lib/<span class="tag">&lt;/<span class="name">classpathPrefix</span>&gt;</span>  </span><br><span class="line">                <span class="tag">&lt;<span class="name">mainClass</span>&gt;</span>App<span class="tag">&lt;/<span class="name">mainClass</span>&gt;</span>  </span><br><span class="line">                <span class="tag">&lt;/<span class="name">manifest</span>&gt;</span>  </span><br><span class="line">            <span class="tag">&lt;/<span class="name">archive</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>다음 명령어를 입력하여 패키징한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn package</span><br></pre></td></tr></table></figure>
+<p><code>class</code>디렉토리에 <code>jar</code>파일이 생성된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ ./target</span><br><span class="line">maven_project-0.0.1.jar</span><br><span class="line">classes                 </span><br><span class="line">generated-sources       </span><br><span class="line">maven-archiver          </span><br><span class="line">maven-status            </span><br></pre></td></tr></table></figure>
+<p>패키징된 파일을 실행해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ java -jar target/maven_project-0.0.1.jar</span><br><span class="line">Hello Maven Project!</span><br></pre></td></tr></table></figure>
+
+<h1 id="템플릿-사용하기"><a href="#템플릿-사용하기" class="headerlink" title="템플릿 사용하기"></a>템플릿 사용하기</h1><p><code>mvn archetype:generate</code>을 사용하면 템플릿을 사용하여 Maven 프로젝트를 쉽게 생성할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn archetype:generate</span><br></pre></td></tr></table></figure>
+<p>이 때 세 개의 인자를 전달해야한다.</p>
+<ul>
+<li><code>groupId</code>: 조직의 고유 id를 입력한다. 보통 조직 도메인 네임의 역순을 입력한다.</li>
+<li><code>artifactId</code>: 애플리케이션을 구분하는 고유 id를 입력한다.</li>
+<li><code>archetypeArtifactId</code>: 프로젝트를 생성할 때 사용할 템플릿을 지정한다. 자주 사용되는 템플릿은 다음과 같으며, 모든 템플릿은 <a target="_blank" rel="noopener" href="https://maven.apache.org/guides/introduction/introduction-to-archetypes.html">이 곳</a>에서 확인 가능하다.<ul>
+<li>maven-archetype-quickstart</li>
+<li>maven-archetype-simple</li>
+<li>maven-archetype-webapp</li>
+</ul>
+</li>
+</ul>
+<p>이제 <code>maven-archetype-quickstart</code> 템플릿을 사용하여 프로젝트를 생성해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/yologger/workspace</span><br><span class="line"></span><br><span class="line">$ mvn archetype:generate -DgroupId=com.yologger.app -DartifactId=quickstart -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</span><br></pre></td></tr></table></figure>
+<p><code>maven-archetype-quickstart</code>템플릿을 사용하면 다음과 같은 구조로 프로젝트가 생성된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">$ pwd</span><br><span class="line">/yologger/workspace</span><br><span class="line"></span><br><span class="line">$ cd quickstart</span><br><span class="line"></span><br><span class="line">$ tree .</span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    ├── main</span><br><span class="line">    │   └── java</span><br><span class="line">    │       └── com</span><br><span class="line">    │           └── yologger</span><br><span class="line">    │               └── app</span><br><span class="line">    │                   └── App.java</span><br><span class="line">    └── test</span><br><span class="line">        └── java</span><br><span class="line">            └── com</span><br><span class="line">                └── yologger</span><br><span class="line">                    └── app</span><br><span class="line">                        └── AppTest.java</span><br></pre></td></tr></table></figure>
+<p>이번엔 <code>maven-archetype-webapp</code>템플릿을 사용해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mvn archetype:generate -DgroupId=com.yologger.webapp -DartifactId=webapp -DarchetypeArtifactId=maven-archetype-webapp -DinteractiveMode=false </span><br></pre></td></tr></table></figure>
+<p>다음과 같은 구조로 프로젝트가 생성된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── resources</span><br><span class="line">        └── webapp</span><br><span class="line">            ├── WEB-INF</span><br><span class="line">            │   └── web.xml</span><br><span class="line">            └── index.jsp</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/06/01/12_tools/01_maven/20180601_maven_project/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/04/04/12_tools/02_gradle/20180404_plugin/"
+                            aria-label=": [Gradle] Gradle Plugin"
+                        >
+                            [Gradle] Gradle Plugin
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-04-04T00:00:00+09:00">
+	
+		    2018/04/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Gradle/">Gradle</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p><code>Gradle Plugin</code>은 유용한 Task들의 집합이다. Gradle Plugin을 추가하면 프로젝트를 더 다양한 방법으로 빌드할 수 있다. 간단한 Gradle 프로젝트를 만들면서 Gradle Plugin에 대해 알아보자. </p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>먼저 디렉토리를 생성하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir myProject</span><br><span class="line">$ cd myProject</span><br></pre></td></tr></table></figure>
+<p>Gradle 프로젝트로 초기화하기 위하여 <code>gradle init</code>명령어를 입력한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle init</span><br></pre></td></tr></table></figure>
+<p>생성할 프로젝트 정보를 입력해야한다. 일단 아래와 같이 입력하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Select type of project to generate:</span><br><span class="line">  1: basic</span><br><span class="line">  2: application</span><br><span class="line">  3: library</span><br><span class="line">  4: Gradle plugin</span><br><span class="line">Enter selection (default: basic) [1..4] 1</span><br><span class="line"></span><br><span class="line">Select build script DSL:</span><br><span class="line">  1: Groovy</span><br><span class="line">  2: Kotlin</span><br><span class="line">Enter selection (default: Groovy) [1..2] 1</span><br><span class="line"></span><br><span class="line">Generate build using new APIs and behavior (some features may change in the next minor release)? (default: no) [yes, no] no</span><br><span class="line"></span><br><span class="line">Project name (default: myProject): myProject</span><br></pre></td></tr></table></figure>
+<p>프로젝트가 성공적으로 생성되면 다음과 같이 출력된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; Task :init</span><br><span class="line">Get more help with your project: Learn more about Gradle by exploring our samples at https://docs.gradle.org/7.3.1/samples</span><br></pre></td></tr></table></figure>
+<p>Gradle 프로젝트는 다음과 같은 구조를 가진다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ tree .</span><br><span class="line">.</span><br><span class="line">├── build.gradle</span><br><span class="line">├── settings.gradle</span><br><span class="line">├── gradle</span><br><span class="line">│   └── wrapper</span><br><span class="line">│       ├── gradle-wrapper.jar</span><br><span class="line">│       └── gradle-wrapper.properties</span><br><span class="line">├── gradlew</span><br><span class="line">├── gradlew.bat</span><br><span class="line">└── .gradle</span><br></pre></td></tr></table></figure>
+
+<p>이제 Java 소스코드를 작성해보자. 우선 <code>src/java/main</code> 디렉토리를 생성한다.</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> mkdir -p src/java/main</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> src/java/main</span></span><br></pre></td></tr></table></figure>
+<p>이 디렉토리 안에 패키지를 생성한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p com.yologger.app</span><br></pre></td></tr></table></figure>
+<p>디렉토리 구조는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ tree</span><br><span class="line">.</span><br><span class="line">├── build.gradle</span><br><span class="line">├── gradle</span><br><span class="line">│   └── wrapper</span><br><span class="line">│       ├── gradle-wrapper.jar</span><br><span class="line">│       └── gradle-wrapper.properties</span><br><span class="line">├── gradlew</span><br><span class="line">├── gradlew.bat</span><br><span class="line">├── settings.gradle</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        └── java</span><br><span class="line">            └── com</span><br><span class="line">                └── yologger</span><br><span class="line">                    └── app</span><br><span class="line">                        └── Main.java</span><br></pre></td></tr></table></figure>
+<p><code>Main.java</code>파일을 생성하고 아래와 같이 코드를 작성한다.</p>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello World!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>마지막으로 빌드 스크립트를 작성하자.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 플러그인 적용</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;java&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;application&#x27;</span></span><br><span class="line"></span><br><span class="line">application &#123;</span><br><span class="line">    <span class="comment">// Main 함수가 포함된 클래스 지정</span></span><br><span class="line">    mainClass = <span class="string">&#x27;com.yologger.app.Main&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 다음 명령어로 프로젝트를 빌드할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle compileJava</span><br></pre></td></tr></table></figure>
+<p>다음 명령어로 프로젝트를 실행할 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle run</span><br></pre></td></tr></table></figure>
+
+<h1 id="Gradle-Plugin"><a href="#Gradle-Plugin" class="headerlink" title="Gradle Plugin"></a>Gradle Plugin</h1><p>예제에서 <code>build.gradle</code>파일에 두 개의 플러그인을 적용했다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;java&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;application&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><code>java</code>는 Java 어플리케이션을 컴파일하기 위한 플러그인이다. 이 플러그인은 <code>compileJava</code> 태스크를 포함한다. 따라서 콘솔창에서 다음과 같이 태스크를 호출할 수 있게 된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle compileJava</span><br></pre></td></tr></table></figure>
+<p>java 플러그인이 제공하는 모든 태스크는 <a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/java_plugin.html#java_plugin">이 곳</a>에서 확인할 수 있다.</p>
+<p><code>application</code>은 Java 어플리케이션을 JVM에서 실행시키기 위한 플러그인이다. 이 플러그인은 <code>run</code> 태스크를 포함한다. 따라서 콘솔창에서 다음과 같이 태스크를 호출할 수 있게 된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle run</span><br></pre></td></tr></table></figure>
+<p>이처럼 <code>Gradle Plugin</code>은 기본으로 내장된 태스크 외에도 유용한 태스크 집합을 추가해준다.</p>
+<h1 id="Built-in-Plugin"><a href="#Built-in-Plugin" class="headerlink" title="Built-in Plugin"></a>Built-in Plugin</h1><p>Gradle은 내장된 기본 플러그인을 제공한다. 이를 <code>Built-in Plugin</code>이라고 한다. java, application 플러그인도 Built-in Plugin이며 별도의 설치없이 사용할 수 있다. 모든 Built-in Plugin은 <a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/plugin_reference.html">이 곳</a>에서 확인할 수 있다.</p>
+<h1 id="외부-Plugin-설치"><a href="#외부-Plugin-설치" class="headerlink" title="외부 Plugin 설치"></a>외부 Plugin 설치</h1><p>Built-in Plugin 외에도 외부 플러그인을 설치하고 적용할 수 있다.</p>
+<p>보통 안드로이드 어플리케이션을 개발할 때는 <code>Android</code> 플러그인과 <code>Kotlin Android</code> 플러그인과 설치한다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle (Project level)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        mavenCentral()</span><br><span class="line">    &#125;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        <span class="comment">// Android Gradle Plugin</span></span><br><span class="line">        classpath <span class="string">&quot;com.android.tools.build:gradle:7.0.0&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Kotlin Android Gradle Plugin</span></span><br><span class="line">        classpath <span class="string">&quot;org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>그리고 다음과 같이 플러그인을 적용한다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle (Module level)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;kotlin-android&#x27;</span></span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>스프링 부트 어플리케이션을 개발할 때는  <code>Spring Boot</code> 플러그인을 설치하고 적용한다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        mavenCentral()</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath(<span class="string">&quot;org.springframework.boot:spring-boot-gradle-plugin:$&#123;springBootVersion&#125;&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;org.springframework.boot&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;io.spring.dependency-management&#x27;</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/04/04/12_tools/02_gradle/20180404_plugin/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
                             aria-label=": [Gradle] Gradle Task"
                         >
@@ -622,6 +844,84 @@
                         <p>
                             <a
                                 href="/ko/2018/04/01/12_tools/02_gradle/20180401_compile_build/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/03/20/04_java/180320_compare_object/"
+                            aria-label=": [Java] 객체 비교하기, Comparable, Comparator"
+                        >
+                            [Java] 객체 비교하기, Comparable, Comparator
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-03-20T00:00:00+09:00">
+	
+		    2018/03/20
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Primitive-Type-비교하기"><a href="#Primitive-Type-비교하기" class="headerlink" title="Primitive Type 비교하기"></a>Primitive Type 비교하기</h1><p>Java에서 Primitive Type를 비교할 때는 <code>==</code>을 사용합니다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line"><span class="keyword">int</span> b = <span class="number">10</span>;</span><br><span class="line"><span class="keyword">int</span> c = <span class="number">11</span>;</span><br><span class="line"></span><br><span class="line">System.out.println(a == b);     <span class="comment">// true</span></span><br><span class="line">System.out.println(a == c);     <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Reference-Type-비교하기"><a href="#Reference-Type-비교하기" class="headerlink" title="Reference Type 비교하기"></a>Reference Type 비교하기</h1><p>Reference Type을 비교할 때 <code>==</code>를 사용하면 객체의 주소값을 비교한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Person p1 = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line">Person p2 = p1;</span><br><span class="line">Person p3 = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(p1 == p2);   <span class="comment">// true</span></span><br><span class="line">System.out.println(p1 == p3);   <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>객체가 아닌 값을 비교할 때는 <code>equals()</code>메소드를 사용한다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Person p1 = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line">Person p2 = <span class="keyword">new</span> Person(<span class="string">&quot;Monica&quot;</span>);</span><br><span class="line">Person p3 = p1;</span><br><span class="line">Person p4 = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(p1.equals(p2));  <span class="comment">// false</span></span><br><span class="line">System.out.println(p1.equals(p3));  <span class="comment">// true</span></span><br><span class="line">System.out.println(p1.equals(p4));  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Comparable"><a href="#Comparable" class="headerlink" title="Comparable"></a>Comparable</h1><p>배열을 정렬할 때는 기준이 있어야한다. 예를 들어 <code>Person</code>클래스가 있다고 가정하자.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name, <span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>Arrays.sort()</code>를 사용하여 배열을 정렬하려고 한다. </p>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Person[] people = &#123;</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>, <span class="number">35</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Monica&quot;</span>, <span class="number">23</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Messi&quot;</span>, <span class="number">27</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Jessica&quot;</span>, <span class="number">21</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;David&quot;</span>, <span class="number">40</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Martin&quot;</span>, <span class="number">33</span>)</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        Arrays.sort(people);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Comparable</code>인터페이스와 <code>compareTo()</code>를 구현하여 정렬의 기준을 정의할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Comparable</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(T o)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>Person</code>클래스의 <code>age</code>속성으로 정렬하도록 <code>Comparable</code>을 구현해보자.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">implements</span> <span class="title">Comparable</span>&lt;<span class="title">Person</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Person person)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.age - person.age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>Comparrable.compareTo()</code>을 사용하여 정렬된다.</p>
+<h1 id="Comparator"><a href="#Comparator" class="headerlink" title="Comparator"></a>Comparator</h1><p><code>Comparator</code>를 사용하여 정렬의 기준을 정의할 수도 있다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name, <span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Person[] people = &#123;</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>, <span class="number">35</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Monica&quot;</span>, <span class="number">23</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Messi&quot;</span>, <span class="number">27</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Jessica&quot;</span>, <span class="number">21</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;David&quot;</span>, <span class="number">40</span>),</span><br><span class="line">                <span class="keyword">new</span> Person(<span class="string">&quot;Martin&quot;</span>, <span class="number">33</span>)</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        Arrays.sort(people, <span class="keyword">new</span> Comparator&lt;Person&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Person o1, Person o2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> o1.getAge() - o2.getAge();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/03/20/04_java/180320_compare_object/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -967,242 +1267,6 @@
                         <p>
                             <a
                                 href="/ko/2018/03/16/04_java/180316_annotation/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/03/15/04_java/180315_reflection/"
-                            aria-label=": [Java] 리플렉션(Reflection)"
-                        >
-                            [Java] 리플렉션(Reflection)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-03-15T00:00:00+09:00">
-	
-		    2018/03/15
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="Reflection"><a href="#Reflection" class="headerlink" title="Reflection"></a>Reflection</h1><p><code>리플렉션(Reflection)</code>은 <u>런타임에 구체적인 클래스 타입을 몰라도 그 클래스의 멤버변수, 메소드 등에 접근할 수 있도록 하는 자바 API와 기법</u>이다. 리플렉션과 관련된 API는 <code>java.lang.reflect.*</code>패키지에 있다.</p>
-<hr>
-<h1 id="Class-클래스와-클래스-참조"><a href="#Class-클래스와-클래스-참조" class="headerlink" title="Class 클래스와 클래스 참조"></a>Class 클래스와 클래스 참조</h1><p>Java의 모든 클래스와 인터페이스는 컴파일 후 <code>.class</code>파일로 변환된다. 이 파일에는 생성자, 멤버변수, 메서드 등 객체의 정보가 포함되어있는데 <code>Class</code>클래스를 사용하면 이 파일에서 가져온 객체의 정보를 담을 수 있다. 이를 <code>클래스 참조(Class Reference)</code>라고 한다.</p>
-<p><code>Class</code>클래스에 정보를 담는 방법에는 세 가지가 있다. </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 클래스에 .class를 붙여서 객체 정보 가져오기</span></span><br><span class="line">Class clazz = String.class</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Class클래스의 forName()메소드를 사용하여 객체 정보 가져오기</span></span><br><span class="line">Class clazz = Class.forName(<span class="string">&quot;java.lang.String&quot;</span>);</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 인스턴스에서 getClass()를 호출하여 객체 정보 가져오기</span></span><br><span class="line">String string = <span class="keyword">new</span> String();</span><br><span class="line">Class clazz = string.getClass();</span><br></pre></td></tr></table></figure>
-
-
-<h1 id="리플렉션"><a href="#리플렉션" class="headerlink" title="리플렉션"></a>리플렉션</h1><p>코드를 작성하다보면 작성 시점에 데이터의 타입을 모를 수도 있다. 이때 <code>리플렉션(Reflection)</code>을 사용할 수 있다. </p>
-<p>예제를 살펴보자. 다음과 같은 클래스가 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    String name;</span><br><span class="line">    String nation;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 기본 생성자</span></span><br><span class="line">    Person() &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = <span class="string">&quot;&quot;</span>;</span><br><span class="line">        <span class="keyword">this</span>.nation = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 보조 생성자</span></span><br><span class="line">    Person(String name, String nation) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.nation = nation;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">printName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(name);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">printNation</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(nation);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">printSomething</span><span class="params">(String something)</span> </span>&#123;</span><br><span class="line">        System.out.println(something);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">printHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Class</code>클래스의 인스턴스에는 클래스 정보를 저장할 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Class personClass = Person.class;</span><br><span class="line"><span class="comment">// 또는 Class personClass = Class.forName(&quot;Person&quot;);</span></span><br></pre></td></tr></table></figure>
-<p>이 <code>Class</code>타입의 인스턴스로 클래스의 인스턴스를 생성할 수도 있다. 이 때는 <code>newInstance()</code>메소드를 사용한다. 다만 반드시 매개변수가 없는 <code>기본생성자</code>가 존재해야 한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Class personClass = Person.class;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    Person person = (Person) personClass.newInstance();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IllegalAccessException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125; <span class="keyword">catch</span> (InstantiationException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="클래스의-멤버변수-가져오기"><a href="#클래스의-멤버변수-가져오기" class="headerlink" title="클래스의 멤버변수 가져오기"></a>클래스의 멤버변수 가져오기</h1><p>클래스의 멤버변수 정보를 읽어올 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line">Field[] fields = personClass.getDeclaredFields();</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;fields.length; i++) &#123;</span><br><span class="line">    System.out.println(fields[i].getName());</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// name</span></span><br><span class="line"><span class="comment">// nation</span></span><br></pre></td></tr></table></figure>
-<h1 id="클래스의-생성자-가져오기"><a href="#클래스의-생성자-가져오기" class="headerlink" title="클래스의 생성자 가져오기"></a>클래스의 생성자 가져오기</h1><p>클래스의 생성자 정보를 읽어올 수도 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"></span><br><span class="line">Class personClass = Person.class;</span><br><span class="line"></span><br><span class="line">Constructor[] constructors = personClass.getDeclaredConstructors();</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;constructors.length; i++) &#123;</span><br><span class="line">    System.out.println(constructors[i].getName());</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// com.yologger.app.Person</span></span><br><span class="line"><span class="comment">// com.yologger.app.Person</span></span><br></pre></td></tr></table></figure>
-<h2 id="클래스의-메소드-가져오기"><a href="#클래스의-메소드-가져오기" class="headerlink" title="클래스의 메소드 가져오기"></a>클래스의 메소드 가져오기</h2><p>클래스의 모든 메소드들은 다음과 같이 가져올 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line">Class personClass = Person.class;</span><br><span class="line"></span><br><span class="line">Method[] methods = personClass.getDeclaredMethods();</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;methods.length; i++) &#123;</span><br><span class="line">    <span class="comment">// 메소드 이름 출력</span></span><br><span class="line">    System.out.println(methods[i].getName());</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// printName</span></span><br><span class="line"><span class="comment">// printNation</span></span><br><span class="line"><span class="comment">// printSomething</span></span><br><span class="line"><span class="comment">// printHello</span></span><br></pre></td></tr></table></figure>
-<p>특정 메소드 한 개만 가져올 수도 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Class personClass = Person.class;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    Method method = personClass.getDeclaredMethod(<span class="string">&quot;printSomething&quot;</span>);</span><br><span class="line">    System.out.println(method.getName());   <span class="comment">// printSomething</span></span><br><span class="line">&#125; <span class="keyword">catch</span> (NoSuchMethodException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>클래스의 메소드를 가져오면 이를 통해 호출도 할 수 있다. 이 때는 <code>invoke()</code>메소드를 호출한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Class personClass = Person.class;</span><br><span class="line">Person person = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>, <span class="string">&quot;America&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    Method printHelloMethod = personClass.getDeclaredMethod(<span class="string">&quot;printHello&quot;</span>);</span><br><span class="line">    printHelloMethod.invoke(person);    <span class="comment">// Hello</span></span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">catch</span> (NoSuchMethodException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IllegalAccessException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/03/15/04_java/180315_reflection/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/03/14/04_java/180314_generic_type_erasure/"
-                            aria-label=": [Java] 제너릭과 타입 소거(Type Erasure)"
-                        >
-                            [Java] 제너릭과 타입 소거(Type Erasure)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-03-14T00:00:00+09:00">
-	
-		    2018/03/14
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="타입-소거"><a href="#타입-소거" class="headerlink" title="타입 소거"></a>타입 소거</h1><p><code>타입 소거(Type Erasure)</code>는 <u>제네릭의 타입 파라미터를 구체화된 자료형으로 대체하는 것</u>이다. Java 컴파일러는 소스 코드를 <u>컴파일</u>할 때 타입 소거를 수행합니다. </p>
-<p>Java 컴파일러는 타입 파라미터가 <code>Unbounded Type</code>인지 <code>Bounded Type</code>인지에 따라 다른 방법으로 소거한다. </p>
-<h3 id="1-Unbounded-Type의-타입소거"><a href="#1-Unbounded-Type의-타입소거" class="headerlink" title="(1) Unbounded Type의 타입소거"></a>(1) Unbounded Type의 타입소거</h3><p><code>Unbounded Type</code>은 형식 타입 파라미터로 전달되는 실 타입 파라미터의 범위를 제한하지 않은 것을 의미한다. <code>&lt;T&gt;</code>, <code>&lt;?&gt;</code> 형태의 형식 타입 파라미터를 Unbounded Type이라고 생각하면 된다.</p>
-<p><code>Unbounded Type</code> 예제를 살펴보자.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 컴파일 전 (타입 소거 전) </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Printer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">(T something)</span> </span>&#123;</span><br><span class="line">        System.out.println(something);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>컴파일러는 위 코드는 아래와 같이 변환한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 컴파일 후 (타입 소거 후)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Printer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">(Object something)</span> </span>&#123;</span><br><span class="line">        System.out.println(something);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>컴파일러는 형식 타입 파라미터를 소거하고 <code>Unbounded Type</code>인 <code>&lt;T&gt;</code>를 <code>Object</code>로 대체합니다.</p>
-<h3 id="2-Bounded-Type의-타입소거"><a href="#2-Bounded-Type의-타입소거" class="headerlink" title="(2) Bounded Type의 타입소거"></a>(2) Bounded Type의 타입소거</h3><p><code>Bounded Type</code>은 <u>형식 타입 파라미터로 전달되는 실 타입 파라미터의 범위를 제한한 것</u>이다. <code>&lt;E extends Something&gt;</code> 형태의 형식 타입 파라미터를 Unbounded Type이라고 생각하면 된다.</p>
-<p><code>Bounded Type</code> 예제를 살펴보자.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span>&lt;<span class="title">T</span> <span class="keyword">extends</span> <span class="title">Observable</span>&lt;<span class="title">T</span>&gt;&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> T data;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">getData</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setData</span><span class="params">(T data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.data = data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>컴파일러는 위 코드를 아래와 같이 변환된다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Observable data;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Observable <span class="title">getData</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setData</span><span class="params">(Observable data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.data = data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>타입 파라미터를 포함한 <code>Observable&lt;T&gt;</code>는 <code>Observable</code>로 소거되었다. <code>&lt;E extends Something&gt;</code>은 <code>Object</code>가 아닌 <code>Something</code>로 대치되는 것이다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/03/14/04_java/180314_generic_type_erasure/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/03/13/04_java/180313_generic_wildcard/"
-                            aria-label=": [Java] 제너릭의 와일드 카드(Wildcard)"
-                        >
-                            [Java] 제너릭의 와일드 카드(Wildcard)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-03-13T00:00:00+09:00">
-	
-		    2018/03/13
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="와일드-카드"><a href="#와일드-카드" class="headerlink" title="와일드 카드"></a>와일드 카드</h1><p><code>와일드 카드(Wildcard)</code>는 <u>제네릭 클래스의 인스턴스를 함수의 인자로 전달할 때, 그 인스턴스의 타입 파라미터를 제한하는 것</u>을 의미한다. 개념이 어렵기 때문에 예제를 통해 살펴보겠다.</p>
-<h1 id="와일드-카드-와-extends"><a href="#와일드-카드-와-extends" class="headerlink" title="와일드 카드(?)와 extends"></a>와일드 카드(?)와 extends</h1><p>다음과 같은 함수가 있다고 가정하자. 이 함수는 인자로 <code>ArrayList</code>타입의 데이터를 입력받는다. </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">printElements</span><span class="params">(ArrayList list)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 <code>Person</code>클래스를 선언한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    String name;</span><br><span class="line"></span><br><span class="line">    Person(String name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Person</code>클래스를 상속하는 <code>Player</code>클래스를 선언한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Player</span> <span class="keyword">extends</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    String team;</span><br><span class="line"></span><br><span class="line">    Player(String name, String team) &#123;</span><br><span class="line">        <span class="keyword">super</span>(name);</span><br><span class="line">        <span class="keyword">this</span>.team = team;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 세 개의 <code>ArrayList</code>를 생성하고 메소드의 매개변수로 전달해보자.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 제네릭 클래스 ArrayList의 타입 변수로 String, Person, Player가 모두 올 수 있다.</span></span><br><span class="line">ArrayList&lt;String&gt; list1 = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">ArrayList&lt;Person&gt; list2 = <span class="keyword">new</span> ArrayList&lt;Person&gt;();</span><br><span class="line">ArrayList&lt;Player&gt; list3 = <span class="keyword">new</span> ArrayList&lt;Player&gt;();</span><br><span class="line"></span><br><span class="line">printElements(list1);</span><br><span class="line">printElements(list2);</span><br><span class="line">printElements(list3);</span><br></pre></td></tr></table></figure>
-<p>그런데 인자로 전달되는 <code>ArrayList</code>에 저장되는 데이터를 제한할 수 있다. 아래와 같이 <code>물음표(?)</code>와 키워드 <code>extends</code>를 사용하면 된다. 물음표는 <code>와일드카드(Wild Card)</code>라고 불리며, 타입이 아직 정해지지 않았음을 의미한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">printElements</span><span class="params">(ArrayList&lt;? extends Person&gt; list)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>&lt;? extends Person&gt;</code>는 <code>Person</code>객체 또는 <code>Person</code>객체를 상속한 객체를 데이터로 가지고 있는 <code>ArrayList</code>객체만 함수의 인자로 전달될 수 있음을 의미한다. 따라서 아래 코드에서 <code>Person</code>객체를 상속하지 않은 <code>list1</code> 때문에 컴파일 에러가 발생힌다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ArrayList&lt;String&gt; list1 = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">ArrayList&lt;Person&gt; list2 = <span class="keyword">new</span> ArrayList&lt;Person&gt;();</span><br><span class="line">ArrayList&lt;Player&gt; list3 = <span class="keyword">new</span> ArrayList&lt;Player&gt;();</span><br><span class="line"></span><br><span class="line">printElements(list1);   <span class="comment">// 에러</span></span><br><span class="line">printElements(list2);</span><br><span class="line">printElements(list3);</span><br></pre></td></tr></table></figure>
-
-<h1 id="super"><a href="#super" class="headerlink" title="super"></a>super</h1><p>키워드 <code>super</code>를 사용하면 특정 클래스와 부모 클래스만 인자로 제한할 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">printElements</span><span class="params">(ArrayList&lt;? <span class="keyword">super</span> Person&gt; list)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ArrayList&lt;String&gt; list1 = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">ArrayList&lt;Person&gt; list2 = <span class="keyword">new</span> ArrayList&lt;Person&gt;();</span><br><span class="line">ArrayList&lt;Player&gt; list3 = <span class="keyword">new</span> ArrayList&lt;Player&gt;();</span><br><span class="line"></span><br><span class="line">printElements(list1);   <span class="comment">// 에러</span></span><br><span class="line">printElements(list2);</span><br><span class="line">printElements(list3);</span><br></pre></td></tr></table></figure>
-
-<h1 id="와일드-카드-lt-gt-의-종류"><a href="#와일드-카드-lt-gt-의-종류" class="headerlink" title="와일드 카드&lt;?&gt;의 종류"></a>와일드 카드&lt;?&gt;의 종류</h1><ul>
-<li><code>&lt;? extends T&gt;</code> 와일드 카드의 상한 제한(upper bound) - T와 그 자손들을 구현한 객체들만 타입 매개변수로 올 수 있다.</li>
-<li><code>&lt;? super T&gt;</code> 와일드 카드의 하한 제한(lower bound) - T와 그 조상들을 구현한 객체들만 타입 매개변수로 올 수 있다.</li>
-<li><code>&lt;?&gt;</code> 타입 매개변수에 제한이 없다.</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/03/13/04_java/180313_generic_wildcard/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

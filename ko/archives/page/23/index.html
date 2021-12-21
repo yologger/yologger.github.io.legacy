@@ -354,6 +354,211 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/02/21/04_java/180221_anonymous_class/"
+                            aria-label=": [Java] 익명 클래스(Anonymous Class)"
+                        >
+                            [Java] 익명 클래스(Anonymous Class)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-02-21T00:00:00+09:00">
+	
+		    2018/02/21
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="익명-클래스"><a href="#익명-클래스" class="headerlink" title="익명 클래스"></a>익명 클래스</h1><p>다음과 같은 부모 클래스가 있다고 가정하자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 부모 클래스</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이를 상속한 자식 클래스를 한번만 사용하는 경우, 매번 자식 클래스를 정의하기에는 번거로운 경우가 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 자식 클래스를 정의</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Designer</span> <span class="keyword">extends</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Do something.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 자식 클래스 사용</span></span><br><span class="line">Person person = <span class="keyword">new</span> Designer();</span><br><span class="line">person.doSomething();</span><br></pre></td></tr></table></figure>
+
+<p>이러한 경우 익명 클래스를 유용하게 사용할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 익명 클래스 사용</span></span><br><span class="line">Person person = <span class="keyword">new</span> Person() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Do something.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">person.doSomething();</span><br></pre></td></tr></table></figure>
+<p>익명 클래스는 안드로이드 어플리케이션 개발에서 이벤트를 처리할 때 많이 사용한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Button loginButton = findViewById(R.id.loginButton);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 버튼을 눌렀을 때 실행할 코드를 익명 클래스로 등록</span></span><br><span class="line">loginButton.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// log in</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/02/21/04_java/180221_anonymous_class/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/02/20/04_java/180220_inner_class/"
+                            aria-label=": [Java] 내부 클래스(Inner Class)"
+                        >
+                            [Java] 내부 클래스(Inner Class)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-02-20T00:00:00+09:00">
+	
+		    2018/02/20
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Inner-Class"><a href="#Inner-Class" class="headerlink" title="Inner Class"></a>Inner Class</h1><p>자바에서는 클래스 안에 클래스를 정의할 수 있다. 이를 <code>내부 클래스</code>라고 한다. 내부 클래스는 다음과 같이 선언한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OuterClass</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">InnerClass</span> </span>&#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>내부 클래스는 외부 클래스의 인스턴스를 먼저 생성해야 내부 클래스를 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// (1) 외부 클래스의 인스턴스 생성</span></span><br><span class="line">OuterClass outerClass = <span class="keyword">new</span> OuterClass();</span><br><span class="line"></span><br><span class="line"><span class="comment">// (2) 외부 클래스의 인스턴스를 사용하여 내부 클래스의 인스턴스 생성</span></span><br><span class="line">OuterClass.InnerClass innerClass = outerClass.<span class="function">new <span class="title">InnerClass</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Static-Inner-Class"><a href="#Static-Inner-Class" class="headerlink" title="Static Inner Class"></a>Static Inner Class</h1><p><code>Static 내부 클래스</code>도 다음과 같이 선언할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OuterClass</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Static Inner Class</span></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">StaticInnerClass</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Static 내부 클래스</code>는 외부 클래스의 인스턴스를 생성하지 않고도 내부 클래스의 인스턴스를 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 외부 클래스의 인스턴스를 생성하지 않고도 내부 클래스의 인스턴스 생성</span></span><br><span class="line">OuterClass.StaticInnerClass staticInnerClass = <span class="keyword">new</span> OuterClass.StaticInnerClass();</span><br></pre></td></tr></table></figure>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/02/20/04_java/180220_inner_class/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/02/19/04_java/180219_interface/"
+                            aria-label=": [Java] 인터페이스(Interface)"
+                        >
+                            [Java] 인터페이스(Interface)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-02-19T00:00:00+09:00">
+	
+		    2018/02/19
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="인터페이스"><a href="#인터페이스" class="headerlink" title="인터페이스"></a>인터페이스</h1><p><u>모든 메소드가 선언만 있고 구현부가 없는 클래스</u>를 <code>인터페이스</code>라고 한다. 인터페이스는 특정 규격을 준수하도록 강제하는데 사용한다.</p>
+<p>인터페이스를 선언할 때는 키워드 <code>interface</code>를 사용한다. 인터페이스에는 메서드를 선언만 하고 구현은 하지 않는다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Database</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">save</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    <span class="keyword">void</span> <span class="title">delete</span><span class="params">()</span></span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>인터페이스는 인스턴스 생성할 수 없다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Database db = <span class="keyword">new</span> Database();   <span class="comment">// 아래와 같은 에러가 발생합니다.</span></span><br><span class="line"><span class="comment">// &#x27;Database&#x27; is abstract; cannot be instantiated</span></span><br></pre></td></tr></table></figure>
+<p>따라서 인터페이스를 구현해야한다. 인터페이스를 구현한 클래스를 <code>구현체(Imlementation)</code>라고 한다. 인터페이스를 구현할 때는 키워드 <code>implements</code>를 사용한다.</p>
+<p>인터페이스 <code>Database</code> 규격을 따르는 클래스 두 개를 구현해보자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MySQL</span> <span class="keyword">implements</span> <span class="title">Database</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">save</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        OracleClient client = <span class="keyword">new</span> OracleClient()</span><br><span class="line">        client.save()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">delete</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        OracleClient client = <span class="keyword">new</span> OracleClient()</span><br><span class="line">        client.delete()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Realm</span> <span class="keyword">implements</span> <span class="title">Database</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">save</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Realm realm = <span class="keyword">new</span> Realm()</span><br><span class="line">        realm.save()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">delete</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Realm realm = <span class="keyword">new</span> Realm()</span><br><span class="line">        realm.delete()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 예제에서는 <code>Database</code>라는 규격을 따르도록 강제하고있다. 이렇게 하면 <code>Database</code>를 사용하는 입장에서 실제 구현체가 무엇인지 신경쓰지 않고 사용할 수 있다. 이를 이처럼 인터페이스에 다양한 구현체를 할당할 수 있는 것을 어려운 용어로 <code>다형성(Polymorphism)</code>이라고 한다.</p>
+<p>다형성을 예제를 통해 살펴보겠습니다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginViewModel</span> <span class="keyword">implements</span> <span class="title">ViewModel</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    Database db = <span class="keyword">new</span> MySQL()</span><br><span class="line">    db.save()</span><br><span class="line">    </span><br><span class="line">    db = <span class="keyword">new</span> Realm()</span><br><span class="line">    db.save()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>변수 <code>db</code>에 <code>MySQL</code>의 인스턴스가 할당되든 <code>Realm</code>의 인스턴스가 할당되는 <code>save()</code>메소드를 호출할 수 있다. <code>MySql</code>클래스와 <code>Realm</code>클래스가 <code>Database</code>인터페이스의 표준을 따르고 있기 때문이다. </p>
+<p>이처럼 인터페이스와 다형성을 사용하면 유지보수성을 향상시킬 수 있다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/02/19/04_java/180219_interface/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/02/18/04_java/180218_abstract_class/"
                             aria-label=": [Java] 추상 클래스(Abstract Class)"
                         >
@@ -811,262 +1016,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/02/11/04_java/180211_class_instance_object/"
-                            aria-label=": [Java] Class, Instance, Object"
-                        >
-                            [Java] Class, Instance, Object
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-02-11T00:00:00+09:00">
-	
-		    2018/02/11
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="객체지향-프로그래밍"><a href="#객체지향-프로그래밍" class="headerlink" title="객체지향 프로그래밍"></a>객체지향 프로그래밍</h1><p>자바는 모든 대상을 <code>객체(Object)</code>로 바라본다. 이러한 점에서 자바는 <code>객체지향 프로그래밍(Object-oriented Programming)</code>언어다. 객체지향 프로그래밍을 이해하려면 클래스와 인스턴스에 대해 알아야한다.</p>
-<h1 id="클래스와-인스턴스"><a href="#클래스와-인스턴스" class="headerlink" title="클래스와 인스턴스"></a>클래스와 인스턴스</h1><p>클래스와 인스턴스를 설명할 때 와플 기계와 와플을 예로 든다.<br><img src="1.png"></p>
-<p><code>클래스(Class)</code>는 <u>인스턴스를 만드는 틀</u>, <code>인스턴스(Instance)</code>는 <u>클래스로 만든 무언가</u>다. 즉 클래스는 와플 기계, 인스턴스 와플이다. 클래스를 코드로 표현하면 다음과 같다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Waffle</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>인스턴스는 다음과 같이 생성한다. 키워드 <code>new</code>를 사용하고 클래스 이름 뒤에 <code>()</code>를 붙여주면 된다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Waffle waffle = <span class="keyword">new</span> Waffle()</span><br></pre></td></tr></table></figure>
-<p>이렇게 만든 인스턴스는 <code>객체(Object)</code>라고도 한다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/02/11/04_java/180211_class_instance_object/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/02/10/04_java/180210_collection_map/"
-                            aria-label=": [Java] 컬렉션 프레임워크 - (3) 맵(Map)"
-                        >
-                            [Java] 컬렉션 프레임워크 - (3) 맵(Map)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-02-10T00:00:00+09:00">
-	
-		    2018/02/10
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="컬렉션-프레임워크"><a href="#컬렉션-프레임워크" class="headerlink" title="컬렉션 프레임워크"></a>컬렉션 프레임워크</h1><p><code>배열(Array)</code>은 생성할 때 크기가 결정된다. 따라서 배열이 생성되면 동적으로 데이터를 추가하거나 삭제할 수 없다. 이를 해결하기 위해 Java API는 <code>컬렉션 프레임워크(Collection Framework)</code>를 지원한다.<br><img src="1.png"></p>
-<p>컬렉션 프레임워크는 <code>java.util</code> 패키지에 포함되어있으며, 가장 중요한 요소는 <code>List</code>, <code>Set</code>, <code>Map</code>이다.</p>
-<h1 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h1><p><code>맵(Map)</code>은 <code>키(Key)</code>와 <code>값(Value)</code>으로 구성된 데이터 집합이다. 키를 통해 값을 저장하거나 읽어오거나 변경하거나 삭제할 수 있다. 자바 API에서 제공하는 Map의 정의는 다음과 같다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Map</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">size</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">V <span class="title">get</span><span class="params">(Object key)</span></span>;</span><br><span class="line">    <span class="function">V <span class="title">put</span><span class="params">(K key, V value)</span></span>;</span><br><span class="line">    <span class="function">V <span class="title">remove</span><span class="params">(Object key)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">putAll</span><span class="params">(Map&lt;? extends K, ? extends V&gt; m)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span></span>;</span><br><span class="line">    ... </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>위에서 보는 것처럼 Map은 Interface이므로 인스턴스를 생성할 수 없다. 따라서 <code>Map</code>의 구현체가 필요하다. 다행히 Java API에서는 <code>HashMap</code>, <code>TreeMap</code>, <code>LinkedMap</code>이라는 구현체를 제공한다.</p>
-<h1 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h1><p><code>HashMap</code>은 다음과 같이 선언하고 초기화한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Integer, String&gt; players = <span class="keyword">new</span> HashMap&lt;Integer, String&gt;();</span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 추가한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">players.put(<span class="number">7</span>, <span class="string">&quot;Ronaldo&quot;</span>);</span><br><span class="line">players.put(<span class="number">9</span>, <span class="string">&quot;Benzema&quot;</span>);</span><br><span class="line">players.put(<span class="number">11</span>, <span class="string">&quot;Bale&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(players.toString()); <span class="comment">// &#123;7=Ronaldo, 9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 변경할 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">players.put(<span class="number">7</span>, <span class="string">&quot;Son&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(players.toString()); <span class="comment">// &#123;7=Son, 9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 삭제할 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">players.remove(<span class="number">7</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(players.toString()); <span class="comment">// &#123;9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="TreeMap"><a href="#TreeMap" class="headerlink" title="TreeMap"></a>TreeMap</h1><p><code>TreeMap</code>은 다음과 같이 선언하고 초기화한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Integer, String&gt; players = <span class="keyword">new</span> TreeMap&lt;Integer, String&gt;();</span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 추가한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">players.put(<span class="number">7</span>, <span class="string">&quot;Ronaldo&quot;</span>);</span><br><span class="line">players.put(<span class="number">9</span>, <span class="string">&quot;Benzema&quot;</span>);</span><br><span class="line">players.put(<span class="number">11</span>, <span class="string">&quot;Bale&quot;</span>);</span><br><span class="line"></span><br><span class="line">players.toString(); <span class="comment">// &#123;7=Ronaldo, 9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 변경할 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">players.put(<span class="number">7</span>, <span class="string">&quot;Son&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(players.toString()); <span class="comment">// &#123;7=Son, 9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 삭제할 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">players.remove(<span class="number">7</span>);</span><br><span class="line">System.out.println(players.toString()); <span class="comment">// &#123;9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="LinkedHashMap"><a href="#LinkedHashMap" class="headerlink" title="LinkedHashMap"></a>LinkedHashMap</h1><p><code>LinkedHashMap</code>은 다음과 같이 선언하고 초기화한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Integer, String&gt; players = <span class="keyword">new</span> LinkedHashMap&lt;Integer, String&gt;();</span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 추가한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">players.put(<span class="number">7</span>, <span class="string">&quot;Ronaldo&quot;</span>);</span><br><span class="line">players.put(<span class="number">9</span>, <span class="string">&quot;Benzema&quot;</span>);</span><br><span class="line">players.put(<span class="number">11</span>, <span class="string">&quot;Bale&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(players.toString()); <span class="comment">// &#123;7=Ronaldo, 9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 변경할 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">players.put(<span class="number">7</span>, <span class="string">&quot;Son&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(players.toString()); <span class="comment">// &#123;7=Son, 9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 삭제할 수 있다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">players.remove(<span class="number">7</span>);</span><br><span class="line">System.out.println(players.toString()); <span class="comment">// &#123;9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="HashMap-vs-LinkedHashMap"><a href="#HashMap-vs-LinkedHashMap" class="headerlink" title="HashMap vs. LinkedHashMap"></a>HashMap vs. LinkedHashMap</h1><p><code>HashMap</code>은 데이터 삽입 순서를 보장하지 않는다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Integer, String&gt; hashMap = <span class="keyword">new</span> HashMap&lt;Integer, String&gt;();</span><br><span class="line"></span><br><span class="line">hashMap.put(<span class="number">11</span>, <span class="string">&quot;Bale&quot;</span>);</span><br><span class="line">hashMap.put(<span class="number">7</span>, <span class="string">&quot;Ronaldo&quot;</span>);</span><br><span class="line">hashMap.put(<span class="number">1</span>, <span class="string">&quot;Courtois&quot;</span>);</span><br><span class="line">hashMap.put(<span class="number">9</span>, <span class="string">&quot;Benzema&quot;</span>);</span><br><span class="line">hashMap.put(<span class="number">4</span>, <span class="string">&quot;Ramos&quot;</span>);</span><br><span class="line">hashMap.put(<span class="number">8</span>, <span class="string">&quot;Kroos&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(hashMap.toString()); </span><br><span class="line"><span class="comment">// &#123;1=Courtois, 4=Ramos, 7=Ronaldo, 8=Kroos, 9=Benzema, 11=Bale&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>반면 <code>LinkedHashMap</code>은 데이터 삽입 순서를 보장한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Integer, String&gt; linkedHashMap = <span class="keyword">new</span> LinkedHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">linkedHashMap.put(<span class="number">11</span>, <span class="string">&quot;Bale&quot;</span>);</span><br><span class="line">linkedHashMap.put(<span class="number">7</span>, <span class="string">&quot;Ronaldo&quot;</span>);</span><br><span class="line">linkedHashMap.put(<span class="number">1</span>, <span class="string">&quot;Courtois&quot;</span>);</span><br><span class="line">linkedHashMap.put(<span class="number">9</span>, <span class="string">&quot;Benzema&quot;</span>);</span><br><span class="line">linkedHashMap.put(<span class="number">4</span>, <span class="string">&quot;Ramos&quot;</span>);</span><br><span class="line">linkedHashMap.put(<span class="number">8</span>, <span class="string">&quot;Kroos&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(linkedHashMap.toString()); </span><br><span class="line"><span class="comment">// &#123;11=Bale, 7=Ronaldo, 1=Courtois, 9=Benzema, 4=Ramos, 8=Kroos&#125;</span></span><br></pre></td></tr></table></figure>
-<h1 id="HashMap-vs-TreeMap"><a href="#HashMap-vs-TreeMap" class="headerlink" title="HashMap vs. TreeMap"></a>HashMap vs. TreeMap</h1><p><code>HashMap</code>은 내부적으로 Hash Table을 통해 구현되어있다. 따라서 데이터를 삽입, 삭제하거나 포함여부를 확인할 때 <code>O(1)</code>의 시간복잡도를 가진다. 또한 데이터가 임의의 순서로 배치된다.</p>
-<p>반면 <code>TreeMap</code>은 내부적으로 Binary Search Tree를 통해 구현되어있다. 따라서 데이터를 삽입, 삭제하거나 포함 여부를 확인할 때 <code>O(log n)</code>의 시간복잡도를 가진다. 또한 Binary Search Tree를 사용하기 때문에 데이터가 정렬된다. </p>
-<p>데이터의 삽입, 삭제, 포함여부 확인이 빈번할 때는 <code>HashMap</code>을 사용한다. 반면 순서 보장이나 정렬이 필요하면 <code>LinkedHashMap</code>이나 <code>TreeMap</code>을 사용한다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/02/10/04_java/180210_collection_map/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/02/09/04_java/180209_collection_set/"
-                            aria-label=": [Java] 컬렉션 프레임워크 - (2) 집합(Set)"
-                        >
-                            [Java] 컬렉션 프레임워크 - (2) 집합(Set)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-02-09T00:00:00+09:00">
-	
-		    2018/02/09
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="컬렉션-프레임워크"><a href="#컬렉션-프레임워크" class="headerlink" title="컬렉션 프레임워크"></a>컬렉션 프레임워크</h1><p><code>배열(Array)</code>은 생성할 때 크기가 결정된다. 따라서 배열이 생성되면 동적으로 데이터를 추가하거나 삭제할 수 없다. 이를 해결하기 위해 Java API는 <code>컬렉션 프레임워크(Collection Framework)</code>를 지원한다.<br><img src="1.png"></p>
-<p>컬렉션 프레임워크는 <code>java.util</code> 패키지에 포함되어있으며, 가장 중요한 요소는 <code>List</code>, <code>Set</code>, <code>Map</code>이다.</p>
-<h1 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h1><p>자바 API에서 제공하는 <code>Set</code>의 정의는 다음과 같다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Set</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Collection</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">size</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">contains</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">removeAll</span><span class="params">(Collection&lt;?&gt; c)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Set은 Interface이므로 인스턴스를 생성할 수 없다. 따라서 Set의 구현체가 필요하다. 다행히 자바 API에서는 <code>HashSet</code>, <code>TreeSet</code>, <code>LinkedHashSet</code>이라는 구현체를 제공한다. </p>
-<h1 id="HashSet"><a href="#HashSet" class="headerlink" title="HashSet"></a>HashSet</h1><p><code>HashSet</code>은 다음과 같이 생성한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; hashSet = <span class="keyword">new</span> HashSet&lt;Integer&gt;();</span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 추가한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hashSet.add(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-<p><code>Set</code>은 중복을 허용하지 않는다. 동일한 데이터를 여러 개 추가해도 한 개만 유지된다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; hashSet = <span class="keyword">new</span> HashSet&lt;Integer&gt;();</span><br><span class="line"></span><br><span class="line">hashSet.add(<span class="number">3</span>);</span><br><span class="line">hashSet.add(<span class="number">1</span>);</span><br><span class="line">hashSet.add(<span class="number">1</span>);</span><br><span class="line">hashSet.add(<span class="number">1</span>);</span><br><span class="line">hashSet.add(<span class="number">2</span>);</span><br><span class="line">hashSet.add(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(hashSet.toString());     <span class="comment">// [1, 2, 3]</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h1><p><code>TreeSet</code>은 다음과 같이 생성한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; treeSet = <span class="keyword">new</span> TreeSet&lt;Integer&gt;();</span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 추가한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">treeSet.add(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-<p><code>TreeSet</code> 역시 중복을 허용하지 않는다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; treeSet = <span class="keyword">new</span> TreeSet&lt;Integer&gt;();</span><br><span class="line">treeSet.add(<span class="number">3</span>);</span><br><span class="line">treeSet.add(<span class="number">1</span>);</span><br><span class="line">treeSet.add(<span class="number">1</span>);</span><br><span class="line">treeSet.add(<span class="number">1</span>);</span><br><span class="line">treeSet.add(<span class="number">2</span>);</span><br><span class="line">treeSet.add(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(treeSet.toString());     <span class="comment">// [1, 2, 3]</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="LinkedHashSet"><a href="#LinkedHashSet" class="headerlink" title="LinkedHashSet"></a>LinkedHashSet</h1><p><code>LinkedHashSet</code>은 다음과 같이 생성한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; linkedHashSet = <span class="keyword">new</span> LinkedHashSet&lt;&gt;();</span><br></pre></td></tr></table></figure>
-<p>다음과 같이 데이터를 추가한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">linkedHashSet.add(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-<p><code>LinkedHashSet</code> 역시 중복을 허용하지 않는다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; linkedHashSet = <span class="keyword">new</span> LinkedHashSet&lt;&gt;();</span><br><span class="line">linkedHashSet.add(<span class="number">3</span>);</span><br><span class="line">linkedHashSet.add(<span class="number">1</span>);</span><br><span class="line">linkedHashSet.add(<span class="number">1</span>);</span><br><span class="line">linkedHashSet.add(<span class="number">2</span>);</span><br><span class="line">linkedHashSet.add(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(linkedHashSet.toString());   <span class="comment">// [3, 1, 2]</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="HashSet-vs-LinkedHashSet"><a href="#HashSet-vs-LinkedHashSet" class="headerlink" title="HashSet vs. LinkedHashSet"></a>HashSet vs. LinkedHashSet</h1><p><code>HashSet</code>은 데이터 삽입 순서를 보장하지 않는다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; hashSet = <span class="keyword">new</span> HashSet&lt;Integer&gt;();</span><br><span class="line"></span><br><span class="line">hashSet.add(<span class="number">5</span>);</span><br><span class="line">hashSet.add(<span class="number">3</span>);</span><br><span class="line">hashSet.add(<span class="number">1</span>);</span><br><span class="line">hashSet.add(<span class="number">2</span>);</span><br><span class="line">hashSet.add(<span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(hashSet.toString());   <span class="comment">// [1, 2, 3, 4, 5]</span></span><br></pre></td></tr></table></figure>
-<p>반면 <code>LinkedHashSet</code>은 데이터 삽입 순서를 보장한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; linkedHashSet = <span class="keyword">new</span> LinkedHashSet&lt;&gt;();</span><br><span class="line">linkedHashSet.add(<span class="number">5</span>);</span><br><span class="line">linkedHashSet.add(<span class="number">3</span>);</span><br><span class="line">linkedHashSet.add(<span class="number">1</span>);</span><br><span class="line">linkedHashSet.add(<span class="number">2</span>);</span><br><span class="line">linkedHashSet.add(<span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(linkedHashSet.toString());   <span class="comment">// [5, 3, 1, 2, 4]</span></span><br></pre></td></tr></table></figure>
-
-
-<h1 id="HashSet-vs-TreeSet"><a href="#HashSet-vs-TreeSet" class="headerlink" title="HashSet vs. TreeSet"></a>HashSet vs. TreeSet</h1><p><code>HashSet</code>은 내부적으로 Hash Table을 통해 구현되어있다. 따라서 데이터를 삽입, 삭제하거나 포함여부를 확인할 때 <code>O(1)</code>의 시간복잡도를 가진다. 또한 데이터가 임의의 순서로 배치된다.</p>
-<p>반면 <code>TreeSet</code>은 내부적으로 Binary Search Tree를 통해 구현되어있다. 따라서 데이터를 삽입, 삭제하거나 포함 여부를 확인할 때 <code>O(log n)</code>의 시간복잡도를 가진다. 또한 Binary Search Tree를 사용하기 때문에 데이터가 정렬된다.  </p>
-<p>데이터의 삽입, 삭제, 포함여부 확인이 빈번할 때는 <code>HashSet</code>을 사용한다. 반면 순서 보장이나 정렬이 필요하면 <code>LinkedHashSet</code>이나 <code>TreeSet</code>을 사용한다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/02/09/04_java/180209_collection_set/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1093,7 +1042,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 23 of 24</li>
+        <li class="pagination-number">page 23 of 25</li>
     </ul>
 </div>
 
