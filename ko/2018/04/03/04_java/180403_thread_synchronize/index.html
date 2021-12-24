@@ -1,0 +1,718 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Java] 스레드(Thread) 동기화 - synchronized, wait(), notify(), notifyAll() - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n스레드 동기화멀티 스레드 환경에서는 여러 스레드가 한 데이터을 동시에 조작할 수 있다. 이 때문에 결과를 예측할 수 없게 될 수도 있다.이 때문에 하나의 스레드가 데이터를 조작할 때 다른 스레드가 데이터를 조작할 수 없도록 공유데이터에 락(Lock)을 걸 수 있다. 이를 동기화(Synchronization)이라고 한다.\n예제예제를 살펴보자. 잔고 데이터를 가지고 있는 계좌인 Account클래스는 다음과 같다. \nAccount.java12345678910111213141516171819class Account &#123;    private int balance = 1000;    public int getBalance() &#123;        return balance;    &#125;    public void withdraw(int money) &#123;        if (balance &gt;= money) &#123;            try &#123;                Thread.sleep(1000);                balance -= money;            &#125; catch (InterruptedException e) &#123;                e.printStackTrace();            &#125;        &#125;    &#125;&#125;\nWorkerThread클래스는 다음과 같다. 이 스레드는 잔고가 0원 이상일 때만 200원 인출을 요청한다. \nWorkerThread.java123456789101112131415class WorkerThread extends Thread &#123;    private Account account;    WorkerThread(Account account) &#123;        this.account = account;    &#125;    @Override    public void run() &#123;        while (account.getBalance() &gt; 0) &#123;            account.withdraw(200);            System.out.println(&quot;Balance: &quot; + account.getBalance());        &#125;    &#125;&#125;\nMain클래스는 다음과 같다.\nMain.java123456789101112public class Main &#123;    public static void main(String[] args) &#123;        Account account = new Account();        WorkerThread t1 = new WorkerThread(account);        WorkerThread t2 = new WorkerThread(account);        t1.start();        t2.start();    &#125;&#125;\n애플리케이션을 실행하면 다음과 같이 출력된다.\n123456Balance: 600Balance: 600Balance: 400Balance: 200Balance: -200Balance: -200\n논리적으로는 출금(withdraw())을 호출할 때 출금액이 잔액보다 크면 잔액에서 출금을 마이너스하면 안된다. \n12345678910public void withdraw(int money) &#123;    if (balance &gt;= money) &#123;        try &#123;            Thread.sleep(1000);            balance -= money;        &#125; catch (InterruptedException e) &#123;            e.printStackTrace();        &#125;    &#125;&#125;\n그러나 두 스레드가 공유 데이터에 동시에 접근하기 때문에 잔액이 마이너스 값으로 출력된다. 따라서 동기화가 필요하다. \n동기화는 두 가지 방법으로 할 수 있다.\n(1) 방법 1공유 데이터에 접근하는 메소드에 synchronized 키워드를 붙이면 된다.\n12345678910public synchronized void withdraw(int money) &#123;    if (balance &gt;= money) &#123;        try &#123;            Thread.sleep(1000);            balance -= money;        &#125; catch (InterruptedException e) &#123;            e.printStackTrace();        &#125;    &#125;&#125;\n특정 스레드가 synchronized메소드를 실행할 때 메소드 안에서 접근하는 데이터에 락(Lock)을 건다. 락이 걸린 상태에서 다른 스레드가 이 메소드를 호출하면 락이 풀릴 때까지 기다리게 된다.\n(2) 방법 2공유 데이터 자체에 synchronized 키워드를 붙일 수도 있다.\n123456789101112public void withdraw(int money) &#123;    synchronized (this) &#123;        if (balance &gt;= money) &#123;            try &#123;                Thread.sleep(1000);                balance -= money;            &#125; catch (InterruptedException e) &#123;                e.printStackTrace();            &#125;        &#125;    &#125;&#125;\n\n데드 락동기화 과정에서 가장 조심해야할 부분이 데드락이다. 데드락(Deadlock)은 두 스레드가 서로 상대방이 락을 풀 때까지 기다리고 있기 때문에 결과적으로 아무것도 하지 못하는 상태를 가리킨다.\nwait(), notify(), notifyAll()Object 클래스에 정의된 wait(), notify(), notifyAll()을 사용하면 동기화의 효율을 높일 수 있다.\n\nwait(): 한 스레드가 자원에 락을 걸고 오래 기다리는 대신 다른 스레드에게 제어권을 넘겨주고 대기 상태로 들어간다.\nnotify(): 다른 스레드는 작업을 하다가 notify()를 호출하며, 대기 상태에 들어갔던 스레드가 다시 실행 상태가 된다.\n\nAccount클래스 예제에 wait()와 notify()를 적용하면 다음과 같다.\nAccount.java123456789101112131415161718192021222324252627class Account &#123;    private int balance = 1000;    public int getBalance() &#123;        return balance;    &#125;    // 인출    public synchronized void withdraw(int money) &#123;        while (balance &lt; money) &#123;            try &#123;                Thread.sleep(1000);                wait()            &#125; catch (InterruptedException e) &#123;                e.printStackTrace();            &#125;        &#125;        balance -= money;    &#125;    // 예금    public synchronized void deposit(int money) &#123;        balance += money;        notify();    &#125;&#125;","dateCreated":"2018-04-03T00:00:00+09:00","dateModified":"2021-12-23T02:24:23+09:00","datePublished":"2018-04-03T00:00:00+09:00","description":"","headline":"[Java] 스레드(Thread) 동기화 - synchronized, wait(), notify(), notifyAll()","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/","keywords":"Java"}</script>
+    <meta name="description" content="스레드 동기화멀티 스레드 환경에서는 여러 스레드가 한 데이터을 동시에 조작할 수 있다. 이 때문에 결과를 예측할 수 없게 될 수도 있다.이 때문에 하나의 스레드가 데이터를 조작할 때 다른 스레드가 데이터를 조작할 수 없도록 공유데이터에 락(Lock)을 걸 수 있다. 이를 동기화(Synchronization)이라고 한다. 예제예제를 살펴보자. 잔고 데이터를">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Java] 스레드(Thread) 동기화 - synchronized, wait(), notify(), notifyAll()">
+<meta property="og:url" content="https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="스레드 동기화멀티 스레드 환경에서는 여러 스레드가 한 데이터을 동시에 조작할 수 있다. 이 때문에 결과를 예측할 수 없게 될 수도 있다.이 때문에 하나의 스레드가 데이터를 조작할 때 다른 스레드가 데이터를 조작할 수 없도록 공유데이터에 락(Lock)을 걸 수 있다. 이를 동기화(Synchronization)이라고 한다. 예제예제를 살펴보자. 잔고 데이터를">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/1.png">
+<meta property="article:published_time" content="2018-04-02T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-22T17:24:23.781Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Java] 스레드(Thread) 동기화 - synchronized, wait(), notify(), notifyAll()
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2018-04-03T00:00:00+09:00">
+	
+		    2018/04/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="스레드-동기화"><a href="#스레드-동기화" class="headerlink" title="스레드 동기화"></a>스레드 동기화</h1><p>멀티 스레드 환경에서는 여러 스레드가 한 데이터을 동시에 조작할 수 있다. 이 때문에 결과를 예측할 수 없게 될 수도 있다.<br><img src="1.png"><br>이 때문에 하나의 스레드가 데이터를 조작할 때 다른 스레드가 데이터를 조작할 수 없도록 공유데이터에 <code>락(Lock)</code>을 걸 수 있다. 이를 <code>동기화(Synchronization)</code>이라고 한다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>예제를 살펴보자. 잔고 데이터를 가지고 있는 계좌인 <code>Account</code>클래스는 다음과 같다. </p>
+<figure class="highlight java"><figcaption><span>Account.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Account</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> balance = <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getBalance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> balance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (balance &gt;= money) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                balance -= money;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>WorkerThread</code>클래스는 다음과 같다. 이 스레드는 잔고가 0원 이상일 때만 200원 인출을 요청한다. </p>
+<figure class="highlight java"><figcaption><span>WorkerThread.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WorkerThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Account account;</span><br><span class="line"></span><br><span class="line">    WorkerThread(Account account) &#123;</span><br><span class="line">        <span class="keyword">this</span>.account = account;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (account.getBalance() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            account.withdraw(<span class="number">200</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;Balance: &quot;</span> + account.getBalance());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Main</code>클래스는 다음과 같다.</p>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Account account = <span class="keyword">new</span> Account();</span><br><span class="line"></span><br><span class="line">        WorkerThread t1 = <span class="keyword">new</span> WorkerThread(account);</span><br><span class="line">        WorkerThread t2 = <span class="keyword">new</span> WorkerThread(account);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>애플리케이션을 실행하면 다음과 같이 출력된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Balance: 600</span><br><span class="line">Balance: 600</span><br><span class="line">Balance: 400</span><br><span class="line">Balance: 200</span><br><span class="line">Balance: -200</span><br><span class="line">Balance: -200</span><br></pre></td></tr></table></figure>
+<p>논리적으로는 출금(<code>withdraw()</code>)을 호출할 때 출금액이 잔액보다 크면 잔액에서 출금을 마이너스하면 안된다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (balance &gt;= money) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            balance -= money;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>그러나 두 스레드가 공유 데이터에 동시에 접근하기 때문에 잔액이 마이너스 값으로 출력된다. 따라서 동기화가 필요하다. </p>
+<p>동기화는 두 가지 방법으로 할 수 있다.</p>
+<h3 id="1-방법-1"><a href="#1-방법-1" class="headerlink" title="(1) 방법 1"></a>(1) 방법 1</h3><p>공유 데이터에 접근하는 메소드에 <code>synchronized</code> 키워드를 붙이면 된다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (balance &gt;= money) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            balance -= money;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>특정 스레드가 <code>synchronized</code>메소드를 실행할 때 메소드 안에서 접근하는 데이터에 <code>락(Lock)</code>을 건다. 락이 걸린 상태에서 다른 스레드가 이 메소드를 호출하면 락이 풀릴 때까지 기다리게 된다.</p>
+<h3 id="2-방법-2"><a href="#2-방법-2" class="headerlink" title="(2) 방법 2"></a>(2) 방법 2</h3><p>공유 데이터 자체에 <code>synchronized</code> 키워드를 붙일 수도 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (balance &gt;= money) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                balance -= money;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="데드-락"><a href="#데드-락" class="headerlink" title="데드 락"></a>데드 락</h1><p>동기화 과정에서 가장 조심해야할 부분이 데드락이다. <code>데드락(Deadlock)</code>은 두 스레드가 서로 상대방이 락을 풀 때까지 기다리고 있기 때문에 결과적으로 아무것도 하지 못하는 상태를 가리킨다.</p>
+<h1 id="wait-notify-notifyAll"><a href="#wait-notify-notifyAll" class="headerlink" title="wait(), notify(), notifyAll()"></a>wait(), notify(), notifyAll()</h1><p><a href="/ko/2018/03/03/04_java/180303_object_class/">Object</a> 클래스에 정의된 <code>wait()</code>, <code>notify()</code>, <code>notifyAll()</code>을 사용하면 동기화의 효율을 높일 수 있다.</p>
+<ul>
+<li><code>wait()</code>: 한 스레드가 자원에 락을 걸고 오래 기다리는 대신 다른 스레드에게 제어권을 넘겨주고 대기 상태로 들어간다.</li>
+<li><code>notify()</code>: 다른 스레드는 작업을 하다가 <code>notify()</code>를 호출하며, 대기 상태에 들어갔던 스레드가 다시 실행 상태가 된다.</li>
+</ul>
+<p><code>Account</code>클래스 예제에 <code>wait()</code>와 <code>notify()</code>를 적용하면 다음과 같다.</p>
+<figure class="highlight java"><figcaption><span>Account.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Account</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> balance = <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getBalance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> balance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 인출</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (balance &lt; money) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                wait()</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        balance -= money;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 예금</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">deposit</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">        balance += money;</span><br><span class="line">        notify();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Java/" rel="tag">Java</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/04/12_tools/02_gradle/20180404_plugin/"
+                    data-tooltip="[Gradle] Gradle Plugin"
+                    aria-label="이전: [Gradle] Gradle Plugin"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                    data-tooltip="[Gradle] Gradle Task"
+                    aria-label="다음: [Gradle] Gradle Task"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/04/12_tools/02_gradle/20180404_plugin/"
+                    data-tooltip="[Gradle] Gradle Plugin"
+                    aria-label="이전: [Gradle] Gradle Plugin"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
+                    data-tooltip="[Gradle] Gradle Task"
+                    aria-label="다음: [Gradle] Gradle Task"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

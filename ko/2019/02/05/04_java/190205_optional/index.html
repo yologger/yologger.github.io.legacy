@@ -1,0 +1,772 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Java 8] 옵셔널(Optional) - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nJava 언어로 개발을 할 때 가장 많이 발생하는 예외 중 하나가 바로 NullPointException이다. \n12Person person = null;person.getName();\n1Exception in thread &quot;main&quot; java.lang.NullPointerException at Main.main(Main.java:16)\n\n이 예외를 피하기 위해 null을 체크해야하는데 이는 코드를 복잡하게 할 수 있다.\n1234Person person = null;if (person != null) &#123;    person.getName();&#125;\n\nOptionalOptional은 Java 8에서 추가된 기능으로 null이 올 수 있는 객체를 감싼 Wrapper 클래스다. 객체는 Optional의 value 속성에 저장된다.\n12345public final class Optional&lt;T&gt; &#123;    private final T value;    // ...&#125;\nOptional을 다음과 같이 생성한다.\n12Person person = null;Optional&lt;Person&gt; optional = Optional.ofNullable(null);\n이제 null이 아닐 때만 값에 접근할 수 있다.\n1optional.ifPresent(p -&gt; p.getName());\n이제 자세한 Optional 사용법에 대해 알아보자.\nOptional 생성하기(1) Optional.empty()empty()는 값이 빈 Optional을 생성한다.\n123Optional&lt;Person&gt; optional = Optional.empty();System.out.println(optional.isPresent());   // false\n(2) Optional.of()of()에 null일 가능성이 없는 값을 전달하여 Optional을 생성한다.\n12345Person p = new Person(&quot;Paul&quot;);Optional&lt;Person&gt; optional = Optional.of(p);System.out.println(optional.isPresent());       // true\nof()는 값이 없는 경우 NullPointException이 발생시킨다.\n12Person p = null;Optional&lt;Person&gt; optional = Optional.of(p);     // NullPointerException\n\n(3) Optional.ofNullable()ofNullable()은 null일 가능성이 있는 객체를 전달하여 Optional을 생성한다.\n12Optional&lt;Person&gt; optional = Optional.ofNullable(null);System.out.println(optional.isPresent());   // false\n123Person person = new Person(&quot;Paul&quot;);Optional&lt;Person&gt; optional = Optional.ofNullable(person);System.out.println(optional.isPresent());   // true\n\nNull 체크(1) isPresent()isPresent()를 사용하면 객체가 null인지 확인할 수 있다.\n12Optional&lt;Person&gt; optional = Optional.ofNullable(null);System.out.println(optional.isPresent());   // false\n1234Person person = new Person(&quot;Paul&quot;);Optional&lt;Person&gt; optional = Optional.ofNullable(person);System.out.println(optional.isPresent());   // true\n\n(2) ifPresent()ifPresent()는 객체가 null이 아닐 때 람다식을 실행한다.\n1234Person person = new Person(&quot;Paul&quot;);Optional.ofNullable(person)    .ifPresent((p -&gt; System.out.println(p.getName())));\n출력 결과1Paul\n객체가 null이면 람다식을 실행하지 않는다.\n1234Person person = null;Optional.ofNullable(person)    .ifPresent((p -&gt; System.out.println(p.getName())));\n출력 결과1\n\n값 가져오기get()을 사용하면 Optional이 가지고 있는 객체를 가져올 수 있다.\n1String str = Optional.ofNullable(&quot;Hello&quot;).get();\n만약 값이 없다면 NoSuchElementException이 발생한다.\n1String str = Optional.ofNullable(null).get();   // NoSuchElementException\n\n필터링filter()을 사용하면 객체를 필터링할 수 있다.\n123Optional.of(&quot;ABCD&quot;)    .filter(v -&gt; v.startsWith(&quot;AB&quot;))    .ifPresent(value -&gt; System.out.println(value));\n\n출력 결과1ABCD\n\n123Optional.of(&quot;ABCD&quot;)    .filter(v -&gt; v.startsWith(&quot;XY&quot;))    .ifPresent(value -&gt; System.out.println(value));\n출력 결과1\n\n변환(1) map()map()을 사용하면 객체를 변환할 수 있다.\n123Optional.of(&quot;ABCD&quot;)    .map(value -&gt; value.toLowerCase())    .ifPresent(value -&gt; System.out.println(value));\n\n출력 결과1abcd\n위 코드는 메소드 참조을 사용하여 다음과 같이 단축할 수도 있다.\n123Optional.of(&quot;ABCD&quot;)    .map(String::toLowerCase)    .ifPresent(System.out::println);\n\n(2) flatMap()flatMap()을 사용하면 다른 Optional로 반환할 수 있다.\n123Optional.of(&quot;ABCD&quot;)    .flatMap(value -&gt; Optional.of(value.toLowerCase()))    .ifPresent(System.out::println);    // abcd\n\n\n기타(1) orElse()orElse()는 Optional이 비어있다면 orElse()로 지정한 값을 반환한다.\n123456String str = &quot;Something&quot;;String value = Optional.ofNullable(str)        .orElse(&quot;Another thing&quot;);System.out.println(value);  // Something\n123456String str = null;String value = Optional.ofNullable(str)        .orElse(&quot;Another Thing&quot;);System.out.println(value);  // Another Thing\n\n(2) orElseGet()orElseGet()는 Optional이 비어있다면 람다식을 실행하고 람다식의 반환값을 반환한다.\n123456String str = &quot;Something&quot;;String value = Optional.ofNullable(str)        .orElseGet(() -&gt; &quot;Another thing&quot;);System.out.println(value);  // Something\n123456String str = null;String value = Optional.ofNullable(str)        .orElseGet(() -&gt; &quot;Another thing&quot;);System.out.println(value);  // Another thing\n(3) orElseThrow()orElseThrow()는 Optional이 비어있다면 예외를 발생시킨다.\n123456String str = &quot;Something&quot;;String value = Optional.ofNullable(str)        .orElseThrow(NoSuchElementException::new);System.out.println(value);      // Something\n123456String str = null;String value = Optional.ofNullable(str)        .orElseThrow(NoSuchElementException::new);  // Exception in thread &quot;main&quot; java.util.NoSuchElementExceptionSystem.out.println(value);\n\n원시타입 옵셔널물론 제너릭과 Wrapper 클래스를 사용하면 원시 타입의 옵셔널을 생성할 수 있다.\n123Optional&lt;Integer&gt; optional = Optional.of(1);optional.ifPresent(System.out::println);    // 1\n그러나 제네릭과 Wrapper 클래스를 사용하지 않고 원시 타입의 옵셔널을 생성할 수도 있다.\n123OptionalInt optional = OptionalInt.of(1);optional.ifPresent(System.out::println);    // 1\n제공되는 원시 타입의 옵셔널은 다음과 같다.\n\nOptionalInt\nOptionalLong\nOptionalDouble\n\n","dateCreated":"2019-02-05T00:00:00+09:00","dateModified":"2021-12-24T18:33:22+09:00","datePublished":"2019-02-05T00:00:00+09:00","description":"","headline":"[Java 8] 옵셔널(Optional)","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/","keywords":"Java, Java 8"}</script>
+    <meta name="description" content="Java 언어로 개발을 할 때 가장 많이 발생하는 예외 중 하나가 바로 NullPointException이다.  12Person person &#x3D; null;person.getName(); 1Exception in thread &quot;main&quot; java.lang.NullPointerException at Main.main(Main.java:16)">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Java 8] 옵셔널(Optional)">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="Java 언어로 개발을 할 때 가장 많이 발생하는 예외 중 하나가 바로 NullPointException이다.  12Person person &#x3D; null;person.getName(); 1Exception in thread &quot;main&quot; java.lang.NullPointerException at Main.main(Main.java:16)">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2019-02-04T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-24T09:33:22.406Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Java 8">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Java 8] 옵셔널(Optional)
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-02-05T00:00:00+09:00">
+	
+		    2019/02/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>, <a class="category-link" href="/ko/categories/Java/Java-8/">Java 8</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<p>Java 언어로 개발을 할 때 가장 많이 발생하는 예외 중 하나가 바로 <code>NullPointException</code>이다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">null</span>;</span><br><span class="line">person.getName();</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread &quot;main&quot; java.lang.NullPointerException at Main.main(Main.java:16)</span><br></pre></td></tr></table></figure>
+
+<p>이 예외를 피하기 위해 <code>null</code>을 체크해야하는데 이는 코드를 복잡하게 할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">if</span> (person != <span class="keyword">null</span>) &#123;</span><br><span class="line">    person.getName();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Optional"><a href="#Optional" class="headerlink" title="Optional"></a>Optional</h1><p><code>Optional</code>은 Java 8에서 추가된 기능으로 <code>null</code>이 올 수 있는 객체를 감싼 Wrapper 클래스다. 객체는 Optional의 <code>value</code> 속성에 저장된다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Optional</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> T value;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Optional을 다음과 같이 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">null</span>;</span><br><span class="line">Optional&lt;Person&gt; optional = Optional.ofNullable(<span class="keyword">null</span>);</span><br></pre></td></tr></table></figure>
+<p>이제 <code>null</code>이 아닐 때만 값에 접근할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">optional.ifPresent(p -&gt; p.getName());</span><br></pre></td></tr></table></figure>
+<p>이제 자세한 Optional 사용법에 대해 알아보자.</p>
+<h1 id="Optional-생성하기"><a href="#Optional-생성하기" class="headerlink" title="Optional 생성하기"></a>Optional 생성하기</h1><h3 id="1-Optional-empty"><a href="#1-Optional-empty" class="headerlink" title="(1) Optional.empty()"></a>(1) Optional.empty()</h3><p><code>empty()</code>는 값이 빈 Optional을 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Person&gt; optional = Optional.empty();</span><br><span class="line"></span><br><span class="line">System.out.println(optional.isPresent());   <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-Optional-of"><a href="#2-Optional-of" class="headerlink" title="(2) Optional.of()"></a>(2) Optional.of()</h3><p><code>of()</code>에 null일 가능성이 없는 값을 전달하여 Optional을 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Person p = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line"></span><br><span class="line">Optional&lt;Person&gt; optional = Optional.of(p);</span><br><span class="line"></span><br><span class="line">System.out.println(optional.isPresent());       <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+<p><code>of()</code>는 값이 없는 경우 NullPointException이 발생시킨다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person p = <span class="keyword">null</span>;</span><br><span class="line">Optional&lt;Person&gt; optional = Optional.of(p);     <span class="comment">// NullPointerException</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Optional-ofNullable"><a href="#3-Optional-ofNullable" class="headerlink" title="(3) Optional.ofNullable()"></a>(3) Optional.ofNullable()</h3><p><code>ofNullable()</code>은 null일 가능성이 있는 객체를 전달하여 Optional을 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Person&gt; optional = Optional.ofNullable(<span class="keyword">null</span>);</span><br><span class="line">System.out.println(optional.isPresent());   <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line">Optional&lt;Person&gt; optional = Optional.ofNullable(person);</span><br><span class="line">System.out.println(optional.isPresent());   <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Null-체크"><a href="#Null-체크" class="headerlink" title="Null 체크"></a>Null 체크</h1><h3 id="1-isPresent"><a href="#1-isPresent" class="headerlink" title="(1) isPresent()"></a>(1) isPresent()</h3><p><code>isPresent()</code>를 사용하면 객체가 null인지 확인할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Person&gt; optional = Optional.ofNullable(<span class="keyword">null</span>);</span><br><span class="line">System.out.println(optional.isPresent());   <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line"></span><br><span class="line">Optional&lt;Person&gt; optional = Optional.ofNullable(person);</span><br><span class="line">System.out.println(optional.isPresent());   <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-ifPresent"><a href="#2-ifPresent" class="headerlink" title="(2) ifPresent()"></a>(2) ifPresent()</h3><p><code>ifPresent()</code>는 객체가 null이 아닐 때 람다식을 실행한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">new</span> Person(<span class="string">&quot;Paul&quot;</span>);</span><br><span class="line"></span><br><span class="line">Optional.ofNullable(person)</span><br><span class="line">    .ifPresent((p -&gt; System.out.println(p.getName())));</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Paul</span><br></pre></td></tr></table></figure>
+<p>객체가 null이면 람다식을 실행하지 않는다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">Optional.ofNullable(person)</span><br><span class="line">    .ifPresent((p -&gt; System.out.println(p.getName())));</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="값-가져오기"><a href="#값-가져오기" class="headerlink" title="값 가져오기"></a>값 가져오기</h1><p><code>get()</code>을 사용하면 Optional이 가지고 있는 객체를 가져올 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String str = Optional.ofNullable(<span class="string">&quot;Hello&quot;</span>).get();</span><br></pre></td></tr></table></figure>
+<p>만약 값이 없다면 <code>NoSuchElementException</code>이 발생한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String str = Optional.ofNullable(<span class="keyword">null</span>).get();   <span class="comment">// NoSuchElementException</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="필터링"><a href="#필터링" class="headerlink" title="필터링"></a>필터링</h1><p><code>filter()</code>을 사용하면 객체를 필터링할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Optional.of(<span class="string">&quot;ABCD&quot;</span>)</span><br><span class="line">    .filter(v -&gt; v.startsWith(<span class="string">&quot;AB&quot;</span>))</span><br><span class="line">    .ifPresent(value -&gt; System.out.println(value));</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ABCD</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Optional.of(<span class="string">&quot;ABCD&quot;</span>)</span><br><span class="line">    .filter(v -&gt; v.startsWith(<span class="string">&quot;XY&quot;</span>))</span><br><span class="line">    .ifPresent(value -&gt; System.out.println(value));</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="변환"><a href="#변환" class="headerlink" title="변환"></a>변환</h1><h3 id="1-map"><a href="#1-map" class="headerlink" title="(1) map()"></a>(1) map()</h3><p><code>map()</code>을 사용하면 객체를 변환할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Optional.of(<span class="string">&quot;ABCD&quot;</span>)</span><br><span class="line">    .map(value -&gt; value.toLowerCase())</span><br><span class="line">    .ifPresent(value -&gt; System.out.println(value));</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">abcd</span><br></pre></td></tr></table></figure>
+<p>위 코드는 <a href="/ko/2019/02/03/04_java/190203_method_reference/">메소드 참조</a>을 사용하여 다음과 같이 단축할 수도 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Optional.of(<span class="string">&quot;ABCD&quot;</span>)</span><br><span class="line">    .map(String::toLowerCase)</span><br><span class="line">    .ifPresent(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-flatMap"><a href="#2-flatMap" class="headerlink" title="(2) flatMap()"></a>(2) flatMap()</h3><p><code>flatMap()</code>을 사용하면 다른 Optional로 반환할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Optional.of(<span class="string">&quot;ABCD&quot;</span>)</span><br><span class="line">    .flatMap(value -&gt; Optional.of(value.toLowerCase()))</span><br><span class="line">    .ifPresent(System.out::println);    <span class="comment">// abcd</span></span><br></pre></td></tr></table></figure>
+
+
+<h1 id="기타"><a href="#기타" class="headerlink" title="기타"></a>기타</h1><h3 id="1-orElse"><a href="#1-orElse" class="headerlink" title="(1) orElse()"></a>(1) orElse()</h3><p><code>orElse()</code>는 Optional이 비어있다면 <code>orElse()</code>로 지정한 값을 반환한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String str = <span class="string">&quot;Something&quot;</span>;</span><br><span class="line"></span><br><span class="line">String value = Optional.ofNullable(str)</span><br><span class="line">        .orElse(<span class="string">&quot;Another thing&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(value);  <span class="comment">// Something</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String str = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">String value = Optional.ofNullable(str)</span><br><span class="line">        .orElse(<span class="string">&quot;Another Thing&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(value);  <span class="comment">// Another Thing</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-orElseGet"><a href="#2-orElseGet" class="headerlink" title="(2) orElseGet()"></a>(2) orElseGet()</h3><p><code>orElseGet()</code>는 Optional이 비어있다면 람다식을 실행하고 람다식의 반환값을 반환한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String str = <span class="string">&quot;Something&quot;</span>;</span><br><span class="line"></span><br><span class="line">String value = Optional.ofNullable(str)</span><br><span class="line">        .orElseGet(() -&gt; <span class="string">&quot;Another thing&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(value);  <span class="comment">// Something</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String str = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">String value = Optional.ofNullable(str)</span><br><span class="line">        .orElseGet(() -&gt; <span class="string">&quot;Another thing&quot;</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(value);  <span class="comment">// Another thing</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-orElseThrow"><a href="#3-orElseThrow" class="headerlink" title="(3) orElseThrow()"></a>(3) orElseThrow()</h3><p><code>orElseThrow()</code>는 Optional이 비어있다면 예외를 발생시킨다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String str = <span class="string">&quot;Something&quot;</span>;</span><br><span class="line"></span><br><span class="line">String value = Optional.ofNullable(str)</span><br><span class="line">        .orElseThrow(NoSuchElementException::<span class="keyword">new</span>);</span><br><span class="line"></span><br><span class="line">System.out.println(value);      <span class="comment">// Something</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String str = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">String value = Optional.ofNullable(str)</span><br><span class="line">        .orElseThrow(NoSuchElementException::<span class="keyword">new</span>);  <span class="comment">// Exception in thread &quot;main&quot; java.util.NoSuchElementException</span></span><br><span class="line"></span><br><span class="line">System.out.println(value);</span><br></pre></td></tr></table></figure>
+
+<h1 id="원시타입-옵셔널"><a href="#원시타입-옵셔널" class="headerlink" title="원시타입 옵셔널"></a>원시타입 옵셔널</h1><p>물론 제너릭과 Wrapper 클래스를 사용하면 원시 타입의 옵셔널을 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Integer&gt; optional = Optional.of(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">optional.ifPresent(System.out::println);    <span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
+<p>그러나 제네릭과 Wrapper 클래스를 사용하지 않고 원시 타입의 옵셔널을 생성할 수도 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">OptionalInt optional = OptionalInt.of(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">optional.ifPresent(System.out::println);    <span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
+<p>제공되는 원시 타입의 옵셔널은 다음과 같다.</p>
+<ul>
+<li>OptionalInt</li>
+<li>OptionalLong</li>
+<li>OptionalDouble</li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Java/" rel="tag">Java</a> <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Java-8/" rel="tag">Java 8</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/02/06/04_java/190206_stream/"
+                    data-tooltip="[Java 8] 스트림 API(Stream API)"
+                    aria-label="이전: [Java 8] 스트림 API(Stream API)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/02/03/04_java/190203_method_reference/"
+                    data-tooltip="[Java 8] 메소드 참조, 생성자 참조"
+                    aria-label="다음: [Java 8] 메소드 참조, 생성자 참조"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/02/06/04_java/190206_stream/"
+                    data-tooltip="[Java 8] 스트림 API(Stream API)"
+                    aria-label="이전: [Java 8] 스트림 API(Stream API)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/02/03/04_java/190203_method_reference/"
+                    data-tooltip="[Java 8] 메소드 참조, 생성자 참조"
+                    aria-label="다음: [Java 8] 메소드 참조, 생성자 참조"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/02/05/04_java/190205_optional/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

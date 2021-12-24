@@ -1,0 +1,733 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Java] 입출력 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n애플리케이션에서는 외부에서 데이터를 읽어오거나 외부로 데이터를 보내는 작업이 빈번하게 일어난다. 외부에서 애플리케이션으로 데이터를 읽어오는 것을 입력(Input), 애플리케이션에서 외부로 데이터를 내보내는 것을 출력(Output)이라고 한다.\n입력\n\n사용자로부터 키보드, 마우스 등으로 데이터를 받아옴\n파일에서 데이터를 읽어옴\n네트워크를 통해 데이터를 읽어옴\n\n출력\n\n모니터에 데이터를 출력하여 보여줌\n파일에 데이터를 출력하여 저장함\n\nJava에서는 입출력을 위한 요소들이 java.io 패키지에 포함되어있다.\nInputStream, OutputStreamJava에서는 InputStream을 통해 입력을, OutputStream을 통해 출력을 처리한다. InputStream과 OutputStream은 1바이트(8비트) 단위로 데이터를 입출력한다. 문자 뿐만 아니라 이미지, 멀티미디어 등 모든 종류의 데이터를 주고받을 수 있다.\nInputStream과 OutputStream은 인터페이스며 대표적인 구현체는 다음과 같다.\n\nFileInputStream, FileOutputStream\nDataInputStream, DataOutputStream\nObjectInputStream, ObjectOutputStream\n\n(1) FileInputStream, FileOutputStreamFileInputStream, FileOutputStream은 파일에 입출력할 때 사용한다.\nFileInputStream 예제를 살펴보자. 이미지 파일을 애플리케이션으로 읽어온다.\nApp.java12345678910111213141516171819202122232425262728public class App &#123;    public static void main(String[] args) &#123;        String sourcePath = null;        InputStream inputStream = null;        int data = 0;        try &#123;            sourcePath = &quot;/Users/yologger/Desktop/folder&quot; + File.separator + &quot;avatar.gif&quot;;            inputStream = new FileInputStream(sourcePath);            while((data = inputStream.read()) != -1) &#123;                System.out.println(data);            &#125;        &#125; catch(IOException e) &#123;            e.printStackTrace();        &#125; finally &#123;            try &#123;                inputStream.close();            &#125; catch (IOException e) &#123;                e.printStackTrace();            &#125;        &#125;    &#125;&#125;\nFileOutputStream 예제를 살펴보자. 읽어온 이미지 파일을 다른 이름으로 디렉토리에 복사하고있다.\nApp.java12345678910111213141516171819202122232425262728293031323334353637import java.io.*;public class App &#123;    public static void main(String[] args) &#123;        String sourcePath = null;        InputStream inputStream = null;        String destinationPath = null;        OutputStream outputStream = null;        int data = 0;        try &#123;            sourcePath = &quot;/Users/yologger/Desktop/folder&quot; + File.separator + &quot;avatar.gif&quot;;            inputStream = new FileInputStream(sourcePath);            destinationPath = &quot;/Users/yologger/Desktop/folder&quot; + File.separator + &quot;copy.gif&quot;;            outputStream =  new FileOutputStream(destinationPath);            while((data = inputStream.read()) != -1) &#123;                outputStream.write(data);            &#125;        &#125; catch(IOException e) &#123;            e.printStackTrace();        &#125; finally &#123;            try &#123;                inputStream.close();                outputStream.close();            &#125; catch (IOException e) &#123;                e.printStackTrace();            &#125;        &#125;    &#125;&#125;\n\n\n(2) DataInputStream, DataOutputStreamDataInputStream, DataOutputStream을 사용하면 기본 자료형 단위로 입출력할 수 있다. \nApp.java123456789101112131415161718192021222324252627282930313233343536373839404142434445464748import java.io.*;public class App &#123;    public static void main(String[] args) &#123;        FileOutputStream fos = null;        DataOutputStream dos = null;        FileInputStream fis = null;        DataInputStream dis = null;        try &#123;            String path = &quot;/Users/yologger/Desktop/folder&quot; + File.separator + &quot;store.txt&quot;;            // Write            fos = new FileOutputStream(path);            dos = new DataOutputStream(fos);            dos.writeInt(3);            dos.writeDouble(183.2);            dos.writeChar(&#x27;a&#x27;);            dos.writeUTF(&quot;Hello World.&quot;);            // Read            fis = new FileInputStream(path);            dis = new DataInputStream(fis);            System.out.println(dis.readInt());      // 3            System.out.println(dis.readDouble());   // 183.2            System.out.println(dis.readChar());     // a            System.out.println(dis.readUTF());      // Hello World.        &#125; catch (IOException e) &#123;            e.printStackTrace();        &#125; finally &#123;            try &#123;                dos.close();                fos.close();                dis.close();                fis.close();            &#125; catch (IOException e) &#123;                e.printStackTrace();            &#125;        &#125;    &#125;&#125;\n\n(3) ObjectInputStream, ObjectOutputStreamObjectInputStream, ObjectOutputStream는 객체 단위 입출력에 사용된다. 예제는 직렬화(Serialization) 포스트에서 확인할 수 있다.\nReader, WriterReader와 Writer는 문자 단위 입출력에 사용된다. 이 클래스들은 인터페이스며 대표적인 구현체들은 다음과 같다.\n\nFileReader, FileWriter\nStringReader, StringWriter\n\nFileReader와 FileWriter 예제는 다음과 같다.\nApp.java123456789101112131415161718192021222324252627282930313233343536public class App &#123;    public static void main(String[] args) &#123;        String sourcePath = null;        FileReader fileReader = null;        String destinationPath = null;        FileWriter fileWriter = null;        try &#123;            sourcePath = &quot;/Users/yologger/Desktop/folder&quot; + File.separator + &quot;source.txt&quot;;            fileReader = new FileReader(sourcePath);            destinationPath = &quot;/Users/yologger/Desktop/folder&quot; + File.separator + &quot;copy.txt&quot;;            fileWriter = new FileWriter(destinationPath);            int data = 0;            while ((data = fileReader.read()) != -1) &#123;                // System.out.print((char) data);                fileWriter.write((char) data);            &#125;            fileWriter.flush();        &#125; catch(IOException e) &#123;            e.printStackTrace();        &#125; finally &#123;            try &#123;                fileReader.close();                fileWriter.close();            &#125; catch (IOException e) &#123;                e.printStackTrace();            &#125;        &#125;    &#125;&#125;\nApp.java1234567891011121314151617181920212223242526public class App &#123;    public static void main(String[] args) &#123;        String destinationPath = null;        FileWriter fileWriter = null;        try &#123;            destinationPath = &quot;/Users/yologger/Desktop/folder&quot; + File.separator + &quot;destination.txt&quot;;            fileWriter = new FileWriter(destinationPath);            fileWriter.write(&quot;Ronaldo\\n&quot;);            fileWriter.write(&quot;Kane\\n&quot;);            fileWriter.write(&quot;Benzema\\n&quot;);            fileWriter.flush();        &#125; catch(IOException e) &#123;            e.printStackTrace();        &#125; finally &#123;            try &#123;                fileWriter.close();            &#125; catch (IOException e) &#123;                e.printStackTrace();            &#125;        &#125;    &#125;&#125;\n\n\n\n표준 입출력표준 입출력은 개발자가 스트림을 생성하지 않아도 시스템이 제공하는 스트림이다. 키보드에서 입력받는 스트림이나 모니터에 출력하는 스트림이 대표적인 표준 입출력과 관련된 스트림이다.\n123456789101112131415public class App &#123;    public static void main(String[] args) &#123;        try &#123;            int input = 0;                        while((input = System.in.read()) != -1) &#123;                System.out.println(&quot;Input: &quot; + (char)input);            &#125;        &#125; catch (IOException e) &#123;            e.printStackTrace();        &#125;    &#125;&#125;","dateCreated":"2019-01-02T00:00:00+09:00","dateModified":"2021-12-23T08:16:36+09:00","datePublished":"2019-01-02T00:00:00+09:00","description":"","headline":"[Java] 입출력","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2019/01/02/04_java/190102_io/","keywords":"Java"}</script>
+    <meta name="description" content="애플리케이션에서는 외부에서 데이터를 읽어오거나 외부로 데이터를 보내는 작업이 빈번하게 일어난다. 외부에서 애플리케이션으로 데이터를 읽어오는 것을 입력(Input), 애플리케이션에서 외부로 데이터를 내보내는 것을 출력(Output)이라고 한다. 입력  사용자로부터 키보드, 마우스 등으로 데이터를 받아옴 파일에서 데이터를 읽어옴 네트워크를 통해 데이터를 읽어">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Java] 입출력">
+<meta property="og:url" content="https://yologger.github.io/ko/2019/01/02/04_java/190102_io/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="애플리케이션에서는 외부에서 데이터를 읽어오거나 외부로 데이터를 보내는 작업이 빈번하게 일어난다. 외부에서 애플리케이션으로 데이터를 읽어오는 것을 입력(Input), 애플리케이션에서 외부로 데이터를 내보내는 것을 출력(Output)이라고 한다. 입력  사용자로부터 키보드, 마우스 등으로 데이터를 받아옴 파일에서 데이터를 읽어옴 네트워크를 통해 데이터를 읽어">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2019-01-01T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-22T23:16:36.363Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tools"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tools</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Java] 입출력
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-01-02T00:00:00+09:00">
+	
+		    2019/01/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<p>애플리케이션에서는 외부에서 데이터를 읽어오거나 외부로 데이터를 보내는 작업이 빈번하게 일어난다. 외부에서 애플리케이션으로 데이터를 읽어오는 것을 <code>입력(Input)</code>, 애플리케이션에서 외부로 데이터를 내보내는 것을 <code>출력(Output)</code>이라고 한다.</p>
+<p>입력</p>
+<ul>
+<li>사용자로부터 키보드, 마우스 등으로 데이터를 받아옴</li>
+<li>파일에서 데이터를 읽어옴</li>
+<li>네트워크를 통해 데이터를 읽어옴</li>
+</ul>
+<p>출력</p>
+<ul>
+<li>모니터에 데이터를 출력하여 보여줌</li>
+<li>파일에 데이터를 출력하여 저장함</li>
+</ul>
+<p>Java에서는 입출력을 위한 요소들이 <code>java.io</code> 패키지에 포함되어있다.</p>
+<h1 id="InputStream-OutputStream"><a href="#InputStream-OutputStream" class="headerlink" title="InputStream, OutputStream"></a>InputStream, OutputStream</h1><p>Java에서는 <code>InputStream</code>을 통해 입력을, <code>OutputStream</code>을 통해 출력을 처리한다. InputStream과 OutputStream은 1바이트(8비트) 단위로 데이터를 입출력한다. 문자 뿐만 아니라 이미지, 멀티미디어 등 모든 종류의 데이터를 주고받을 수 있다.</p>
+<p>InputStream과 OutputStream은 인터페이스며 대표적인 구현체는 다음과 같다.</p>
+<ul>
+<li>FileInputStream, FileOutputStream</li>
+<li>DataInputStream, DataOutputStream</li>
+<li>ObjectInputStream, ObjectOutputStream</li>
+</ul>
+<h3 id="1-FileInputStream-FileOutputStream"><a href="#1-FileInputStream-FileOutputStream" class="headerlink" title="(1) FileInputStream, FileOutputStream"></a>(1) FileInputStream, FileOutputStream</h3><p><code>FileInputStream</code>, <code>FileOutputStream</code>은 파일에 입출력할 때 사용한다.</p>
+<p><code>FileInputStream</code> 예제를 살펴보자. 이미지 파일을 애플리케이션으로 읽어온다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        String sourcePath = <span class="keyword">null</span>;</span><br><span class="line">        InputStream inputStream = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> data = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            sourcePath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;avatar.gif&quot;</span>;</span><br><span class="line">            inputStream = <span class="keyword">new</span> FileInputStream(sourcePath);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span>((data = inputStream.read()) != -<span class="number">1</span>) &#123;</span><br><span class="line">                System.out.println(data);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                inputStream.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>FileOutputStream</code> 예제를 살펴보자. 읽어온 이미지 파일을 다른 이름으로 디렉토리에 복사하고있다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        String sourcePath = <span class="keyword">null</span>;</span><br><span class="line">        InputStream inputStream = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        String destinationPath = <span class="keyword">null</span>;</span><br><span class="line">        OutputStream outputStream = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> data = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            sourcePath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;avatar.gif&quot;</span>;</span><br><span class="line">            inputStream = <span class="keyword">new</span> FileInputStream(sourcePath);</span><br><span class="line"></span><br><span class="line">            destinationPath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;copy.gif&quot;</span>;</span><br><span class="line">            outputStream =  <span class="keyword">new</span> FileOutputStream(destinationPath);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span>((data = inputStream.read()) != -<span class="number">1</span>) &#123;</span><br><span class="line">                outputStream.write(data);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                inputStream.close();</span><br><span class="line">                outputStream.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-DataInputStream-DataOutputStream"><a href="#2-DataInputStream-DataOutputStream" class="headerlink" title="(2) DataInputStream, DataOutputStream"></a>(2) DataInputStream, DataOutputStream</h3><p><code>DataInputStream</code>, <code>DataOutputStream</code>을 사용하면 기본 자료형 단위로 입출력할 수 있다. </p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        FileOutputStream fos = <span class="keyword">null</span>;</span><br><span class="line">        DataOutputStream dos = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        FileInputStream fis = <span class="keyword">null</span>;</span><br><span class="line">        DataInputStream dis = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String path = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;store.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Write</span></span><br><span class="line">            fos = <span class="keyword">new</span> FileOutputStream(path);</span><br><span class="line">            dos = <span class="keyword">new</span> DataOutputStream(fos);</span><br><span class="line"></span><br><span class="line">            dos.writeInt(<span class="number">3</span>);</span><br><span class="line">            dos.writeDouble(<span class="number">183.2</span>);</span><br><span class="line">            dos.writeChar(<span class="string">&#x27;a&#x27;</span>);</span><br><span class="line">            dos.writeUTF(<span class="string">&quot;Hello World.&quot;</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Read</span></span><br><span class="line">            fis = <span class="keyword">new</span> FileInputStream(path);</span><br><span class="line">            dis = <span class="keyword">new</span> DataInputStream(fis);</span><br><span class="line"></span><br><span class="line">            System.out.println(dis.readInt());      <span class="comment">// 3</span></span><br><span class="line">            System.out.println(dis.readDouble());   <span class="comment">// 183.2</span></span><br><span class="line">            System.out.println(dis.readChar());     <span class="comment">// a</span></span><br><span class="line">            System.out.println(dis.readUTF());      <span class="comment">// Hello World.</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                dos.close();</span><br><span class="line">                fos.close();</span><br><span class="line">                dis.close();</span><br><span class="line">                fis.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-ObjectInputStream-ObjectOutputStream"><a href="#3-ObjectInputStream-ObjectOutputStream" class="headerlink" title="(3) ObjectInputStream, ObjectOutputStream"></a>(3) ObjectInputStream, ObjectOutputStream</h3><p><code>ObjectInputStream</code>, <code>ObjectOutputStream</code>는 객체 단위 입출력에 사용된다. 예제는 <a href="/ko/2019/01/03/04_java/190103_serialization_transient/"><code>직렬화(Serialization)</code></a> 포스트에서 확인할 수 있다.</p>
+<h1 id="Reader-Writer"><a href="#Reader-Writer" class="headerlink" title="Reader, Writer"></a>Reader, Writer</h1><p><code>Reader</code>와 <code>Writer</code>는 문자 단위 입출력에 사용된다. 이 클래스들은 인터페이스며 대표적인 구현체들은 다음과 같다.</p>
+<ul>
+<li>FileReader, FileWriter</li>
+<li>StringReader, StringWriter</li>
+</ul>
+<p><code>FileReader</code>와 <code>FileWriter</code> 예제는 다음과 같다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        String sourcePath = <span class="keyword">null</span>;</span><br><span class="line">        FileReader fileReader = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        String destinationPath = <span class="keyword">null</span>;</span><br><span class="line">        FileWriter fileWriter = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            sourcePath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;source.txt&quot;</span>;</span><br><span class="line">            fileReader = <span class="keyword">new</span> FileReader(sourcePath);</span><br><span class="line"></span><br><span class="line">            destinationPath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;copy.txt&quot;</span>;</span><br><span class="line">            fileWriter = <span class="keyword">new</span> FileWriter(destinationPath);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> data = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">while</span> ((data = fileReader.read()) != -<span class="number">1</span>) &#123;</span><br><span class="line">                <span class="comment">// System.out.print((char) data);</span></span><br><span class="line">                fileWriter.write((<span class="keyword">char</span>) data);</span><br><span class="line">            &#125;</span><br><span class="line">            fileWriter.flush();</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                fileReader.close();</span><br><span class="line">                fileWriter.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String destinationPath = <span class="keyword">null</span>;</span><br><span class="line">        FileWriter fileWriter = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            destinationPath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;destination.txt&quot;</span>;</span><br><span class="line">            fileWriter = <span class="keyword">new</span> FileWriter(destinationPath);</span><br><span class="line"></span><br><span class="line">            fileWriter.write(<span class="string">&quot;Ronaldo\n&quot;</span>);</span><br><span class="line">            fileWriter.write(<span class="string">&quot;Kane\n&quot;</span>);</span><br><span class="line">            fileWriter.write(<span class="string">&quot;Benzema\n&quot;</span>);</span><br><span class="line">            fileWriter.flush();</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                fileWriter.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="표준-입출력"><a href="#표준-입출력" class="headerlink" title="표준 입출력"></a>표준 입출력</h3><p><code>표준 입출력</code>은 개발자가 스트림을 생성하지 않아도 시스템이 제공하는 스트림이다. 키보드에서 입력받는 스트림이나 모니터에 출력하는 스트림이 대표적인 표준 입출력과 관련된 스트림이다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class App &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            int input = 0;</span><br><span class="line">            </span><br><span class="line">            while((input = System.in.read()) != -1) &#123;</span><br><span class="line">                System.out.println(&quot;Input: &quot; + (char)input);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Java/" rel="tag">Java</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/02/08_android/00_gradle/190802_module/"
+                    data-tooltip="[Android] Gradle - (2) 모듈(Module)"
+                    aria-label="이전: [Android] Gradle - (2) 모듈(Module)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                    aria-label="다음: [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/02/08_android/00_gradle/190802_module/"
+                    data-tooltip="[Android] Gradle - (2) 모듈(Module)"
+                    aria-label="이전: [Android] Gradle - (2) 모듈(Module)"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2019/01/02/06_spring/01_servlet_jsp/20190102_eclipse_java_web_app/"
+                    data-tooltip="[Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                    aria-label="다음: [Servlet, JSP] Eclipse로 Java Web Application 구성하기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2019/01/02/04_java/190102_io/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

@@ -294,20 +294,6 @@
                     
                         <a
                             class="sidebar-button-link "
-                            href="/ko/devops"
-                            
-                            rel="noopener"
-                            title="DevOps"
-                        >
-                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">DevOps</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
                             href="/ko/tools"
                             
                             rel="noopener"
@@ -344,6 +330,108 @@
                         ">
                 
     <section class="postShorten-group main-content-wrap">
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/04/04/04_java/180404_date_time/"
+                            aria-label=": [Java] Java에서 날짜, 시간 처리하기"
+                        >
+                            [Java] Java에서 날짜, 시간 처리하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-04-04T00:00:00+09:00">
+	
+		    2018/04/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p>Java에서는 버전에 따라 날짜와 시간을 처리하는 방식이 다르다.</p>
+<p>Java 8 이전</p>
+<ul>
+<li>java.util.Date</li>
+<li>java.util.Calander</li>
+</ul>
+<p>Java 8 이후</p>
+<ul>
+<li>java.time.LocalDate</li>
+<li>java.time.LocalTime</li>
+<li>java.time.LocalDateTime</li>
+</ul>
+<h1 id="Date와-SimpleDateFormat"><a href="#Date와-SimpleDateFormat" class="headerlink" title="Date와 SimpleDateFormat"></a>Date와 SimpleDateFormat</h1><p>시스템의 현재 시간은 다음과 같이 알아낼 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> now = System.currentTimeMillis();</span><br><span class="line">System.out.println(now);        <span class="comment">// 1640209553887</span></span><br><span class="line"></span><br><span class="line">Date date = <span class="keyword">new</span> Date(now);</span><br><span class="line">System.out.println(date);       <span class="comment">// Thu Dec 23 06:45:53 KST 2021</span></span><br></pre></td></tr></table></figure>
+
+<p><code>SimpleDateFormat</code>클래스를 사용하면 날짜를 포맷팅할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SimpleDateFormat dateFormat = <span class="keyword">new</span> SimpleDateFormat(<span class="string">&quot;yyyy-MM-dd HH:mm&quot;</span>, Locale.getDefault());</span><br><span class="line">String str = dateFormat.format(date);</span><br><span class="line">System.out.println(str);        </span><br></pre></td></tr></table></figure>
+
+<h1 id="LocalDate-LocalTime-LocalDateTime"><a href="#LocalDate-LocalTime-LocalDateTime" class="headerlink" title="LocalDate, LocalTime, LocalDateTime"></a>LocalDate, LocalTime, LocalDateTime</h1><p>Java 8 이상에서는 <code>LocalDate</code>, <code>LocalTime</code>, <code>LocalDate</code>클래스를 사용한다.</p>
+<h3 id="1-LocalDate"><a href="#1-LocalDate" class="headerlink" title="(1) LocalDate"></a>(1) LocalDate</h3><p><code>LocalDate</code>는 날짜를 다루는데 사용한다.</p>
+<p>현재 날짜 정보는 다음과 같이 얻을 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LocalDate currentDate = LocalDate.now();</span><br><span class="line">System.out.println(currentDate);    <span class="comment">// 2018-04-04</span></span><br></pre></td></tr></table></figure>
+<p>특정 날짜 정보를 담은 <code>LocalDate</code>객체는 다음과 같이 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LocalDate targetDate = LocalDate.of(<span class="number">2018</span>, <span class="number">11</span>, <span class="number">12</span>);</span><br><span class="line">System.out.println(targetDate);     <span class="comment">// 2018-11-12</span></span><br></pre></td></tr></table></figure>
+<p><code>Period</code>클래스를 사용하면 두 날짜 사이의 기간을 취급할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Period period = Period.between(targetDate, currentDate);</span><br><span class="line">System.out.println(period.getYears());      <span class="comment">// 3</span></span><br><span class="line">System.out.println(period.getMonths());     <span class="comment">// 1</span></span><br><span class="line">System.out.println(period.getDays());       <span class="comment">// 11</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-LocalTime"><a href="#2-LocalTime" class="headerlink" title="(2) LocalTime"></a>(2) LocalTime</h3><p><code>LocalTime</code>은 시간을 다루는데 사용한다.</p>
+<p>현재 시간 정보는 다음과 같이 얻을 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LocalTime currentTime = LocalTime.now();</span><br><span class="line">System.out.println(currentTime);           <span class="comment">// 06:58:51.952</span></span><br></pre></td></tr></table></figure>
+<p>특정 시간 정보를 담은 <code>LocalTime</code>객체는 다음과 같이 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LocalTime targetTime = LocalTime.of(<span class="number">3</span>, <span class="number">22</span>, <span class="number">44</span>, <span class="number">2</span>);</span><br><span class="line">System.out.println(targetTime);           <span class="comment">// 03:22:44.000000002</span></span><br></pre></td></tr></table></figure>
+<p><code>Duration</code>클래스를 사용하면 두 시간 사이의 기간을 계산할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Duration duration = Duration.between(targetTime, currentTime);</span><br><span class="line">System.out.println(duration.getSeconds());      <span class="comment">// 13088</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-LocalDateTime"><a href="#3-LocalDateTime" class="headerlink" title="(3) LocalDateTime"></a>(3) LocalDateTime</h3><p>날짜와 시간을 함께 취급할 때는 <code>LocalDateTime</code>클래스를 사용한다.<br>현재 날짜 시간 정보는 다음과 같이 얻을 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LocalDateTime currentDateTime = LocalDateTime.now();</span><br><span class="line">System.out.println(currentDateTime);    <span class="comment">// 2018-04-04T11:46:46.831</span></span><br></pre></td></tr></table></figure>
+<p>특정 시간 정보를 담은 <code>LocalDateTime</code>객체는 다음과 같이 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LocalDateTime targetDateTime = LocalDateTime.of(<span class="number">2019</span>, <span class="number">10</span>, <span class="number">1</span>, <span class="number">12</span>, <span class="number">30</span>, <span class="number">22</span>, <span class="number">3333</span>);</span><br><span class="line">System.out.println(targetDateTime);     <span class="comment">// 2019-10-01T12:30:22.000003333</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-DateTimeFormatter"><a href="#4-DateTimeFormatter" class="headerlink" title="(4) DateTimeFormatter"></a>(4) DateTimeFormatter</h3><p><code>DateTimeFormatter</code>클래스를 사용하면 <code>LocalDateTime</code>객체를 포맷팅할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">LocalDateTime time = LocalDateTime.of(<span class="number">2019</span>, <span class="number">10</span>, <span class="number">1</span>, <span class="number">12</span>, <span class="number">30</span>, <span class="number">22</span>, <span class="number">3333</span>);</span><br><span class="line">System.out.println(time);     <span class="comment">// 2019-10-01T12:30:22.000003333</span></span><br><span class="line"></span><br><span class="line">DateTimeFormatter formatter = DateTimeFormatter.ofPattern(<span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>);</span><br><span class="line">System.out.println(time.format(formatter));     <span class="comment">// 2019-10-01 12:30:22</span></span><br><span class="line"></span><br><span class="line">System.out.println(time.format(DateTimeFormatter.ISO_DATE));    <span class="comment">// 2019-10-01</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-문자열을-LocalDateTime으로-변환하기"><a href="#5-문자열을-LocalDateTime으로-변환하기" class="headerlink" title="(5) 문자열을 LocalDateTime으로 변환하기"></a>(5) 문자열을 LocalDateTime으로 변환하기</h3><p><code>LocalDateTime.parse()</code>를 사용하면 문자열을 LocalDateTime 객체로 변환할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String dateTimeStr = <span class="string">&quot;2020-12-24T03:16:11.000Z&quot;</span>;</span><br><span class="line">LocalDateTime localDateTime = LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_DATE_TIME);</span><br><span class="line">System.out.println(localDateTime);  <span class="comment">// 2020-12-24T03:16:11</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/04/04/04_java/180404_date_time/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
     
     
     <article class="postShorten postShorten--thumbnailimg-bottom">
@@ -454,6 +542,90 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/04/03/04_java/180403_thread_synchronize/"
+                            aria-label=": [Java] 스레드(Thread) 동기화 - synchronized, wait(), notify(), notifyAll()"
+                        >
+                            [Java] 스레드(Thread) 동기화 - synchronized, wait(), notify(), notifyAll()
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-04-03T00:00:00+09:00">
+	
+		    2018/04/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="스레드-동기화"><a href="#스레드-동기화" class="headerlink" title="스레드 동기화"></a>스레드 동기화</h1><p>멀티 스레드 환경에서는 여러 스레드가 한 데이터을 동시에 조작할 수 있다. 이 때문에 결과를 예측할 수 없게 될 수도 있다.<br><img src="1.png"><br>이 때문에 하나의 스레드가 데이터를 조작할 때 다른 스레드가 데이터를 조작할 수 없도록 공유데이터에 <code>락(Lock)</code>을 걸 수 있다. 이를 <code>동기화(Synchronization)</code>이라고 한다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>예제를 살펴보자. 잔고 데이터를 가지고 있는 계좌인 <code>Account</code>클래스는 다음과 같다. </p>
+<figure class="highlight java"><figcaption><span>Account.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Account</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> balance = <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getBalance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> balance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (balance &gt;= money) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                balance -= money;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>WorkerThread</code>클래스는 다음과 같다. 이 스레드는 잔고가 0원 이상일 때만 200원 인출을 요청한다. </p>
+<figure class="highlight java"><figcaption><span>WorkerThread.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WorkerThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Account account;</span><br><span class="line"></span><br><span class="line">    WorkerThread(Account account) &#123;</span><br><span class="line">        <span class="keyword">this</span>.account = account;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (account.getBalance() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            account.withdraw(<span class="number">200</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;Balance: &quot;</span> + account.getBalance());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Main</code>클래스는 다음과 같다.</p>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Account account = <span class="keyword">new</span> Account();</span><br><span class="line"></span><br><span class="line">        WorkerThread t1 = <span class="keyword">new</span> WorkerThread(account);</span><br><span class="line">        WorkerThread t2 = <span class="keyword">new</span> WorkerThread(account);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>애플리케이션을 실행하면 다음과 같이 출력된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Balance: 600</span><br><span class="line">Balance: 600</span><br><span class="line">Balance: 400</span><br><span class="line">Balance: 200</span><br><span class="line">Balance: -200</span><br><span class="line">Balance: -200</span><br></pre></td></tr></table></figure>
+<p>논리적으로는 출금(<code>withdraw()</code>)을 호출할 때 출금액이 잔액보다 크면 잔액에서 출금을 마이너스하면 안된다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (balance &gt;= money) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            balance -= money;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>그러나 두 스레드가 공유 데이터에 동시에 접근하기 때문에 잔액이 마이너스 값으로 출력된다. 따라서 동기화가 필요하다. </p>
+<p>동기화는 두 가지 방법으로 할 수 있다.</p>
+<h3 id="1-방법-1"><a href="#1-방법-1" class="headerlink" title="(1) 방법 1"></a>(1) 방법 1</h3><p>공유 데이터에 접근하는 메소드에 <code>synchronized</code> 키워드를 붙이면 된다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (balance &gt;= money) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            balance -= money;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>특정 스레드가 <code>synchronized</code>메소드를 실행할 때 메소드 안에서 접근하는 데이터에 <code>락(Lock)</code>을 건다. 락이 걸린 상태에서 다른 스레드가 이 메소드를 호출하면 락이 풀릴 때까지 기다리게 된다.</p>
+<h3 id="2-방법-2"><a href="#2-방법-2" class="headerlink" title="(2) 방법 2"></a>(2) 방법 2</h3><p>공유 데이터 자체에 <code>synchronized</code> 키워드를 붙일 수도 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (balance &gt;= money) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                balance -= money;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="데드-락"><a href="#데드-락" class="headerlink" title="데드 락"></a>데드 락</h1><p>동기화 과정에서 가장 조심해야할 부분이 데드락이다. <code>데드락(Deadlock)</code>은 두 스레드가 서로 상대방이 락을 풀 때까지 기다리고 있기 때문에 결과적으로 아무것도 하지 못하는 상태를 가리킨다.</p>
+<h1 id="wait-notify-notifyAll"><a href="#wait-notify-notifyAll" class="headerlink" title="wait(), notify(), notifyAll()"></a>wait(), notify(), notifyAll()</h1><p><a href="/ko/2018/03/03/04_java/180303_object_class/">Object</a> 클래스에 정의된 <code>wait()</code>, <code>notify()</code>, <code>notifyAll()</code>을 사용하면 동기화의 효율을 높일 수 있다.</p>
+<ul>
+<li><code>wait()</code>: 한 스레드가 자원에 락을 걸고 오래 기다리는 대신 다른 스레드에게 제어권을 넘겨주고 대기 상태로 들어간다.</li>
+<li><code>notify()</code>: 다른 스레드는 작업을 하다가 <code>notify()</code>를 호출하며, 대기 상태에 들어갔던 스레드가 다시 실행 상태가 된다.</li>
+</ul>
+<p><code>Account</code>클래스 예제에 <code>wait()</code>와 <code>notify()</code>를 적용하면 다음과 같다.</p>
+<figure class="highlight java"><figcaption><span>Account.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Account</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> balance = <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getBalance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> balance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 인출</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">withdraw</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (balance &lt; money) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                wait()</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        balance -= money;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 예금</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">deposit</span><span class="params">(<span class="keyword">int</span> money)</span> </span>&#123;</span><br><span class="line">        balance += money;</span><br><span class="line">        notify();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/04/03/04_java/180403_thread_synchronize/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/04/03/12_tools/02_gradle/20180403_task/"
                             aria-label=": [Gradle] Gradle Task"
                         >
@@ -519,6 +691,98 @@
                         <p>
                             <a
                                 href="/ko/2018/04/03/12_tools/02_gradle/20180403_task/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/04/02/04_java/180402_thread_control_execution/"
+                            aria-label=": [Java] 스레드(Thread) 실행 제어 - sleep(), join(), suspend(), resume(), stop(), yield()"
+                        >
+                            [Java] 스레드(Thread) 실행 제어 - sleep(), join(), suspend(), resume(), stop(), yield()
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-04-02T00:00:00+09:00">
+	
+		    2018/04/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="스레드-실행-제어"><a href="#스레드-실행-제어" class="headerlink" title="스레드 실행 제어"></a>스레드 실행 제어</h1><p>멀티 스레드 환경에서는 다양한 함수로 실행을 제어할 수 있다.</p>
+<ul>
+<li>sleep()</li>
+<li>join()</li>
+<li>suspend()</li>
+<li>resume()</li>
+<li>yield()</li>
+</ul>
+<h3 id="1-sleep"><a href="#1-sleep" class="headerlink" title="(1) sleep()"></a>(1) sleep()</h3><p><code>sleep()</code>은 현재 스레드를 일정 시간동안 일시중지시킨다.<br><img src="5.png"><br><code>sleep()</code>을 호출하기 전 상태가 다음과 같다면<br><img src="5-1.png"><br><code>sleep()</code>을 호출하면 다음 상태가 된다.<br><img src="5-2.png"><br>일정 시간이 지나면 다음 상태가 된다.<br><img src="5-3.png"><br>예제를 살펴보자.</p>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Before Sleep&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 현재 스레드를 5초 동안 일시중지</span></span><br><span class="line">            Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;After Sleep&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Before Sleep    // 앱 실행 시 바로 출력</span><br><span class="line">After Sleep     // 5초 뒤 출력</span><br></pre></td></tr></table></figure>
+<h3 id="2-join"><a href="#2-join" class="headerlink" title="(2) join()"></a>(2) join()</h3><p><code>join()</code>은 다른 스레드가 종료될 때까지 기다린다.</p>
+<p><code>join()</code>을 사용하지 않는 예제를 살펴보자. <code>WorkerThread</code>는 5초 뒤에 로그를 출력한다</p>
+<figure class="highlight java"><figcaption><span>WorkerThread.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WorkerThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;run() from WorkerThread&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Main</code>클래스는 다음과 같다.</p>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        WorkerThread workerThread = <span class="keyword">new</span> WorkerThread();</span><br><span class="line">        workerThread.start();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;run() from MainThread&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">run() from MainThread       // Main Thread에서 바로 출력</span><br><span class="line">run() from WorkerThread     // Worker Thread에서 5초 뒤 출력</span><br></pre></td></tr></table></figure>
+<p>이제 <code>join()</code>을 추가해보자.</p>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        WorkerThread workerThread = <span class="keyword">new</span> WorkerThread();</span><br><span class="line">        workerThread.start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 다음 코드를 실행하지 않고 WorkerThread가 종료될 때 까지 기다린다.</span></span><br><span class="line">            workerThread.join();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;run() from MainThread&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">run() from WorkerThread     // 5초 뒤 출력</span><br><span class="line">run() from MainThread</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-suspend"><a href="#3-suspend" class="headerlink" title="(3) suspend()"></a>(3) suspend()</h3><p><code>suspend()</code>는 스레드를 일시정지시킨다.<br><img src="6.png"><br><code>suspend()</code>을 호출하기 전 상태가 다음과 같다면<br><img src="6-1.png"><br><code>suspend()</code>을 호출하면 다음 상태가 된다.<br><img src="6-2.png"></p>
+<h3 id="4-resume"><a href="#4-resume" class="headerlink" title="(4) resume()"></a>(4) resume()</h3><p><code>suspend()</code>는 스레드를 재개한다.<br><img src="6.png"><br><code>suspend()</code>을 호출하기 전 상태가 다음과 같다면<br><img src="6-1.png"><br><code>suspend()</code>을 호출하면 다음 상태가 된다.<br><img src="6-2.png"></p>
+<h3 id="5-resume"><a href="#5-resume" class="headerlink" title="(5) resume()"></a>(5) resume()</h3><p><code>suspend()</code>는 스레드를 종료시킨다.<br><img src="7.png"><br><code>suspend()</code>을 호출하기 전 상태가 다음과 같다면<br><img src="7-1.png"><br><code>suspend()</code>을 호출하면 다음 상태가 된다.<br><img src="7-2.png"></p>
+<h3 id="6-예제"><a href="#6-예제" class="headerlink" title="(6) 예제"></a>(6) 예제</h3><p>예제를 살펴보자. <code>WorkerThread</code>는 1초에 한번씩 로그를 출력한다.</p>
+<figure class="highlight java"><figcaption><span>WorkerThread.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WorkerThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1</span> * <span class="number">1000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;run() from WorkerThread&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        WorkerThread workerThread = <span class="keyword">new</span> WorkerThread();</span><br><span class="line">        workerThread.start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 현재 스레드를 5초 일시정지</span></span><br><span class="line">            Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// WorkerThread를 일시정지</span></span><br><span class="line">            workerThread.suspend();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 현재 스레드를 5초 일시정지</span></span><br><span class="line">            Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// WorkerThread를 재개</span></span><br><span class="line">            workerThread.resume();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 현재 스레드를 5초 일시정지</span></span><br><span class="line">            Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// WorkerThread를 종료</span></span><br><span class="line">            workerThread.stop();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>결과는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 5초 뒤부터 1초 마다 출력</span><br><span class="line">run() from WorkerThread</span><br><span class="line">run() from WorkerThread</span><br><span class="line">run() from WorkerThread</span><br><span class="line">run() from WorkerThread</span><br><span class="line"></span><br><span class="line">// 5초 동안 일시정지</span><br><span class="line"></span><br><span class="line">// 다시 1초 마다 출력</span><br><span class="line">run() from WorkerThread</span><br><span class="line">run() from WorkerThread</span><br><span class="line">run() from WorkerThread</span><br><span class="line">run() from WorkerThread</span><br><span class="line">run() from WorkerThread</span><br><span class="line">run() from WorkerThread</span><br><span class="line"></span><br><span class="line">// 종료</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-yield"><a href="#7-yield" class="headerlink" title="(7) yield()"></a>(7) yield()</h3><p><code>yield()</code>는 현재 실행 중인 스레드를 중지하거나 종료하진 않는다. 다만 대기중인 스레드가 먼저 실행되도록 양보한다.<br><img src="9.png"><br><code>yield()</code> 호출 전 상태가 다음과 같다면<br><img src="10.png"><br><code>yield()</code> 호출 후 상태는 다음과 같아진다.<br><img src="11.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/04/02/04_java/180402_thread_control_execution/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -660,6 +924,136 @@
                         <p>
                             <a
                                 href="/ko/2018/04/02/12_tools/02_gradle/20180402_gradle/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/04/01/04_java/180401_thread_state/"
+                            aria-label=": [Java] 스레드(Thread)의 상태"
+                        >
+                            [Java] 스레드(Thread)의 상태
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-04-01T12:00:00+09:00">
+	
+		    2018/04/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Thread의-상태"><a href="#Thread의-상태" class="headerlink" title="Thread의 상태"></a>Thread의 상태</h1><p>스레드는 크게 네 가지 상태를 가지고 있다.<br><img src="1.png"></p>
+<h3 id="1-Runnable"><a href="#1-Runnable" class="headerlink" title="(1) Runnable"></a>(1) Runnable</h3><p>스레드를 생성하고 <code>start()</code>를 호출하면 <code>Runnable</code>상태가 된다.<br><img src="2.png"><br>주목할 점은 <code>Runnable</code>상태는 아직 스레드가 실행 중인 상태가 아니다.</p>
+<h3 id="2-Running"><a href="#2-Running" class="headerlink" title="(2) Running"></a>(2) Running</h3><p><code>Running</code>은 스레드가 실행 중인 상태다.<br><img src="3.png"><br><code>Runnable</code>과 <code>Running</code>상태를 구분한 이유는 여러 스레드가 존재할 수 있기 때문이다.<br><img src="4.png"><br><code>Thread</code>클래스의 <code>start()</code>를 호출하면 Thread가 순서대로 Queue에 들어가며, 여기에서 <code>Runnable</code>상태로 대기하고 있다. 그리고 가장 먼저 들어온 Thread가 <code>Running</code>상태로 실행된다.</p>
+<h3 id="3-Blocked"><a href="#3-Blocked" class="headerlink" title="(3) Blocked"></a>(3) Blocked</h3><p>스레드가 일시중지 상태로 들어간다.</p>
+<h3 id="4-Terminated"><a href="#4-Terminated" class="headerlink" title="(4) Terminated"></a>(4) Terminated</h3><p>스레드가 종료되어 메모리에서 사라진다.</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/04/01/04_java/180401_thread_state/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/04/01/04_java/180401_thread/"
+                            aria-label=": [Java] 스레드(Thread) 사용법"
+                        >
+                            [Java] 스레드(Thread) 사용법
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-04-01T00:00:00+09:00">
+	
+		    2018/04/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p>Java에서 Thraed는 두 가지 방법으로 생성하고 사용할 수 있다.</p>
+<h3 id="1-Runnable"><a href="#1-Runnable" class="headerlink" title="(1) Runnable"></a>(1) Runnable</h3><p>첫 번째 방법은 <code>Runnable</code>인터페이스를 구현하는 것이다.</p>
+<figure class="highlight java"><figcaption><span>MyRunnable.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyRunnable</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;name: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread thread = <span class="keyword">new</span> Thread(<span class="keyword">new</span> MyRunnable());</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;name: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">        thread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 단축할 수도 있다.</p>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread thread = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;name: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        </span><br><span class="line">        thread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Thread"><a href="#2-Thread" class="headerlink" title="(2) Thread"></a>(2) Thread</h3><p>두 번째 방법은 <code>Thread</code>클래스를 상속하는 것이다.</p>
+<figure class="highlight java"><figcaption><span>MyThread.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;name: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread thread = <span class="keyword">new</span> MyThread();</span><br><span class="line">        </span><br><span class="line">        System.out.println(<span class="string">&quot;name: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">        thread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/04/01/04_java/180401_thread/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

@@ -294,20 +294,6 @@
                     
                         <a
                             class="sidebar-button-link "
-                            href="/ko/devops"
-                            
-                            rel="noopener"
-                            title="DevOps"
-                        >
-                        <i class="sidebar-button-icon fa fa-cogs" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">DevOps</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
                             href="/ko/tools"
                             
                             rel="noopener"
@@ -601,6 +587,75 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/01/03/04_java/190103_serialization_transient/"
+                            aria-label=": [Java] 직렬화와 transient"
+                        >
+                            [Java] 직렬화와 transient
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-03T00:00:00+09:00">
+	
+		    2019/01/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="직렬화"><a href="#직렬화" class="headerlink" title="직렬화"></a>직렬화</h1><p>운영체제나 네트워크에는 Java의 객체의 개념이 없다. 그렇다면 어떻게 객체를 운영체제의 파일 시스템에 저장하거나 네트워크로 전송할 수 있을까?</p>
+<p><code>직렬화(Serialization)</code>는 객체를 바이트로 변환하여 저장하는 기술을 의미한다. <code>역직렬화(Deserialization)</code>는 바이트를 다시 Java 객체로 변환하는 것이다.</p>
+<h1 id="Serializable"><a href="#Serializable" class="headerlink" title="Serializable"></a>Serializable</h1><p>직렬화할 클래스는 <code>Serializable</code>를 구현해야한다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">implements</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String nation;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name, String nation, <span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.nation = nation;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getNation</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> nation;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNation</span><span class="params">(String nation)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.nation = nation;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h1 id="ObjectInputStream-ObjectOutputStream"><a href="#ObjectInputStream-ObjectOutputStream" class="headerlink" title="ObjectInputStream, ObjectOutputStream"></a>ObjectInputStream, ObjectOutputStream</h1><p>직렬화와 역직렬화에는 보통 <code>ObjectInputStream</code>, <code>ObjectOutputStream</code>을 사용한다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        FileOutputStream fos = <span class="keyword">null</span>;</span><br><span class="line">        ObjectOutputStream oos = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        FileInputStream fis = <span class="keyword">null</span>;</span><br><span class="line">        ObjectInputStream ois = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        Person original = <span class="keyword">new</span> Person(<span class="string">&quot;Ronaldo&quot;</span>, <span class="string">&quot;Portugal&quot;</span>, <span class="number">37</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String path = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;store.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line">            fos = <span class="keyword">new</span> FileOutputStream(path);</span><br><span class="line">            oos = <span class="keyword">new</span> ObjectOutputStream(fos);</span><br><span class="line">            oos.writeObject(original);</span><br><span class="line"></span><br><span class="line">            fis = <span class="keyword">new</span> FileInputStream(path);</span><br><span class="line">            ois = <span class="keyword">new</span> ObjectInputStream(fis);</span><br><span class="line"></span><br><span class="line">            Person result = (Person) ois.readObject();</span><br><span class="line"></span><br><span class="line">            System.out.println(result.getName());   <span class="comment">// Ronaldo</span></span><br><span class="line">            System.out.println(result.getNation()); <span class="comment">// Portugal</span></span><br><span class="line">            System.out.println(result.getAge());    <span class="comment">// 37</span></span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException | ClassNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                oos.close();</span><br><span class="line">                fos.close();</span><br><span class="line">                ois.close();</span><br><span class="line">                fis.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="transient"><a href="#transient" class="headerlink" title="transient"></a>transient</h1><p>멤버변수에 <code>transient</code>을 붙이면 직렬화 대상에서 제외된다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">implements</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">transient</span> <span class="keyword">private</span> String nation;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>transient</code>가 붙은 멤버변수를 역직렬화하면 값이 <code>null</code>이 된다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(result.getName());   <span class="comment">// Ronaldo</span></span><br><span class="line">System.out.println(result.getNation()); <span class="comment">// null</span></span><br><span class="line">System.out.println(result.getAge());    <span class="comment">// 37</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/03/04_java/190103_serialization_transient/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/01/02/08_android/00_gradle/190802_module/"
                             aria-label=": [Android] Gradle - (2) 모듈(Module)"
                         >
@@ -664,6 +719,107 @@
                         <p>
                             <a
                                 href="/ko/2019/01/02/08_android/00_gradle/190802_module/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/02/04_java/190102_io/"
+                            aria-label=": [Java] 입출력"
+                        >
+                            [Java] 입출력
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-02T00:00:00+09:00">
+	
+		    2019/01/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p>애플리케이션에서는 외부에서 데이터를 읽어오거나 외부로 데이터를 보내는 작업이 빈번하게 일어난다. 외부에서 애플리케이션으로 데이터를 읽어오는 것을 <code>입력(Input)</code>, 애플리케이션에서 외부로 데이터를 내보내는 것을 <code>출력(Output)</code>이라고 한다.</p>
+<p>입력</p>
+<ul>
+<li>사용자로부터 키보드, 마우스 등으로 데이터를 받아옴</li>
+<li>파일에서 데이터를 읽어옴</li>
+<li>네트워크를 통해 데이터를 읽어옴</li>
+</ul>
+<p>출력</p>
+<ul>
+<li>모니터에 데이터를 출력하여 보여줌</li>
+<li>파일에 데이터를 출력하여 저장함</li>
+</ul>
+<p>Java에서는 입출력을 위한 요소들이 <code>java.io</code> 패키지에 포함되어있다.</p>
+<h1 id="InputStream-OutputStream"><a href="#InputStream-OutputStream" class="headerlink" title="InputStream, OutputStream"></a>InputStream, OutputStream</h1><p>Java에서는 <code>InputStream</code>을 통해 입력을, <code>OutputStream</code>을 통해 출력을 처리한다. InputStream과 OutputStream은 1바이트(8비트) 단위로 데이터를 입출력한다. 문자 뿐만 아니라 이미지, 멀티미디어 등 모든 종류의 데이터를 주고받을 수 있다.</p>
+<p>InputStream과 OutputStream은 인터페이스며 대표적인 구현체는 다음과 같다.</p>
+<ul>
+<li>FileInputStream, FileOutputStream</li>
+<li>DataInputStream, DataOutputStream</li>
+<li>ObjectInputStream, ObjectOutputStream</li>
+</ul>
+<h3 id="1-FileInputStream-FileOutputStream"><a href="#1-FileInputStream-FileOutputStream" class="headerlink" title="(1) FileInputStream, FileOutputStream"></a>(1) FileInputStream, FileOutputStream</h3><p><code>FileInputStream</code>, <code>FileOutputStream</code>은 파일에 입출력할 때 사용한다.</p>
+<p><code>FileInputStream</code> 예제를 살펴보자. 이미지 파일을 애플리케이션으로 읽어온다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        String sourcePath = <span class="keyword">null</span>;</span><br><span class="line">        InputStream inputStream = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> data = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            sourcePath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;avatar.gif&quot;</span>;</span><br><span class="line">            inputStream = <span class="keyword">new</span> FileInputStream(sourcePath);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span>((data = inputStream.read()) != -<span class="number">1</span>) &#123;</span><br><span class="line">                System.out.println(data);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                inputStream.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>FileOutputStream</code> 예제를 살펴보자. 읽어온 이미지 파일을 다른 이름으로 디렉토리에 복사하고있다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        String sourcePath = <span class="keyword">null</span>;</span><br><span class="line">        InputStream inputStream = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        String destinationPath = <span class="keyword">null</span>;</span><br><span class="line">        OutputStream outputStream = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> data = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            sourcePath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;avatar.gif&quot;</span>;</span><br><span class="line">            inputStream = <span class="keyword">new</span> FileInputStream(sourcePath);</span><br><span class="line"></span><br><span class="line">            destinationPath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;copy.gif&quot;</span>;</span><br><span class="line">            outputStream =  <span class="keyword">new</span> FileOutputStream(destinationPath);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span>((data = inputStream.read()) != -<span class="number">1</span>) &#123;</span><br><span class="line">                outputStream.write(data);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                inputStream.close();</span><br><span class="line">                outputStream.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-DataInputStream-DataOutputStream"><a href="#2-DataInputStream-DataOutputStream" class="headerlink" title="(2) DataInputStream, DataOutputStream"></a>(2) DataInputStream, DataOutputStream</h3><p><code>DataInputStream</code>, <code>DataOutputStream</code>을 사용하면 기본 자료형 단위로 입출력할 수 있다. </p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        FileOutputStream fos = <span class="keyword">null</span>;</span><br><span class="line">        DataOutputStream dos = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        FileInputStream fis = <span class="keyword">null</span>;</span><br><span class="line">        DataInputStream dis = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String path = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;store.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Write</span></span><br><span class="line">            fos = <span class="keyword">new</span> FileOutputStream(path);</span><br><span class="line">            dos = <span class="keyword">new</span> DataOutputStream(fos);</span><br><span class="line"></span><br><span class="line">            dos.writeInt(<span class="number">3</span>);</span><br><span class="line">            dos.writeDouble(<span class="number">183.2</span>);</span><br><span class="line">            dos.writeChar(<span class="string">&#x27;a&#x27;</span>);</span><br><span class="line">            dos.writeUTF(<span class="string">&quot;Hello World.&quot;</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Read</span></span><br><span class="line">            fis = <span class="keyword">new</span> FileInputStream(path);</span><br><span class="line">            dis = <span class="keyword">new</span> DataInputStream(fis);</span><br><span class="line"></span><br><span class="line">            System.out.println(dis.readInt());      <span class="comment">// 3</span></span><br><span class="line">            System.out.println(dis.readDouble());   <span class="comment">// 183.2</span></span><br><span class="line">            System.out.println(dis.readChar());     <span class="comment">// a</span></span><br><span class="line">            System.out.println(dis.readUTF());      <span class="comment">// Hello World.</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                dos.close();</span><br><span class="line">                fos.close();</span><br><span class="line">                dis.close();</span><br><span class="line">                fis.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-ObjectInputStream-ObjectOutputStream"><a href="#3-ObjectInputStream-ObjectOutputStream" class="headerlink" title="(3) ObjectInputStream, ObjectOutputStream"></a>(3) ObjectInputStream, ObjectOutputStream</h3><p><code>ObjectInputStream</code>, <code>ObjectOutputStream</code>는 객체 단위 입출력에 사용된다. 예제는 <a href="/ko/2019/01/03/04_java/190103_serialization_transient/"><code>직렬화(Serialization)</code></a> 포스트에서 확인할 수 있다.</p>
+<h1 id="Reader-Writer"><a href="#Reader-Writer" class="headerlink" title="Reader, Writer"></a>Reader, Writer</h1><p><code>Reader</code>와 <code>Writer</code>는 문자 단위 입출력에 사용된다. 이 클래스들은 인터페이스며 대표적인 구현체들은 다음과 같다.</p>
+<ul>
+<li>FileReader, FileWriter</li>
+<li>StringReader, StringWriter</li>
+</ul>
+<p><code>FileReader</code>와 <code>FileWriter</code> 예제는 다음과 같다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        String sourcePath = <span class="keyword">null</span>;</span><br><span class="line">        FileReader fileReader = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        String destinationPath = <span class="keyword">null</span>;</span><br><span class="line">        FileWriter fileWriter = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            sourcePath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;source.txt&quot;</span>;</span><br><span class="line">            fileReader = <span class="keyword">new</span> FileReader(sourcePath);</span><br><span class="line"></span><br><span class="line">            destinationPath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;copy.txt&quot;</span>;</span><br><span class="line">            fileWriter = <span class="keyword">new</span> FileWriter(destinationPath);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> data = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">while</span> ((data = fileReader.read()) != -<span class="number">1</span>) &#123;</span><br><span class="line">                <span class="comment">// System.out.print((char) data);</span></span><br><span class="line">                fileWriter.write((<span class="keyword">char</span>) data);</span><br><span class="line">            &#125;</span><br><span class="line">            fileWriter.flush();</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                fileReader.close();</span><br><span class="line">                fileWriter.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String destinationPath = <span class="keyword">null</span>;</span><br><span class="line">        FileWriter fileWriter = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            destinationPath = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;destination.txt&quot;</span>;</span><br><span class="line">            fileWriter = <span class="keyword">new</span> FileWriter(destinationPath);</span><br><span class="line"></span><br><span class="line">            fileWriter.write(<span class="string">&quot;Ronaldo\n&quot;</span>);</span><br><span class="line">            fileWriter.write(<span class="string">&quot;Kane\n&quot;</span>);</span><br><span class="line">            fileWriter.write(<span class="string">&quot;Benzema\n&quot;</span>);</span><br><span class="line">            fileWriter.flush();</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                fileWriter.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="표준-입출력"><a href="#표준-입출력" class="headerlink" title="표준 입출력"></a>표준 입출력</h3><p><code>표준 입출력</code>은 개발자가 스트림을 생성하지 않아도 시스템이 제공하는 스트림이다. 키보드에서 입력받는 스트림이나 모니터에 출력하는 스트림이 대표적인 표준 입출력과 관련된 스트림이다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class App &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            int input = 0;</span><br><span class="line">            </span><br><span class="line">            while((input = System.in.read()) != -1) &#123;</span><br><span class="line">                System.out.println(&quot;Input: &quot; + (char)input);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/02/04_java/190102_io/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -842,6 +998,67 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/01/01/04_java/190101_file_class/"
+                            aria-label=": [Java] File 클래스"
+                        >
+                            [Java] File 클래스
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-01T00:00:00+09:00">
+	
+		    2019/01/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="File-클래스"><a href="#File-클래스" class="headerlink" title="File 클래스"></a>File 클래스</h1><p><code>File</code>클래스를 사용하면 파일이라 디렉토리를 쉽게 다룰 수 있다.</p>
+<h1 id="파일-다루기"><a href="#파일-다루기" class="headerlink" title="파일 다루기"></a>파일 다루기</h1><figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        String path = <span class="string">&quot;/Users/yologger/Desktop/project&quot;</span> + File.separator + <span class="string">&quot;source.txt&quot;</span>;</span><br><span class="line">        File file = <span class="keyword">new</span> File(path);</span><br><span class="line"></span><br><span class="line">        System.out.println(file.getName());</span><br><span class="line">        <span class="comment">// source.txt</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.getAbsolutePath());</span><br><span class="line">        <span class="comment">// /Users/yologger/Desktop/project/source.txt</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.getPath());</span><br><span class="line">        <span class="comment">// /Users/yologger/Desktop/project/source.txt</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.exists());</span><br><span class="line">        <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.isFile());</span><br><span class="line">        <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.isDirectory());</span><br><span class="line">        <span class="comment">// false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="디렉토리-다루기"><a href="#디렉토리-다루기" class="headerlink" title="디렉토리 다루기"></a>디렉토리 다루기</h1><figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        String path = <span class="string">&quot;/Users/yologger/Desktop/project&quot;</span>;</span><br><span class="line">        File file = <span class="keyword">new</span> File(path);</span><br><span class="line"></span><br><span class="line">        System.out.println(file.getName());</span><br><span class="line">        <span class="comment">// project</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.getAbsolutePath());</span><br><span class="line">        <span class="comment">// /Users/yologger/Desktop/project</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.getPath());</span><br><span class="line">        <span class="comment">// /Users/yologger/Desktop/project</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.exists());</span><br><span class="line">        <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.isFile());</span><br><span class="line">        <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line">        System.out.println(file.isDirectory());</span><br><span class="line">        <span class="comment">// true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/01/04_java/190101_file_class/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/01/01/06_spring/01_servlet_jsp/20190101_maven_java_web_app/"
                             aria-label=": [Servlet, JSP] Maven으로 Java Web Application 구성하기"
                         >
@@ -906,124 +1123,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/"
-                            aria-label=": [Homebrew] Homebrew란?"
-                        >
-                            [Homebrew] Homebrew란?
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-01-01T00:00:00+09:00">
-	
-		    2019/01/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Homebrew/">Homebrew</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p><code>Homebrew</code>는 MacOS용 패키지 관리자다. Homebrew를 사용하면 패키지를 쉽게 설치, 관리, 업데이트, 제거할 수 있다.</p>
-<h1 id="Homebrew-설치"><a href="#Homebrew-설치" class="headerlink" title="Homebrew 설치"></a>Homebrew 설치</h1><p>터미널에서 다음 명령어를 입력하면 Homebrew가 설치된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ /usr/bin/ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</span><br></pre></td></tr></table></figure>
-
-<h1 id="Homebrew-사용법"><a href="#Homebrew-사용법" class="headerlink" title="Homebrew 사용법"></a>Homebrew 사용법</h1><p>Homebrew의 버전을 확인해보자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ brew --version</span><br><span class="line">Homebrew 3.3.7</span><br><span class="line">Homebrew/homebrew-core (git revision 099747a08de; last commit 2021-12-13)</span><br><span class="line">Homebrew/homebrew-cask (git revision e7bdec90ea; last commit 2021-12-13)</span><br></pre></td></tr></table></figure>
-
-<p>Homewbrew의 명령어는 다음과 같다.</p>
-<table>
-<thead>
-<tr>
-<th>명령어</th>
-<th>설명</th>
-<th>비고</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>brew install [패키지명]</td>
-<td>패키지 설치</td>
-<td></td>
-</tr>
-<tr>
-<td>brew uninstall [패키지명]</td>
-<td>패키지 삭제</td>
-<td></td>
-</tr>
-<tr>
-<td>brew upgrade [패키지명]</td>
-<td>패키지 업그레이드</td>
-<td>패키지명 미입력시, 전체 업그레이드</td>
-</tr>
-<tr>
-<td>brew search [패키지명]</td>
-<td>패키지 검색</td>
-<td></td>
-</tr>
-<tr>
-<td>brew list</td>
-<td>설치된 패키지 목록 확인하기</td>
-<td></td>
-</tr>
-<tr>
-<td>brew update</td>
-<td>Homebrew 업데이트</td>
-<td></td>
-</tr>
-</tbody></table>
-<p>Homebrew로 <code>mysql</code>을 설치하려고 한다. mysql을 탐색해보자</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ brew search mysql</span><br><span class="line">==&gt; Formulae</span><br><span class="line">automysqlbackup             mysql-client                mysql-sandbox               mysql@5.7</span><br><span class="line">mysql ✔                     mysql-client@5.7            mysql-search-replace        mysqltuner</span><br><span class="line">mysql++                     mysql-connector-c++         mysql@5.6                   qt-mysql</span><br><span class="line">==&gt; Casks</span><br><span class="line">mysql-connector-python      mysql-utilities             navicat-for-mysql</span><br><span class="line">mysql-shell                 mysqlworkbench              sqlpro-for-mysql</span><br></pre></td></tr></table></figure>
-<p>mysql을 설치한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ brew install mysql</span><br></pre></td></tr></table></figure>
-<p>설치된 패키지 목록을 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">brew list </span><br><span class="line">==&gt; Formulae</span><br><span class="line">gradle      maven       mysql       curl</span><br><span class="line">git         curl        carthage    tree</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">==&gt; Casks</span><br><span class="line">adoptopenjdk8   android-platform-tools	iterm2</span><br></pre></td></tr></table></figure>
-<p><code>mysql</code>은 백그라운드에서 데몬 프로세스로 동작한다. mysql은 다음과 같이 구동한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ brew services start mysql</span><br><span class="line">==&gt; Successfully started `mysql` (label: homebrew.mxcl.mysql)</span><br></pre></td></tr></table></figure>
-<p>실행 중인 목록을 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Name  Status  User      File</span><br><span class="line">mysql started yologger  ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist</span><br></pre></td></tr></table></figure>
-<p>재시작할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ brew services restart mysql</span><br><span class="line">Stopping `mysql`... (might take a while)</span><br><span class="line">==&gt; Successfully stopped `mysql` (label: homebrew.mxcl.mysql)</span><br><span class="line">==&gt; Successfully started `mysql` (label: homebrew.mxcl.mysql)</span><br></pre></td></tr></table></figure>
-<p>데몬을 정지할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ brew services stop mysql</span><br><span class="line">Stopping `mysql`... (might take a while)</span><br><span class="line">==&gt; Successfully stopped `mysql` (label: homebrew.mxcl.mysql)</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1039,7 +1138,18 @@
           </li>
         
         
-        <li class="pagination-number">page 2 of 2</li>
+          <li class="pagination-next">
+            <a
+                class="btn btn--default btn--small"
+                href="/ko/archives/2019/01/page/3/"
+                aria-label="이전 포스트"
+            >
+              <span>이전 포스트</span>
+              <i class="fa fa-angle-right text-base icon-ml"></i>
+            </a>
+          </li>
+        
+        <li class="pagination-number">page 2 of 3</li>
     </ul>
 </div>
 
