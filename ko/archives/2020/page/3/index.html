@@ -266,20 +266,6 @@
                     
                         <a
                             class="sidebar-button-link "
-                            href="/ko/android"
-                            
-                            rel="noopener"
-                            title="Android"
-                        >
-                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Android</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
                             href="/ko/spring"
                             
                             rel="noopener"
@@ -294,13 +280,41 @@
                     
                         <a
                             class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infra_devops"
+                            
+                            rel="noopener"
+                            title="Infra, DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infra, DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
                             href="/ko/tools"
                             
                             rel="noopener"
-                            title="Tools"
+                            title="Tool"
                         >
                         <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Tools</span>
+                        <span class="sidebar-button-desc">Tool</span>
                     </a>
             </li>
             
@@ -340,7 +354,77 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2020/06/06/12_tools/03_git/20200606_git_clone_fetch_pull/"
+                            href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/"
+                            aria-label=": [Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기"
+                        >
+                            [Android] 알림(Notification) - (6) 포그라운드 상태에서 원격 알림 받기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-06T01:00:00+09:00">
+	
+		    2020/06/06
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="포그라운드-상태에서-알람-받기"><a href="#포그라운드-상태에서-알람-받기" class="headerlink" title="포그라운드 상태에서 알람 받기"></a>포그라운드 상태에서 알람 받기</h1><p>현재 포그라운드로 실행되고 있는 앱은 Firebase 알림을 받지 못합니다. </p>
+<p>포그라운드 상태에서 알림을 받으려면 <code>FirebaseMessagingService</code>클래스를 구현하고 <code>onMessageReceived()</code>메서드를 오버라이딩 해야합니다.</p>
+<p><code>MyFBMessageService</code>라는 클래스를 다음과 같이 구현합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyFBMessageService</span> : <span class="type">FirebaseMessagingService</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMessageReceived</span><span class="params">(remoteMessage: <span class="type">RemoteMessage</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMessageReceived(remoteMessage)</span><br><span class="line">        <span class="comment">// Do somthing when you receive a message.</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>onMessageReceived()</code>메소드가 호출될 때는 <code>RemoteMessage</code>객체를 인자로 받습니다. 이 객체에는 알림의 <code>제목</code>과 <code>내용</code>같은 정보가 담겨있습니다. </p>
+<p>제목과 내용을 로그에 출력해보겠습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyFBMessageService</span> : <span class="type">FirebaseMessagingService</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMessageReceived</span><span class="params">(remoteMessage: <span class="type">RemoteMessage</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onMessageReceived(remoteMessage)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 제목</span></span><br><span class="line">        <span class="keyword">val</span> title = remoteMessage.notification?.title</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 내용</span></span><br><span class="line">        <span class="keyword">val</span> body = remoteMessage.notification?.body</span><br><span class="line"></span><br><span class="line">        Log.d(<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;title: <span class="subst">$&#123;title&#125;</span>&quot;</span>)</span><br><span class="line">        Log.d(<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;body: <span class="subst">$&#123;body&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>마지막으로 <code>AndroidManifest.xml</code>에 <code>Firebase 메시징과 관련된 액션</code>을 수신할 수 있도록 <code>인텐트 필터</code>를 추가합니다.</p>
+<figure class="highlight xml"><figcaption><span>AndroidManefest.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.yologger.remote_notification&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:allowBackup</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:icon</span>=<span class="string">&quot;@mipmap/ic_launcher&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">&quot;@string/app_name&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:roundIcon</span>=<span class="string">&quot;@mipmap/ic_launcher_round&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:supportsRtl</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.Remote_notification&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">service</span> <span class="attr">android:name</span>=<span class="string">&quot;.MyFBMessageService&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:enabled</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:exported</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;com.google.firebase.MESSAGING_EVENT&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행시킵니다. 홈 버튼을 누르지 않고 앱을 포그라운드 상태로 유지합니다.<br><img src="1.png"></p>
+<p><code>Firebase 콘솔</code>에서 알림을 보냅시다.<br><img src="2.png"><br>그러면 로그에 다음과 같은 내용이 출력됩니다.<br><img src="3.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/06/08_android/11_notification/200606_remote_notification_in_foreground/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/06/06/10_infra_devops/00_git/20200606_git_clone_fetch_pull/"
                             aria-label=": [Git, GitHub] (6) git clone, fetch, pull"
                         >
                             [Git, GitHub] (6) git clone, fetch, pull
@@ -356,7 +440,7 @@
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/Git-GitHub/">Git, GitHub</a>
 
 
     
@@ -441,7 +525,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2020/06/06/12_tools/03_git/20200606_git_clone_fetch_pull/#post-footer"
+                                href="/ko/2020/06/06/10_infra_devops/00_git/20200606_git_clone_fetch_pull/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -537,7 +621,7 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2020/06/05/12_tools/03_git/20200605_git_tag/"
+                            href="/ko/2020/06/05/10_infra_devops/00_git/20200605_git_tag/"
                             aria-label=": [Git, GitHub] (5) git tag"
                         >
                             [Git, GitHub] (5) git tag
@@ -553,7 +637,7 @@
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/Git-GitHub/">Git, GitHub</a>
 
 
     
@@ -610,7 +694,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2020/06/05/12_tools/03_git/20200605_git_tag/#post-footer"
+                                href="/ko/2020/06/05/10_infra_devops/00_git/20200605_git_tag/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -697,7 +781,7 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2020/06/04/12_tools/03_git/20200604_github_remote_push_gitignore/"
+                            href="/ko/2020/06/04/10_infra_devops/00_git/20200604_github_remote_push_gitignore/"
                             aria-label=": [Git, GitHub] (4) GitHub란? - git remote, git push, gitignore 파일"
                         >
                             [Git, GitHub] (4) GitHub란? - git remote, git push, gitignore 파일
@@ -713,7 +797,7 @@
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/Git-GitHub/">Git, GitHub</a>
 
 
     
@@ -799,7 +883,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2020/06/04/12_tools/03_git/20200604_github_remote_push_gitignore/#post-footer"
+                                href="/ko/2020/06/04/10_infra_devops/00_git/20200604_github_remote_push_gitignore/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -888,7 +972,7 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2020/06/03/12_tools/03_git/20200603_git_checkout_branch_merge/"
+                            href="/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
                             aria-label=": [Git, GitHub] (3) git checkout, branch, merge"
                         >
                             [Git, GitHub] (3) git checkout, branch, merge
@@ -904,7 +988,7 @@
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/Git-GitHub/">Git, GitHub</a>
 
 
     
@@ -1020,7 +1104,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2020/06/03/12_tools/03_git/20200603_git_checkout_branch_merge/#post-footer"
+                                href="/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1111,7 +1195,7 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/ko/2020/06/02/12_tools/03_git/20200602_rm_clean_reset_revert/"
+                            href="/ko/2020/06/02/10_infra_devops/00_git/20200602_rm_clean_reset_revert/"
                             aria-label=": [Git, GitHub] (2) git rm, clean, reset, revert"
                         >
                             [Git, GitHub] (2) git rm, clean, reset, revert
@@ -1127,7 +1211,7 @@
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Git-GitHub/">Git, GitHub</a>
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/Git-GitHub/">Git, GitHub</a>
 
 
     
@@ -1247,111 +1331,7 @@
                     
                         <p>
                             <a
-                                href="/ko/2020/06/02/12_tools/03_git/20200602_rm_clean_reset_revert/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/06/01/08_android/11_notification/200601_local_notification/"
-                            aria-label=": [Android] 알림(Notification) - (1) 로컬 알림"
-                        >
-                            [Android] 알림(Notification) - (1) 로컬 알림
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-06-01T01:00:00+09:00">
-	
-		    2020/06/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="알림"><a href="#알림" class="headerlink" title="알림"></a>알림</h1><p><code>알림(Notification)</code>은 앱이 실행되고 있지 않거나 백그라운드 상태일 때 메시지를 전달하는 방법을 제공합니다. 문자 앱이나 Gmail 앱이 대표적인 알림입니다.</p>
-<p>알림이 생성되면 화면 위쪽 <code>상태 바</code>에 아이콘으로 나타납니다.<br><img src="1.png"></p>
-<p>상태 바를 끌어내리면 <code>알림 패널</code>에서 알림의 자세한 내용을 확인할 수 있습니다.<br><img src="2.png"></p>
-<h1 id="알림의-종류"><a href="#알림의-종류" class="headerlink" title="알림의 종류"></a>알림의 종류</h1><p>알림에는 두 종류가 있습니다.</p>
-<ol>
-<li>로컬 알림(Local Notification)</li>
-<li>원격 알림(Remote Notification)</li>
-</ol>
-<h1 id="로컬-알림"><a href="#로컬-알림" class="headerlink" title="로컬 알림"></a>로컬 알림</h1><p><code>로컬 알림(Local Notification)</code>은 기기에서 실행 중인 앱에서 생성됩니다. 버튼을 누르면 로컬 알림을 전송하는 예제를 만들어봅시다.</p>
-<p><code>NotificationCompat.Builder</code>객체를 사용하면 알림을 생성할 수 있습니다. 우선 <code>NotificationBuilder</code>객체를 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">        .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">        .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p><code>setSmallIcon()</code>메소드를 사용하면 알림의 아이콘을 설정할 수 있습니다. <code>setContentTitle()</code>메소드를 사용하면 알림의 제목을 설정할 수 있으며, <code>setContentText()</code>메소드를 사용하면 알림의 본문을 설정할 수 있습니다.</p>
-<p>이제 <code>NotificationBuilder</code>객체의 <code>build()</code>메소드를 사용하여 알림을 생성합시다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notification = notificationBuilder.build()</span><br></pre></td></tr></table></figure>
-<p>알림을 보내기 위해서는 <code>NotificationManager</code>객체가 필요합니다. 시스템 서비스에서 다음과 같이 <code>NotificationManager</code>객체를 가져옵니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br></pre></td></tr></table></figure>
-<p>마지막으로 <code>NotificationManager</code>객체의 <code>notify()</code>메소드를 사용하여 알람을 전송합니다. 이때 메소드의 첫 번째 인자로 <code>알림의 ID</code>를 나타내는 임의의 정수값을 전달합니다. <code>알람 ID</code>는 안드로이드 시스템이 알림을 구분하는데 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationManager.notify(NOTIFICATION_ID, notification)</span><br></pre></td></tr></table></figure>
-<p>완성된 코드는 다음과 같습니다. 버튼을 누르면 알림을 전송합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">                    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">val</span> notification = notificationBuilder.build()         </span><br><span class="line"></span><br><span class="line">            <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line"></span><br><span class="line">            notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 앱을 실행하고 버튼을 눌러봅니다.<br><img src="3.png"><br>상단 상태 바에 알림 아이콘이 생성됩니다.<br><img src="4.png"><br>상태 바를 아래로 쓸어내리면 알림을 확인할 수 있습니다.<br><img src="5.png"></p>
-<h1 id="Oreo-버전에서의-알림"><a href="#Oreo-버전에서의-알림" class="headerlink" title="Oreo 버전에서의 알림"></a>Oreo 버전에서의 알림</h1><p><code>안드로이드 API 26 (Oreo)</code>부터는 알림을 사용하는 방식이 변경되었습니다. 따라서 버전에 따른 분기처리를 해야합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line">    <span class="comment">// 오레오 버전 이상</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 오레오 이전 버전</span></span><br><span class="line">    <span class="comment">// 위 코드와 동일</span></span><br><span class="line">    <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>)</span><br><span class="line">            .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">            .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">            .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notification = notificationBuilder.build()         </span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line"></span><br><span class="line">    notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Oreo</code> 이후 버전부터는 알림을 사용할 때 <code>Notification Channel</code>을 지정해야합니다.</p>
-<h1 id="Notification-Channel"><a href="#Notification-Channel" class="headerlink" title="Notification Channel"></a>Notification Channel</h1><p><code>Oreo</code> 이하 버전에서는 모든 알림이 하나의 <code>Notification Channel</code>로 관리됐습니다. 이 때문에 스마트폰에 알림이 쌓이길 원하지 않아 알림을 끄면, 모든 알림을 받을 수 없었습니다.</p>
-<p><code>Oreo</code> 버전부터는 알림을 여러 채널 별로 분리하여 사용자가 <code>확인하고 싶은 알림</code>과 <code>보고싶지 않은 알림</code>을 직접 설정할 수 있습니다. 각 채널별 수신 여부 외에도 잠금화면 표시 여부, 소리 설정, 진동 설정 등 여러 옵션을 세밀하게 설정할 수 있습니다.</p>
-<p>우선 다음과 같이 <code>NotificationChannel</code> 객체를 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line"><span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line"><span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line"><span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">notificationChannel.description = channelDescription</span><br></pre></td></tr></table></figure>
-<p><code>NotificationChannel</code>객체를 생성할 때 사용하는 <code>id</code>, <code>name</code>, <code>importance</code>, <code>description</code>은 다음과 같습니다.</p>
-<ul>
-<li>id: 각 채널을 구분할 수 있는 고유한 값</li>
-<li>name: 사용자에게 표시되는 채널의 이름</li>
-<li>description: 채널에 대한 설명, 특정 채널 설정 창에서 표시됩니다.</li>
-<li>importance: 알림에 대한 중요도, 이 값에 따라 알림이 다르게 똥작합니다. importance 값에 따른 동작은 <a target="_blank" rel="noopener" href="https://developer.android.com/training/notify-user/channels#importance">이 곳</a>에서 확인할 수 있습니다.</li>
-</ul>
-<p><code>Notification Manager</code>에 채널을 등록합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">notificationManager.createNotificationChannel(notificationChannel)</span><br></pre></td></tr></table></figure>
-<p><code>NotificationBuilder</code>를 생성합니다. 이 때 <code>Builer()</code>의 두 번째 인자로 채널의 <code>id</code>를 전달합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p><code>Notification</code>을 생성합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> notification = notificationBuilder.build()</span><br></pre></td></tr></table></figure>
-<p><code>NotificationManager</code>의 <code>notify()</code>메소드를 호출하여 알림을 전송합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationManager.notify(NOTIFICATION_ID, notification)</span><br></pre></td></tr></table></figure>
-<p>전체 코드는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line">                <span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">                notificationChannel.description = channelDescription</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">                notificationManager.createNotificationChannel(notificationChannel)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                        .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                        .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                        .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification = notificationBuilder.build()</span><br><span class="line"></span><br><span class="line">                notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 오레오 이전 버전</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 앱을 실행하고 버튼을 클릭합시다.<br><img src="6.png"><br>다음과 같이 화면에 알림 상자가 나오며, 상태바에 알림 아이콘이 생성됩니다.<br><img src="7.png"><br>상태 바를 아래로 쓸어내리면 자세한 내용을 확인할 수 있습니다.<br><img src="8.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/06/01/08_android/11_notification/200601_local_notification/#post-footer"
+                                href="/ko/2020/06/02/10_infra_devops/00_git/20200602_rm_clean_reset_revert/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

@@ -13,7 +13,7 @@
         <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nTaskTask는 빌드를 위한 작업 단위다. Task는 크게 두 종류가 있다.\n\nBuilt-in Task\nCustom Task\n\nBuilt-in TaskBuilt-in Task는 Gradle에 내장되어있는 Task다. Gradle 프로젝트를 초기화하는 gradle init, Gradle 프로젝트를 빌드하는 gradle build, Gradle 프로젝트를 실행하는 gradle run도 사실은 모두 Task다.\nGradle 프로젝트에서 gradle tasks명령어를 입력하면 모든 Built-in Task를 확인할 수 있다.\n123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263$ gradle tasks&gt; Task :tasks------------------------------------------------------------Tasks runnable from root project &#x27;KotlinApplication&#x27;------------------------------------------------------------Application tasks-----------------run - Runs this project as a JVM applicationBuild tasks-----------assemble - Assembles the outputs of this project.build - Assembles and tests this project.buildDependents - Assembles and tests this project and all projects that depend on it.buildKotlinToolingMetadata - Build metadata json file containing information about the used Kotlin toolingbuildNeeded - Assembles and tests this project and all projects it depends on.classes - Assembles main classes.clean - Deletes the build directory.jar - Assembles a jar archive containing the main classes.testClasses - Assembles test classes.Build Setup tasks-----------------init - Initializes a new Gradle build.wrapper - Generates Gradle wrapper files.Distribution tasks------------------assembleDist - Assembles the main distributionsdistTar - Bundles the project as a distribution.distZip - Bundles the project as a distribution.installDist - Installs the project as a distribution as-is.Documentation tasks-------------------javadoc - Generates Javadoc API documentation for the main source code.Help tasks----------buildEnvironment - Displays all buildscript dependencies declared in root project &#x27;KotlinApplication&#x27;.dependencies - Displays all dependencies declared in root project &#x27;KotlinApplication&#x27;.dependencyInsight - Displays the insight into a specific dependency in root project &#x27;KotlinApplication&#x27;.help - Displays a help message.javaToolchains - Displays the detected java toolchains.outgoingVariants - Displays the outgoing variants of root project &#x27;KotlinApplication&#x27;.projects - Displays the sub-projects of root project &#x27;KotlinApplication&#x27;.properties - Displays the properties of root project &#x27;KotlinApplication&#x27;.tasks - Displays the tasks runnable from root project &#x27;KotlinApplication&#x27; (some of the displayed tasks may belong to subprojects).Verification tasks------------------check - Runs all checks.test - Runs the test suite.To see all tasks and more detail, run gradle tasks --allTo see more detail about a task, run gradle help --task &lt;task&gt;BUILD SUCCESSFUL in 19s1 actionable task: 1 executed\n\nCustom TaskCustom Task는 사용자가 build.gradle에 직접 정의하는 Task다.\n(1) 정의Task는 다음과 같이 정의한다.\nbuild.gradle123task [task_name] &#123;  // ..&#125;\n다음과 같은 형태로도 정의할 수 있다.\nbuild.gradle123task([task_name]) &#123;  // ...&#125;\nTask는 콘솔에서 다음과 같이 실행한다.\n1$ gradle [task_name]\nprintHello라는 Task를 정의하고 실행해보자.\nbuild.gradle123task printHello &#123;  println &quot;Hello!&quot;&#125;\n123456$ gradle printHello&gt; Configure project :Hello!BUILD SUCCESSFUL in 667ms\nTask를 quite 모드로 실행하면 오직 결과값만 출력된다. -q을 지정하면 된다.\n12$ gradle -q printHelloHello!\n\n(2) 파라미터Task로 파라미터를 전달할 수 있다.\nbuild.gradle123456task sum &#123;    def x = x.toInteger()    def y = y.toInteger()    println x+y&#125;\n이제 다음과 같이 호출할 수 있다.\n12$ gradle -q sum -Px=10 -Py=1020\n(3) doFirst, doLast위에서는 Task를 다음과 같이 정의했다.\nbuild.gradle123task myTask &#123;  println &quot;myTask&quot;&#125;\n그러나 일반적으로 Task에서 실제로 수행할 작업은 doFirst, doLast 안에 정의한다.\nbuild.gradle12345678task [task_name] &#123;    doFirst &#123;        // ...    &#125;    doLast &#123;        // ...    &#125;&#125;","dateCreated":"2018-04-03T00:00:00+09:00","dateModified":"2021-12-14T00:30:55+09:00","datePublished":"2018-04-03T00:00:00+09:00","description":"","headline":"[Gradle] Gradle Task","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/","keywords":"Gradle"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\nTaskTask는 빌드를 위한 작업 단위다. Task는 크게 두 종류가 있다.\n\nBuilt-in Task\nCustom Task\n\nBuilt-in TaskBuilt-in Task는 Gradle에 내장되어있는 Task다. Gradle 프로젝트를 초기화하는 gradle init, Gradle 프로젝트를 빌드하는 gradle build, Gradle 프로젝트를 실행하는 gradle run도 사실은 모두 Task다.\nGradle 프로젝트에서 gradle tasks명령어를 입력하면 모든 Built-in Task를 확인할 수 있다.\n123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263$ gradle tasks&gt; Task :tasks------------------------------------------------------------Tasks runnable from root project &#x27;KotlinApplication&#x27;------------------------------------------------------------Application tasks-----------------run - Runs this project as a JVM applicationBuild tasks-----------assemble - Assembles the outputs of this project.build - Assembles and tests this project.buildDependents - Assembles and tests this project and all projects that depend on it.buildKotlinToolingMetadata - Build metadata json file containing information about the used Kotlin toolingbuildNeeded - Assembles and tests this project and all projects it depends on.classes - Assembles main classes.clean - Deletes the build directory.jar - Assembles a jar archive containing the main classes.testClasses - Assembles test classes.Build Setup tasks-----------------init - Initializes a new Gradle build.wrapper - Generates Gradle wrapper files.Distribution tasks------------------assembleDist - Assembles the main distributionsdistTar - Bundles the project as a distribution.distZip - Bundles the project as a distribution.installDist - Installs the project as a distribution as-is.Documentation tasks-------------------javadoc - Generates Javadoc API documentation for the main source code.Help tasks----------buildEnvironment - Displays all buildscript dependencies declared in root project &#x27;KotlinApplication&#x27;.dependencies - Displays all dependencies declared in root project &#x27;KotlinApplication&#x27;.dependencyInsight - Displays the insight into a specific dependency in root project &#x27;KotlinApplication&#x27;.help - Displays a help message.javaToolchains - Displays the detected java toolchains.outgoingVariants - Displays the outgoing variants of root project &#x27;KotlinApplication&#x27;.projects - Displays the sub-projects of root project &#x27;KotlinApplication&#x27;.properties - Displays the properties of root project &#x27;KotlinApplication&#x27;.tasks - Displays the tasks runnable from root project &#x27;KotlinApplication&#x27; (some of the displayed tasks may belong to subprojects).Verification tasks------------------check - Runs all checks.test - Runs the test suite.To see all tasks and more detail, run gradle tasks --allTo see more detail about a task, run gradle help --task &lt;task&gt;BUILD SUCCESSFUL in 19s1 actionable task: 1 executed\n\nCustom TaskCustom Task는 사용자가 build.gradle에 직접 정의하는 Task다.\n(1) 정의Task는 다음과 같이 정의한다.\nbuild.gradle123task [task_name] &#123;  // ..&#125;\n다음과 같은 형태로도 정의할 수 있다.\nbuild.gradle123task([task_name]) &#123;  // ...&#125;\nTask는 콘솔에서 다음과 같이 실행한다.\n1$ gradle [task_name]\nprintHello라는 Task를 정의하고 실행해보자.\nbuild.gradle123task printHello &#123;  println &quot;Hello!&quot;&#125;\n123456$ gradle printHello&gt; Configure project :Hello!BUILD SUCCESSFUL in 667ms\nTask를 quite 모드로 실행하면 오직 결과값만 출력된다. -q을 지정하면 된다.\n12$ gradle -q printHelloHello!\n\n(2) 파라미터Task로 파라미터를 전달할 수 있다.\nbuild.gradle123456task sum &#123;    def x = x.toInteger()    def y = y.toInteger()    println x+y&#125;\n이제 다음과 같이 호출할 수 있다.\n12$ gradle -q sum -Px=10 -Py=1020\n(3) doFirst, doLast위에서는 Task를 다음과 같이 정의했다.\nbuild.gradle123task myTask &#123;  println &quot;myTask&quot;&#125;\n그러나 일반적으로 Task에서 실제로 수행할 작업은 doFirst, doLast 안에 정의한다.\nbuild.gradle12345678task [task_name] &#123;    doFirst &#123;        // ...    &#125;    doLast &#123;        // ...    &#125;&#125;","dateCreated":"2018-04-03T00:00:00+09:00","dateModified":"2021-12-26T19:37:36+09:00","datePublished":"2018-04-03T00:00:00+09:00","description":"","headline":"[Gradle] Gradle Task","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/04/03/12_tools/02_gradle/20180403_task/","keywords":"Gradle"}</script>
     <meta name="description" content="TaskTask는 빌드를 위한 작업 단위다. Task는 크게 두 종류가 있다.  Built-in Task Custom Task  Built-in TaskBuilt-in Task는 Gradle에 내장되어있는 Task다. Gradle 프로젝트를 초기화하는 gradle init, Gradle 프로젝트를 빌드하는 gradle build, Gradle 프로젝트를">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="[Gradle] Gradle Task">
@@ -22,7 +22,7 @@
 <meta property="og:description" content="TaskTask는 빌드를 위한 작업 단위다. Task는 크게 두 종류가 있다.  Built-in Task Custom Task  Built-in TaskBuilt-in Task는 Gradle에 내장되어있는 Task다. Gradle 프로젝트를 초기화하는 gradle init, Gradle 프로젝트를 빌드하는 gradle build, Gradle 프로젝트를">
 <meta property="og:locale" content="ko_KR">
 <meta property="article:published_time" content="2018-04-02T15:00:00.000Z">
-<meta property="article:modified_time" content="2021-12-13T15:30:55.922Z">
+<meta property="article:modified_time" content="2021-12-26T10:37:36.384Z">
 <meta property="article:author" content="yologger">
 <meta property="article:tag" content="Gradle">
 <meta name="twitter:card" content="summary">
@@ -271,20 +271,6 @@
                     
                         <a
                             class="sidebar-button-link "
-                            href="/ko/android"
-                            
-                            rel="noopener"
-                            title="Android"
-                        >
-                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Android</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
                             href="/ko/spring"
                             
                             rel="noopener"
@@ -299,13 +285,41 @@
                     
                         <a
                             class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infra_devops"
+                            
+                            rel="noopener"
+                            title="Infra, DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infra, DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
                             href="/ko/tools"
                             
                             rel="noopener"
-                            title="Tools"
+                            title="Tool"
                         >
                         <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Tools</span>
+                        <span class="sidebar-button-desc">Tool</span>
                     </a>
             </li>
             
@@ -353,7 +367,7 @@
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Gradle/">Gradle</a>
+    <a class="category-link" href="/ko/categories/Tools/">Tools</a>, <a class="category-link" href="/ko/categories/Tools/Build-Tool/">Build Tool</a>, <a class="category-link" href="/ko/categories/Tools/Build-Tool/Gradle/">Gradle</a>
 
 
     

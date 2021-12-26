@@ -1,0 +1,801 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Git, GitHub] (3) git checkout, branch, merge - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n목차\ngit checkout\ngit branch\ngit merge\nConflict\n\n\ngit checkoutgit checkout명령어를 사용하면 Head를 특정 Commit으로 옮길 수 있다.\n현재 master 브랜치의 Commit 내역은 다음과 같다.\n12345678910111213141516171819202122232425$ git logcommit 44444 (HEAD -&gt; master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:39:01 2021 +0900    4commit 33333Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:45 2021 +0900    3commit 22222Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:25 2021 +0900    2commit 11111Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:07 2021 +0900    1\n브랜치의 가장 최근 Commit에는 브랜치의 이름이 표시된다. 다음 결과는 Commit ID 44444가 가장 최근 Commit이라는 의미다.\n12345commit 44444 (master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:39:01 2021 +0900    4\n현재 작업 중인 Commit에는 HEAD포인터가 표시된다.\n12345commit 44444 (HEAD)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:39:01 2021 +0900    4\n다음 결과물은 master브랜치의 가장 최근 Commit의 Id가 44444이며, 현재 이 Commit에서 작업 중이라는 의미다.\n12345commit 44444 (HEAD -&gt; master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:39:01 2021 +0900    4\n\n이제 git checkout명령어와 Commit Id를 이용하여 특정 Commit으로 이동해보자.\n12// Commit Id 22222로 Head 이동$ git checkout 22222\n123456789101112$ git logcommit 22222 (HEAD)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:25 2021 +0900    2commit 11111Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:07 2021 +0900    1\n다시 최신 Commit으로 돌아갈 수도 있다.\n12// git checkout &lt;branch_name&gt;$ git checkout master\n123456789101112131415161718192021222324$ git logcommit 44444 (HEAD -&gt; master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:39:01 2021 +0900    4commit 33333Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:45 2021 +0900    3commit 22222Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:25 2021 +0900    2commit 11111Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:07 2021 +0900    1\n\nN 단계 이전으로 Head를 옮길 수 있다.\n123456789101112131415// 두 단계 이전으로 이동 $ git checkout HEAD~2$ git logcommit 22222 (HEAD)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:25 2021 +0900    2commit 11111Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:38:07 2021 +0900    1\n\ngit branch브랜치(Branch)를 사용하면 작업 공간을 분기할 수 있다.\n우선 초기 상태를 확인해보자.\n123456789101112$ git logcommit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:56:29 2021 +0900    Second commitcommit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:54:44 2021 +0900    First commit\ngit branch명령어로 현재 작업 중인 브랜치를 확인할 수 있다.\n123// 현재 Branch 확인$ git branch* master\n새로운 브랜치를 생성해보자\n12// 이름이 develop인 브랜치 생성$ git branch develop\n두 개의 브랜치(develop, master)가 존재하며, 현재 master에서 작업하고 있다.\n1234// 현재 작업 중인 브랜치 확인$ git branch  develop* master\n123456789101112$ git logcommit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master, develop)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:56:29 2021 +0900    Second commitcommit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:54:44 2021 +0900    First commit\ngit checkout명령어를 이용하면 브랜치를 이동할 수 있다. develop로 이동해보자.\n1234567// 브랜치 이동$ git checkout develop&#x27;develop&#x27; 브랜치로 전환합니다$ git branch* develop  master\nHEAD가 develop로 이동했다.\n123456789101112$ git logcommit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; develop, master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:56:29 2021 +0900    Second commitcommit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:54:44 2021 +0900    First commit\ndevelop브랜치에서 Commit을 해보자.\n123456$ git branch* develop  master$ git commitThird commit\n로그를 확인해보자.\n123456789101112131415161718$ git logcommit f3ecc9c5c0aab5deb00955184b497d44f5175c48 (HEAD -&gt; develop)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 20:03:57 2021 +0900    Third commitcommit 90a9a879c5b45ae392a6b434a8cb75e823546374 (master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:56:29 2021 +0900    Second commitcommit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:54:44 2021 +0900    First commit\n다시 master로 이동해서 Commit을 해보자.\n123456789101112131415$ git checkout master &#x27;master&#x27; 브랜치로 전환합니다$ git logcommit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:56:29 2021 +0900    Second commitcommit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Tue Oct 5 19:54:44 2021 +0900    First commit\n12$ git commitThird commit\n이제 로그를 확인해보자. git log명령어에 --branches와 --graph옵션을 추가하면 시각적으로 브랜치를 확인할 수 있다.\n123456789101112131415161718192021222324$ git log --branches --graph* commit 043b07324fb44cdbea4f6ef4539bcb52ad895a4f (HEAD -&gt; master)| Author: yologger &lt;yologger1013@gmail.com&gt;| Date:   Tue Oct 5 20:10:27 2021 +0900| |     Third commit|   | * commit f3ecc9c5c0aab5deb00955184b497d44f5175c48 (develop)|/  Author: yologger &lt;yologger1013@gmail.com&gt;|   Date:   Tue Oct 5 20:03:57 2021 +0900|   |       Third commit| * commit 90a9a879c5b45ae392a6b434a8cb75e823546374| Author: yologger &lt;yologger1013@gmail.com&gt;| Date:   Tue Oct 5 19:56:29 2021 +0900| |     Second commit| * commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1  Author: yologger &lt;yologger1013@gmail.com&gt;  Date:   Tue Oct 5 19:54:44 2021 +0900        First commit\n\ngit merge두 개의 브랜치를 합치는 작업을 Merge라 한다.\n예제를 살펴보자. 초기 상태는 다음과 같다.\n123456$ git logcommit 49ff46662071c4c4576aac8c0aca98f34058c919 (HEAD -&gt; master)Author: yologger &lt;yologger1013@gmail.com&gt;Date:   Mon Dec 20 22:38:48 2021 +0900    Add a.txt\na.txt1function do()\ndevelop브랜치를 생성하고 a.txt를 다음과 같이 수정한 후 Commit하자.\n12345678910111213141516// 브랜치 생성$ git branch develop// 브랜치 이동$ git checkout develop  // a.txt 수정$ vim a.txtfunction develop()  // 추가된 부분function do()// add &amp; commit$ git add -A$ git commitUpdate a.txt: Add function &#x27;develop()&#x27;\nmaster브랜치로 돌아가서 a.txt를 다르게 수정한 후 Commit하자.\n12345678910111213// 브랜치 이동$ git checkout master// a.txt 수정$ vim a.txtfunction do()function master()  // 추가된 부분// add &amp; commit$ git add -A$ git commitUpdate a.txt: Add function &#x27;master()&#x27;\n로그를 확인해보자.\n1234567891011121314151617181920$ git log --branches --graph* commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa (HEAD -&gt; master)| Author: yologger &lt;yologger1013@gmail.com&gt;| Date:   Mon Dec 20 22:46:14 2021 +0900| |     Update a.txt|     : Add function &#x27;master()&#x27;|   | * commit 6ea93029db54ab2d98a81924241395fd3ffd654f (develop)|/  Author: yologger &lt;yologger1013@gmail.com&gt;|   Date:   Mon Dec 20 22:44:06 2021 +0900|   |       Update a.txt|       : Add function &#x27;develop()&#x27;| * commit 49ff46662071c4c4576aac8c0aca98f34058c919  Author: yologger &lt;yologger1013@gmail.com&gt;  Date:   Mon Dec 20 22:38:48 2021 +0900        Add a.txt\n이제 develop을 master에 병합해보자. master로 이동한 후 다음 명령어를 입력한다.\n12345// master로 이동$ git checkout master// develop을 master에 merge$ git merge develop\n로그를 확인해보자.\n1234567891011121314151617181920212223242526*   commit 1ac36964707e4b6bcf594d864728ce1fc473b5cf (HEAD -&gt; master)|\\  Merge: 9f265d2 6ea9302| | Author: yologger &lt;yologger1013@gmail.com&gt;| | Date:   Mon Dec 20 22:48:47 2021 +0900| | | |     Merge branch &#x27;develop&#x27;| | | * commit 6ea93029db54ab2d98a81924241395fd3ffd654f (develop)| | Author: yologger &lt;yologger1013@gmail.com&gt;| | Date:   Mon Dec 20 22:44:06 2021 +0900| | | |     Update a.txt| |     : Add function &#x27;develop()&#x27;| | * | commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa|/  Author: yologger &lt;yologger1013@gmail.com&gt;|   Date:   Mon Dec 20 22:46:14 2021 +0900|   |       Update a.txt|       : Add function &#x27;master()&#x27;| * commit 49ff46662071c4c4576aac8c0aca98f34058c919  Author: yologger &lt;yologger1013@gmail.com&gt;  Date:   Mon Dec 20 22:38:48 2021 +0900        Add a.txt\na.txt를 확인해보자. develop브랜치의 a.txt내용이 추가되었다.\na.txt123function branch()   // branch에서 추가function do()function master()   // master에서 추가\n이제 다 사용한 develop브랜치를 삭제하자. master브랜치에서 다음 명령어를 실행한다.\n12345// master로 이동$ git checkout master// develop 삭제$ git branch -d develop\ndevelop브랜치가 삭제되었는지 로그를 다시 한 번 확인해보자.\n123456789101112131415161718192021222324252627$ git log --branches --graph*   commit 1ac36964707e4b6bcf594d864728ce1fc473b5cf (HEAD -&gt; master)|\\  Merge: 9f265d2 6ea9302| | Author: yologger &lt;yologger1013@gmail.com&gt;| | Date:   Mon Dec 20 22:48:47 2021 +0900| | | |     Merge branch &#x27;develop&#x27;| | | * commit 6ea93029db54ab2d98a81924241395fd3ffd654f| | Author: yologger &lt;yologger1013@gmail.com&gt;| | Date:   Mon Dec 20 22:44:06 2021 +0900| | | |     Update a.txt| |     : Add function &#x27;develop()&#x27;| | * | commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa|/  Author: yologger &lt;yologger1013@gmail.com&gt;|   Date:   Mon Dec 20 22:46:14 2021 +0900|   |       Update a.txt|       : Add function &#x27;master()&#x27;| * commit 49ff46662071c4c4576aac8c0aca98f34058c919  Author: yologger &lt;yologger1013@gmail.com&gt;  Date:   Mon Dec 20 22:38:48 2021 +0900        Add a.txt\n\n\n\nConflict두 브랜치를 Merge하는 과정에 불일치가 발생할 수 있다. 이를 Conflict라고 한다.\n예제를 살펴보자. 초기 상태는 다음과 같다.\n123456$ git log* commit bbb7ca7cf73c3022b5bcf0df80b922021935780c  Author: yologger &lt;yologger1013@gmail.com&gt;  Date:   Mon Dec 20 22:11:40 2021 +0900        Add a.txt\n12345$ lsa.txt$ cat a.txtfunction do()\n이제 develop브랜치를 만들고 a.txt를 다음과 같이 수정한 후 Commit한다.\n123456789101112$ git branch develop$ git checkout develop// a.txt 수정$ vim a.txtfuntion do(develop)// Add &amp; Commit$ git add -A$ git commitUpdate a.txt: add parameter &#x27;develop&#x27;\n다시 master브랜치로 돌아와서 a.txt를 다음과 같이 수정한 후 Commit한다.\n1234567891011$ git checkout master// a.txt 수정$ vim a.txtfuntion do(master)// Add &amp; Commit$ git add -A$ git commitUpdate a.txt: add parameter &#x27;master&#x27;\n이제 로그를 확인해보자\n1234567891011121314151617181920$ git log --branches --graph* commit 8a452009b15e4c9cb251c5697c23d94c3b6c64d6 (HEAD -&gt; master)| Author: yologger &lt;yologger1013@gmail.com&gt;| Date:   Mon Dec 20 21:53:57 2021 +0900| |     Update a.txt|     : add parameter &#x27;master&#x27;|   | * commit 906f9ea289a238eb72b3aead3de918e053f5e3b7 (develop)|/  Author: yologger &lt;yologger1013@gmail.com&gt;|   Date:   Mon Dec 20 21:50:41 2021 +0900|   |       Update a.txt|       : add parameter &#x27;develop&#x27;| * commit bbb7ca7cf73c3022b5bcf0df80b922021935780c  Author: yologger &lt;yologger1013@gmail.com&gt;  Date:   Mon Dec 20 21:47:50 2021 +0900        Add a.txt\nmaster에서 develop을 Merge해보자. a.txt에서 Conflict가 발생한다.\n12345678$ git branch* master  develop$ git merge developAuto-merging a.txtCONFLICT (content): Merge conflict in a.txtAutomatic merge failed; fix conflicts and then commit the result. \na.txt를 열어보면 어디에서 Conflict가 발생했는지 확인할 수 있다.\n123456$ cat a.txt&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEADfunction do(master)         // Head(master) branch에서의 a.txt=======function do(develop)        // develop branch에서의 a.txt&gt;&gt;&gt;&gt;&gt;&gt;&gt; develop\nConflict를 해결하려면 a.txt를 직접 수정하고 다시 Commit해야한다. a.txt를 다음과 같이 수정하자.\na.txt1function(master, develop)\n다시 Commit해준다.\n123$ git add$ git commit[master 9384313] Merge branch &#x27;develop&#x27;\n마지막으로 master에서 다 사용한 develop브랜치를 삭제한다.\n12$ git checkout master$ git branch -d develop\n결과를 확인해보자.\n1234567891011121314151617181920212223242526*   commit 9384313dcb041f1dc73a6862b2bd8de883da4c21 (HEAD -&gt; master)|\\  Merge: 8a45200 906f9ea| | Author: yologger &lt;yologger1013@gmail.com&gt;| | Date:   Mon Dec 20 22:02:19 2021 +0900| | | |     Merge branch &#x27;develop&#x27;| | | * commit 906f9ea289a238eb72b3aead3de918e053f5e3b7| | Author: yologger &lt;yologger1013@gmail.com&gt;| | Date:   Mon Dec 20 21:50:41 2021 +0900| | | |     Update a.txt| |     : add parameter &#x27;develop&#x27;| | * | commit 8a452009b15e4c9cb251c5697c23d94c3b6c64d6|/  Author: yologger &lt;yologger1013@gmail.com&gt;|   Date:   Mon Dec 20 21:53:57 2021 +0900|   |       Update a.txt:|       add parameter &#x27;master&#x27;| * commit bbb7ca7cf73c3022b5bcf0df80b922021935780c  Author: yologger &lt;yologger1013@gmail.com&gt;  Date:   Mon Dec 20 21:47:50 2021 +0900        Add a.txt\na.txt도 확인해보자. 수정한대로 Merge된 것을 확인할 수 있다.\na.txt1function(master, develop)","dateCreated":"2020-06-03T00:00:00+09:00","dateModified":"2021-12-26T20:17:52+09:00","datePublished":"2020-06-03T00:00:00+09:00","description":"","headline":"[Git, GitHub] (3) git checkout, branch, merge","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/","keywords":"Git, GitHub"}</script>
+    <meta name="description" content="목차 git checkout git branch git merge Conflict   git checkoutgit checkout명령어를 사용하면 Head를 특정 Commit으로 옮길 수 있다. 현재 master 브랜치의 Commit 내역은 다음과 같다. 12345678910111213141516171819202122232425$ git logcommit">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Git, GitHub] (3) git checkout, branch, merge">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="목차 git checkout git branch git merge Conflict   git checkoutgit checkout명령어를 사용하면 Head를 특정 Commit으로 옮길 수 있다. 현재 master 브랜치의 Commit 내역은 다음과 같다. 12345678910111213141516171819202122232425$ git logcommit">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-06-02T15:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-26T11:17:52.570Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Git, GitHub">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infra_devops"
+                            
+                            rel="noopener"
+                            title="Infra, DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infra, DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tool"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tool</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Git, GitHub] (3) git checkout, branch, merge
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-06-03T00:00:00+09:00">
+	
+		    2020/06/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/Git-GitHub/">Git, GitHub</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="목차"><a href="#목차" class="headerlink" title="목차"></a>목차</h1><ul>
+<li><a href="#git-checkout">git checkout</a></li>
+<li><a href="#git-branch">git branch</a></li>
+<li><a href="#git-merge">git merge</a></li>
+<li><a href="#Conflict">Conflict</a></li>
+</ul>
+<hr>
+<h1 id="git-checkout"><a href="#git-checkout" class="headerlink" title="git checkout"></a>git checkout</h1><p><code>git checkout</code>명령어를 사용하면 <code>Head</code>를 특정 Commit으로 옮길 수 있다.</p>
+<p>현재 <code>master</code> 브랜치의 Commit 내역은 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 44444 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br><span class="line"></span><br><span class="line">commit 33333</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:45 2021 +0900</span><br><span class="line"></span><br><span class="line">    3</span><br><span class="line"></span><br><span class="line">commit 22222</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:25 2021 +0900</span><br><span class="line"></span><br><span class="line">    2</span><br><span class="line"></span><br><span class="line">commit 11111</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:07 2021 +0900</span><br><span class="line"></span><br><span class="line">    1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>브랜치의 <u>가장 최근 Commit</u>에는 <u>브랜치의 이름</u>이 표시된다. 다음 결과는 Commit ID 44444가 가장 최근 Commit이라는 의미다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">commit 44444 (master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br></pre></td></tr></table></figure>
+<p>현재 작업 중인 Commit에는 <code>HEAD</code>포인터가 표시된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">commit 44444 (HEAD)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br></pre></td></tr></table></figure>
+<p>다음 결과물은 <code>master</code>브랜치의 가장 최근 Commit의 Id가 44444이며, 현재 이 Commit에서 작업 중이라는 의미다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">commit 44444 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>git checkout</code>명령어와 Commit Id를 이용하여 특정 Commit으로 이동해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// Commit Id 22222로 Head 이동</span><br><span class="line">$ git checkout 22222</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 22222 (HEAD)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:25 2021 +0900</span><br><span class="line"></span><br><span class="line">    2</span><br><span class="line"></span><br><span class="line">commit 11111</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:07 2021 +0900</span><br><span class="line"></span><br><span class="line">    1</span><br></pre></td></tr></table></figure>
+<p>다시 최신 Commit으로 돌아갈 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// git checkout &lt;branch_name&gt;</span><br><span class="line">$ git checkout master</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 44444 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:39:01 2021 +0900</span><br><span class="line"></span><br><span class="line">    4</span><br><span class="line"></span><br><span class="line">commit 33333</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:45 2021 +0900</span><br><span class="line"></span><br><span class="line">    3</span><br><span class="line"></span><br><span class="line">commit 22222</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:25 2021 +0900</span><br><span class="line"></span><br><span class="line">    2</span><br><span class="line"></span><br><span class="line">commit 11111</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:07 2021 +0900</span><br><span class="line"></span><br><span class="line">    1</span><br></pre></td></tr></table></figure>
+
+<p>N 단계 이전으로 Head를 옮길 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 두 단계 이전으로 이동 </span><br><span class="line">$ git checkout HEAD~2</span><br><span class="line"></span><br><span class="line">$ git log</span><br><span class="line">commit 22222 (HEAD)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:25 2021 +0900</span><br><span class="line"></span><br><span class="line">    2</span><br><span class="line"></span><br><span class="line">commit 11111</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:38:07 2021 +0900</span><br><span class="line"></span><br><span class="line">    1</span><br></pre></td></tr></table></figure>
+
+<h1 id="git-branch"><a href="#git-branch" class="headerlink" title="git branch"></a>git branch</h1><p><code>브랜치(Branch)</code>를 사용하면 작업 공간을 분기할 수 있다.</p>
+<p>우선 초기 상태를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<p><code>git branch</code>명령어로 현재 작업 중인 브랜치를 확인할 수 있다.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 현재 Branch 확인</span><br><span class="line">$ git branch</span><br><span class="line">* master</span><br></pre></td></tr></table></figure>
+<p>새로운 브랜치를 생성해보자</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 이름이 develop인 브랜치 생성</span><br><span class="line">$ git branch develop</span><br></pre></td></tr></table></figure>
+<p>두 개의 브랜치(<code>develop</code>, <code>master</code>)가 존재하며, 현재 <code>master</code>에서 작업하고 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 현재 작업 중인 브랜치 확인</span><br><span class="line">$ git branch</span><br><span class="line">  develop</span><br><span class="line">* master</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master, develop)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<p><code>git checkout</code>명령어를 이용하면 브랜치를 이동할 수 있다. <code>develop</code>로 이동해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// 브랜치 이동</span><br><span class="line">$ git checkout develop</span><br><span class="line">&#x27;develop&#x27; 브랜치로 전환합니다</span><br><span class="line"></span><br><span class="line">$ git branch</span><br><span class="line">* develop</span><br><span class="line">  master</span><br></pre></td></tr></table></figure>
+<p><code>HEAD</code>가 <code>develop</code>로 이동했다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; develop, master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<p><code>develop</code>브랜치에서 Commit을 해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git branch</span><br><span class="line">* develop</span><br><span class="line">  master</span><br><span class="line"></span><br><span class="line">$ git commit</span><br><span class="line">Third commit</span><br></pre></td></tr></table></figure>
+<p>로그를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit f3ecc9c5c0aab5deb00955184b497d44f5175c48 (HEAD -&gt; develop)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 20:03:57 2021 +0900</span><br><span class="line"></span><br><span class="line">    Third commit</span><br><span class="line"></span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<p>다시 <code>master</code>로 이동해서 Commit을 해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master </span><br><span class="line">&#x27;master&#x27; 브랜치로 전환합니다</span><br><span class="line"></span><br><span class="line">$ git log</span><br><span class="line">commit 90a9a879c5b45ae392a6b434a8cb75e823546374 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line"></span><br><span class="line">    Second commit</span><br><span class="line"></span><br><span class="line">commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line"></span><br><span class="line">    First commit</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git commit</span><br><span class="line">Third commit</span><br></pre></td></tr></table></figure>
+<p>이제 로그를 확인해보자. <code>git log</code>명령어에 <code>--branches</code>와 <code>--graph</code>옵션을 추가하면 시각적으로 브랜치를 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ git log --branches --graph</span><br><span class="line">* commit 043b07324fb44cdbea4f6ef4539bcb52ad895a4f (HEAD -&gt; master)</span><br><span class="line">| Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| Date:   Tue Oct 5 20:10:27 2021 +0900</span><br><span class="line">| </span><br><span class="line">|     Third commit</span><br><span class="line">|   </span><br><span class="line">| * commit f3ecc9c5c0aab5deb00955184b497d44f5175c48 (develop)</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Tue Oct 5 20:03:57 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Third commit</span><br><span class="line">| </span><br><span class="line">* commit 90a9a879c5b45ae392a6b434a8cb75e823546374</span><br><span class="line">| Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| Date:   Tue Oct 5 19:56:29 2021 +0900</span><br><span class="line">| </span><br><span class="line">|     Second commit</span><br><span class="line">| </span><br><span class="line">* commit 6904277d6ff897a2d7e8fac19f2186ab502cd1f1</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Tue Oct 5 19:54:44 2021 +0900</span><br><span class="line">  </span><br><span class="line">      First commit</span><br></pre></td></tr></table></figure>
+
+<h1 id="git-merge"><a href="#git-merge" class="headerlink" title="git merge"></a>git merge</h1><p>두 개의 브랜치를 합치는 작업을 <code>Merge</code>라 한다.</p>
+<p>예제를 살펴보자. 초기 상태는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">commit 49ff46662071c4c4576aac8c0aca98f34058c919 (HEAD -&gt; master)</span><br><span class="line">Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">Date:   Mon Dec 20 22:38:48 2021 +0900</span><br><span class="line"></span><br><span class="line">    Add a.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">function do()</span><br></pre></td></tr></table></figure>
+<p><code>develop</code>브랜치를 생성하고 <code>a.txt</code>를 다음과 같이 수정한 후 Commit하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">// 브랜치 생성</span><br><span class="line">$ git branch develop</span><br><span class="line"></span><br><span class="line">// 브랜치 이동</span><br><span class="line">$ git checkout develop </span><br><span class="line"></span><br><span class="line"> // a.txt 수정</span><br><span class="line">$ vim a.txt</span><br><span class="line">function develop()  // 추가된 부분</span><br><span class="line">function do()</span><br><span class="line"></span><br><span class="line">// add &amp; commit</span><br><span class="line">$ git add -A</span><br><span class="line">$ git commit</span><br><span class="line">Update a.txt</span><br><span class="line">: Add function &#x27;develop()&#x27;</span><br></pre></td></tr></table></figure>
+<p><code>master</code>브랜치로 돌아가서 <code>a.txt</code>를 다르게 수정한 후 Commit하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 브랜치 이동</span><br><span class="line">$ git checkout master</span><br><span class="line"></span><br><span class="line">// a.txt 수정</span><br><span class="line">$ vim a.txt</span><br><span class="line">function do()</span><br><span class="line">function master()  // 추가된 부분</span><br><span class="line"></span><br><span class="line">// add &amp; commit</span><br><span class="line">$ git add -A</span><br><span class="line">$ git commit</span><br><span class="line">Update a.txt</span><br><span class="line">: Add function &#x27;master()&#x27;</span><br></pre></td></tr></table></figure>
+<p>로그를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ git log --branches --graph</span><br><span class="line">* commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa (HEAD -&gt; master)</span><br><span class="line">| Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| Date:   Mon Dec 20 22:46:14 2021 +0900</span><br><span class="line">| </span><br><span class="line">|     Update a.txt</span><br><span class="line">|     : Add function &#x27;master()&#x27;</span><br><span class="line">|   </span><br><span class="line">| * commit 6ea93029db54ab2d98a81924241395fd3ffd654f (develop)</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 22:44:06 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt</span><br><span class="line">|       : Add function &#x27;develop()&#x27;</span><br><span class="line">| </span><br><span class="line">* commit 49ff46662071c4c4576aac8c0aca98f34058c919</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 22:38:48 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<p>이제 <code>develop</code>을 <code>master</code>에 병합해보자. <code>master</code>로 이동한 후 다음 명령어를 입력한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// master로 이동</span><br><span class="line">$ git checkout master</span><br><span class="line"></span><br><span class="line">// develop을 master에 merge</span><br><span class="line">$ git merge develop</span><br></pre></td></tr></table></figure>
+<p>로그를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">*   commit 1ac36964707e4b6bcf594d864728ce1fc473b5cf (HEAD -&gt; master)</span><br><span class="line">|\  Merge: 9f265d2 6ea9302</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:48:47 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Merge branch &#x27;develop&#x27;</span><br><span class="line">| | </span><br><span class="line">| * commit 6ea93029db54ab2d98a81924241395fd3ffd654f (develop)</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:44:06 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Update a.txt</span><br><span class="line">| |     : Add function &#x27;develop()&#x27;</span><br><span class="line">| | </span><br><span class="line">* | commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 22:46:14 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt</span><br><span class="line">|       : Add function &#x27;master()&#x27;</span><br><span class="line">| </span><br><span class="line">* commit 49ff46662071c4c4576aac8c0aca98f34058c919</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 22:38:48 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<p><code>a.txt</code>를 확인해보자. <code>develop</code>브랜치의 <code>a.txt</code>내용이 추가되었다.</p>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function branch()   // branch에서 추가</span><br><span class="line">function do()</span><br><span class="line">function master()   // master에서 추가</span><br></pre></td></tr></table></figure>
+<p>이제 다 사용한 <code>develop</code>브랜치를 삭제하자. <code>master</code>브랜치에서 다음 명령어를 실행한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// master로 이동</span><br><span class="line">$ git checkout master</span><br><span class="line"></span><br><span class="line">// develop 삭제</span><br><span class="line">$ git branch -d develop</span><br></pre></td></tr></table></figure>
+<p><code>develop</code>브랜치가 삭제되었는지 로그를 다시 한 번 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">$ git log --branches --graph</span><br><span class="line">*   commit 1ac36964707e4b6bcf594d864728ce1fc473b5cf (HEAD -&gt; master)</span><br><span class="line">|\  Merge: 9f265d2 6ea9302</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:48:47 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Merge branch &#x27;develop&#x27;</span><br><span class="line">| | </span><br><span class="line">| * commit 6ea93029db54ab2d98a81924241395fd3ffd654f</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:44:06 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Update a.txt</span><br><span class="line">| |     : Add function &#x27;develop()&#x27;</span><br><span class="line">| | </span><br><span class="line">* | commit 9f265d2ef48776f5c9ef53bd6b2f286b52a051aa</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 22:46:14 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt</span><br><span class="line">|       : Add function &#x27;master()&#x27;</span><br><span class="line">| </span><br><span class="line">* commit 49ff46662071c4c4576aac8c0aca98f34058c919</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 22:38:48 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Conflict"><a href="#Conflict" class="headerlink" title="Conflict"></a>Conflict</h1><p>두 브랜치를 Merge하는 과정에 불일치가 발생할 수 있다. 이를 <code>Conflict</code>라고 한다.</p>
+<p>예제를 살펴보자. 초기 상태는 다음과 같다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git log</span><br><span class="line">* commit bbb7ca7cf73c3022b5bcf0df80b922021935780c</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 22:11:40 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ ls</span><br><span class="line">a.txt</span><br><span class="line"></span><br><span class="line">$ cat a.txt</span><br><span class="line">function do()</span><br></pre></td></tr></table></figure>
+<p>이제 <code>develop</code>브랜치를 만들고 <code>a.txt</code>를 다음과 같이 수정한 후 Commit한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git branch develop</span><br><span class="line">$ git checkout develop</span><br><span class="line"></span><br><span class="line">// a.txt 수정</span><br><span class="line">$ vim a.txt</span><br><span class="line">funtion do(develop)</span><br><span class="line"></span><br><span class="line">// Add &amp; Commit</span><br><span class="line">$ git add -A</span><br><span class="line">$ git commit</span><br><span class="line">Update a.txt</span><br><span class="line">: add parameter &#x27;develop&#x27;</span><br></pre></td></tr></table></figure>
+<p>다시 <code>master</code>브랜치로 돌아와서 <code>a.txt</code>를 다음과 같이 수정한 후 Commit한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br><span class="line"></span><br><span class="line">// a.txt 수정</span><br><span class="line">$ vim a.txt</span><br><span class="line">funtion do(master)</span><br><span class="line"></span><br><span class="line">// Add &amp; Commit</span><br><span class="line">$ git add -A</span><br><span class="line">$ git commit</span><br><span class="line">Update a.txt</span><br><span class="line">: add parameter &#x27;master&#x27;</span><br></pre></td></tr></table></figure>
+<p>이제 로그를 확인해보자</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ git log --branches --graph</span><br><span class="line">* commit 8a452009b15e4c9cb251c5697c23d94c3b6c64d6 (HEAD -&gt; master)</span><br><span class="line">| Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| Date:   Mon Dec 20 21:53:57 2021 +0900</span><br><span class="line">| </span><br><span class="line">|     Update a.txt</span><br><span class="line">|     : add parameter &#x27;master&#x27;</span><br><span class="line">|   </span><br><span class="line">| * commit 906f9ea289a238eb72b3aead3de918e053f5e3b7 (develop)</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 21:50:41 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt</span><br><span class="line">|       : add parameter &#x27;develop&#x27;</span><br><span class="line">| </span><br><span class="line">* commit bbb7ca7cf73c3022b5bcf0df80b922021935780c</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 21:47:50 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<p><code>master</code>에서 <code>develop</code>을 Merge해보자. <code>a.txt</code>에서 Conflict가 발생한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ git branch</span><br><span class="line">* master</span><br><span class="line">  develop</span><br><span class="line"></span><br><span class="line">$ git merge develop</span><br><span class="line">Auto-merging a.txt</span><br><span class="line">CONFLICT (content): Merge conflict in a.txt</span><br><span class="line">Automatic merge failed; fix conflicts and then commit the result. </span><br></pre></td></tr></table></figure>
+<p><code>a.txt</code>를 열어보면 어디에서 Conflict가 발생했는지 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ cat a.txt</span><br><span class="line">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span><br><span class="line">function do(master)         // Head(master) branch에서의 a.txt</span><br><span class="line">=======</span><br><span class="line">function do(develop)        // develop branch에서의 a.txt</span><br><span class="line">&gt;&gt;&gt;&gt;&gt;&gt;&gt; develop</span><br></pre></td></tr></table></figure>
+<p>Conflict를 해결하려면 <code>a.txt</code>를 직접 수정하고 다시 Commit해야한다. <code>a.txt</code>를 다음과 같이 수정하자.</p>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">function(master, develop)</span><br></pre></td></tr></table></figure>
+<p>다시 Commit해준다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add</span><br><span class="line">$ git commit</span><br><span class="line">[master 9384313] Merge branch &#x27;develop&#x27;</span><br></pre></td></tr></table></figure>
+<p>마지막으로 <code>master</code>에서 다 사용한 <code>develop</code>브랜치를 삭제한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br><span class="line">$ git branch -d develop</span><br></pre></td></tr></table></figure>
+<p>결과를 확인해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">*   commit 9384313dcb041f1dc73a6862b2bd8de883da4c21 (HEAD -&gt; master)</span><br><span class="line">|\  Merge: 8a45200 906f9ea</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 22:02:19 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Merge branch &#x27;develop&#x27;</span><br><span class="line">| | </span><br><span class="line">| * commit 906f9ea289a238eb72b3aead3de918e053f5e3b7</span><br><span class="line">| | Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">| | Date:   Mon Dec 20 21:50:41 2021 +0900</span><br><span class="line">| | </span><br><span class="line">| |     Update a.txt</span><br><span class="line">| |     : add parameter &#x27;develop&#x27;</span><br><span class="line">| | </span><br><span class="line">* | commit 8a452009b15e4c9cb251c5697c23d94c3b6c64d6</span><br><span class="line">|/  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">|   Date:   Mon Dec 20 21:53:57 2021 +0900</span><br><span class="line">|   </span><br><span class="line">|       Update a.txt:</span><br><span class="line">|       add parameter &#x27;master&#x27;</span><br><span class="line">| </span><br><span class="line">* commit bbb7ca7cf73c3022b5bcf0df80b922021935780c</span><br><span class="line">  Author: yologger &lt;yologger1013@gmail.com&gt;</span><br><span class="line">  Date:   Mon Dec 20 21:47:50 2021 +0900</span><br><span class="line">  </span><br><span class="line">      Add a.txt</span><br></pre></td></tr></table></figure>
+<p><code>a.txt</code>도 확인해보자. 수정한대로 Merge된 것을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><figcaption><span>a.txt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">function(master, develop)</span><br></pre></td></tr></table></figure>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Git-GitHub/" rel="tag">Git, GitHub</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/03/08_android/11_notification/200603_notification_action/"
+                    data-tooltip="[Android] 알림(Notification) - (3) 알림에 액션 추가하기"
+                    aria-label="이전: [Android] 알림(Notification) - (3) 알림에 액션 추가하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/02/08_android/11_notification/200602_notification_start_activity/"
+                    data-tooltip="[Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                    aria-label="다음: [Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/03/08_android/11_notification/200603_notification_action/"
+                    data-tooltip="[Android] 알림(Notification) - (3) 알림에 액션 추가하기"
+                    aria-label="이전: [Android] 알림(Notification) - (3) 알림에 액션 추가하기"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/06/02/08_android/11_notification/200602_notification_start_activity/"
+                    data-tooltip="[Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                    aria-label="다음: [Android] 알림(Notification) - (2) 알림에서 액티비티 시작시키기"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

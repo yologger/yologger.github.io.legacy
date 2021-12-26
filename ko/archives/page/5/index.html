@@ -266,20 +266,6 @@
                     
                         <a
                             class="sidebar-button-link "
-                            href="/ko/android"
-                            
-                            rel="noopener"
-                            title="Android"
-                        >
-                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Android</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
                             href="/ko/spring"
                             
                             rel="noopener"
@@ -294,13 +280,41 @@
                     
                         <a
                             class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infra_devops"
+                            
+                            rel="noopener"
+                            title="Infra, DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infra, DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
                             href="/ko/tools"
                             
                             rel="noopener"
-                            title="Tools"
+                            title="Tool"
                         >
                         <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Tools</span>
+                        <span class="sidebar-button-desc">Tool</span>
                     </a>
             </li>
             
@@ -330,6 +344,79 @@
                         ">
                 
     <section class="postShorten-group main-content-wrap">
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/"
+                            aria-label=": [구글 지도(Google Maps)] (3) 마커(Marker) 보여주기"
+                        >
+                            [구글 지도(Google Maps)] (3) 마커(Marker) 보여주기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-05-03T01:00:00+09:00">
+	
+		    2020/05/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
+<ul>
+<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
+<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
+<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
+<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
+<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
+<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
+<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
+</ul>
+<hr>
+<h1 id="마커"><a href="#마커" class="headerlink" title="마커"></a>마커</h1><p><code>GoogleMap</code>클래스의 <code>addMarker()</code>메소드를 사용하면 지도에 <code>마커(Marker)</code>를 표시할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> &#123;</span><br><span class="line">        mMap = googleMap</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 시드니</span></span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(-<span class="number">33.8688</span>, <span class="number">151.2093</span>)</span><br><span class="line">        mMap.addMarker(MarkerOptions().position(sydney).title(<span class="string">&quot;Marker in Sydney&quot;</span>))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 서울</span></span><br><span class="line">        <span class="keyword">val</span> seoul = LatLng(<span class="number">37.5665</span>, <span class="number">126.9780</span>)</span><br><span class="line">        mMap.addMarker(MarkerOptions().position(seoul).title(<span class="string">&quot;Marker in Seoul&quot;</span>))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 도쿄</span></span><br><span class="line">        <span class="keyword">val</span> tokyo = LatLng(<span class="number">35.6804</span>, <span class="number">139.7690</span>)</span><br><span class="line">        mMap.addMarker(MarkerOptions().position(tokyo).title(<span class="string">&quot;Marker in Tokyo&quot;</span>))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 위성 지도</span></span><br><span class="line">        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 시드니로 카메라 이동</span></span><br><span class="line">        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="1.png"><br>마커를 선택하면 제목을 확인할 수 있습니다.<br><img src="2.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
     
     
     <article class="postShorten postShorten--thumbnailimg-bottom">
@@ -1632,71 +1719,6 @@
                         <p>
                             <a
                                 href="/ko/2020/03/07/08_android/00_google_play_console/200307_unpublish_app/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/03/06/08_android/00_google_play_console/200306_app_update/"
-                            aria-label=": [Google Play Console] 앱 출시하기 - (6) 플레이스토어에 출시했던 앱 업데이트"
-                        >
-                            [Google Play Console] 앱 출시하기 - (6) 플레이스토어에 출시했던 앱 업데이트
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-03-06T01:00:00+09:00">
-	
-		    2020/03/06
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Play-Console/">Google Play Console</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="앱-업데이트"><a href="#앱-업데이트" class="headerlink" title="앱 업데이트"></a>앱 업데이트</h1><p>기능이 추가되거나 버그를 수정하는 등 앱에 변경사항이 발생하면 구글 플레이 콘솔에 새로운 APK 파일을 업로드 해야합니다.</p>
-<p><code>구글 플레이 콘솔 &gt; All apps</code>에서 업데이트할 앱을 선택합니다.<br><img src="1.png"><br><code>Production &gt; Release</code>로 이동한 후 <code>Create new release</code>를 선택합니다.<br><img src="2.png"><br><code>Upload</code>를 클릭하여 새로운 APK 파일을 업로드합니다.<br><img src="3.png"></p>
-<div class="alert info icon"><p>과거에 APK를 업로드한 적이 있다면, <b>versionCode</b> 값을 증가시켜 새롭게 빌드한 APK를 업로드해야합니다. <b>versionCode</b>는 모듈 수준의 <b>build.gradle</b>에서 수정할 수 있습니다.</p>
-</div>
-
-<p>페이지 하단의 <code>Release name</code>과 <code>Release notes</code>를 적절하게 입력합니다. <code>Release notes</code>에는 이번 버전에서 추가되거나 변경된 사항을 작성합니다. 그리고 <code>Save</code>와 <code>Review release</code>를 순서대로 클릭합니다.<br><img src="4.png"></p>
-<p>에러나 경고가 없는지 확인하고 <code>Start rollout to Production</code> 버튼을 누르면 앱이 출시됩니다.<br><img src="5.png"><br>새로운 릴리즈가 추가되었습니다. 새로운 릴리즈가 심사 중이면 <code>In review</code>로 표시됩니다. 심사는 몇 시간에서 며칠이 소요될 수 있습니다.<br><img src="6.png"><br>심사를 통과하면 새로운 릴리즈의 상태가 <code>Available on Google Play</code>로 변경됩니다. 이전 릴리즈는 <code>Release history</code>에서 확인할 수 있습니다.<br><img src="7.png"><br>고객은 구글 플레이스토어에서 새로운 릴리즈로 앱을 업데이트할 수 있습니다.<br><img src="8-ko.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/03/06/08_android/00_google_play_console/200306_app_update/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

@@ -266,20 +266,6 @@
                     
                         <a
                             class="sidebar-button-link "
-                            href="/ko/android"
-                            
-                            rel="noopener"
-                            title="Android"
-                        >
-                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Android</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
                             href="/ko/spring"
                             
                             rel="noopener"
@@ -294,13 +280,41 @@
                     
                         <a
                             class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infra_devops"
+                            
+                            rel="noopener"
+                            title="Infra, DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infra, DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
                             href="/ko/tools"
                             
                             rel="noopener"
-                            title="Tools"
+                            title="Tool"
                         >
                         <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Tools</span>
+                        <span class="sidebar-button-desc">Tool</span>
                     </a>
             </li>
             
@@ -330,6 +344,158 @@
                         ">
                 
     <section class="postShorten-group main-content-wrap">
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/02/06/04_java/190206_stream/"
+                            aria-label=": [Java 8] 스트림 API(Stream API)"
+                        >
+                            [Java 8] 스트림 API(Stream API)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-02-06T00:00:00+09:00">
+	
+		    2019/02/06
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>, <a class="category-link" href="/ko/categories/Java/Java-8/">Java 8</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="스트림"><a href="#스트림" class="headerlink" title="스트림"></a>스트림</h1><p>Java 8에서 추가된 <code>스트림(Stream)</code>은 <a href="/ko/2019/01/02/04_java/190102_io/">입출력</a>에서 살펴본 스트림과는 전혀 다른 개념이다.</p>
+<p>Java에서는 여러 개의 데이터를 다루기 위해 Array 또는 Collection(List, Set, Map)를 사용한다. 그리고 이 데이터들에 접근하기 위해서는 <code>for</code> 또는 <code>foreach</code>같은 반복문을 사용했다. </p>
+<p>그러나 이렇게 작성된 코드는 가독성이 떨어지고 길이도 길어지는 문제가 있다. 이러한 문제를 극복하기 위해 <code>스트림(Stream)</code>이 등장하게 되었다.</p>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>간단한 예제를 살펴보면서 스트림이 어떤 것인지 알아보자. 1에서 6까지의 숫자가 List에 들어있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; numbers = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">numbers.add(<span class="number">1</span>);</span><br><span class="line">numbers.add(<span class="number">2</span>);</span><br><span class="line">numbers.add(<span class="number">3</span>);</span><br><span class="line">numbers.add(<span class="number">4</span>);</span><br><span class="line">numbers.add(<span class="number">5</span>);</span><br><span class="line">numbers.add(<span class="number">6</span>);</span><br></pre></td></tr></table></figure>
+<p>이제 반복문을 사용하여 짝수만 추출해보자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; evenNumbers = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;numbers.size(); i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (numbers.get(i) % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        evenNumbers.add(numbers.get(i));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">System.out.println(evenNumbers.toString()); <span class="comment">// [2, 4, 6]</span></span><br></pre></td></tr></table></figure>
+
+<p><code>스트림(Stream)</code>을 사용하면 더욱 쉽게 짝수를 추출할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; evenNumbers = numbers.stream()</span><br><span class="line">        .filter(value -&gt; value%<span class="number">2</span> == <span class="number">0</span>)</span><br><span class="line">        .collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line">System.out.println(evenNumbers.toString());     <span class="comment">// [2, 4, 6]</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="스트림-생성하기"><a href="#스트림-생성하기" class="headerlink" title="스트림 생성하기"></a>스트림 생성하기</h1><p>다양한 방법으로 스트림을 생성할 수 있다.</p>
+<h3 id="1-Stream-builder"><a href="#1-Stream-builder" class="headerlink" title="(1) Stream.builder()"></a>(1) Stream.builder()</h3><p><code>Builder</code>를 사용하면 스트림에 값을 직접 넣을 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.&lt;Integer&gt;builder()</span><br><span class="line">    .add(<span class="number">1</span>)</span><br><span class="line">    .add(<span class="number">2</span>)</span><br><span class="line">    .add(<span class="number">3</span>)</span><br><span class="line">    .add(<span class="number">4</span>)</span><br><span class="line">    .build();</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-Stream-generate"><a href="#2-Stream-generate" class="headerlink" title="(2) Stream.generate()"></a>(2) Stream.generate()</h3><p><code>Stream.generate()</code>을 사용하면 람다식으로 스트림을 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.generate(() -&gt; <span class="number">1</span>).limit(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Stream-iterate"><a href="#3-Stream-iterate" class="headerlink" title="(3) Stream.iterate()"></a>(3) Stream.iterate()</h3><p><code>Stream.iterate()</code>은 초기값과 람다식을 이용하여 스트림을 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.iterate(<span class="number">100</span>, x -&gt; x+<span class="number">1</span>).limit(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Stream-of"><a href="#4-Stream-of" class="headerlink" title="(4) Stream.of()"></a>(4) Stream.of()</h3><p><code>Stream.of()</code>은 매개변수로 전달된 요소들로 스트림을 생성한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-배열로-스트림-생성하기"><a href="#5-배열로-스트림-생성하기" class="headerlink" title="(5) 배열로 스트림 생성하기"></a>(5) 배열로 스트림 생성하기</h3><p><code>Arrays.stream()</code>을 사용하면 배열을 스트림으로 만들 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Integer[] array  = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line">Stream&lt;Integer&gt; stream = Arrays.stream(array);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-List-Set으로-스트림-생성하기"><a href="#6-List-Set으로-스트림-생성하기" class="headerlink" title="(6) List, Set으로 스트림 생성하기"></a>(6) List, Set으로 스트림 생성하기</h3><p><code>List.stream()</code>을 사용하면 <code>List</code>로 스트림을 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">list.add(<span class="number">1</span>);</span><br><span class="line">list.add(<span class="number">2</span>);</span><br><span class="line">list.add(<span class="number">3</span>);</span><br><span class="line">list.add(<span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">Stream&lt;Integer&gt; stream = list.stream();</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
+<p><code>Set.stream()</code>을 사용하면 <code>Set</code>로 스트림을 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; set = <span class="keyword">new</span> HashSet&lt;Integer&gt;();</span><br><span class="line">set.add(<span class="number">1</span>);</span><br><span class="line">set.add(<span class="number">2</span>);</span><br><span class="line">set.add(<span class="number">3</span>);</span><br><span class="line">set.add(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">Stream&lt;Integer&gt; stream = set.stream();</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Stream-empty"><a href="#6-Stream-empty" class="headerlink" title="(6) Stream.empty()"></a>(6) Stream.empty()</h3><p><code>Stream.empty()</code>을 사용하면 빈 스트림을 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Stream stream = Stream.empty();</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h1 id="원시-타입의-스트림-생성하기"><a href="#원시-타입의-스트림-생성하기" class="headerlink" title="원시 타입의 스트림 생성하기"></a>원시 타입의 스트림 생성하기</h1><p>물론 제너릭과 Wrapper 클래스를 사용하면 원시 타입의 스트림을 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.&lt;Integer&gt;of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
+<p>그러나 제네릭과 Wrapper 클래스를 사용하지 않고 원시 타입의 스트림을 생성할 수도 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">IntStream stream = IntStream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
+<p>제공되는 원시 타입의 스트림은 다음과 같다.</p>
+<ul>
+<li>IntStream</li>
+<li>LongStream</li>
+<li>DoubleStream</li>
+</ul>
+<h1 id="스트림-조작하기"><a href="#스트림-조작하기" class="headerlink" title="스트림 조작하기"></a>스트림 조작하기</h1><h3 id="1-Stream-concat"><a href="#1-Stream-concat" class="headerlink" title="(1) Stream.concat()"></a>(1) Stream.concat()</h3><p><code>Stream.concat()</code>을 사용하면 두 스트림을 합쳐 새로운 스트림을 만들 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream1 = Stream.&lt;Integer&gt;of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);</span><br><span class="line">Stream&lt;Integer&gt; stream2 = Stream.&lt;Integer&gt;of(<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">Stream&lt;Integer&gt; stream = Stream.concat(stream1, stream2);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td></tr></table></figure>
+<h3 id="2-Stream-filter"><a href="#2-Stream-filter" class="headerlink" title="(2) Stream.filter()"></a>(2) Stream.filter()</h3><p><code>Stream.filter()</code>을 사용하면 요소를 필터링할 수 있다. 아래 예제는 짝수만 필터링한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.&lt;Integer&gt;of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>)</span><br><span class="line">        .filter(value -&gt; value%<span class="number">2</span> == <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">        .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2</span><br><span class="line">4</span><br><span class="line">6</span><br><span class="line">8</span><br><span class="line">10</span><br></pre></td></tr></table></figure>
+<h3 id="3-Stream-map"><a href="#3-Stream-map" class="headerlink" title="(3) Stream.map()"></a>(3) Stream.map()</h3><p><code>Stream.map()</code>을 사용하면 요소들을 다른 값들로 매핑할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;String&gt; stream = Stream.of(<span class="string">&quot;Paul&quot;</span>, <span class="string">&quot;Monica&quot;</span>, <span class="string">&quot;Rachel&quot;</span>, <span class="string">&quot;Chandler&quot;</span>)</span><br><span class="line">    .map(value -&gt; value.toUpperCase());</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PAUL</span><br><span class="line">MONICA</span><br><span class="line">RACHEL</span><br><span class="line">CHANDLER</span><br></pre></td></tr></table></figure>
+<h3 id="4-Stream-flatMap"><a href="#4-Stream-flatMap" class="headerlink" title="(4) Stream.flatMap()"></a>(4) Stream.flatMap()</h3><p><code>Stream.flatMap()</code>을 사용하면 요소를 다른 스트림으로 만들 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.of(</span><br><span class="line">    <span class="keyword">new</span> Student(<span class="string">&quot;Joey&quot;</span>, <span class="number">80</span>, <span class="number">90</span>, <span class="number">70</span>),</span><br><span class="line">    <span class="keyword">new</span> Student(<span class="string">&quot;Monica&quot;</span>, <span class="number">75</span>, <span class="number">100</span>, <span class="number">90</span>),</span><br><span class="line">    <span class="keyword">new</span> Student(<span class="string">&quot;Ross&quot;</span>, <span class="number">70</span>, <span class="number">80</span>, <span class="number">100</span>)</span><br><span class="line">).flatMap(student -&gt; Stream.&lt;Integer&gt;of(student.getMath(), student.getEnglish(), student.getScience()));</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">80</span><br><span class="line">90</span><br><span class="line">70</span><br><span class="line">75</span><br><span class="line">100</span><br><span class="line">90</span><br><span class="line">70</span><br><span class="line">80</span><br><span class="line">100</span><br></pre></td></tr></table></figure>
+<h3 id="5-Stream-sorted"><a href="#5-Stream-sorted" class="headerlink" title="(5) Stream.sorted()"></a>(5) Stream.sorted()</h3><p><code>Stream.sorted()</code>을 사용하면 요소들을 정렬할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>)</span><br><span class="line">    .sorted();</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td></tr></table></figure>
+
+<h1 id="스트림으로-결과-만들기"><a href="#스트림으로-결과-만들기" class="headerlink" title="스트림으로 결과 만들기"></a>스트림으로 결과 만들기</h1><h3 id="1-Stream-foreach"><a href="#1-Stream-foreach" class="headerlink" title="(1) Stream.foreach()"></a>(1) Stream.foreach()</h3><p><code>Stream.foreach()</code>을 사용하면 모든 요소들을 순회할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">2</span><br><span class="line">3</span><br><span class="line">1</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Stream-count"><a href="#2-Stream-count" class="headerlink" title="(2) Stream.count()"></a>(2) Stream.count()</h3><p>요소의 개수를 구할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">long</span> count = stream.count();    <span class="comment">// 6</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Stream-sum"><a href="#3-Stream-sum" class="headerlink" title="(3) Stream.sum()"></a>(3) Stream.sum()</h3><p>요소의 합을 구할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">IntStream stream = IntStream.of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">long</span> count = stream.sum();    <span class="comment">// 21</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-Stream-min"><a href="#4-Stream-min" class="headerlink" title="(4) Stream.min()"></a>(4) Stream.min()</h3><p>최소값을 찾을 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">IntStream stream = IntStream.of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">OptionalInt min = stream.min();    </span><br><span class="line"></span><br><span class="line">min.ifPresent(System.out::println);     <span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
+<h3 id="5-Stream-max"><a href="#5-Stream-max" class="headerlink" title="(5) Stream.max()"></a>(5) Stream.max()</h3><p>최대값을 찾을 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">IntStream stream = IntStream.of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">OptionalInt max = stream.max();</span><br><span class="line"></span><br><span class="line">max.ifPresent(System.out::println);     <span class="comment">// 6</span></span><br></pre></td></tr></table></figure>
+<h3 id="6-Stream-average"><a href="#6-Stream-average" class="headerlink" title="(6) Stream.average()"></a>(6) Stream.average()</h3><p>평균값을 찾을 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">IntStream stream = IntStream.of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">OptionalDouble average = stream.average();</span><br><span class="line"></span><br><span class="line">average.ifPresent(System.out::println);     <span class="comment">// 3.5</span></span><br></pre></td></tr></table></figure>
+<h3 id="7-Stream-reduce"><a href="#7-Stream-reduce" class="headerlink" title="(7) Stream.reduce()"></a>(7) Stream.reduce()</h3><p><code>Stream.reduce()</code>는 각 요소에 람다식을 실행하여 단 1개의 결과를 반환한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">IntStream stream = IntStream.of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">OptionalInt sum = stream.reduce((acc, next) -&gt; acc + next);</span><br><span class="line"></span><br><span class="line">sum.ifPresent(System.out::println);     <span class="comment">// 21</span></span><br></pre></td></tr></table></figure>
+<h1 id="collect-와-Collectors"><a href="#collect-와-Collectors" class="headerlink" title="collect()와 Collectors"></a>collect()와 Collectors</h1><p><code>collect()</code>메소드와 <code>Collectors</code>클래스의 메소드들을 사용하면 스트림을 다양하게 조작할 수 있다.</p>
+<h3 id="1-Collectors-toList"><a href="#1-Collectors-toList" class="headerlink" title="(1) Collectors.toList()"></a>(1) Collectors.toList()</h3><p>스트림을 List로 변환한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Stream.&lt;Integer&gt;of(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">4</span>)</span><br><span class="line">    .collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Collectors-joining"><a href="#2-Collectors-joining" class="headerlink" title="(2) Collectors.joining()"></a>(2) Collectors.joining()</h3><p>스트림을 하나의 문자열로 이어 붙일 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String str = Stream.&lt;String&gt;of(<span class="string">&quot;AAA&quot;</span>, <span class="string">&quot;BBB&quot;</span>, <span class="string">&quot;CCC&quot;</span>, <span class="string">&quot;DDD&quot;</span>)</span><br><span class="line">    .collect(Collectors.joining());</span><br><span class="line"></span><br><span class="line">System.out.println(str);    <span class="comment">// AAABBBCCCDDD</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String str = Stream.&lt;String&gt;of(<span class="string">&quot;AAA&quot;</span>, <span class="string">&quot;BBB&quot;</span>, <span class="string">&quot;CCC&quot;</span>, <span class="string">&quot;DDD&quot;</span>)</span><br><span class="line">    .collect(Collectors.joining(<span class="string">&quot;+&quot;</span>, <span class="string">&quot;&lt;&quot;</span>, <span class="string">&quot;&gt;&quot;</span>));</span><br><span class="line"></span><br><span class="line">System.out.println(str);    <span class="comment">// &lt;AAA+BBB+CCC+DDD&gt;</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/02/06/04_java/190206_stream/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
     
     
     <article class="postShorten postShorten--thumbnailimg-bottom">
@@ -738,72 +904,6 @@
                         <p>
                             <a
                                 href="/ko/2019/02/01/04_java/190201_functional_programming/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/02/01/06_spring/02_spring/20190201_eclipse_spring/"
-                            aria-label=": [Eclipse] Eclipse에서 다양한 Spring 프로젝트 생성하기"
-                        >
-                            [Eclipse] Eclipse에서 다양한 Spring 프로젝트 생성하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-02-01T00:00:00+09:00">
-	
-		    2019/02/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Eclipse/">Eclipse</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="STS"><a href="#STS" class="headerlink" title="STS"></a>STS</h1><p>Eclipse 환경에서는 <code>STS(Spring Tool Suite)</code>을 설치하여 Spring 프로젝트를 쉽게 구성할 수 있다. <code>Eclipse &gt; Help &gt; Eclipse Marketplace</code>로 이동한다. 그리고 검색창에 STS를 입력하고 적절한 버전을 설치한다. 이 포스트에서는 <code>STS 3</code>을 사용한다.<br><img src="1.png"></p>
-<h1 id="Spring-프로젝트-생성"><a href="#Spring-프로젝트-생성" class="headerlink" title="Spring 프로젝트 생성"></a>Spring 프로젝트 생성</h1><p><code>Eclipse &gt; File &gt; New &gt; Project</code>로 이동하여 spring을 검색한다.<br><img src="2.png"></p>
-<ul>
-<li><code>Spring Legacy Project</code>: Spring Boot를 사용하지 않는 Spring 프로젝트를 구성할 때 사용한다. </li>
-<li><code>Spring Starter Project</code>: Spring Boot 프로젝트를 구성할 때 사용한다.</li>
-</ul>
-<h3 id="1-Spring-Legacy-Project"><a href="#1-Spring-Legacy-Project" class="headerlink" title="1. Spring Legacy Project"></a>1. Spring Legacy Project</h3><p><code>Spring Legacy Project</code>를 선택하고 <code>Next &gt;</code>버튼을 누르면 다음 화면으로 이동한다.<br><img src="3.png"></p>
-<h3 id="2-Spring-Starter-Project"><a href="#2-Spring-Starter-Project" class="headerlink" title="2. Spring Starter Project"></a>2. Spring Starter Project</h3><p><code>Spring Starter Project</code>를 선택하고 <code>Next &gt;</code>버튼을 누르면 다음 화면으로 이동한다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/02/01/06_spring/02_spring/20190201_eclipse_spring/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
