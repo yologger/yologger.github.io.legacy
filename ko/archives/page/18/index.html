@@ -354,6 +354,168 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/09/09/05_kotlin/180909_functional_programming/"
+                            aria-label=": [Kotlin] 함수형 프로그래밍과 람다(Lambda)"
+                        >
+                            [Kotlin] 함수형 프로그래밍과 람다(Lambda)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-09-09T00:00:00+09:00">
+	
+		    2018/09/09
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="일급-객체"><a href="#일급-객체" class="headerlink" title="일급 객체"></a>일급 객체</h1><p>다음 세 가지 조건을 모두 충족하면 <code>일급 객체</code>라고 힙니다.</p>
+<ol>
+<li>변수나 상수에 할당할 수 있다.</li>
+<li>함수의 인자로 전달할 수 있다.</li>
+<li>함수의 반환값으로 반환할 수 있다.</li>
+</ol>
+<p>Kotlin에서는 <code>함수</code>를 <code>일급 객체</code>로 취급합니다. 함수가 위의 세 가지 조건을 모두 충족하는지 살펴보겠습니다.</p>
+<h3 id="1-함수를-변수나-상수에-할당할-수-있다"><a href="#1-함수를-변수나-상수에-할당할-수-있다" class="headerlink" title="(1) 함수를 변수나 상수에 할당할 수 있다."></a>(1) 함수를 변수나 상수에 할당할 수 있다.</h3><p>Kotlin에서는 함수를 변수에 할당할 수 있습니다. 이때 <code>리플렉션</code>을 사용합니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">add</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a+b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 함수를 변수에 할당</span></span><br><span class="line"><span class="keyword">var</span> plus = ::add</span><br><span class="line"></span><br><span class="line"><span class="comment">// 함수 호출</span></span><br><span class="line"><span class="keyword">var</span> sum = plus(<span class="number">3</span>, <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+<p>람다식 또한 변수에 할당할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 람다식을 변수에 할당</span></span><br><span class="line"><span class="keyword">var</span> add = &#123; a, b -&gt; </span><br><span class="line">    a+b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 람다 호출</span></span><br><span class="line"><span class="keyword">var</span> result = add(<span class="number">3</span>, <span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-함수를-함수의-인자로-전달할-수-있다"><a href="#2-함수를-함수의-인자로-전달할-수-있다" class="headerlink" title="(2) 함수를 함수의 인자로 전달할 수 있다."></a>(2) 함수를 함수의 인자로 전달할 수 있다.</h3><p>Kotlin에서는 함수를 함수의 인자로 전달할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">run</span><span class="params">(func: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    func()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 함수의 인자로 익명함수 전달</span></span><br><span class="line">run(&#123;</span><br><span class="line">    println(<span class="string">&quot;Hello World!&quot;</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-함수를-함수의-반환-값으로-반환"><a href="#3-함수를-함수의-반환-값으로-반환" class="headerlink" title="(3) 함수를 함수의 반환 값으로 반환"></a>(3) 함수를 함수의 반환 값으로 반환</h3><p>Kotlin에서는 함수를 함수의 반환 값으로 반환할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">function</span><span class="params">()</span></span>: () -&gt; <span class="built_in">Unit</span> &#123;</span><br><span class="line">    <span class="comment">// 함수에서 익명함수를 반환</span></span><br><span class="line">    <span class="keyword">return</span> &#123; println(<span class="string">&quot;kotlin&quot;</span>) &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> myFunction = function()</span><br></pre></td></tr></table></figure>
+
+<h1 id="함수-타입"><a href="#함수-타입" class="headerlink" title="함수 타입"></a>함수 타입</h1><p><code>함수 타입</code>은 위 세 가지 특성을 가능하게 해주는 Kotlin의 자료형입니다. 정수형 타입의 변수에 정수를 할당하는 것 처럼 함수형 타입에는 함수를 할당할 수 있습니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 익명 함수를 변수에 할당</span></span><br><span class="line"><span class="keyword">var</span> add: (<span class="built_in">Int</span>, <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = &#123; a, b -&gt; </span><br><span class="line">    a+b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 익명 함수 호출</span></span><br><span class="line"><span class="keyword">var</span> result = add(<span class="number">3</span>, <span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<p>위 예제에서는 <code>(Int, Int) -&gt; Int</code>가 바로 함수 타입입니다. </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/09/09/05_kotlin/180909_functional_programming/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/09/08/05_kotlin/180908_lambda/"
+                            aria-label=": [Kotlin] 람다와 익명함수"
+                        >
+                            [Kotlin] 람다와 익명함수
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-09-08T00:00:00+09:00">
+	
+		    2018/09/08
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="람다"><a href="#람다" class="headerlink" title="람다"></a>람다</h1><p><code>람다(Lambda)</code>는 <code>익명함수(Anonymous Function)</code>라고도 불리며 <u>이름이 없는 함수</u>를 의미합니다. </p>
+<p>람다식을 사용할 때는 <code>&#123;&#125;</code>를 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sayHello: () -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">    println(<span class="string">&quot;Hello.&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">sayHello()</span><br></pre></td></tr></table></figure>
+<p>람다식에 매개변수가 있는 경우 <code>&#123; 인자1, 인자2, ... -&gt; &#125;</code>을 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> printInformation: (name: String, age: <span class="built_in">Int</span>) -&gt; <span class="built_in">Unit</span> = &#123; name: String, age: <span class="built_in">Int</span> -&gt;</span><br><span class="line">    println(<span class="string">&quot;<span class="subst">$&#123;name&#125;</span> is <span class="subst">$&#123;age&#125;</span> years old.&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">printInformation(<span class="string">&quot;Paul&quot;</span>, <span class="number">35</span>)</span><br></pre></td></tr></table></figure>
+<p>반환값이 있는 경우 다음과 같이 사용합니다. 람다식에서 값을 반환할 땐 키워드 <code>return</code>을 사용하지 않아도 마지막 구문이 자동으로 반환됩니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sum: (a: <span class="built_in">Int</span>, b: <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = &#123; a: <span class="built_in">Int</span>, b: <span class="built_in">Int</span> -&gt;</span><br><span class="line">    a+b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> result = sum(<span class="number">3</span>, <span class="number">5</span>)</span><br><span class="line">println(result)</span><br></pre></td></tr></table></figure>
+<p>람다식도 자동으로 <code>타입 추론</code>이 되므로 <code>매개변수의 자료형</code>과 <code>함수타입</code>을 생략할 수 있습니다. 위 코드와 아래 코드는 동일합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sum = &#123; a, b -&gt;</span><br><span class="line">    a+b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> result = sum(<span class="number">3</span>, <span class="number">5</span>)</span><br><span class="line">println(result)</span><br></pre></td></tr></table></figure>
+<p>매개변수가 한 개인 경우도 살펴봅시다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> printName = &#123; name -&gt;</span><br><span class="line">    println(name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>매개변수</code>와 <code>-&gt;</code>을 생략하고 <code>it</code>로 대체할 수 있습니다. 위 코드와 아래 코드는 동일합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> printName = &#123; </span><br><span class="line">    println(it)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="Trailing"><a href="#Trailing" class="headerlink" title="Trailing"></a>Trailing</h1><p>함수의 맨 마지막 인자가 람다식이라면 <code>괄호()</code>에서 빼내어 밖에 표현할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy(&#123;p: Person -&gt; p.age&#125;) </span><br><span class="line"></span><br><span class="line"><span class="comment">// Trailing</span></span><br><span class="line">people.maxBy() &#123;p: Person -&gt; p.age&#125; </span><br></pre></td></tr></table></figure>
+<p>함수의 인자가 1개고 그 인자가 익명함수라면 <code>괄호()</code>까지 생략할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy &#123;p: Person -&gt; p.age&#125; </span><br></pre></td></tr></table></figure>
+<p>람다의 인자가 1개라면 그 인자는 익명함수 내부에서 <code>it</code>으로 받을 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy &#123;it.age&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>안드로이드 앱에서 버튼과 같은 위젯을 클릭했을 때 처리할 내용을 람다식으로 구현합니다. 아래 코드들은 모두 동일합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 익명 클래스 사용</span></span><br><span class="line">button.setOnClickListener(<span class="keyword">object</span>: View.OnClickListener &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onClick</span><span class="params">(v: <span class="type">View</span>?)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 클릭 시 처리</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 익명클래스의 구현해야 할 매서드가 1개 뿐인 인터페이스는 람다식으로 대체할 수 있다.</span></span><br><span class="line">button.setOnClickListener(&#123; v: View? -&gt;</span><br><span class="line">    <span class="comment">// 클릭 시 처리</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 트레일링</span></span><br><span class="line">button.setOnClickListener() &#123; v: View? -&gt;</span><br><span class="line">    <span class="comment">// 클릭 시 처리</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 파라미터가 하나인 경우, 괄호생략 가능</span></span><br><span class="line">button.setOnClickListener &#123; v: View? -&gt;</span><br><span class="line">    <span class="comment">// 클릭 시 처리</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 자료형 추론</span></span><br><span class="line">button.setOnClickListener &#123; v -&gt;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/09/08/05_kotlin/180908_lambda/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/09/07/05_kotlin/180907_error_handling/"
                             aria-label=": [Kotlin] 예외 처리(Exception Handling)"
                         >
@@ -938,144 +1100,6 @@
                         <p>
                             <a
                                 href="/ko/2018/08/27/05_kotlin/180827_scope_function_with/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/08/26/05_kotlin/180826_scope_function_also/"
-                            aria-label=": [Kotlin] 스코프 함수 - (4) also"
-                        >
-                            [Kotlin] 스코프 함수 - (4) also
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-08-26T00:00:00+09:00">
-	
-		    2018/08/26
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p>Kotlin 표준 라이브러리는 객체의 컨텍스트 내에서 코드 블럭을 실행하기 위한 목적만을 가진 다섯 개의 <code>스코프 함수(Scope function)</code>를 제공합니다. </p>
-<ul>
-<li><code>run()</code></li>
-<li><code>let()</code></li>
-<li><code>apply()</code></li>
-<li><code>also()</code></li>
-<li><code>with()</code></li>
-</ul>
-<h1 id="also"><a href="#also" class="headerlink" title="also()"></a>also()</h1><p><code>also()</code>는 <u>함수를 호출하는 객체</u>가 <u>인자</u>의 형태로 <u>코드 블록</u>으로 전달된다는 점에서 <code>apply()</code>함수와 유사합니다. 그리고 전달 받은 객체가 반환됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">var</span> name: String, <span class="keyword">var</span> age: <span class="built_in">Int</span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">printName</span><span class="params">()</span></span> &#123;</span><br><span class="line">        println(<span class="string">&quot;Name: <span class="subst">$&#123;name&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">printAge</span><span class="params">()</span></span> &#123;</span><br><span class="line">        println(<span class="string">&quot;Age; <span class="subst">$&#123;age&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person = Person(<span class="string">&quot;&quot;</span>, <span class="number">0</span>).also &#123; person -&gt;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 생성된 클래스의 인스턴스(person)가 람다의 인자로 전달됩니다.</span></span><br><span class="line">    person.name = <span class="string">&quot;Paul&quot;</span></span><br><span class="line">    person.age = <span class="number">35</span></span><br><span class="line">    person.incrementAge()</span><br><span class="line">    person.printAge()</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>인자가 하나인 경우 <code>it</code>을 사용하여 코드를 더 간략하게 할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person = Person(<span class="string">&quot;&quot;</span>, <span class="number">0</span>).also &#123; </span><br><span class="line"></span><br><span class="line">    it.name = <span class="string">&quot;Paul&quot;</span></span><br><span class="line">    it.age = <span class="number">35</span></span><br><span class="line">    it.incrementAge()</span><br><span class="line">    it.printAge()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/08/26/05_kotlin/180826_scope_function_also/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/08/25/05_kotlin/180825_scope_function_apply/"
-                            aria-label=": [Kotlin] 스코프 함수 - (3) apply"
-                        >
-                            [Kotlin] 스코프 함수 - (3) apply
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-08-25T00:00:00+09:00">
-	
-		    2018/08/25
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<p>Kotlin 표준 라이브러리는 객체의 컨텍스트 내에서 코드 블럭을 실행하기 위한 목적만을 가진 다섯 개의 <code>스코프 함수(Scope function)</code>를 제공합니다. </p>
-<ul>
-<li><code>run()</code></li>
-<li><code>let()</code></li>
-<li><code>apply()</code></li>
-<li><code>also()</code></li>
-<li><code>with()</code></li>
-</ul>
-<h1 id="apply"><a href="#apply" class="headerlink" title="apply()"></a>apply()</h1><p><code>apply()</code>는 <code>코드 블록</code>으로 <code>함수를 호출한 객체</code>가 암시적으로 전달된다는 점에서 <code>run()</code>과 유사됩니다. 다만 전달 받은 객체 자체를 반환한다는 점에서 차이가 있습니다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">var</span> name: String, <span class="keyword">var</span> age: <span class="built_in">Int</span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">incrementAge</span><span class="params">()</span></span> &#123;</span><br><span class="line">        age += <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">printAge</span><span class="params">()</span></span> &#123;</span><br><span class="line">        println(<span class="string">&quot;Age: <span class="subst">$&#123;age&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person = Person(<span class="string">&quot;&quot;</span>, <span class="number">0</span>).apply &#123;</span><br><span class="line">    <span class="keyword">this</span>.name = <span class="string">&quot;Paul&quot;</span></span><br><span class="line">    <span class="keyword">this</span>.age = <span class="number">35</span></span><br><span class="line">    <span class="keyword">this</span>.incrementAge()</span><br><span class="line">    <span class="keyword">this</span>.printAge()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/08/25/05_kotlin/180825_scope_function_apply/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

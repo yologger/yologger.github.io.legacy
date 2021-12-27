@@ -354,6 +354,142 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/08/17/05_kotlin/180817_data_class/"
+                            aria-label=": [Kotlin] 데이터 클래스(Data Class)"
+                        >
+                            [Kotlin] 데이터 클래스(Data Class)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-08-17T00:00:00+09:00">
+	
+		    2018/08/17
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="데이터-클래스"><a href="#데이터-클래스" class="headerlink" title="데이터 클래스"></a>데이터 클래스</h1><p>Kotlin은 데이터만을 담기 위한 클래스를 제공한다. 이를 <code>데이터 클래스(data class)</code>라고 한다. 데이터 클래스를 선언할 때는 키워드<code>data</code>를 붙인다. 주의할 점은 멤버 변수를 반드시 기본 생성자에 추가해야한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> nation: String)</span><br></pre></td></tr></table></figure>
+<p>데이터 클래스는 데이터를 처리하는데 유용한 메소드들을 자동으로 제공한다. 자주 사용하는 몇 가지 메소드만 알아보자.</p>
+<h4 id="1-equal"><a href="#1-equal" class="headerlink" title="(1) equal()"></a>(1) equal()</h4><p><code>equal()</code>메소드는 두 인스턴스가 동일한지 비교하는데 사용한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> nation: String)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> p1 = Person(<span class="string">&quot;Ronaldo&quot;</span>, <span class="string">&quot;Portugal&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> p2 = Person(<span class="string">&quot;Ramos&quot;</span>, <span class="string">&quot;Spain&quot;</span>)</span><br><span class="line"></span><br><span class="line">println(p1.equals(p2))  <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<p>보통 <code>equal()</code>은 개발자가 정의하여 사용한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> nation: String) &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">equals</span><span class="params">(other: <span class="type">Any</span>?)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">this</span>.name == (other <span class="keyword">as</span> Person).name) &amp;&amp; (<span class="keyword">this</span>.nation == (other <span class="keyword">as</span> Person).nation)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> p1 = Person(<span class="string">&quot;John&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> p2 = Person(<span class="string">&quot;John&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> p3 = Person(<span class="string">&quot;John&quot;</span>, <span class="string">&quot;France&quot;</span>)</span><br><span class="line"></span><br><span class="line">p1.equals(p2)   <span class="comment">// true</span></span><br><span class="line">p1.equals(p3)   <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-toString"><a href="#2-toString" class="headerlink" title="(2) toString()"></a>(2) toString()</h4><p><code>toString()</code>메소드는 인스턴스를 문자열로 변환하는데 사용한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> nation: String)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> person = Person(<span class="string">&quot;Ronaldo&quot;</span>, <span class="string">&quot;Portugal&quot;</span>)</span><br><span class="line"></span><br><span class="line">println(person.toString())	<span class="comment">// Person(name=Ronaldo, nation=Portugal) </span></span><br></pre></td></tr></table></figure>
+<p>보통 <code>toString()</code>도 개발자가 정의하여 사용한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> nation: String) &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">toString</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;<span class="subst">$&#123;name&#125;</span> lives in <span class="subst">$&#123;nation&#125;</span>&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> p = Person(<span class="string">&quot;John&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">p.toString()    <span class="comment">// John lives in USA</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-copy"><a href="#3-copy" class="headerlink" title="(3) copy()"></a>(3) copy()</h4><p><code>copy()</code>메소드는 인스턴스를 복사하는데 사용한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> nation: String)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> p1 = Person(<span class="string">&quot;Paul&quot;</span>, <span class="string">&quot;England&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> p2 = p1.copy()</span><br><span class="line"></span><br><span class="line">println(p2.name)    <span class="comment">// Paul</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/08/17/05_kotlin/180817_data_class/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/08/16/05_kotlin/180816_interface/"
+                            aria-label=": [Kotlin] 인터페이스(Interface)"
+                        >
+                            [Kotlin] 인터페이스(Interface)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-08-16T00:00:00+09:00">
+	
+		    2018/08/16
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="인터페이스"><a href="#인터페이스" class="headerlink" title="인터페이스"></a>인터페이스</h1><p><u>모든 메소드가 선언만 있고 구현부가 없는 클래스</u>를 <code>인터페이스(Interface)</code>라고 한다. 인터페이스를 선언할 때는 키워드 <code>interface</code>를 사용한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">work</span><span class="params">()</span></span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">eat</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>인터페이스는 인스턴스를 만들 수 없으며, 이를 구현한 클래스를 작성해야한다. 인터페이스를 구현한 클래스를 <code>구현체(Implementation)</code>라고 한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 구현체</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Footballer</span>: <span class="type">Person &#123;</span></span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">work</span><span class="params">()</span></span> &#123;</span><br><span class="line">        println(<span class="string">&quot;play soccer.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">eat</span><span class="params">()</span></span> &#123;</span><br><span class="line">        println(<span class="string">&quot;Eat something.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>인터페이스를 구현한 클래스는 인스턴스를 생성할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 구현체의 인스턴스 생성</span></span><br><span class="line"><span class="keyword">var</span> footballer = Footballer()</span><br><span class="line">footballer.work()</span><br><span class="line">footballer.eat()</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/08/16/05_kotlin/180816_interface/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/08/15/05_kotlin/180815_abstract_class/"
                             aria-label=": [Kotlin] 추상 클래스(Abstract Class)"
                         >
@@ -890,163 +1026,6 @@
                         <p>
                             <a
                                 href="/ko/2018/08/08/05_kotlin/180808_unit_nothing/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/08/08/05_kotlin/180808_function/"
-                            aria-label=": [Kotlin] 함수(Function)"
-                        >
-                            [Kotlin] 함수(Function)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-08-08T00:00:00+09:00">
-	
-		    2018/08/08
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="함수"><a href="#함수" class="headerlink" title="함수"></a>함수</h1><p><code>함수(Function)</code>는 <u>특정 값을 입력받아 작업을 수행하고 결과를 반환</u>한다.</p>
-<h3 id="1-매개변수가-있는-함수"><a href="#1-매개변수가-있는-함수" class="headerlink" title="(1) 매개변수가 있는 함수"></a>(1) 매개변수가 있는 함수</h3><p>함수를 선언할 때는 키워드<code>fun</code>을 사용한다. 함수 호출 시 값을 전달할 수 있다. 이를 <code>매개변수(Parameter)</code>라고 한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 함수 선언</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printSomething</span><span class="params">(something: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    println(something);  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
-<p>이렇게 정의한 함수는 아래와 같이 호출한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 함수 호출</span></span><br><span class="line">printSomething(<span class="string">&quot;Hello World!&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-매개변수가-없는-함수"><a href="#2-매개변수가-없는-함수" class="headerlink" title="(2) 매개변수가 없는 함수"></a>(2) 매개변수가 없는 함수</h3><p>매개변수가 없는 함수도 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 함수 정의</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printHelloWorld</span><span class="params">()</span></span> &#123;</span><br><span class="line">    println(<span class="string">&quot;Hello World.&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>이렇게 정의한 함수는 아래와 같이 호출한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">printHelloWorld()  <span class="comment">// Hello World.</span></span><br></pre></td></tr></table></figure>
-<h3 id="3-반환값이-있는-함수"><a href="#3-반환값이-있는-함수" class="headerlink" title="(3) 반환값이 있는 함수"></a>(3) 반환값이 있는 함수</h3><p>함수는 값을 반환할 수 있다. 값을 반환할 때는 키워드<code>return</code>을 사용한다. 또한 반환값이 있는 경우 함수에 타입을 반드시 명시해야한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 함수 선언</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getLength</span><span class="params">(something: <span class="type">String</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> something.length</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이렇게 정의한 함수는 아래와 같이 호출한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 함수 호출</span></span><br><span class="line"><span class="keyword">var</span> length = getLength(<span class="string">&quot;Hello World!&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h1 id="Named-argument"><a href="#Named-argument" class="headerlink" title="Named argument"></a>Named argument</h1><p>함수를 호출할 때 매개변수의 이름을 명시할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printName</span><span class="params">(name: <span class="type">String</span>, age: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">    println(name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 매개변수의 이름을 명시하지 않고 호출</span></span><br><span class="line">printName(<span class="string">&quot;John&quot;</span>, <span class="number">35</span>)    </span><br><span class="line"></span><br><span class="line"><span class="comment">// 매개변수의 이름을 명시하고 호출</span></span><br><span class="line">printName(name=<span class="string">&quot;John&quot;</span>, age=<span class="number">35</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 매개변수의 이름을 명시하면 매개변수의 순서를 바꿔서 호출할 수 있다.</span></span><br><span class="line">printName(age=<span class="number">35</span>, name=<span class="string">&quot;John&quot;</span>)   </span><br></pre></td></tr></table></figure>
-
-
-<h1 id="기본값"><a href="#기본값" class="headerlink" title="기본값"></a>기본값</h1><p>함수를 정의할 때 매개변수의 기본값을 선언할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printName</span><span class="params">(name: <span class="type">String</span> = <span class="string">&quot;John&quot;</span>)</span></span> &#123;</span><br><span class="line">    println(name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>함수로 값을 전달하지 않으면 기본값이 매개변수에 할당된다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">printName()         <span class="comment">// John</span></span><br><span class="line">printName(<span class="string">&quot;Kane&quot;</span>)   <span class="comment">// Kane</span></span><br></pre></td></tr></table></figure>
-
-
-<h1 id="단일-표현식"><a href="#단일-표현식" class="headerlink" title="단일 표현식"></a>단일 표현식</h1><p>함수의 실행코드가 한 줄인 경우 <code>대입문(=)</code>처럼 단축할 수 있다. 이를 <code>단일 표현식</code>이라고 한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getDescription</span><span class="params">(name: <span class="type">String</span>)</span></span>: String &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Name: <span class="subst">$&#123;name&#125;</span>&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>위 구문은 실행코드가 반환문 한 줄이다. 이는 다음과 같이 <code>단일 표현식</code>으로 표현할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getDescription</span><span class="params">(name: <span class="type">String</span>)</span></span> = <span class="string">&quot;Name: <span class="subst">$&#123;name&#125;</span>&quot;</span></span><br></pre></td></tr></table></figure>
-<p>함수의 반환문이 없어도 실행코드가 한 줄인 경우 <code>단일 표현식</code>으로 표현할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printDescription</span><span class="params">(name: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    print(<span class="string">&quot;Name: <span class="subst">$&#123;name&#125;</span>&quot;</span>)</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
-<p>위 구문은 다음과 같이 단축할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printDescription</span><span class="params">(name: <span class="type">String</span>)</span></span> = print(<span class="string">&quot;Name: <span class="subst">$&#123;name&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/08/08/05_kotlin/180808_function/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/08/07/05_kotlin/180807_parameter_argument/"
-                            aria-label=": [Kotlin] 매개변수(Parameter)와 전달인자(Argument)"
-                        >
-                            [Kotlin] 매개변수(Parameter)와 전달인자(Argument)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-08-07T00:00:00+09:00">
-	
-		    2018/08/07
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="매개변수"><a href="#매개변수" class="headerlink" title="매개변수"></a>매개변수</h1><p>Kotlin에서는 함수를 다음과 같이 선언한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printSomething</span><span class="params">(something: <span class="type">String</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>여기서 something을 <code>매개변수(Parameter)</code>라고 한다. 변수라는 말 그대로 함수의 실행구문 내에서 변수처럼 접근할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printSomething</span><span class="params">(something: <span class="type">String</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="comment">// 변수처럼 something에 접근</span></span><br><span class="line">    println(something)</span><br><span class="line">    <span class="keyword">return</span> something.length</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="전달인자"><a href="#전달인자" class="headerlink" title="전달인자"></a>전달인자</h1><p><code>전달인자(Argument)</code>는 함수를 호출할 때 <u>매개변수로 전달되는 실제 값</u>을 의미한다. 위에서 선언한 함수는 다음과 같이 호출한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">printSomething(<span class="string">&quot;Hello World!&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>여기서 실제로 전달되는 문자열 “Hello World”가 전달인자다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/08/07/05_kotlin/180807_parameter_argument/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
