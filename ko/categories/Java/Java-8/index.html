@@ -354,6 +354,228 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/02/09/04_java/190209_concurrent_api_executor/"
+                            aria-label=": [Java 8] Concurrent API - Thread Pool / Executors / ExecutorService / Future"
+                        >
+                            [Java 8] Concurrent API - Thread Pool / Executors / ExecutorService / Future
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-02-09T00:00:00+09:00">
+	
+		    2019/02/09
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>, <a class="category-link" href="/ko/categories/Java/Java-8/">Java 8</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Thread-Pool"><a href="#Thread-Pool" class="headerlink" title="Thread Pool"></a>Thread Pool</h1><p>멀티 스레드 환경에서 스레드 개수가 증가하면 스레드 생성과 스케쥴링으로 인한 성능 저하가 발생한다. 이를 해결하기 위해 <code>스레드 풀(Thread Pool)</code>이라는 공간에 일정 수의 스레드를 사전에 만들어 사용한다.</p>
+<p>스레드 풀의 특징은 다음과 같다.</p>
+<ul>
+<li>사전에 만들어둔 스레드를 사용하기 때문에 스레드 생성과 스케쥴링 비용일 줄일 수 있다.</li>
+<li>다 사용한 스레드는 스레드 풀에 반납한다.</li>
+<li>스레드를 재사용할 수 있다.</li>
+<li>적절한 수의 스레드를 만드는 것이 중요하다.</li>
+</ul>
+<p>Java 8부터는 <code>Concurrent API</code>를 통해 스레드 풀을 포함한 다양한 병렬처리를 할 수 있다. </p>
+<h1 id="Concurrent-API"><a href="#Concurrent-API" class="headerlink" title="Concurrent API"></a>Concurrent API</h1><p> Concurrent API는 <code>java.util.concurrent</code>패키지에 포함된다. 이 패키지의 <code>ExecutorService</code>인터페이스와 <code>Executors</code>클래스를 사용하면 스레드 풀을 쉽게 제어할 수 있다.</p>
+<h1 id="간단한-예제"><a href="#간단한-예제" class="headerlink" title="간단한 예제"></a>간단한 예제</h1><p>간단한 예제를 살펴보자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 크기가 2인 스레드 풀 생성</span></span><br><span class="line">        ExecutorService executorService = Executors.newFixedThreadPool(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 첫 번째 작업</span></span><br><span class="line">        executorService.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Job 1 started at &quot;</span> + LocalTime.now() + <span class="string">&quot;in Thread: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">                    System.out.println(<span class="string">&quot;Job 1 finished at &quot;</span> + LocalTime.now() + <span class="string">&quot;in Thread: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 두 번째 작업</span></span><br><span class="line">        executorService.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Job 2 started at &quot;</span> + LocalTime.now() + <span class="string">&quot; in Thread: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">                    System.out.println(<span class="string">&quot;Job 2 finished at &quot;</span> + LocalTime.now() + <span class="string">&quot; in Thread: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 세 번째 작업</span></span><br><span class="line">        executorService.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Job 3 started at &quot;</span> + LocalTime.now() + <span class="string">&quot; in Thread: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">                    System.out.println(<span class="string">&quot;Job 3 finished at &quot;</span> + LocalTime.now() + <span class="string">&quot; in Thread: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 스레드 풀 종료</span></span><br><span class="line">        executorService.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>우선 크기가 2인 스레드 풀을 다음과 같이 생성하고 있다. <code>Executors</code>클래스의 <code>newFixedThreadPool()</code>을 호출하면 스레드 풀을 생성할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ExecutorService executorService = Executors.newFixedThreadPool(<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+<p>이제 세 개의 작업을 생성하고 <code>ExecutorService.submit()</code>의 인자로 전달하자. 각 작업은 시작 시간을 출력하고 5초 동안 Sleep한 후 종료 시간을 출력한다. 작업은 <code>Runnable</code> 또는 <a href="/ko/2019/02/08/04_java/190208_callable_futuretask/"><code>Callable</code></a>로 구현한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">executorService.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 스레드 이름과 시작 시간</span></span><br><span class="line">        System.out.println(<span class="string">&quot;Job 1 started at &quot;</span> + LocalTime.now() + <span class="string">&quot; in Thread: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 5초 동안 Sleep</span></span><br><span class="line">            Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">            <span class="comment">// 스레드 이름과 종료 시간</span></span><br><span class="line">            System.out.println(<span class="string">&quot;Job 1 finished at &quot;</span> + LocalTime.now() + <span class="string">&quot; in Thread: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>ExecutorService.submit()</code>에는 <code>작업(Runnable)</code>을 전달한다. 이제 스레드 풀은 작업을 처리하기 위해 스레드 하나를 할당한다.</p>
+<p>마지막으로 스레드 풀을 종료시킨다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">executorService.shutdown();</span><br></pre></td></tr></table></figure>
+<p>이제 출력 결과를 살펴보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Job 1 started at 20:06:11.747462 in Thread: pool-1-thread-1</span><br><span class="line">Job 2 started at 20:06:11.747344 in Thread: pool-1-thread-2</span><br><span class="line">Job 1 finished at 20:06:16.769752 in Thread: pool-1-thread-1</span><br><span class="line">Job 2 finished at 20:06:16.769752 in Thread: pool-1-thread-2</span><br><span class="line">Job 3 started at 20:06:16.771134 in Thread: pool-1-thread-1</span><br><span class="line">Job 3 finished at 20:06:21.773421 in Thread: pool-1-thread-1</span><br></pre></td></tr></table></figure>
+<p>위 예제는 다음과 같은 순서로 처리된다.</p>
+<ol>
+<li>스레드 풀의 크기가 2 이므로 첫 번째 작업과 두 번째 작업은 스레드를 할당받아 동시에 처리된다. </li>
+<li>반면 세 번째 작업은 남은 스레드가 없으므로 <code>작업 큐(Job Queue)</code>라는 공간에서 대기한다.</li>
+<li>첫 번째 작업 또는 두 번째 작업이 종료되어 스레드를 반환한다.</li>
+<li>세 번째 작업은 스레드를 재사용하여 처리된다.</li>
+</ol>
+<p>이제 <code>Concurrent API</code>에 대해 좀 더 자세히 알아보자.</p>
+<h1 id="스레드-풀-생성하기"><a href="#스레드-풀-생성하기" class="headerlink" title="스레드 풀 생성하기"></a>스레드 풀 생성하기</h1><p><code>Executors</code>클래스는 스레드 풀을 생성하기 위한 다양한 메소드를 제공한다. 모든 메소드는 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Executors.html">이 곳</a>에서 확인할 수 있다.</p>
+<ul>
+<li><p><code>newFixedThreadPool()</code>: </p>
+<ul>
+<li>고정 크기의 스레드 풀을 생성한다. </li>
+<li>남은 스레드가 없으면 작업은 <code>작업 큐(Job Queue)</code>에서 대기한다.</li>
+</ul>
+</li>
+<li><p><code>newCachedThreadPool()</code></p>
+<ul>
+<li>가변 크기의 스레드 풀을 생성한다. </li>
+<li>남은 스레드가 없으면 새로운 스레드를 생성하여 작업에 할당한다.</li>
+</ul>
+</li>
+<li><p><code>newSingleThreadExecutor()</code></p>
+<ul>
+<li>크기가 1인 스레드 풀을 생성한다.</li>
+</ul>
+</li>
+</ul>
+<h1 id="스레드-풀-실행하기"><a href="#스레드-풀-실행하기" class="headerlink" title="스레드 풀 실행하기"></a>스레드 풀 실행하기</h1><p><code>ExecutorService</code>는 스레드 풀에 작업을 할당하기 위한 두 가지 메소드를 제공한다.</p>
+<h3 id="1-execute"><a href="#1-execute" class="headerlink" title="(1) execute()"></a>(1) execute()</h3><p><code>execute()</code>는 다음과 같은 특징이 있다.</p>
+<ul>
+<li>작업 처리 결과를 반환하지 않는다.</li>
+<li>작업 처리 도중에 예외가 발생하면 해당 스레드를 종료시키고 새로운 스레드를 생성한다.</li>
+</ul>
+<p><code>execute()</code> 예제를 첨부한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">ExecutorService executorService = Executors.newSingleThreadExecutor();</span><br><span class="line"></span><br><span class="line">executorService.execute(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;[&quot;</span> + LocalTime.now() + <span class="string">&quot;]&quot;</span> + <span class="string">&quot; Job started.&quot;</span>);</span><br><span class="line">            Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;[&quot;</span> + LocalTime.now() + <span class="string">&quot;]&quot;</span> + <span class="string">&quot; Job finished.&quot;</span>);</span><br><span class="line">            String result = <span class="string">&quot;This is result&quot;</span>;</span><br><span class="line">            System.out.println(<span class="string">&quot;[&quot;</span> + LocalTime.now() + <span class="string">&quot;]&quot;</span> + <span class="string">&quot; Result: &quot;</span> + result);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">executorService.shutdown();</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[21:20:05.142350] Job started.</span><br><span class="line">[21:20:15.154706] Job finished.</span><br><span class="line">[21:20:15.155586] Result: This is result</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-submit"><a href="#2-submit" class="headerlink" title="(2) submit()"></a>(2) submit()</h3><p><code>submit()</code>는 다음과 같은 특징이 있다.</p>
+<ul>
+<li>작업 처리 결과를 반환할 수 있다.</li>
+<li>결과는 <code>Future</code>클래스로 Wrapping해서 반환된다.</li>
+<li>작업 처리 도중에 예외가 발생해도 해당 스레드를 종료시키지 않고 다음 작업에 재사용한다.</li>
+</ul>
+<p><code>submit()</code> 예제를 첨부한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">ExecutorService executorService = Executors.newSingleThreadExecutor();</span><br><span class="line"></span><br><span class="line">Future&lt;String&gt; future = executorService.submit(<span class="keyword">new</span> Callable&lt;String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;[&quot;</span> + LocalTime.now() + <span class="string">&quot;]&quot;</span> + <span class="string">&quot; Job started.&quot;</span>);</span><br><span class="line">        Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;[&quot;</span> + LocalTime.now() + <span class="string">&quot;]&quot;</span> + <span class="string">&quot; Job finished.&quot;</span>);</span><br><span class="line">        String result = <span class="string">&quot;This is result&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    String result = future.get();</span><br><span class="line">    System.out.println(<span class="string">&quot;[&quot;</span> + LocalTime.now() + <span class="string">&quot;]&quot;</span> + <span class="string">&quot; Result: &quot;</span> + result);</span><br><span class="line">&#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">executorService.shutdown();</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[21:23:27.843158] Job started.</span><br><span class="line">[21:23:37.855516] Job finished.</span><br><span class="line">[21:23:37.857058] Result: This is result</span><br></pre></td></tr></table></figure>
+
+<h1 id="스레드-풀-종료하기"><a href="#스레드-풀-종료하기" class="headerlink" title="스레드 풀 종료하기"></a>스레드 풀 종료하기</h1><p>스레드 풀에 속한 스레드는 기본적으로 Main 스레드가 종료되어도 작업을 처리하기 위해 실행 상태로 남아있다. 따라서 적절한 시점에 스레드 풀을 종료하고 스레드를 해제해야한다.</p>
+<p><code>ExecutorService</code>클래스는 스레드 풀을 종료하기 위한 다양한 메소드를 제공한다.</p>
+<ul>
+<li><p><code>shutdown()</code></p>
+<ul>
+<li>작업 큐에 남아있는 작업이 모두 마무리될 때 까지 기다렸다가 스레드 풀을 종료한다.</li>
+</ul>
+</li>
+<li><p><code>shutdownNow()</code></p>
+<ul>
+<li>작업 큐에 작업이 남아있는지와 관계없이 스레드 풀을 종료한다.</li>
+</ul>
+</li>
+<li><p><code>awaitTermination(long timeout, TimeUnit unit)</code></p>
+<ul>
+<li>timeout 안에 모든 작업을 처리하면 true, 처리하지 못하면 false를 반환한다. </li>
+</ul>
+</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/02/09/04_java/190209_concurrent_api_executor/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/02/08/04_java/190208_callable_futuretask/"
+                            aria-label=": [Java 8] Concurrent API - Callable과 FutureTask"
+                        >
+                            [Java 8] Concurrent API - Callable과 FutureTask
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-02-08T00:00:00+09:00">
+	
+		    2019/02/08
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>, <a class="category-link" href="/ko/categories/Java/Java-8/">Java 8</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Concurrent-API"><a href="#Concurrent-API" class="headerlink" title="Concurrent API"></a>Concurrent API</h1><p>Java 8에는 동시성 제어를 위한 <code>Concurrent API</code>가 추가되었다. Concurrent API는 <code>java.util.concurrent</code>패키지에 포함되어있으며, 이 패키지는 동시성,  멀티 스레드 작업을 위한 다양한 컴포넌트를 제공한다.</p>
+<h1 id="Runnable"><a href="#Runnable" class="headerlink" title="Runnable"></a>Runnable</h1><p>Java 8 이전에는 멀티 스레드 작업을 위해 <code>Runnable</code> 인터페이스를 사용했다. 이 인터페이스의 코드는 다음과 같다. <u>반환값이 없고 예외를 발생시키지 않는다.</u> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Runnable</code>은 보통 다음과 같이 사용한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyRunnable</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String result = <span class="string">&quot;Called at &quot;</span> + LocalTime.now();</span><br><span class="line">        Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">        System.out.println(result);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        MyRunnable runnable = <span class="keyword">new</span> MyRunnable();</span><br><span class="line">        Thread thread = <span class="keyword">new</span> Thread(runnable);</span><br><span class="line">        thread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Callable"><a href="#Callable" class="headerlink" title="Callable"></a>Callable</h1><p>Java 8 부터는 <code>Callable</code> 인터페이스를 구현하여 멀티 스레드 작업을 할 수 있다. 이 인터페이스의 코드는 다음과 같다. <u>반환값이 있고 예외도 발생시킬 수 있다.</u></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Callable</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">V <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Callable</code>은 보통 다음과 같이 사용한다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.Callable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyCallable</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">        String result = <span class="string">&quot;Called at &quot;</span> + LocalTime.now();</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.Callable;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.FutureTask;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        MyCallable callable = <span class="keyword">new</span> MyCallable();</span><br><span class="line">        FutureTask futureTask = <span class="keyword">new</span> FutureTask(callable);</span><br><span class="line">        Thread thread = <span class="keyword">new</span> Thread(futureTask);</span><br><span class="line">        thread.start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 결과가 반환될 때 까지 기다린다.</span></span><br><span class="line">            System.out.println(<span class="string">&quot;result : &quot;</span> + futureTask.get());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>FutureTask</code>클래스는 내부적으로 <code>RunnableFuture</code>클래스를 상속하며, RunnableFuture클래스는 다시 <code>Runnable</code>인터페이스와 <code>Future</code>인터페이스를 구현하고있다.</p>
+<figure class="highlight java"><figcaption><span>FutureTask.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FutureTask</span>&lt;<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">RunnableFuture</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>RunnableFuture.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">RunnableFuture</span>&lt;<span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">Runnable</span>, <span class="title">Future</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 때문에 다음과 같은 형태로 <code>Thread</code>클래스의 생성자에 인스턴스를 전달할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MyCallable callable = <span class="keyword">new</span> MyCallable();</span><br><span class="line">FutureTask futureTask = <span class="keyword">new</span> FutureTask(callable);</span><br><span class="line">Thread thread = <span class="keyword">new</span> Thread(futureTask);</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/02/08/04_java/190208_callable_futuretask/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/02/07/04_java/190207_default_method/"
                             aria-label=": [Java 8] default 메소드"
                         >

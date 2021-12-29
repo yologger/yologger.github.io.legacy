@@ -354,6 +354,154 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/08/19/05_kotlin/180819_sealed_class/"
+                            aria-label=": [Kotlin] Sealed Class"
+                        >
+                            [Kotlin] Sealed Class
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-08-19T00:00:00+09:00">
+	
+		    2018/08/19
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Sealed-Class"><a href="#Sealed-Class" class="headerlink" title="Sealed Class"></a>Sealed Class</h1><p><code>Sealed Class</code>는 열거 클래스의 확장판이라고 보면 된다. 열거 클래스와 마찬가지로 서로 관련 있는 상수들을 모아 심볼릭한 명칭의 집합으로 정의할 수 있다.</p>
+<p>Sealed Class는 키워드 <code>Sealed</code>를 사용하여 선언한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">sealed</span> <span class="class"><span class="keyword">class</span> <span class="title">Color</span> </span>&#123;</span><br><span class="line">    <span class="keyword">object</span> Red: Color()</span><br><span class="line">    <span class="keyword">object</span> Blue: Color()</span><br><span class="line">    <span class="keyword">object</span> Green: Color()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Sealed Class의 인스턴스는 다음과 같이 생성할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Sealed Class의 인스턴스 생성</span></span><br><span class="line"><span class="keyword">var</span> backgroundColor: Color = Color.Blue</span><br></pre></td></tr></table></figure>
+<p>Sealed Class는 <code>when 구문</code>과 함께 유용하게 사용할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">when</span>(backgroundColor) &#123;</span><br><span class="line">    <span class="keyword">is</span> Color.Red -&gt; &#123;</span><br><span class="line">        println(<span class="string">&quot;Background color is red.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">is</span> Color.Blue -&gt; &#123;</span><br><span class="line">        println(<span class="string">&quot;Background color is blue.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">is</span> Color.Green -&gt; &#123;</span><br><span class="line">        println(<span class="string">&quot;Background color is green.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="열거-클래스와의-차이점"><a href="#열거-클래스와의-차이점" class="headerlink" title="열거 클래스와의 차이점"></a>열거 클래스와의 차이점</h1><p><code>Sealed Class</code>는 인스턴스 안에 다른 타입의 데이터를 포함할 수도 있다. 아래 코드를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">sealed</span> <span class="class"><span class="keyword">class</span> <span class="title">Manager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Programmer</span></span>(<span class="keyword">var</span> school: String) : Manager()</span><br><span class="line">    <span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Marketer</span></span>(<span class="keyword">var</span> major: String) : Manager()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>매니저는 프로그래머 출신일 수도 있고 마케터 출신일 수도 있다. 이에 따라 다른 구문이 실행되도록 구현할 수 있다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printInformation</span><span class="params">(manager: <span class="type">Manager</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">when</span> (manager) &#123;</span><br><span class="line">        <span class="keyword">is</span> Manager.Programmer -&gt; &#123;</span><br><span class="line">            println(<span class="string">&quot;Manager studied at MIT&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">is</span> Manager.Marketer -&gt; &#123;</span><br><span class="line">            println(<span class="string">&quot;Manager majored in Economics&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> itManager = Manager.Programmer(<span class="string">&quot;MIT&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> marketingManager = Manager.Marketer(<span class="string">&quot;Economics&quot;</span>)</span><br><span class="line"></span><br><span class="line">printInformation(itManager) </span><br><span class="line"><span class="comment">// Manager studied at MIT</span></span><br><span class="line"></span><br><span class="line">printInformation(marketingManager)  </span><br><span class="line"><span class="comment">// Manager majored in Economics</span></span><br></pre></td></tr></table></figure>
+<h1 id="로그인-예제"><a href="#로그인-예제" class="headerlink" title="로그인 예제"></a>로그인 예제</h1><p>서버에 로그인을 요청하는 코드가 있다고 가정하자. 로그인에 성공하면 다음과 같이 데이터를 반환한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">LogInData</span></span>(<span class="keyword">val</span> code: <span class="built_in">Int</span>, <span class="keyword">var</span> message: String)</span><br></pre></td></tr></table></figure>
+<p>로그인에 실패하면 다음과 같이 에러를 반환한다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">LogInError</span> </span>&#123;</span><br><span class="line">    INVALID_EMAIL,</span><br><span class="line">    INVALID_PASSWORD,</span><br><span class="line">    NETWORK_ERROR</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>이처럼 상황에 따라 다른 타입의 데이터를 반환할 때 Sealed Class를 유용하게 사용할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">sealed</span> <span class="class"><span class="keyword">class</span> <span class="title">LogInResponse</span> </span>&#123;</span><br><span class="line">    <span class="keyword">object</span> OnProgress : LogInResponse()</span><br><span class="line">    <span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">OnSuccess</span></span>(<span class="keyword">val</span> <span class="keyword">data</span>: LogInData) : LogInResponse()</span><br><span class="line">    <span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">OnFailure</span></span>(<span class="keyword">val</span> error: LogInError) : LogInResponse()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>로그인을 요청하는 함수는 아래와 같이 <code>LogInResponse</code>를 반환한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">logIn</span><span class="params">(id: <span class="type">String</span>, password; String)</span></span>: LogInResponse &#123;</span><br><span class="line">    <span class="comment">// 로그인 </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Sealed Class <code>when()</code>구문과 함께 유용하게 사용될 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> response = logIn(<span class="string">&quot;Paul@gmail.com&quot;</span>, <span class="string">&quot;12345&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">when</span>(response) &#123;</span><br><span class="line">    <span class="keyword">is</span> SignUpResponse.OnProgress -&gt; &#123;</span><br><span class="line">        println(<span class="string">&quot;<span class="subst">$&#123;response&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">is</span> SignUpResponse.OnSuccess -&gt; &#123;</span><br><span class="line">        println(<span class="string">&quot;<span class="subst">$&#123;response.data.code&#125;</span>&quot;</span>)</span><br><span class="line">        println(<span class="string">&quot;<span class="subst">$&#123;response.data.message&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">is</span> SignUpResponse.OnFailure -&gt; &#123;</span><br><span class="line">        <span class="keyword">when</span>(response.error) &#123;</span><br><span class="line">            SignUpError.INVALID_EMAIL -&gt; &#123;</span><br><span class="line">                println(<span class="string">&quot;invalid email&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            SignUpError.NETWORK_ERROR -&gt; &#123;</span><br><span class="line">                println(<span class="string">&quot;network error&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            SignUpError.INVALID_PASSWORD -&gt; &#123;</span><br><span class="line">                println(<span class="string">&quot;invalid password&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/08/19/05_kotlin/180819_sealed_class/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/08/18/05_kotlin/180818_enum_class/"
+                            aria-label=": [Kotlin] 열거 클래스(enum class)"
+                        >
+                            [Kotlin] 열거 클래스(enum class)
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-08-18T00:00:00+09:00">
+	
+		    2018/08/18
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="열거-클래스"><a href="#열거-클래스" class="headerlink" title="열거 클래스"></a>열거 클래스</h1><p><code>열거 클래스(enum class)</code>는 <u>서로 관련 있는 상수들을 모아 심볼릭한 명칭의 집합으로 정의하는 것</u>이다.</p>
+<p>예를 들어 요일은 월요일부터 일요일까지로 데이터의 범위가 한정되어 있다. 이러한 경우 열거 클래스를 유용하게 사용할 수 있다. 열거 클래스는 키워드 <code>enum</code>을 붙여 정의한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">Day</span> </span>&#123;</span><br><span class="line">    SUNDAY,</span><br><span class="line">    MONDAY,</span><br><span class="line">    TUESDAY,</span><br><span class="line">    WEDNESDAY,</span><br><span class="line">    THURSDAY,</span><br><span class="line">    FRIDAY,</span><br><span class="line">    SATURDAY,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>열거 클래스의 인스턴스는 다음과 같이 생성한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> today: Day = Day.MONDAY</span><br></pre></td></tr></table></figure>
+<p>열거 클래스 역시 타입 추론이 가능하므로 타입을 생략할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> today = Day.MONDAY</span><br></pre></td></tr></table></figure>
+<p>열거 클래스는 <code>when()</code> 구문과 함께 유용하게 사용할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">when</span>(today) &#123;</span><br><span class="line">    Day.MONDAY -&gt; println(<span class="string">&quot;It&#x27;s monday today.&quot;</span>)</span><br><span class="line">    Day.TUESDAY -&gt; println(<span class="string">&quot;It&#x27;s tuesday today.&quot;</span>)</span><br><span class="line">    Day.WEDNESDAY -&gt; println(<span class="string">&quot;It&#x27;s Wednesday today.&quot;</span>)</span><br><span class="line">    Day.THURSDAY -&gt; println(<span class="string">&quot;It&#x27;s thursday today.&quot;</span>)</span><br><span class="line">    Day.FRIDAY -&gt; println(<span class="string">&quot;It&#x27;s friday today.&quot;</span>)</span><br><span class="line">    <span class="keyword">else</span> -&gt; println(<span class="string">&quot;Weekend.&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>열거 클래스는 내부에 데이터를 담을 수도 있다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">Day</span></span>(<span class="keyword">val</span> color: String) &#123;</span><br><span class="line">    SUNDAY(<span class="string">&quot;Red&quot;</span>),</span><br><span class="line">    MONDAY(<span class="string">&quot;Black&quot;</span>),</span><br><span class="line">    TUESDAY(<span class="string">&quot;Black&quot;</span>),</span><br><span class="line">    WEDNESDAY(<span class="string">&quot;Black&quot;</span>),</span><br><span class="line">    THURSDAY(<span class="string">&quot;Black&quot;</span>),</span><br><span class="line">    FRIDAY(<span class="string">&quot;Black&quot;</span>),</span><br><span class="line">    SATURDAY(<span class="string">&quot;Blue&quot;</span>),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 값에 접근할 수도 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> today = Day.SUNDAY</span><br><span class="line"></span><br><span class="line">today.color    <span class="comment">// Red</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/08/18/05_kotlin/180818_enum_class/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/08/17/05_kotlin/180817_data_class/"
                             aria-label=": [Kotlin] 데이터 클래스(Data Class)"
                         >
@@ -895,150 +1043,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/08/09/05_kotlin/180809_vararg/"
-                            aria-label=": [Kotlin] 키워드 vararg란?"
-                        >
-                            [Kotlin] 키워드 vararg란?
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-08-09T00:00:00+09:00">
-	
-		    2018/08/09
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="가변인자"><a href="#가변인자" class="headerlink" title="가변인자"></a>가변인자</h1><p>함수의 파라미터가 몇 개일지 모를 수도 있다. 이때 키워드<code>vararg</code>를 사용할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">sum</span><span class="params">(<span class="keyword">vararg</span> numbers: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>vararg</code>가 붙은 매개변수는 함수 내부에서 Array처럼 사용할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">sum</span><span class="params">(<span class="keyword">vararg</span> numbers: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="comment">// numbers는 array</span></span><br><span class="line">    <span class="keyword">var</span> sum = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> (n <span class="keyword">in</span> numbers) &#123;</span><br><span class="line">        sum += n</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> sum</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 함수를 호출할 때 인자를 유연하게 전달할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> result1 = sum(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)  <span class="comment">// 6</span></span><br><span class="line"><span class="keyword">var</span> result2 = sum(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>)  <span class="comment">// 21</span></span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/08/09/05_kotlin/180809_vararg/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/08/08/05_kotlin/180808_unit_nothing/"
-                            aria-label=": [Kotlin] Unit과 Nothing"
-                        >
-                            [Kotlin] Unit과 Nothing
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-08-08T08:00:00+09:00">
-	
-		    2018/08/08
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="Unit"><a href="#Unit" class="headerlink" title="Unit"></a>Unit</h1><p><code>Unit</code>은 Java의 Void와 유사하며 <u>함수의 반환값이 없음</u>을 의미합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printSomething</span><span class="params">(something: <span class="type">String</span>)</span></span>: <span class="built_in">Unit</span> &#123;</span><br><span class="line">    println(something)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">printSomething(<span class="string">&quot;Hello&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>반환값이 없는 함수에서는 <code>Unit</code>은 생략할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printSomething</span><span class="params">(something: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    println(something)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">printSomething(<span class="string">&quot;Hello&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>반환값이 없는 함수에서는 <code>return</code>도 생략할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printSomething</span><span class="params">(something: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    println(something)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">printSomething(<span class="string">&quot;Hello&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p><code>Unit</code>은 싱글톤이기도 합니다. 인스턴스를 생성하지 않고도 접근할 수 있으며, 인스턴스 또한 생성할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> unit: <span class="built_in">Unit</span> = <span class="built_in">Unit</span></span><br></pre></td></tr></table></figure>
-<p><code>Unit</code>은 <code>RxKotlin</code>에서 데이터가 없는 이벤트에 사용합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> didLogOut = PublishSubject.create&lt;<span class="built_in">Unit</span>&gt;()</span><br><span class="line">didLogOut.onNext(<span class="built_in">Unit</span>)</span><br></pre></td></tr></table></figure>
-
-
-<h1 id="Nothing"><a href="#Nothing" class="headerlink" title="Nothing"></a>Nothing</h1><p><code>Nothing</code>은 <u>함수가 정상적으로 끝나지 않는다는 것을 명시적으로 표현</u>하는데 사용합니다.</p>
-<p>예를 들어 예외를 발생시키는 함수는 정상적으로 끝나지 않습니다. 이를 표현할 때 <code>Nothing</code>을 사용할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doSomething</span><span class="params">()</span></span>: <span class="built_in">Nothing</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> Exception(<span class="string">&quot;Unknown exception.&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Nothing</code> 타입을 반환하는 대표적인 함수가 <code>TODO()</code>입니다. <code>TODO()</code>는 <code>NotImplementedError</code>이라는 예외를 발생시킵니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">TODO</span><span class="params">()</span></span>: <span class="built_in">Nothing</span> = <span class="keyword">throw</span> NotImplementedError()</span><br></pre></td></tr></table></figure>
-<p>이번에는 <code>TODO()</code>를 호출하는 예제를 살펴봅시다. 인터페이스 <code>Person</code>이 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">printName</span><span class="params">()</span></span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">printAge</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>안드로이드 스튜디오에서 이 인터페이스의 구현체 <code>Programmer</code>를 정의하면 다음과 같이 <code>TODO()</code>함수가 추가됩니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Programmer</span>: <span class="type">Person &#123;</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">printName</span><span class="params">()</span></span> &#123;</span><br><span class="line">        TODO(<span class="string">&quot;Not yet implemented&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">printAge</span><span class="params">()</span></span> &#123;</span><br><span class="line">        TODO(<span class="string">&quot;Not yet implemented&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이 코드는 <code>TODO()</code>를 삭제하고 <code>printName()</code>과 <code>printAge()</code>를 구현하기 전까지 빌드되지 않습니다. 이처럼 <code>TODO()</code>는 코드가 아직 구현되지 않았으며, 나중에 코드를 구현해야한다는 것을 표시하는데 사용합니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/08/08/05_kotlin/180808_unit_nothing/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1065,7 +1069,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 20 of 27</li>
+        <li class="pagination-number">page 20 of 28</li>
     </ul>
 </div>
 

@@ -354,6 +354,75 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/01/03/04_java/190103_serialization_transient/"
+                            aria-label=": [Java] 직렬화와 transient"
+                        >
+                            [Java] 직렬화와 transient
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-03T00:00:00+09:00">
+	
+		    2019/01/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Java/">Java</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="직렬화"><a href="#직렬화" class="headerlink" title="직렬화"></a>직렬화</h1><p>운영체제나 네트워크에는 Java의 객체의 개념이 없다. 그렇다면 어떻게 객체를 운영체제의 파일 시스템에 저장하거나 네트워크로 전송할 수 있을까?</p>
+<p><code>직렬화(Serialization)</code>는 객체를 바이트로 변환하여 저장하는 기술을 의미한다. <code>역직렬화(Deserialization)</code>는 바이트를 다시 Java 객체로 변환하는 것이다.</p>
+<h1 id="Serializable"><a href="#Serializable" class="headerlink" title="Serializable"></a>Serializable</h1><p>직렬화할 클래스는 <code>Serializable</code>를 구현해야한다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">implements</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String nation;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name, String nation, <span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.nation = nation;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getNation</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> nation;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNation</span><span class="params">(String nation)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.nation = nation;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h1 id="ObjectInputStream-ObjectOutputStream"><a href="#ObjectInputStream-ObjectOutputStream" class="headerlink" title="ObjectInputStream, ObjectOutputStream"></a>ObjectInputStream, ObjectOutputStream</h1><p>직렬화와 역직렬화에는 보통 <code>ObjectInputStream</code>, <code>ObjectOutputStream</code>을 사용한다.</p>
+<figure class="highlight java"><figcaption><span>App.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        FileOutputStream fos = <span class="keyword">null</span>;</span><br><span class="line">        ObjectOutputStream oos = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        FileInputStream fis = <span class="keyword">null</span>;</span><br><span class="line">        ObjectInputStream ois = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        Person original = <span class="keyword">new</span> Person(<span class="string">&quot;Ronaldo&quot;</span>, <span class="string">&quot;Portugal&quot;</span>, <span class="number">37</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String path = <span class="string">&quot;/Users/yologger/Desktop/folder&quot;</span> + File.separator + <span class="string">&quot;store.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line">            fos = <span class="keyword">new</span> FileOutputStream(path);</span><br><span class="line">            oos = <span class="keyword">new</span> ObjectOutputStream(fos);</span><br><span class="line">            oos.writeObject(original);</span><br><span class="line"></span><br><span class="line">            fis = <span class="keyword">new</span> FileInputStream(path);</span><br><span class="line">            ois = <span class="keyword">new</span> ObjectInputStream(fis);</span><br><span class="line"></span><br><span class="line">            Person result = (Person) ois.readObject();</span><br><span class="line"></span><br><span class="line">            System.out.println(result.getName());   <span class="comment">// Ronaldo</span></span><br><span class="line">            System.out.println(result.getNation()); <span class="comment">// Portugal</span></span><br><span class="line">            System.out.println(result.getAge());    <span class="comment">// 37</span></span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException | ClassNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                oos.close();</span><br><span class="line">                fos.close();</span><br><span class="line">                ois.close();</span><br><span class="line">                fis.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="transient"><a href="#transient" class="headerlink" title="transient"></a>transient</h1><p>멤버변수에 <code>transient</code>을 붙이면 직렬화 대상에서 제외된다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">implements</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">transient</span> <span class="keyword">private</span> String nation;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>transient</code>가 붙은 멤버변수를 역직렬화하면 값이 <code>null</code>이 된다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(result.getName());   <span class="comment">// Ronaldo</span></span><br><span class="line">System.out.println(result.getNation()); <span class="comment">// null</span></span><br><span class="line">System.out.println(result.getAge());    <span class="comment">// 37</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/03/04_java/190103_serialization_transient/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/01/02/04_java/190102_io/"
                             aria-label=": [Java] 입출력"
                         >
@@ -1059,104 +1128,6 @@
                         <p>
                             <a
                                 href="/ko/2018/03/20/04_java/180320_compare_object/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/03/17/04_java/180317_annotation_processor/"
-                            aria-label=": [Java] 어노테이션 프로세서(Annotation Processor)"
-                        >
-                            [Java] 어노테이션 프로세서(Annotation Processor)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-03-17T00:00:00+09:00">
-	
-		    2018/03/17
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="어노테이션은-어떻게-처리되는가"><a href="#어노테이션은-어떻게-처리되는가" class="headerlink" title="어노테이션은 어떻게 처리되는가?"></a>어노테이션은 어떻게 처리되는가?</h1><p>다음 예제를 살펴보자</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sum</span><span class="params">(<span class="meta">@IntRange(from = 0, to = 10)</span> <span class="keyword">int</span> a, <span class="meta">@IntRange(from = 0, to = 10)</span> <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a+b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> result = sum(<span class="number">30</span>, <span class="number">10</span>)</span><br></pre></td></tr></table></figure>
-<p>어노테이션 <code>@IntRange</code>를 통해 데이터 유효성을 검증하고있다. 그렇다면 실제로 유효성을 검사하는 코드는 어디에 존재할까? 이를 이해하기 위해서는 어노테이션 프로세서에 대해 알아야한다.</p>
-<h1 id="어노테이션-프로세싱"><a href="#어노테이션-프로세싱" class="headerlink" title="어노테이션 프로세싱"></a>어노테이션 프로세싱</h1><p><code>어노테이션 프로세싱</code>은 자바 컴파일러가 컴파일 단계에서 어노테이션을 분석하고 처리하는 기법이다. </p>
-<p><code>자바 컴파일러</code>는 자바 소스코드를 자바 바이트코드로 변환한다. 이때 <code>어노테이션 프로세서(Annotation Processor)</code>를 플러그인 형태로 자바 컴파일러에 등록하면 어노테이션을 처리하게 된다.</p>
-<h1 id="자바-컴파일러와-어노테이션-프로세서"><a href="#자바-컴파일러와-어노테이션-프로세서" class="headerlink" title="자바 컴파일러와 어노테이션 프로세서"></a>자바 컴파일러와 어노테이션 프로세서</h1><p>자바 컴파일러는 등록된 어노테이션 프로세서가 모두 처리될 때까지 반복하여 실행한다. 이 때 어노테이션 프로세서에 구현된 로직에 따라 경고나 에러를 발생시키기도, 추가적인 자바코드를 추가하기도 한다. 자바 컴파일러는 이렇게 최종적으로 완성된 자바 소스코드를 자바 바이트코드로 변환한다. </p>
-<h1 id="설정"><a href="#설정" class="headerlink" title="설정"></a>설정</h1><p>사용하는 IDE에 따라 어노테이션 프로세서를 등록하는 방법이 다르다. 이 포스트에서는 <code>Android Studio</code>를 기준으로 설명한다.</p>
-<p>우선 다음과 같이 새로운 프로젝트를 생성하고 세 개의 모듈을 생성한다.<br><img src="1.png"></p>
-<p>각 모듈에 의존성을 추가한다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>app/build.gradle</span><ul class="tabs"><li class="tab active">groovy</li></ul></figcaption><div class="tabs-content"><figure class="highlight groovy" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">implementation project(<span class="string">':annotation'</span>)</span><br><span class="line">annotationProcessor project(<span class="string">':annotation_processor'</span>)</span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-
-<figure class="codeblock codeblock--tabbed"><figcaption><span>annotation_processor/build.gradle</span><ul class="tabs"><li class="tab active">groovy</li></ul></figcaption><div class="tabs-content"><figure class="highlight groovy" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies {</span><br><span class="line">    implementation project(<span class="string">':annotation'</span>)</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-<h1 id="어노테이션-만들기"><a href="#어노테이션-만들기" class="headerlink" title="어노테이션 만들기"></a>어노테이션 만들기</h1><p>설정이 끝났다면 <code>annotation</code>모듈에 <code>MyAnnotation.java</code>파일을 생성한다.<br><img src="2.png"></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.annotation;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> MyAnnotation &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="어노테이션-프로세서-만들기"><a href="#어노테이션-프로세서-만들기" class="headerlink" title="어노테이션 프로세서 만들기"></a>어노테이션 프로세서 만들기</h1><p><code>annotation_processor</code>모듈에 다음과 같이 <code>MyAnnotation.java</code>파일을 생성하자.<br><img src="3.png"><br>어노테이션을 프로세서를 구현할 땐 <code>AbstractProcessor</code>를 상속해야한다. 또한 <code>process()</code>메소드를 구현해야한다. 이 메소드 안에서 실제로 어노테이션 처리를 하게된다. </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAnnotationProcessor</span> <span class="keyword">extends</span> <span class="title">AbstractProcessor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">process</span><span class="params">(Set&lt;? extends TypeElement&gt; set, RoundEnvironment roundEnvironment)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>어노테이션을 사용하면 “Annotation Processing!!!”를 출력하도록 코드를 작성해보자.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAnnotationProcessor</span> <span class="keyword">extends</span> <span class="title">AbstractProcessor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(ProcessingEnvironment processingEnvironment)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 프로세싱에 필요한 기본적인 정보들을 processingEnvironment 부터 가져올 수 있다.</span></span><br><span class="line">        <span class="keyword">super</span>.init(processingEnvironment);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">process</span><span class="params">(Set&lt;? extends TypeElement&gt; set, RoundEnvironment roundEnvironment)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 프로세싱이 되는지 확인하기 위한 로그입</span></span><br><span class="line">        System.out.println(<span class="string">&quot;Annotation Processing!!!&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SourceVersion <span class="title">getSupportedSourceVersion</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 지원되는 소스 버전을 리턴합니다.</span></span><br><span class="line">        <span class="keyword">return</span> SourceVersion.latestSupported();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Set&lt;String&gt; <span class="title">getSupportedAnnotationTypes</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 어떤 애노테이션을 처리할 지를 Set에 추가한다.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> HashSet&lt;String&gt;() &#123;</span><br><span class="line">            &#123;</span><br><span class="line">                add(MyAnnotation.class.getCanonicalName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>init()</code>: 파일을 생성하기 위해 필요한 FileWriter, 디버깅에 필요한 Messager 등 각종 유틸리티 클래스들을 이 곳에서 사용할 수 있다.</li>
-<li><code>process()</code>: 프로세서의 핵심 부분이다. 이곳에서 클래스, 메소드, 필드 등에 추가한 어노테이션을 처리하고 처리에 대한 결과로 자바 파일을 생성할 수 있다.</li>
-<li><code>getSupportedAnnotationType()</code>: 어떤 어노테이션들을 처리할 지 <code>집합(Set)</code> 형태로 리턴하게 된다.</li>
-<li><code>getSupportedSourceVersion()</code>: 일반적으로 최신의 Java 버전을 리턴한다.</li>
-</ul>
-<h1 id="어노테이션-프로세서-등록하기"><a href="#어노테이션-프로세서-등록하기" class="headerlink" title="어노테이션 프로세서 등록하기"></a>어노테이션 프로세서 등록하기</h1><p>어노테이션 프로세서를 구현했다면 자바 컴파일러가 사용할 수 있도록 등록해야한다. </p>
-<p><code>annotation_processor</code>모듈에 다음과 같이 폴더를 생성한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">annotation_processor/src/main/resources/META-INF/services</span><br></pre></td></tr></table></figure>
-<p>그 다음 파일을 하나 생성한다. 파일명은 반드시 다음과 같아야한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javax.annotation.processing.Processor</span><br></pre></td></tr></table></figure>
-<p><img src="4.png"><br>이제 파일을 열어 위에서 작성한 어노테이션 프로세서를 등록하자. 이때 반드시 프로젝트의 패키지명을 포함해서 작성해야한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">com.yologger.annotation_processor.MyAnnotationProcessor</span><br></pre></td></tr></table></figure>
-<p>이제 <code>app</code>모듈을 빌드해보자. 어노테이션 프로세서가 정상적으로 작동되었다면, 다음과 같은 로그를 확인할 수 있다.<br><img src="5.png"></p>
-<h1 id="auto-service-라이브러리"><a href="#auto-service-라이브러리" class="headerlink" title="auto-service 라이브러리"></a>auto-service 라이브러리</h1><p>구글의 <code>auto-service 라이브러리</code>를 사용하면 위의 번거로운 등록 과정없이 자동으로 어노테이션 프로세서를 컴파일러에 등록해준다.</p>
-<p><code>annotation_processeor</code>모듈에 다음과 같이 auto-service 라이브러리 의존성을 추가한다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>annotation_processor/build.gradle</span><ul class="tabs"><li class="tab active">groovy</li></ul></figcaption><div class="tabs-content"><figure class="highlight groovy" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies {</span><br><span class="line">    implementation <span class="string">'com.google.auto.service:auto-service:1.0-rc5'</span></span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure></div></figure>
-<p>그 다음 어노테이션 프로세서 클래스에 다음과 같이 <code>@AutoService(Processor.class)</code>어노테이션을 추가하자.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@AutoService(Processor.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CharlesProcessor</span> <span class="keyword">extends</span> <span class="title">AbstractProcessor</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 <code>app</code>모듈을 다시 빌드하면 어노테이션 프로세서가 자동으로 등록되고 동작한다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/03/17/04_java/180317_annotation_processor/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

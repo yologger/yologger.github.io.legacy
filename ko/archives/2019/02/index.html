@@ -355,9 +355,9 @@
                         <a
                             class="link-unstyled"
                             href="/ko/2019/02/09/04_java/190209_concurrent_api_executor/"
-                            aria-label=": [Java 8] Concurrent API - Thread Pool / Executors / ExecutorService"
+                            aria-label=": [Java 8] Concurrent API - Thread Pool / Executors / ExecutorService / Future"
                         >
-                            [Java 8] Concurrent API - Thread Pool / Executors / ExecutorService
+                            [Java 8] Concurrent API - Thread Pool / Executors / ExecutorService / Future
                         </a>
                     
                 </h1>
@@ -370,7 +370,7 @@
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
+    <a class="category-link" href="/ko/categories/Java/">Java</a>, <a class="category-link" href="/ko/categories/Java/Java-8/">Java 8</a>
 
 
     
@@ -380,7 +380,7 @@
             
                 <div class="postShorten-content">
                     <hr>
-<h1 id="Thread-Pool"><a href="#Thread-Pool" class="headerlink" title="Thread Pool"></a>Thread Pool</h1><p>멀티 스레드 환경에서 스레드 개수가 증가하면 스레드 생성과 스케쥴링으로 인한 성능 저하게 발생한다. 이를 해결하기 위해 <code>스레드 풀(Thread Pool)</code>이라는 공간에 일정 수의 스레드를 사전에 만들어 사용한다.</p>
+<h1 id="Thread-Pool"><a href="#Thread-Pool" class="headerlink" title="Thread Pool"></a>Thread Pool</h1><p>멀티 스레드 환경에서 스레드 개수가 증가하면 스레드 생성과 스케쥴링으로 인한 성능 저하가 발생한다. 이를 해결하기 위해 <code>스레드 풀(Thread Pool)</code>이라는 공간에 일정 수의 스레드를 사전에 만들어 사용한다.</p>
 <p>스레드 풀의 특징은 다음과 같다.</p>
 <ul>
 <li>사전에 만들어둔 스레드를 사용하기 때문에 스레드 생성과 스케쥴링 비용일 줄일 수 있다.</li>
@@ -516,7 +516,7 @@
     
         <span>카테고리 </span>
         
-    <a class="category-link" href="/ko/categories/Java/">Java</a>
+    <a class="category-link" href="/ko/categories/Java/">Java</a>, <a class="category-link" href="/ko/categories/Java/Java-8/">Java 8</a>
 
 
     
@@ -540,6 +540,11 @@
 <p><code>Callable</code>은 보통 다음과 같이 사용한다.</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.Callable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyCallable</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Thread.sleep(<span class="number">5</span> * <span class="number">1000</span>);</span><br><span class="line">        String result = <span class="string">&quot;Called at &quot;</span> + LocalTime.now();</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.Callable;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.FutureTask;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        MyCallable callable = <span class="keyword">new</span> MyCallable();</span><br><span class="line">        FutureTask futureTask = <span class="keyword">new</span> FutureTask(callable);</span><br><span class="line">        Thread thread = <span class="keyword">new</span> Thread(futureTask);</span><br><span class="line">        thread.start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 결과가 반환될 때 까지 기다린다.</span></span><br><span class="line">            System.out.println(<span class="string">&quot;result : &quot;</span> + futureTask.get());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>FutureTask</code>클래스는 내부적으로 <code>RunnableFuture</code>클래스를 상속하며, RunnableFuture클래스는 다시 <code>Runnable</code>인터페이스와 <code>Future</code>인터페이스를 구현하고있다.</p>
+<figure class="highlight java"><figcaption><span>FutureTask.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FutureTask</span>&lt;<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">RunnableFuture</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>RunnableFuture.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">RunnableFuture</span>&lt;<span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">Runnable</span>, <span class="title">Future</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 때문에 다음과 같은 형태로 <code>Thread</code>클래스의 생성자에 인스턴스를 전달할 수 있다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MyCallable callable = <span class="keyword">new</span> MyCallable();</span><br><span class="line">FutureTask futureTask = <span class="keyword">new</span> FutureTask(callable);</span><br><span class="line">Thread thread = <span class="keyword">new</span> Thread(futureTask);</span><br></pre></td></tr></table></figure>
                     
                         
 
