@@ -354,6 +354,72 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/06/03/08_android/11_notification/200603_notification_action/"
+                            aria-label=": [Android] 알림(Notification) - (3) 알림에 액션 추가하기"
+                        >
+                            [Android] 알림(Notification) - (3) 알림에 액션 추가하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-06-03T01:00:00+09:00">
+	
+		    2020/06/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="액션"><a href="#액션" class="headerlink" title="액션"></a>액션</h1><p>알림에는 버튼이 포함될 수 있습니다. 이를 <code>액션 버튼</code>이라고 합니다.</p>
+<p><img src="1.png"><br>액션은 다음과 같이 생성할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> action = NotificationCompat.Action.Builder(</span><br><span class="line">    android.R.drawable.sym_action_chat,</span><br><span class="line">    <span class="string">&quot;OPEN&quot;</span>,</span><br><span class="line">    pendingIntent</span><br><span class="line">).build()</span><br></pre></td></tr></table></figure>
+<p>생성된 액션은 <code>NotificationBuilder</code>객체의 <code>addAction()</code>메소드를 사용하여 추가합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationBuilder.addAction(action)</span><br></pre></td></tr></table></figure>
+<p>전체 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> REQUEST_CODE = <span class="number">1</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line">                <span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">                notificationChannel.description = channelDescription</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">                notificationManager.createNotificationChannel(notificationChannel)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> resultIntent = Intent(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, ResultActivity::<span class="keyword">class</span>.java)</span><br><span class="line">                <span class="keyword">val</span> pendingIntent = PendingIntent.getActivity(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, REQUEST_CODE, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)</span><br><span class="line">                notificationBuilder.setContentIntent(pendingIntent)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> action = NotificationCompat.Action.Builder(</span><br><span class="line">                    android.R.drawable.sym_action_chat,</span><br><span class="line">                    <span class="string">&quot;OPEN&quot;</span>,</span><br><span class="line">                    pendingIntent</span><br><span class="line">                ).build()</span><br><span class="line"></span><br><span class="line">                notificationBuilder.addAction(action)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification = notificationBuilder.build()</span><br><span class="line"></span><br><span class="line">                notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// ... </span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 알림 패널에서 액션 버튼을 클릭하면 <code>ResultActivity</code>가 실행됩니다.<br><img src="2.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/06/03/08_android/11_notification/200603_notification_action/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/06/03/10_infra_devops/00_git/20200603_git_checkout_branch_merge/"
                             aria-label=": [Git, GitHub] (3) git checkout, branch, merge"
                         >
@@ -1350,83 +1416,6 @@
                         <p>
                             <a
                                 href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/"
-                            aria-label=": [구글 지도(Google Maps)] (4) 지도 확대와 축소 (줌-인과 줌-아웃)"
-                        >
-                            [구글 지도(Google Maps)] (4) 지도 확대와 축소 (줌-인과 줌-아웃)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-05-04T01:00:00+09:00">
-	
-		    2020/05/04
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Google-Maps/">Google Maps</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="들어가며"><a href="#들어가며" class="headerlink" title="들어가며"></a>들어가며</h1><p>일곱 개의 포스트에 걸쳐 <code>구글 지도(Google Maps)</code>에 대해 알아보고 있습니다.</p>
-<ul>
-<li><a href="/ko/2020/05/01/08_android/08_google_maps/200501_GoogleMaps/">구글 지도 띄우기</a></li>
-<li><a href="/ko/2020/05/02/08_android/08_google_maps/200502_GoogleMaps_mapType/">지도 타입 변경하기</a></li>
-<li><a href="/ko/2020/05/03/08_android/08_google_maps/200503_GoogleMaps_marker/">마커 보여주기</a></li>
-<li><a href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/">지도 확대와 축소 (줌-인과 줌-아웃)</a></li>
-<li><a href="/ko/2020/05/05/08_android/08_google_maps/200505_GoogleMaps_showMyLocation/">지도에 내 위치 보여주기</a></li>
-<li><a href="/ko/2020/05/06/08_android/08_google_maps/200506_GoogleMpas_moveToMyLocation/">내 위치로 카메라 이동하기</a></li>
-<li><a href="/ko/2020/05/07/08_android/08_google_maps/200507_GoogleMaps_control/">맵 컨트롤</a></li>
-</ul>
-<hr>
-<h1 id="줌-인-줌-아웃"><a href="#줌-인-줌-아웃" class="headerlink" title="줌-인, 줌-아웃"></a>줌-인, 줌-아웃</h1><p>지도를 확대하는 것을 <code>줌-인(Zoom-in)</code>, 축소하는 것을 <code>줌-아웃(Zoom-out)</code>이라고 합니다. 예제를 만들면서 <code>줌-인</code>과 <code>줌-아웃</code>에 대해 알아보겠습니다.</p>
-<h1 id="예제"><a href="#예제" class="headerlink" title="예제"></a>예제</h1><p>우선 다음과 같이 두 개의 버튼을 추가합니다.<br><img src="1.png"><br>레이아웃 파일은 다음과 같습니다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>activity_main.xml</span><ul class="tabs"><li class="tab active">xml</li></ul></figcaption><div class="tabs-content"><figure class="highlight xml" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">".MainActivity"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">fragment</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_main_fragment_map"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">tools:context</span>=<span class="string">".MapsActivity"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">"com.google.android.gms.maps.SupportMapFragment"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.google.android.material.floatingactionbutton.FloatingActionButton</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_fab_zoom_in"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:clickable</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:srcCompat</span>=<span class="string">"@drawable/ic_baseline_add_24"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_margin</span>=<span class="string">"16dp"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.google.android.material.floatingactionbutton.FloatingActionButton</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/activity_fab_zoom_out"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:clickable</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:srcCompat</span>=<span class="string">"@drawable/ic_baseline_remove_24"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">"@+id/activity_fab_zoom_in"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintEnd_toEndOf</span>=<span class="string">"parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_margin</span>=<span class="string">"16dp"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-<p>코드는 다음과 같습니다. 카메라 위치를 바꿀 때는 <code>GoogleMap</code>클래스의 <code>moveCamera()</code>메소드를 호출합니다. 이 때 <code>줌-인</code>을 하려면 <code>CameraUpdateFactory.zoomIn()</code>을 <code>줌-아웃</code>을 하려면 <code>CameraUpdateFactory.zoomOut()</code>을 인자로 전달합니다.</p>
-<figure class="codeblock codeblock--tabbed"><figcaption><span>MainActivity.kt</span><ul class="tabs"><li class="tab active">kotlin</li></ul></figcaption><div class="tabs-content"><figure class="highlight kotlin" style="display: block;"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>(), OnMapReadyCallback {</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mMap: GoogleMap</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonZoomIn: FloatingActionButton <span class="keyword">by</span> lazy { findViewById&lt;FloatingActionButton&gt;(R.id.activity_fab_zoom_in) }</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buttonZoomOut: FloatingActionButton <span class="keyword">by</span> lazy { findViewById&lt;FloatingActionButton&gt;(R.id.activity_fab_zoom_out) }</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> {</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">        <span class="keyword">val</span> mapFragment = supportFragmentManager.findFragmentById(R.id.activity_main_fragment_map) <span class="keyword">as</span> SupportMapFragment</span><br><span class="line">        mapFragment.getMapAsync(<span class="keyword">this</span>)</span><br><span class="line"></span><br><span class="line">        buttonZoomIn.setOnClickListener {</span><br><span class="line">            mMap.moveCamera(CameraUpdateFactory.zoomIn())</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        buttonZoomOut.setOnClickListener {</span><br><span class="line">            mMap.moveCamera(CameraUpdateFactory.zoomOut())</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMapReady</span><span class="params">(googleMap: <span class="type">GoogleMap</span>)</span></span> {</span><br><span class="line">        mMap = googleMap</span><br><span class="line">        <span class="keyword">val</span> sydney = LatLng(<span class="number">37.5665</span>, <span class="number">126.9780</span>)</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure></div></figure>
-
-<p>이제 (+) 버튼을 누르면 줌-인, (-) 버튼을 누르면 줌-아웃이 됩니다. <code>zoomTo()</code>메소드를 사용하면 특정 줌으로 이동할 수 있습니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/05/04/08_android/08_google_maps/200504_GoogleMaps_zoom/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

@@ -354,6 +354,99 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2020/07/03/08_android/03_jetpack/01_architecture/20200703_livedata/"
+                            aria-label=": [Android Jetpack] LiveData 개념 및 사용법"
+                        >
+                            [Android Jetpack] LiveData 개념 및 사용법
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-07-03T01:00:00+09:00">
+	
+		    2020/07/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Jetpack/">Jetpack</a>, <a class="category-link" href="/ko/categories/Android/Jetpack/Architecture-Component/">Architecture Component</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="Jetpack"><a href="#Jetpack" class="headerlink" title="Jetpack"></a>Jetpack</h1><p><code>Jetpack</code>은 더 좋은 품질의 안드로이드 개발을 돕는 라이브러리의 집합입니다.<br><img src="1.png"><br><code>Jetpack</code>은 크게 네 가지 카테고리로 분류됩니다.</p>
+<ul>
+<li>Architecture Component</li>
+<li>UI Component</li>
+<li>Foundation Component</li>
+<li>Behavior Component</li>
+</ul>
+<p>이번 포스트에서는 <code>Lifecycle Owner</code>와 <code>Lifecycle-aware Component</code>에 대해 알아보겠습니다.</p>
+<hr>
+<h1 id="LiveData"><a href="#LiveData" class="headerlink" title="LiveData"></a>LiveData</h1><p><code>LiveData</code>는 관찰 가능한 데이터입니다. <code>LiveData</code>는 <code>value</code>라는 속성에 데이터를 유지하고 있으며, 이 데이터의 값이 변경되면 관찰자에게 통지됩니다.</p>
+<p><code>LiveData</code>는 다음과 같이 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> count: LiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">by</span> lazy &#123; LiveData&lt;<span class="built_in">Int</span>&gt;() &#125;</span><br></pre></td></tr></table></figure>
+<p><code>LiveData</code>는 값을 변경할 수 없습니다. 따라서 변경이 필요하다면 <code>MutableLiveData</code>를 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> count: MutableLiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">by</span> lazy &#123; MutableLiveData&lt;<span class="built_in">Int</span>&gt;() &#125;</span><br></pre></td></tr></table></figure>
+<p>초기값은 다음과 같이 설정합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> count: MutableLiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">by</span> lazy &#123; MutableLiveData&lt;<span class="built_in">Int</span>&gt;().apply &#123; value = <span class="number">0</span> &#125; &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="LiveData-관찰"><a href="#LiveData-관찰" class="headerlink" title="LiveData 관찰"></a>LiveData 관찰</h1><p>이렇게 선언된 <code>MutableLiveData</code>는 액티비티에서 다음과 같이 관찰할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span>: <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// MutableLiveData 관찰</span></span><br><span class="line">        count.observe(<span class="keyword">this</span>) &#123; count -&gt;</span><br><span class="line">            <span class="comment">// MutableLiveData 값이 변하면 이 부분이 호출</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>프래그먼트에서는 다음과 같이 관찰할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainFragment</span>: <span class="type">Fragment</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onViewCreated</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// MutableLiveData 관찰</span></span><br><span class="line">        count.observe(viewLifecycleOwner) &#123; count -&gt;</span><br><span class="line">            <span class="comment">// MutableLiveData 값이 변하면 이 부분이 호출</span></span><br><span class="line">        &#125;        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="LiveData-변경"><a href="#LiveData-변경" class="headerlink" title="LiveData 변경"></a>LiveData 변경</h1><p><code>MutableLiveData</code>는 <code>value</code>속성을 사용하여 값을 변경할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> count: MutableLiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">by</span> lazy &#123; MutableLiveData&lt;<span class="built_in">Int</span>&gt;().apply &#123; value = <span class="number">0</span> &#125; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 값을 1로 변경</span></span><br><span class="line">count.value = <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="ViewModel과-함께-사용하기"><a href="#ViewModel과-함께-사용하기" class="headerlink" title="ViewModel과 함께 사용하기"></a>ViewModel과 함께 사용하기</h1><p><code>LiveData</code>는 <code>ViewModel</code>과 함께 빈번하게 사용됩니다. 아래 예제는 <code>ViewModel</code>과 <code>LiveData</code>를 사용하여 구현한 카운터 앱입니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// MainViewModel.kt</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainViewModel</span> : <span class="type">ViewModel</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> _liveCount: MutableLiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">by</span> lazy &#123; MutableLiveData&lt;<span class="built_in">Int</span>&gt;().apply &#123; value = <span class="number">0</span> &#125; &#125;</span><br><span class="line">    <span class="keyword">val</span> liveCount: LiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">get</span>() = _liveCount</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        _liveCount.value = _liveCount.value?.plus(<span class="number">1</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        _liveCount.value = _liveCount.value?.minus(<span class="number">1</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// MainActivity.kt</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> mainViewModel: MainViewModel</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> textViewValue: TextView <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_tv_value) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ViewModel 초기화</span></span><br><span class="line">        mainViewModel = ViewModelProvider(<span class="keyword">this</span>).<span class="keyword">get</span>(MainViewModel::<span class="keyword">class</span>.java)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// LiveData 관찰</span></span><br><span class="line">        mainViewModel.liveCount.observe(<span class="keyword">this</span>) &#123;</span><br><span class="line">            textViewValue.text = it.toString()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onButtonClicked</span><span class="params">(view: <span class="type">View</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">when</span>(view.id) &#123;</span><br><span class="line">            R.id.activity_main_btn_plus -&gt; &#123;</span><br><span class="line">                mainViewModel.plus()</span><br><span class="line">            &#125;</span><br><span class="line">            R.id.activity_main_btn_minus -&gt; &#123;</span><br><span class="line">                mainViewModel.minus()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="setValue-vs-postValue"><a href="#setValue-vs-postValue" class="headerlink" title="setValue() vs. postValue()"></a>setValue() vs. postValue()</h1><p><code>MutableLive</code>의 <code>value</code>속성을 사용하면 값을 변경할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> count: MutableLiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">by</span> lazy &#123; MutableLiveData&lt;<span class="built_in">Int</span>&gt;().apply &#123; value = <span class="number">0</span> &#125; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 값을 1로 변경</span></span><br><span class="line">count.value = <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p><code>value</code>속성을 사용하면 내부적으로 <code>setValue()</code>메소드가 호출됩니다. 아래 코드는 동일합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">count.value = <span class="number">1</span></span><br><span class="line">count.setValue(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p><code>setValue()</code>는 메인 스레드에서 값을 변경할 때 사용합니다. 반면 <code>postValue()</code>는 작업 스레드에서 값을 변경할 때 사용합니다. 다음 예제는 코루틴에서 <code>postValue()</code>를 호출하는 예제입니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// MainViewModel.kt</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainViewModel</span> : <span class="type">ViewModel</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> _liveCount: MutableLiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">by</span> lazy &#123; MutableLiveData&lt;<span class="built_in">Int</span>&gt;().apply &#123; value = <span class="number">0</span> &#125; &#125;</span><br><span class="line">    <span class="keyword">val</span> liveCount: LiveData&lt;<span class="built_in">Int</span>&gt; <span class="keyword">get</span>() = _liveCount</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        viewModelScope.launch(Dispatchers.IO) &#123;</span><br><span class="line">            <span class="comment">// 작업 스레드에서 값을 변경</span></span><br><span class="line">            _liveCount.postValue(_liveCount.value?.plus(<span class="number">1</span>))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// 메인 스레드에서 값을 변경</span></span><br><span class="line">        _liveCount.value = _liveCount.value?.minus(<span class="number">1</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/07/03/08_android/03_jetpack/01_architecture/20200703_livedata/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2020/07/02/08_android/03_jetpack/01_architecture/20200702_viewmodel/"
                             aria-label=": [Android Jetpack] ViewModel 개념 및 사용법"
                         >
@@ -1174,72 +1267,6 @@
                         <p>
                             <a
                                 href="/ko/2020/06/04/10_infra_devops/00_git/20200604_github_remote_push_gitignore/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2020/06/03/08_android/11_notification/200603_notification_action/"
-                            aria-label=": [Android] 알림(Notification) - (3) 알림에 액션 추가하기"
-                        >
-                            [Android] 알림(Notification) - (3) 알림에 액션 추가하기
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2020-06-03T01:00:00+09:00">
-	
-		    2020/06/03
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Notification/">Notification</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="액션"><a href="#액션" class="headerlink" title="액션"></a>액션</h1><p>알림에는 버튼이 포함될 수 있습니다. 이를 <code>액션 버튼</code>이라고 합니다.</p>
-<p><img src="1.png"><br>액션은 다음과 같이 생성할 수 있습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> action = NotificationCompat.Action.Builder(</span><br><span class="line">    android.R.drawable.sym_action_chat,</span><br><span class="line">    <span class="string">&quot;OPEN&quot;</span>,</span><br><span class="line">    pendingIntent</span><br><span class="line">).build()</span><br></pre></td></tr></table></figure>
-<p>생성된 액션은 <code>NotificationBuilder</code>객체의 <code>addAction()</code>메소드를 사용하여 추가합니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">notificationBuilder.addAction(action)</span><br></pre></td></tr></table></figure>
-<p>전체 코드는 다음과 같습니다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> REQUEST_CODE = <span class="number">1</span></span><br><span class="line">    <span class="keyword">val</span> NOTIFICATION_ID = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button = findViewById&lt;Button&gt;(R.id.activity_main_btn)</span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> channelId = <span class="string">&quot;channel_id&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelName = <span class="string">&quot;channel_name&quot;</span></span><br><span class="line">                <span class="keyword">val</span> channelDescription = <span class="string">&quot;channel_description&quot;</span></span><br><span class="line">                <span class="keyword">val</span> importance = NotificationManager.IMPORTANCE_HIGH</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationChannel = NotificationChannel(channelId, channelName, importance)</span><br><span class="line">                notificationChannel.description = channelDescription</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span class="keyword">as</span> NotificationManager</span><br><span class="line">                notificationManager.createNotificationChannel(notificationChannel)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notificationBuilder = NotificationCompat.Builder(<span class="keyword">this</span>, channelId)</span><br><span class="line">                    .setSmallIcon(android.R.drawable.ic_dialog_info)</span><br><span class="line">                    .setContentTitle(<span class="string">&quot;A Notification&quot;</span>)</span><br><span class="line">                    .setContentText(<span class="string">&quot;This is a notification&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> resultIntent = Intent(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, ResultActivity::<span class="keyword">class</span>.java)</span><br><span class="line">                <span class="keyword">val</span> pendingIntent = PendingIntent.getActivity(<span class="keyword">this</span><span class="symbol">@MainActivity</span>, REQUEST_CODE, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)</span><br><span class="line">                notificationBuilder.setContentIntent(pendingIntent)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> action = NotificationCompat.Action.Builder(</span><br><span class="line">                    android.R.drawable.sym_action_chat,</span><br><span class="line">                    <span class="string">&quot;OPEN&quot;</span>,</span><br><span class="line">                    pendingIntent</span><br><span class="line">                ).build()</span><br><span class="line"></span><br><span class="line">                notificationBuilder.addAction(action)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> notification = notificationBuilder.build()</span><br><span class="line"></span><br><span class="line">                notificationManager.notify(NOTIFICATION_ID, notification)</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// ... </span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이제 알림 패널에서 액션 버튼을 클릭하면 <code>ResultActivity</code>가 실행됩니다.<br><img src="2.png"></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2020/06/03/08_android/11_notification/200603_notification_action/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

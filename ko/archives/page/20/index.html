@@ -354,6 +354,160 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2018/08/21/05_kotlin/180821_comparison_statement/"
+                            aria-label=": [Kotlin] 비교문"
+                        >
+                            [Kotlin] 비교문
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-08-21T00:00:00+09:00">
+	
+		    2018/08/21
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="비교연산자"><a href="#비교연산자" class="headerlink" title="비교연산자"></a>비교연산자</h1><h3 id="1"><a href="#1" class="headerlink" title="(1) =="></a>(1) ==</h3><p><code>==</code>는 내부적으로 <code>equals()</code>메소드를 호출한다. 우선 기본 데이터 타입의 비교는 다음과 같이 한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">100</span> == <span class="number">100</span>      <span class="comment">// true</span></span><br><span class="line"><span class="number">100</span> != <span class="number">100</span>      <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>클래스의 인스턴스를 비교할 때도 마찬가지로 <code>equals()</code>를 호출한다. 단 <code>equals()</code>메소드를 오버라이드하여 구현해야한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">var</span> name: String) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">equals</span><span class="params">(other: <span class="type">Any</span>?)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> target = other <span class="keyword">as</span> Person</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.name == target.name</span><br><span class="line">    &#125;</span><br><span class="line">&#125;	</span><br></pre></td></tr></table></figure>
+<p>이제 세 개의 인스턴스를 생성하자.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> p1 = Person(<span class="string">&quot;Ronaldo&quot;</span>)	</span><br><span class="line"><span class="keyword">var</span> p2 = Person(<span class="string">&quot;Ronaldo&quot;</span>)	</span><br><span class="line"><span class="keyword">var</span> p3 = Person(<span class="string">&quot;Bale&quot;</span>)	</span><br></pre></td></tr></table></figure>
+<p><code>==</code>를 사용하면 <code>equals()</code>메소드가 호출된다. 아래 두 줄은 동일한 코드다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p1==p2          <span class="comment">// true</span></span><br><span class="line">p1.equals(p2))  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2"><a href="#2" class="headerlink" title="(2) ==="></a>(2) ===</h3><p><code>===</code>는 같은 주소를 참조하고 있는지 <code>주소값</code>을 비교한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> p1 = Person(<span class="string">&quot;Paul&quot;</span>)	</span><br><span class="line"><span class="keyword">var</span> p2 = Person(<span class="string">&quot;Paul&quot;</span>)	</span><br><span class="line"><span class="keyword">var</span> p3 = p1	</span><br><span class="line"></span><br><span class="line">p1===p2     <span class="comment">// false</span></span><br><span class="line">p1===p3     <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="타입-체크"><a href="#타입-체크" class="headerlink" title="타입 체크"></a>타입 체크</h1><p>타입 체크를 할 때는 키워드<code>is</code>를 사용한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> p = Person()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (p <span class="keyword">is</span> Person) &#123;</span><br><span class="line">    println(<span class="string">&quot;p is Person.&quot;</span>)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    println(<span class="string">&quot;p is not Person.&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="조건문"><a href="#조건문" class="headerlink" title="조건문"></a>조건문</h1><p>Kotlin은 두 가지의 조건문을 제공한다.</p>
+<h3 id="1-if-구문"><a href="#1-if-구문" class="headerlink" title="(1) if 구문"></a>(1) if 구문</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> isMarried: <span class="built_in">Boolean</span> = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (isMarried) &#123;</span><br><span class="line">    println(<span class="string">&quot;He is married.&quot;</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    println(<span class="string">&quot;He is not married.&quot;</span>);        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-when-구문"><a href="#2-when-구문" class="headerlink" title="(2) when 구문"></a>(2) when 구문</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doWhen</span><span class="params">(nation: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">when</span>(nation) &#123;</span><br><span class="line">        <span class="string">&quot;Korea&quot;</span> -&gt; println(<span class="string">&quot;He&#x27;s from Korea.&quot;</span>)</span><br><span class="line">        <span class="string">&quot;Spain&quot;</span> -&gt; println(<span class="string">&quot;He&#x27;s from Spain.&quot;</span>)</span><br><span class="line">        <span class="string">&quot;France&quot;</span> -&gt; println(<span class="string">&quot;He&#x27;s from France.&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span> -&gt; println(<span class="string">&quot;Where are you from?&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">doWhen(<span class="string">&quot;Korea&quot;</span>)     <span class="comment">// He&#x27;s from Korea.</span></span><br><span class="line">doWhen(<span class="string">&quot;Germany&quot;</span>)   <span class="comment">// Where are you from?</span></span><br></pre></td></tr></table></figure>
+<p><code>when</code>구문은 결과값을 변수에 할당할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doWhen</span><span class="params">(nation: <span class="type">String</span>)</span></span>: String &#123;</span><br><span class="line">    <span class="keyword">var</span> result: String = <span class="keyword">when</span>(nation) &#123;</span><br><span class="line">        <span class="string">&quot;Korea&quot;</span> -&gt; <span class="string">&quot;He&#x27;s from Korea.&quot;</span></span><br><span class="line">        <span class="string">&quot;Spain&quot;</span> -&gt; <span class="string">&quot;He&#x27;s from Spain.&quot;</span></span><br><span class="line">        <span class="string">&quot;France&quot;</span> -&gt; <span class="string">&quot;He&#x27;s from France.&quot;</span></span><br><span class="line">        <span class="keyword">else</span> -&gt; <span class="string">&quot;Where are you from?&quot;</span></span><br><span class="line">    &#125;   </span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> result = doWhen(<span class="string">&quot;Korean&quot;</span>)</span><br><span class="line">println(result)</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/08/21/05_kotlin/180821_comparison_statement/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2018/08/20/05_kotlin/180820_object/"
+                            aria-label=": [Kotlin] object, companion object"
+                        >
+                            [Kotlin] object, companion object
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2018-08-20T00:00:00+09:00">
+	
+		    2018/08/20
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="키워드-object"><a href="#키워드-object" class="headerlink" title="키워드 object"></a>키워드 object</h1><p>키워드 <code>object</code>는 크게 세 가지 용도로 사용된다. </p>
+<h3 id="1-싱글톤"><a href="#1-싱글톤" class="headerlink" title="(1) 싱글톤"></a>(1) 싱글톤</h3><p>키워드 <code>object</code>는 싱글톤을 만드는데 사용할 수 있다. <code>싱글톤(Singleton)</code>은 <u>오직 하나의 인스턴스만 존재하는 클래스</u>를 의미한다. 싱글톤은 다음과 같이 정의한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">object</span> Counter &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> count = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">countUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">        count ++</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">clear</span><span class="params">()</span></span> &#123;</span><br><span class="line">        count = <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>싱글톤은 별도의 인스턴스를 생성하지 않고 사용할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Counter.count   <span class="comment">// 0</span></span><br><span class="line"></span><br><span class="line">Counter.countUp()</span><br><span class="line">Counter.countUp()</span><br><span class="line">Counter.countUp()</span><br><span class="line">Counter.count   <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line">Counter.clear()</span><br><span class="line">Counter.count   <span class="comment">// 0</span></span><br></pre></td></tr></table></figure>
+<p>물론 싱글톤은 인스턴스에 할당할 수 있다. 이때 모든 인스턴스가 값을 공유한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myCounter: Counter = Counter</span><br><span class="line">myCounter.countUp()</span><br><span class="line">myCounter.countUp()</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> yourCounter: Counter = Counter</span><br><span class="line">yourCounter.countUp()</span><br><span class="line">yourCounter.countUp()</span><br><span class="line"></span><br><span class="line">myCounter.count     <span class="comment">// 4</span></span><br><span class="line">yourCounter.count   <span class="comment">// 4</span></span><br><span class="line">Counter.count       <span class="comment">// 4</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-익명-클래스"><a href="#2-익명-클래스" class="headerlink" title="(2) 익명 클래스"></a>(2) 익명 클래스</h3><p>키워드 object는 <code>익명 클래스(Anonymous Class)</code>에도 사용된다. 아래 예제는 안드로이드에서 버튼을 클릭했을 때 특정 작업을 수행하는 코드다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">button.setOnClickListener(OnButtonClickedListener())</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OnButtonClickedListener</span>: <span class="type">View.OnClickListener &#123;</span></span></span><br><span class="line">    <span class="meta">@override</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onClick</span><span class="params">(v: <span class="type">View</span>?)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 클릭 시 처리</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Button</code>클래스의 <code>setOnClickListener()</code>메소드는 인터페이스 <code>View.OnClickListener</code>의 구현체를 인자로 전달받는다. 따라서 <code>OnButtonClickedListener</code>라는 구현체에서 <code>View.OnClickListener</code>를 구현하고 있다.</p>
+<p>익명 클래스를 사용하면 위 코드를 다음과 같이 단축할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> button: Button</span><br><span class="line"></span><br><span class="line">button.setOnClickListener(<span class="keyword">object</span>: View.OnClickListener &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onClick</span><span class="params">(v: <span class="type">View</span>?)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 클릭 시 처리</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-companion-object"><a href="#3-companion-object" class="headerlink" title="(3) companion object"></a>(3) companion object</h3><p>키워드 <code>companion object</code>는 자바의 <code>static</code>과 유사하다. <code>companion object</code>구문 안에 선언된 멤버 변수와 메소드는 인스턴스를 별도로 생성하지 않고 접근할 수 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FoodPoll</span></span>(<span class="keyword">val</span> name: String) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> total = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">printTotal</span><span class="params">()</span></span> &#123;</span><br><span class="line">            println(total);</span><br><span class="line">        &#125;</span><br><span class="line">		</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> POLL: String = <span class="string">&quot;food&quot;</span> </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> count = <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">vote</span><span class="params">()</span></span> &#123;</span><br><span class="line">        total++</span><br><span class="line">        count++</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>companion object</code>구문 안에 선언된 멤버 변수는 클래스의 모든 인스턴스가 공유한다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> melon = FoodPoll(<span class="string">&quot;Melon&quot;</span>)</span><br><span class="line">melon.vote()</span><br><span class="line">melon.vote()</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> apple = FoodPoll(<span class="string">&quot;Apple&quot;</span>)</span><br><span class="line">apple.vote()</span><br><span class="line">apple.vote()</span><br><span class="line">apple.vote()</span><br><span class="line"></span><br><span class="line">FoodPoll.printTotal()   <span class="comment">// 5</span></span><br><span class="line">    </span><br><span class="line">println(<span class="string">&quot;<span class="subst">$&#123;melon.name&#125;</span>: <span class="subst">$&#123;melon.count&#125;</span>&quot;</span>)    <span class="comment">// Melon: 2</span></span><br><span class="line">println(<span class="string">&quot;<span class="subst">$&#123;apple.name&#125;</span>: <span class="subst">$&#123;apple.count&#125;</span>&quot;</span>)    <span class="comment">// Apple: 3</span></span><br><span class="line"></span><br><span class="line">println(<span class="string">&quot;Total: <span class="subst">$&#123;FoodPoll.total&#125;</span>&quot;</span>) <span class="comment">// Total: 5</span></span><br><span class="line">println(<span class="string">&quot;POLL: <span class="subst">$&#123;FoodPoll.POLL&#125;</span>&quot;</span>)    <span class="comment">// food</span></span><br></pre></td></tr></table></figure>
+<p><code>companion object</code>에는 이름을 붙일 수도 있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name: String) &#123; </span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> Loader &#123; </span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">fromJSON</span><span class="params">(jsonText: <span class="type">String</span>)</span></span>: Person = .... </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line">person1 = Person.Loader.fromJSON(<span class="string">&quot;&#123;name:&#x27;hong&#x27;&#125;&quot;</span>) </span><br><span class="line">person2 = Person.fromJSON(<span class="string">&quot;&#123;name:&#x27;kim&#x27;&#125;&quot;</span>) </span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2018/08/20/05_kotlin/180820_object/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2018/08/19/05_kotlin/180819_sealed_class/"
                             aria-label=": [Kotlin] Sealed Class"
                         >
@@ -892,144 +1046,6 @@
                         <p>
                             <a
                                 href="/ko/2018/08/12/05_kotlin/180812_class_method_property/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/08/11/05_kotlin/180811_constructor/"
-                            aria-label=": [Kotlin] 클래스의 생성자(Constructor)"
-                        >
-                            [Kotlin] 클래스의 생성자(Constructor)
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-08-11T00:00:00+09:00">
-	
-		    2018/08/11
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="생성자"><a href="#생성자" class="headerlink" title="생성자"></a>생성자</h1><p><code>생성자(Constructor)</code>는 클래스의 인스턴스를 생성할 때 호출되는 구문이다. 보통 생성자에서 초기화 작업을 수행한다. 생성자는 키워드<code>constructor</code>를 사용하여 선언한다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 멤버변수</span></span><br><span class="line">    String name</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 생성자</span></span><br><span class="line">    <span class="keyword">constructor</span>() &#123;</span><br><span class="line">        <span class="comment">// 멤버변수 초기화 작업 수행   </span></span><br><span class="line">        <span class="keyword">this</span>.name = <span class="string">&quot;John&quot;</span> </span><br><span class="line">        println(<span class="string">&quot;This is constructor.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>이 생성자는 클래스의 인스턴스를 생성할 때 호출된다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person person = person()</span><br><span class="line"><span class="comment">// This is constructor.</span></span><br></pre></td></tr></table></figure>
-<p>생성자에는 두 가지가 있다.</p>
-<h3 id="1-기본-생성자"><a href="#1-기본-생성자" class="headerlink" title="(1) 기본 생성자"></a>(1) 기본 생성자</h3><p><code>기본 생성자</code>는 클래스 이름 뒤에 키워드<code>constructor</code>를 붙여서 만든다. </p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(name: String) &#123;	</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">주의할 점은 기본 생성자는 별도의 초기화 구문이 존재하지 않는다. 이 때는 `<span class="keyword">init</span>`구문을 사용할 수 있다.</span><br><span class="line">``` kotlin</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="keyword">constructor</span></span>(name: String) &#123;	</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 멤버변수 선언</span></span><br><span class="line">    <span class="keyword">var</span> name: String</span><br><span class="line">	    </span><br><span class="line">    <span class="comment">// 초기화 작업 수행</span></span><br><span class="line">    <span class="keyword">init</span> &#123;</span><br><span class="line">        println(<span class="string">&quot;This is constructor.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 클래스의 인스턴스 생성</span></span><br><span class="line"><span class="keyword">var</span> person = Person(<span class="string">&quot;Paul&quot;</span>)		</span><br><span class="line"></span><br><span class="line">print(person.name)</span><br></pre></td></tr></table></figure>
-
-<p>키워드<code>constructor</code>는 생략할 수 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(name: String) &#123;	</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 멤버변수 선언</span></span><br><span class="line">    <span class="keyword">var</span> name: String</span><br><span class="line">	    </span><br><span class="line">    <span class="comment">// 초기화 구문</span></span><br><span class="line">    <span class="keyword">init</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> person = Person(<span class="string">&quot;Paul&quot;</span>)		</span><br><span class="line"></span><br><span class="line">print(person.name)</span><br></pre></td></tr></table></figure>
-<p>생성자 안에서 멤버변수를 선언할 수도 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>(<span class="keyword">var</span> name: String) &#123;</span><br><span class="line">    <span class="comment">// var name: String</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>위처럼 코드를 작성하는 경우, 클래스를 생성할 때 전달한 값 전달인자가 매개변수에 자동으로 초기화된다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person = Person(<span class="string">&quot;Paul&quot;</span>)</span><br><span class="line"></span><br><span class="line">print(person.name)  <span class="comment">// Paul</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="2-보조-생성자"><a href="#2-보조-생성자" class="headerlink" title="(2) 보조 생성자"></a>(2) 보조 생성자</h1><p>기본 생성자를 정의하지 않고 아래와 같이 <code>보조 생성자</code>만을 사용할 수도 있다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 멤버변수</span></span><br><span class="line">    <span class="keyword">var</span> name: String</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 보조 생성자</span></span><br><span class="line">    <span class="keyword">constructor</span>(name: String) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name    </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">	</span><br><span class="line"><span class="keyword">var</span> person = Person(<span class="string">&quot;Paul&quot;</span>) </span><br><span class="line">println(person.name)</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/08/11/05_kotlin/180811_constructor/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2018/08/10/05_kotlin/180810_class_instance_object/"
-                            aria-label=": [Kotlin] 객체지향 프로그래밍, 클래스, 인스턴스, 객체"
-                        >
-                            [Kotlin] 객체지향 프로그래밍, 클래스, 인스턴스, 객체
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2018-08-10T00:00:00+09:00">
-	
-		    2018/08/10
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Kotlin/">Kotlin</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="객체지향-프로그래밍"><a href="#객체지향-프로그래밍" class="headerlink" title="객체지향 프로그래밍"></a>객체지향 프로그래밍</h1><p>Kotlin은 모든 대상을 <code>객체(Object)</code>로 바라본다. 이러한 점에서 Kotlin은 객체지향 프로그래밍 언어다. 객체지향 프로그래밍을 이해하려면 클래스와 인스턴스에 대해 알아야 한다.</p>
-<h1 id="클래스와-인스턴스"><a href="#클래스와-인스턴스" class="headerlink" title="클래스와 인스턴스"></a>클래스와 인스턴스</h1><p>클래스와 인스턴스를 설명할 때 와플 기계와 와플을 예로 많이 든다.<br><img src="1.png"><br><code>클래스(Class)</code>는 <u>인스턴스를 만드는 틀</u>, <code>인스턴스(Instance)</code>는 <u>클래스로 만든 무언가</u>다. 즉 클래스는 와플 기계, 인스턴스 와플이다. 클래스를 코드로 표현하면 다음과 같다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Waffle</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>인스턴스는 다음과 같이 생성한다. 클래스 이름 뒤에 <code>()</code>를 붙여주면 된다.</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> waffle = Waffle()</span><br></pre></td></tr></table></figure>
-<p>이렇게 만든 인스턴스는 <code>객체(Object)</code>라고도 한다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2018/08/10/05_kotlin/180810_class_instance_object/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

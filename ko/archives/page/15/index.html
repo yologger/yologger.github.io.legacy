@@ -354,6 +354,145 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/ko/2019/01/16/06_spring/01_servlet_jsp/20190116_ServletContainerInitializer/"
+                            aria-label=": [Servlet, JSP] ServletContainerInitializer 이란?"
+                        >
+                            [Servlet, JSP] ServletContainerInitializer 이란?
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-16T00:00:00+09:00">
+	
+		    2019/01/16
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="ServletContainerInitializer"><a href="#ServletContainerInitializer" class="headerlink" title="ServletContainerInitializer"></a>ServletContainerInitializer</h1><p>Servlet 3.0 부터는 <code>web.xml</code>없이 Servlet Context를 초기화할 수 있다. <code>javax.servlet.ServletContainerInitializer</code>인터페이스의 구현체를 만들고 <code>META-INF/services/javax.servlet.ServletContainerInitializer</code>라는 텍스프 파일에 추가하면 된다.</p>
+<p>우선 <code>web.xml</code>을 사용한 간단한 예제를 살펴보자. <code>Controller</code> 서블릿 클래스를 컨테이너에 등록하고 URL 매핑을 하고있다.</p>
+<figure class="highlight xml"><figcaption><span>web.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">id</span>=<span class="string">&quot;WebApp_ID&quot;</span> <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>controller<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>com.yologger.app.controller.Controller<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>controller<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/Controller<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>이제 <code>ServletContainerInitializer</code>인터페이스를 사용하여 위와 동일한 코드를 구현해보자.</p>
+<p><code>web.xml</code>을 삭제하고 <code>ServletContainerInitializer</code>인터페이스의 구현체를 생성한다.</p>
+<figure class="highlight java"><figcaption><span>AppInitializer.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppInitializer</span> <span class="keyword">implements</span> <span class="title">ServletContainerInitializer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onStartup</span><span class="params">(Set&lt;Class&lt;?&gt;&gt; set, ServletContext servletContext)</span> <span class="keyword">throws</span> ServletException </span>&#123;	</span><br><span class="line">        ServletRegistration.Dynamic servlet = servletContext.addServlet(<span class="string">&quot;controller&quot;</span>, Controller.class);</span><br><span class="line">        servlet.setLoadOnStartup(<span class="number">0</span>);</span><br><span class="line">        servlet.addMapping(<span class="string">&quot;/Controller&quot;</span>);	</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>META-INFO/services</code> 디렉토리에 <code>javax.servlet.ServletContainerInitializer</code>라는 파일을 생성한다. 그리고 <code>AppInitializer</code>클래스의 경로를 입력한다.</p>
+<figure class="highlight plaintext"><figcaption><span>javax.servlet.ServletContainerInitializer</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">com.yologger.app.config.AppInitializer</span><br></pre></td></tr></table></figure>
+<p>이제 웹 어플리케이션을 다시 시작해보자. Servlet Container는 <code>ServletContainerInitializer</code>인터페이스의 구현체를 참조하여 컨텍스트를 생성하게된다.</p>
+<h1 id="SpringServletContainerInitializer"><a href="#SpringServletContainerInitializer" class="headerlink" title="SpringServletContainerInitializer"></a>SpringServletContainerInitializer</h1><p><code>Spring MVC</code> 역시 ServletContainerInitializer 인터페이스를 상속하는 <code>SpringServletContainerInitializer</code>를 사용한다. <code>SpringServletContainerInitializer</code>는 내부적으로 컨텍스트 파일(보통 *_context.xml 형태)을 읽어서 <code>Spring IoC Container</code>를 생성한 후 Servlet으로 등록한다. </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/16/06_spring/01_servlet_jsp/20190116_ServletContainerInitializer/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2019/01/15/06_spring/01_servlet_jsp/20190115_web_xml/"
+                            aria-label=": [Servlet, JSP] web.xml이란?"
+                        >
+                            [Servlet, JSP] web.xml이란?
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2019-01-15T00:00:00+09:00">
+	
+		    2019/01/15
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Spring/">Spring</a>, <a class="category-link" href="/ko/categories/Spring/Servlet-JSP/">Servlet, JSP</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="web-xml"><a href="#web-xml" class="headerlink" title="web.xml"></a>web.xml</h1><p>WAS는 Java Web Application를 구동하면서 <code>web.xml</code>파일을 참고하여 Web Container와 Context를 구성한다. Eclipse로 생성한 Java Web Application 프로젝트에서는 보통 다음 경로에 위치한다.<br><img src="1.png"> </p>
+<p><code>web.xml</code>에는 다음 정보가 포함된다.</p>
+<h3 id="1-Welcome-File"><a href="#1-Welcome-File" class="headerlink" title="1. Welcome File"></a>1. Welcome File</h3><p><code>Welcome File</code>은 Web Application의 기본 웹 페이지다. 클라이언트가 서블릿 이름을 생략하여 요청하면 웹 서버는 Welcome File을 찾아서 응답한다.</p>
+<figure class="highlight xml"><figcaption><span>web.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span> <span class="attr">id</span>=<span class="string">&quot;WebApp_ID&quot;</span> <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">    <span class="tag">&lt;<span class="name">welcome-file-list</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">welcome-file</span>&gt;</span>index.html<span class="tag">&lt;/<span class="name">welcome-file</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">welcome-file</span>&gt;</span>index.htm<span class="tag">&lt;/<span class="name">welcome-file</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">welcome-file</span>&gt;</span>index.jsp<span class="tag">&lt;/<span class="name">welcome-file</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">welcome-file</span>&gt;</span>default.html<span class="tag">&lt;/<span class="name">welcome-file</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">welcome-file</span>&gt;</span>default.htm<span class="tag">&lt;/<span class="name">welcome-file</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">welcome-file</span>&gt;</span>default.jsp<span class="tag">&lt;/<span class="name">welcome-file</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">welcome-file-list</span>&gt;</span></span><br><span class="line">  </span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-Servlet-URL-매핑"><a href="#2-Servlet-URL-매핑" class="headerlink" title="2. Servlet URL 매핑"></a>2. Servlet URL 매핑</h3><figure class="highlight xml"><figcaption><span>web.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">id</span>=<span class="string">&quot;WebApp_ID&quot;</span> <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>controller<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>com.yologger.app.controller.Controller<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>controller<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/controller<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Listener-정의"><a href="#3-Listener-정의" class="headerlink" title="3. Listener 정의"></a>3. Listener 정의</h3><figure class="highlight xml"><figcaption><span>web.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">	<span class="attr">id</span>=<span class="string">&quot;WebApp_ID&quot;</span> <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- Listener --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listener</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">listener-class</span>&gt;</span>com.yologger.app.listener.AppListener<span class="tag">&lt;/<span class="name">listener-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">listener</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Filter-정의"><a href="#4-Filter-정의" class="headerlink" title="4. Filter 정의"></a>4. Filter 정의</h3><figure class="highlight xml"><figcaption><span>web.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span> <span class="attr">id</span>=<span class="string">&quot;WebApp_ID&quot;</span> <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>MyFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>com.yologger.app.MyFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>MyFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<h3 id="5-ServletContext-정의"><a href="#5-ServletContext-정의" class="headerlink" title="5. ServletContext 정의"></a>5. ServletContext 정의</h3><figure class="highlight xml"><figcaption><span>web.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">	<span class="attr">id</span>=<span class="string">&quot;WebApp_ID&quot;</span> <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">context-param</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>name<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>Paul<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">context-param</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">context-param</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>nation<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>England<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">context-param</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Error-Page"><a href="#6-Error-Page" class="headerlink" title="6. Error Page"></a>6. Error Page</h3><figure class="highlight xml"><figcaption><span>web.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span> <span class="attr">id</span>=<span class="string">&quot;WebApp_ID&quot;</span> <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">    <span class="tag">&lt;<span class="name">error-page</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">error-code</span>&gt;</span>404<span class="tag">&lt;/<span class="name">error-code</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">location</span>&gt;</span>/errorPage404.jsp<span class="tag">&lt;/<span class="name">location</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">error-page</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2019/01/15/06_spring/01_servlet_jsp/20190115_web_xml/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/ko/2019/01/14/06_spring/01_servlet_jsp/20190114_filter/"
                             aria-label=": [Servlet, JSP] Servlet Filter란?"
                         >
@@ -1079,160 +1218,6 @@
                         <p>
                             <a
                                 href="/ko/2019/01/06/08_android/00_gradle/190806_productFlavor/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/"
-                            aria-label=": [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType"
-                        >
-                            [Android] Gradle - (5) 빌드 변형(Build Variant) - BuildType
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-01-05T01:00:00+09:00">
-	
-		    2019/01/05
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="왜-빌드-변형이-필요할까"><a href="#왜-빌드-변형이-필요할까" class="headerlink" title="왜 빌드 변형이 필요할까?"></a>왜 빌드 변형이 필요할까?</h1><p>안드로이드에서는 하나의 프로젝트를 여러 버전의 앱으로 빌드할 수 있습니다. 그렇다면 왜 여러 버전의 앱으로 빌드를 해야할까요? </p>
-<h4 id="1-스마트폰-앱-vs-태블릿-앱"><a href="#1-스마트폰-앱-vs-태블릿-앱" class="headerlink" title="(1) 스마트폰 앱 vs. 태블릿 앱"></a>(1) 스마트폰 앱 vs. 태블릿 앱</h4><p>스마트폰용 앱과 태블릿용 앱을 출시한다고 가정합시다. 두 앱은 기능은 동일하고 레이아웃만 약간 다릅니다. 이러한 경우 두 개의 프로젝트를 생성하여 각각 관리한다면 매우 비효율적일 것입니다.</p>
-<h4 id="2-무료-앱-vs-유료-앱"><a href="#2-무료-앱-vs-유료-앱" class="headerlink" title="(2) 무료 앱 vs. 유료 앱"></a>(2) 무료 앱 vs. 유료 앱</h4><p>이번엔 무료 앱과 유료 앱을 출시한다고 가정합시다. 두 앱은 레이아웃은 동일하며, 기능만 약간 다릅니다. 이러한 경우에도 두 개의 프로젝트를 생성하는 것은 비효율적입니다.</p>
-<h4 id="3-개발용-앱-vs-출시용-앱"><a href="#3-개발용-앱-vs-출시용-앱" class="headerlink" title="(3) 개발용 앱 vs 출시용 앱"></a>(3) 개발용 앱 vs 출시용 앱</h4><p>마지막으로 개발용 앱과 출시용 앱이 있다고 가정합시다. <code>프로가드(ProGuard)</code>는 앱 용량을 축소하고 코드를 난독화합니다. 다만 프로가드를 적용하면 빌드 시간이 길어지는데 굳이 디버그용 앱에 적용할 필요가 있을까요? 이러한 경우 출시용 앱에만 적용되도록 할 수 있습니다.</p>
-<h1 id="빌드-변형"><a href="#빌드-변형" class="headerlink" title="빌드 변형"></a>빌드 변형</h1><p>하나의 프로젝트가 여러 버전으로 빌드되면 각각의 앱을 <code>빌드 변형(Build Variant)</code>이라고 합니다. 빌드 변형을 만드는 방법에는 두 가지가 있습니다.</p>
-<ul>
-<li><code>빌드 타입(Build Type)</code></li>
-<li><code>프로덕트 플래이버(Product Flavor)</code></li>
-</ul>
-<hr>
-<h1 id="빌드-타입"><a href="#빌드-타입" class="headerlink" title="빌드 타입"></a>빌드 타입</h1><p>안드로이드 스튜디오 프로젝트를 생성하면 <code>debug</code>, <code>release</code>라는 두 개의 <code>빌드 타입(BuildType)</code>이 자동으로 생성됩니다.</p>
-<p><code>안드로이드 스튜디오 &gt; 왼쪽 하단의 Build Variant</code> 탭에서 빌드 타입을 확인할 수 있습니다.<br><img src="1.png"></p>
-<p>각 빌드 타입에 대한 설정은 <code>모듈 수준의 build.gradle</code>의 <code>buildTypes 섹션</code>에서 할 수 있습니다. 프로젝트를 처음 생성하면 아마 아래와 같은 모습일 것입니다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>release 섹션</code>만 있고 <code>debug 색션</code>은 없습니다. 따라서 <code>debug</code>모드로 빌드하면 기본값이 적용됩니다. 물론 다음과 같이 <code>debug</code>모드의 설정을 직접 할 수도 있습니다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>직접 빌드 타입을 추가할 수도 있습니다. <code>alpha</code>, <code>beta</code>를 추가하고 그래들의 <code>Sync Now</code>버튼을 클릭합시다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        alpha &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        beta &#123;</span><br><span class="line">            <span class="comment">// ..</span></span><br><span class="line">        &#125;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="literal">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile(<span class="string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>alpha</code>와 <code>beta</code>가 추가된 것을 확인할 수 있습니다.<br><img src="2.png"></p>
-<p>이처럼 빌드 타입을 사용하면 빌드 타입에 따라 다른 빌드 방식을 설정할 수 있습니다.</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/01/05/08_android/00_gradle/190805_buildtype/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2019/01/04/08_android/00_gradle/190804_properties/"
-                            aria-label=": [Android] Gradle - (4) 코드에서 환경변수 분리하기 - properties 파일"
-                        >
-                            [Android] Gradle - (4) 코드에서 환경변수 분리하기 - properties 파일
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2019-01-04T01:00:00+09:00">
-	
-		    2019/01/04
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Gradle/">Gradle</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="왜-환경변수를-코드에서-분리해야할까"><a href="#왜-환경변수를-코드에서-분리해야할까" class="headerlink" title="왜 환경변수를 코드에서 분리해야할까?"></a>왜 환경변수를 코드에서 분리해야할까?</h1><p>많은 어플리케이션이 Google, Facebook과 같은 SNS 계정을 통한 로그인을 지원합니다. 개발자는 SNS 로그인 API를 사용하기 위해 <code>키(Key)</code>를 발급받는데, 이를 소스코드에 포함시키면 여러 보안 이슈가 발생할 수 있습니다. </p>
-<p><code>properties 파일</code>을 사용하면 민감한 데이터를 코드에서 분리하여 이 파일에 저장할 수 있습니다.</p>
-<h1 id="properties-파일-만들기"><a href="#properties-파일-만들기" class="headerlink" title=".properties 파일 만들기"></a>.properties 파일 만들기</h1><p>프로젝트의 루트 디렉토리에 <code>config.properties</code>파일을 생성합니다.<br><img src="1.png"></p>
-<figure class="highlight groovy"><figcaption><span>config.properties</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CLIENT_ID=<span class="string">&quot;your_client_id&quot;</span></span><br><span class="line">CLIENT_SECRET=<span class="string">&quot;your_client_secret&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="모듈-수준의-build-gradle-설정하기"><a href="#모듈-수준의-build-gradle-설정하기" class="headerlink" title="모듈 수준의 build.gradle 설정하기"></a>모듈 수준의 build.gradle 설정하기</h1><p><code>build.gradle</code>에서 다음과 같이 <code>config.properties</code>파일을 읽어올 수 있습니다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> configPropertiesFile = rootProject.file(<span class="string">&quot;config.properties&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> configProperties = <span class="keyword">new</span> Properties()</span><br><span class="line">configProperties.load(<span class="keyword">new</span> FileInputStream(configPropertiesFile))</span><br></pre></td></tr></table></figure>
-
-<p>이제 <code>configProperties[&#39;your_key&#39;]</code>형태로 값을 읽어올 수 있습니다.</p>
-<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> configPropertiesFile = rootProject.file(<span class="string">&quot;config.properties&quot;</span>)</span><br><span class="line"><span class="keyword">def</span> configProperties = <span class="keyword">new</span> Properties()</span><br><span class="line">configProperties.load(<span class="keyword">new</span> FileInputStream(configPropertiesFile))</span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.example.simple_memo&quot;</span></span><br><span class="line">        minSdkVersion <span class="number">21</span></span><br><span class="line">        targetSdkVersion <span class="number">30</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">        testInstrumentationRunner <span class="string">&quot;androidx.test.runner.AndroidJUnitRunner&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// for xml file</span></span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_ID&#x27;</span>]</span><br><span class="line">        resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_SECRET&#x27;</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment">// for source file</span></span><br><span class="line">        buildConfigField(<span class="string">&quot;String&quot;</span>, <span class="string">&quot;CLIENT_ID&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_ID&#x27;</span>])</span><br><span class="line">        buildConfigField(<span class="string">&quot;String&quot;</span>, <span class="string">&quot;CLIENT_SECRET&quot;</span>, configProperties[<span class="string">&#x27;CLIENT_SECRET&#x27;</span>])</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="소스코드에서-값을-사용하기"><a href="#소스코드에서-값을-사용하기" class="headerlink" title="소스코드에서 값을 사용하기"></a>소스코드에서 값을 사용하기</h1><p>이제 <code>소스 코드</code>에서 사용할 수 있습니다.</p>
-<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> clientId = BuildConfig.CLIENT_ID            <span class="comment">// your_client_id</span></span><br><span class="line">        <span class="keyword">val</span> clientSecret = BuildConfig.CLIENT_SECRET    <span class="comment">// your_client_secret</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="xml-파일에서-값을-사용하기"><a href="#xml-파일에서-값을-사용하기" class="headerlink" title="xml 파일에서 값을 사용하기"></a>xml 파일에서 값을 사용하기</h1><p><code>xml 파일</code>에서도 접근할 수 있습니다.</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_ID&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:text</span>=<span class="string">&quot;@string/CLIENT_SECRET&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="gitignore파일에-추가하기"><a href="#gitignore파일에-추가하기" class="headerlink" title=".gitignore파일에 추가하기"></a>.gitignore파일에 추가하기</h1><p>보통 <code>.properties</code>파일처럼 민감한 데이터가 포함된 파일은 원격 저장소에 업로드하지 않습니다. <code>.gitignore</code>에 <code>config.properties</code>파일을 추가합시다.</p>
-<figure class="highlight groovy"><figcaption><span>.gitignore</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config.properties</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2019/01/04/08_android/00_gradle/190804_properties/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
