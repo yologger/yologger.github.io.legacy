@@ -1,0 +1,781 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Linux] 리눅스 파일 시스템 구조 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n거의 대부분의 리눅스 배포판은 리눅스 파일시스템 계층 표준인 Linux Filesystem Hierarchy Standard을 준수한다. 따라서 다음 디렉토리 구조를 가진다.\n123456789101112131415# tree -L 1 -N -d├─ bin├─ dev├─ etc├─ home├─ lib├─ media├─ mnt├─ opt├─ proc├─ root├─ sbin├─ tmp├─ usr└─ var\n\n여기서 중요한 몇 가지 디렉토리를 살펴보자.\n\n\n\n이름\n설명\n\n\n\n/\n최상위 디렉토리인 루트 디렉토리\n\n\n/boot/\n부팅에 필요한 파일들이 존재한다.\n\n\n/bin/\n모든 사용자들이 사용할 수 있는 명령어 바이너리. ls, cat, cp, rm, ps 같은 명령어가 이 곳에 존재한다.\n\n\n/sbin/\n시스템 관리자가 사용하는 시스템 명령어 바이너리. useradd, userdel, usermod 같은 명령어가 이 곳에 존재한다.\n\n\n/lib\n/bin/과 /sbin의 명령어 바이너리가 필요로하는 라이브러리 파일\n\n\n/root\n루트 사용자의 홈 디렉토리\n\n\n/home\n일반 사용자의 홈 디렉토리\n\n\n/usr\nUniversal Resource의 약자. 일반 사용자가 사용하는 모든 프로그램과 자원 파일들이 존재한다.\n\n\n/etc\n시스템 전반의 환경설정 파일이 존재한다.\n\n\n/var\n상대적으로 자주 변하는 파일들이 존재한다.\n\n\n/tmp\n다양한 프로그램에서 만들어지는 임시 파일들이 저장된다. 시스템이 재부팅될 때 마다 이 디렉토리가 비워진다.\n\n\n/mnt\n테스트2\n\n\n/media\nUSB 드라이버, CD-ROM 같은 휴대용 장치가 연결될 때의 마운트 포인트가 이 곳에 존재한다.\n\n\n/dev\n커널이 장치하는 모든 장치. 리눅스는 장치도 파일로 관리한다.\n\n\n/opt\nOptional의 약자로\n\n\n/proc\n리눅스에서 동작 중인 프로세스, 하드웨어, 시스템 등의 상태 정보를 담은 파일이 저장된다.\n\n\napt-get 설치 경로/usr/local/bin/docker/var/log/mysqld.log디렉토리 opt마운트 포인트\n","dateCreated":"2020-08-02T00:00:00+09:00","dateModified":"2022-01-03T09:46:57+09:00","datePublished":"2020-08-02T00:00:00+09:00","description":"","headline":"[Linux] 리눅스 파일 시스템 구조","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/","keywords":"Linux"}</script>
+    <meta name="description" content="거의 대부분의 리눅스 배포판은 리눅스 파일시스템 계층 표준인 Linux Filesystem Hierarchy Standard을 준수한다. 따라서 다음 디렉토리 구조를 가진다. 123456789101112131415# tree -L 1 -N -d├─ bin├─ dev├─ etc├─ home├─ lib├─ media├─ mnt├─ opt├─ proc├─ ro">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Linux] 리눅스 파일 시스템 구조">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="거의 대부분의 리눅스 배포판은 리눅스 파일시스템 계층 표준인 Linux Filesystem Hierarchy Standard을 준수한다. 따라서 다음 디렉토리 구조를 가진다. 123456789101112131415# tree -L 1 -N -d├─ bin├─ dev├─ etc├─ home├─ lib├─ media├─ mnt├─ opt├─ proc├─ ro">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-08-01T15:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-03T00:46:57.619Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infra_devops"
+                            
+                            rel="noopener"
+                            title="Infra, DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infra, DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tool"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tool</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Linux] 리눅스 파일 시스템 구조
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-08-02T00:00:00+09:00">
+	
+		    2020/08/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/Linux/">Linux</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<p>거의 대부분의 리눅스 배포판은 <code>리눅스 파일시스템 계층 표준</code>인 <a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/%ED%8C%8C%EC%9D%BC%EC%8B%9C%EC%8A%A4%ED%85%9C_%EA%B3%84%EC%B8%B5%EA%B5%AC%EC%A1%B0_%ED%91%9C%EC%A4%80">Linux Filesystem Hierarchy Standard</a>을 준수한다. 따라서 다음 디렉토리 구조를 가진다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># tree -L 1 -N -d</span><br><span class="line">├─ bin</span><br><span class="line">├─ dev</span><br><span class="line">├─ etc</span><br><span class="line">├─ home</span><br><span class="line">├─ lib</span><br><span class="line">├─ media</span><br><span class="line">├─ mnt</span><br><span class="line">├─ opt</span><br><span class="line">├─ proc</span><br><span class="line">├─ root</span><br><span class="line">├─ sbin</span><br><span class="line">├─ tmp</span><br><span class="line">├─ usr</span><br><span class="line">└─ var</span><br></pre></td></tr></table></figure>
+
+<p>여기서 중요한 몇 가지 디렉토리를 살펴보자.</p>
+<table>
+<thead>
+<tr>
+<th>이름</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>/</td>
+<td>최상위 디렉토리인 루트 디렉토리</td>
+</tr>
+<tr>
+<td>/boot/</td>
+<td>부팅에 필요한 파일들이 존재한다.</td>
+</tr>
+<tr>
+<td>/bin/</td>
+<td>모든 사용자들이 사용할 수 있는 명령어 바이너리. <code>ls</code>, <code>cat</code>, <code>cp</code>, <code>rm</code>, <code>ps</code> 같은 명령어가 이 곳에 존재한다.</td>
+</tr>
+<tr>
+<td>/sbin/</td>
+<td>시스템 관리자가 사용하는 시스템 명령어 바이너리. <code>useradd</code>, <code>userdel</code>, <code>usermod</code> 같은 명령어가 이 곳에 존재한다.</td>
+</tr>
+<tr>
+<td>/lib</td>
+<td><code>/bin/</code>과 <code>/sbin</code>의 명령어 바이너리가 필요로하는 라이브러리 파일</td>
+</tr>
+<tr>
+<td>/root</td>
+<td>루트 사용자의 홈 디렉토리</td>
+</tr>
+<tr>
+<td>/home</td>
+<td>일반 사용자의 홈 디렉토리</td>
+</tr>
+<tr>
+<td>/usr</td>
+<td>Universal Resource의 약자. 일반 사용자가 사용하는 모든 프로그램과 자원 파일들이 존재한다.</td>
+</tr>
+<tr>
+<td>/etc</td>
+<td>시스템 전반의 환경설정 파일이 존재한다.</td>
+</tr>
+<tr>
+<td>/var</td>
+<td>상대적으로 자주 변하는 파일들이 존재한다.</td>
+</tr>
+<tr>
+<td>/tmp</td>
+<td>다양한 프로그램에서 만들어지는 임시 파일들이 저장된다. 시스템이 재부팅될 때 마다 이 디렉토리가 비워진다.</td>
+</tr>
+<tr>
+<td>/mnt</td>
+<td>테스트2</td>
+</tr>
+<tr>
+<td>/media</td>
+<td>USB 드라이버, CD-ROM 같은 휴대용 장치가 연결될 때의 마운트 포인트가 이 곳에 존재한다.</td>
+</tr>
+<tr>
+<td>/dev</td>
+<td>커널이 장치하는 모든 장치. 리눅스는 장치도 파일로 관리한다.</td>
+</tr>
+<tr>
+<td>/opt</td>
+<td><code>Optional</code>의 약자로</td>
+</tr>
+<tr>
+<td>/proc</td>
+<td>리눅스에서 동작 중인 프로세스, 하드웨어, 시스템 등의 상태 정보를 담은 파일이 저장된다.</td>
+</tr>
+</tbody></table>
+<p>apt-get 설치 경로<br>/usr/local/bin/docker<br>/var/log/mysqld.log<br>디렉토리 opt<br>마운트 포인트</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Linux/" rel="tag">Linux</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/02/08_android/12_di/20200802_dagger/"
+                    data-tooltip="[Android] 의존성 주입(DI) - Dagger 사용법"
+                    aria-label="이전: [Android] 의존성 주입(DI) - Dagger 사용법"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                    data-tooltip="[Android] 의존성 주입(DI) - Koin 사용법"
+                    aria-label="다음: [Android] 의존성 주입(DI) - Koin 사용법"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2022 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/02/08_android/12_di/20200802_dagger/"
+                    data-tooltip="[Android] 의존성 주입(DI) - Dagger 사용법"
+                    aria-label="이전: [Android] 의존성 주입(DI) - Dagger 사용법"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/01/08_android/12_di/20200801_koin/"
+                    data-tooltip="[Android] 의존성 주입(DI) - Koin 사용법"
+                    aria-label="다음: [Android] 의존성 주입(DI) - Koin 사용법"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/02/10_infra_devops/01_linux/20200804_linux_file_system/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

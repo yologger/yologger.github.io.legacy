@@ -1,0 +1,829 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Yologger&#39;s Blog">
+    <title>[Linux] 리눅스 계정 관리와 su, sudo, id 명령어 - Yologger&#39;s Blog</title>
+    <meta name="author" content="yologger">
+    
+    
+        <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n목차\n계정 종류\n계정 목록 확인\n계정 비밀번호\n그룹\n계정 추가\n계정 비밀번호 설정\n계정 속성 변경\n계정 삭제\n현재 계정 확인\n그룹 추가\n그룹 확인\n그룹 삭제\nsu 명령어\nsudo 명령어\nid 명령어\n\n\n계정 종류리눅스에는 크게 세 가지 계정이 존재한다.\n\n루트 계정: 모든 권한을 가지고 있는 최고 관리자. 0번 UID를 부여받는다.\n시스템 계정: 시스템 운영상 필요한 계정. 일반적으로 로그인이 불가능하며, 1~100 사이의 UID를 부여받는다. \n일반 계정: 레드햇 계열은 100에서 499 사이, 데비안 계열의 경우 100에서 999 사이의 UID를 부여받는다.\n\n계정 목록 확인모든 계정은 /etc/passwd파일에 정의되어있다.\n1# cat /etc/passwd\n출력 결과1234root:x:0:0:root:/root:/bin/bashbin:x:1:1:bin:/bin:/sbin/nologindaemon:x:2:2:daemon:/sbin:/sbin/nologin...\n계정은 다음과 같은 형태로 정의된다.\n\n계정 이름\n패스워드: 값이 x인 경우 패스워드는 /etc/shadow에 암호화되어 저장된다.\n사용자 ID: 모든 계정은 유일한 사용자 ID(UID)를 갖는다.\n그룹 ID: 모든 계정은 적어도 하나의 그룹에 포함된다.\n설명: 계정에 대한 설명\n홈 디렉토리: 사용자의 홈 디렉토리\n기본 쉘: 로그인 시 적용되는 기본 쉘\n\n계정 비밀번호계정의 비밀번호는 암호화되어 etc/shadow에 저장된다.\n그룹사용자는 적어도 하나의 그룹(Group)에 포함된다. 그룹에 대한 정보는 /etc/group파일에 정의된다.\n1# cat /etc/group\n출력 결과12345root:x:0:bin:x:1:daemon:x:2:sys:x:3:...\n\n그룹은 다음과 같은 형태로 정의된다.\n\n그룹 이름\n그룹 패스워드: 새로운 계정을 그룹에 가입시킬 때 사용할 수 있다. 선택사항이다.\n그룹 ID: 모든 그룹은 유일한 ID(GID)를 가진다.\n그룹 멤버: 그룹에 포함된 모든 유저 목록. 콤마로 유저를 구분한다.\n\n계정 추가리눅스 설치 시 기본적으로 루트 계정과 시스템 계정만 존재하고 일반 계정은 존재하지 않는다. useradd명령어와 다양한 옵션을 사용하여 계정을 추가할 수 있다. \n1# useradd -m &lt;user_name&gt; -g &lt;group_name&gt; -d &lt;home_directory&gt; -s &lt;shell&gt;\nuser1, user2 계정을 추가해보자. \n1# useradd -m user1 -g group1 -d /home/user1 -s /bin/bash\n1# useradd -m user2 -g group1 -d /home/user2 -s /bin/bash\n/etc/passwd파일에서 추가된 계정을 확인할 수 있다.\n1# cat /etc/passwd\n\n출력 결과123...user1:x:1000:1000::/home/user1:/bin/bashuser2:x:1001:1000::/home/user2:/bin/bash\n/home디렉토리에서 사용자의 홈 디렉토리가 생성된 것도 확인할 수 있다.\n1$ cat /home\n출력 결과1user1   user2\n\n계정 비밀번호 설정passwd명령어로 계정 비밀번호를 설정할 수 있다.\n1234# passwd &lt;user_name&gt;New password: Retype new password: passwd: all authentication tokens updated successfully.\n\n\n계정 속성 변경usermod명령어를 사용하면 사용자의 홈 디렉토리, 그룹, 기본 쉘 등 여러가지 속성을 변경할 수 있다. user1의 그룹을 group1에서 group2로 변경해보자.\n1# usermod -g group2 user1\n\n계정 삭제userdel명령어를 사용하면 사용자를 삭제할 수 있다. 계정 뿐만 아니라 홈 디렉토리 등 관련된 모든 정보를 삭제하려면 옵션 -r을 추가한다.\n1# userdel -r &lt;user_name&gt;\n1# userdel -r user1 \n\n현재 계정 확인환경변수 USER의 값을 출력하여 현재 세션에 접속한 사용자를 확인할 수 있다.\n12$ echo $USER[user1] $ user1\nwhoami명령어를 사용할 수도 있다.\n12$ whoamiuser1\n\n그룹 추가groupadd명령어와 옵션을 사용하면 그룹을 추가할 수 있다.\n1# groupadd &lt;group_name&gt;\n1# groupadd group1\n\n그룹 확인groups명령어로 현재 사용자가 속한 그룹을 확인할 수 있다.\n12$ groupsgroup1\n\n그룹 삭제groupdel 명령어로 그룹을 삭제할 수 있다.\n1# groupdel &lt;group_name&gt;\n1# groupdel group1\n\nsu 명령어Switch User의 약자인 su명령어를 사용하면 현재 계정을 로그아웃을 하지 않고 다른 계정으로 전환할 수 있다.\n루트 계정에서 일반 계정으로 전환할 때는 비밀번호를 입력할 필요가 없다.\n12root /root # su - user1user1 /root $ \n일반 계정에서 다른 일반 계정으로 전환할 때는 비밀번호를 입력한다.\n123user1 /root $ su -user2Password:user2 /root $\n계정 이름을 입력하지 않으면 루트 계정으로 전환한다.\n12user2 /root $ suroot /root #\n\n\n-을 사용하면 계정을 전환하면서 환경변수까지 적용한다. 환경변수가 적용되었기 때문에 현재 경로가 계정의 홈 디렉토리로 이동했다.\n12root /root # su user1user1 /home/user1 $  \n\nlogout명령어를 사용하면 전환 전 계정으로 돌아갈 수 있다.\n12user1 /home/user1 $ logoutroot /root #\nexit 명령어를 사용해도 된다.\n12user1 /home/user1 $ exitroot /root #\n\nsudo 명령어Superuser do의 약자인 sudo명령어를 사용하면 다른 계정의 권한을 빌려 명령어를 실행할 수 있다. 계정이 전환되진 않으며, 보통 일반 계정이 관리자 계정의 권한을 잠시 빌려서 명령어를 실행할 때 사용한다.\n예제를 살펴보자. 일반 계정에서 apt-get update를 실행하면 권한 오류가 발생한다.\n12345user1 $ apt-get updateE: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)E: Unable to lock directory /var/lib/apt/lists/E: Could not open lock file /var/lib/dpkg/lock - open (13: Permission denied)E: Unable to lock the administration directory (/var/lib/dpkg/), are you root?\n\n관리자는 일반 계정에게 sudo명령어를 사용할 수 있는 권한을 부여해야한다. 관리자 계정에서 /etc/sudoers파일을 다음과 같이 수정하면 된다.\n/etc/sudoers123...# User privilege specificationuser1   ALL=(ALL:ALL) ALL\n이제 일반 계정에서 sudo명령어를 사용할 수 있다. 이때 관리자 계정이 아닌 일반 계정의 비밀번호를 입력한다.\n12345user1 $ sudo apt-get update[sudo] password for user1: ...Fetched 14.9 kB in 5s (2752 B/s)         Reading package lists... Done\n\nid 명령어id명령어를 사용하면 사용자의 ID를 확인할 수 있다.\n12$ iduid=1000(user1) gid=1000(group1) groups=1000(group1),1002(group2),1003(group3),1004(group4) \n\nuid: 사용자의 ID (User ID)\ngid: 사용자가 포함된 주 그룹의 ID (Group ID)\ngroups: 사용자는 주 그룹 외에도 다른 그룹에 속할 수 있다.\n\n","dateCreated":"2020-08-07T00:00:00+09:00","dateModified":"2022-01-03T15:35:33+09:00","datePublished":"2020-08-07T00:00:00+09:00","description":"","headline":"[Linux] 리눅스 계정 관리와 su, sudo, id 명령어","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/","keywords":"Linux"}</script>
+    <meta name="description" content="목차 계정 종류 계정 목록 확인 계정 비밀번호 그룹 계정 추가 계정 비밀번호 설정 계정 속성 변경 계정 삭제 현재 계정 확인 그룹 추가 그룹 확인 그룹 삭제 su 명령어 sudo 명령어 id 명령어   계정 종류리눅스에는 크게 세 가지 계정이 존재한다.  루트 계정: 모든 권한을 가지고 있는 최고 관리자. 0번 UID를 부여받는다. 시스템 계정: 시스템">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="[Linux] 리눅스 계정 관리와 su, sudo, id 명령어">
+<meta property="og:url" content="https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/index.html">
+<meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="목차 계정 종류 계정 목록 확인 계정 비밀번호 그룹 계정 추가 계정 비밀번호 설정 계정 속성 변경 계정 삭제 현재 계정 확인 그룹 추가 그룹 확인 그룹 삭제 su 명령어 sudo 명령어 id 명령어   계정 종류리눅스에는 크게 세 가지 계정이 존재한다.  루트 계정: 모든 권한을 가지고 있는 최고 관리자. 0번 UID를 부여받는다. 시스템 계정: 시스템">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/1.png">
+<meta property="og:image" content="https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/2.png">
+<meta property="article:published_time" content="2020-08-06T15:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-03T06:35:33.735Z">
+<meta property="article:author" content="yologger">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/1.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/ko/assets/css/style-mg0ufdhe3lf13uaqzh5sfd3dtbhx3iokplil152c5hqau8lqr315qgpxsjvw.min.css">
+
+    <!--STYLES END-->
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYKNWR810R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-QYKNWR810R');
+    </script>
+
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/ko/"
+            aria-label=""
+        >
+            Yologger&#39;s Blog
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /ko/#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://yologger.github.io"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="English"
+                        >
+                        <i class="sidebar-button-icon fa fa-globe" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">English</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/all-archives"
+                            
+                            rel="noopener"
+                            title="Archives"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/yologger"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/mailto"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/java"
+                            
+                            rel="noopener"
+                            title="Java"
+                        >
+                        <i class="sidebar-button-icon fab fa-java" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Java</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/kotlin"
+                            
+                            rel="noopener"
+                            title="Kotlin"
+                        >
+                        <i class="sidebar-button-icon fab fa-korvue" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kotlin</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/spring"
+                            
+                            rel="noopener"
+                            title="Spring"
+                        >
+                        <i class="sidebar-button-icon fas fa-leaf" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Spring</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/android"
+                            
+                            rel="noopener"
+                            title="Android"
+                        >
+                        <i class="sidebar-button-icon fab fa-android" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Android</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/infra_devops"
+                            
+                            rel="noopener"
+                            title="Infra, DevOps"
+                        >
+                        <i class="sidebar-button-icon fa fa-server" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Infra, DevOps</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/tools"
+                            
+                            rel="noopener"
+                            title="Tool"
+                        >
+                        <i class="sidebar-button-icon fa fa-wrench" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tool</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/ko/algorithm"
+                            
+                            rel="noopener"
+                            title="Algorithm"
+                        >
+                        <i class="sidebar-button-icon fas fa-project-diagram" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Algorithm</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            [Linux] 리눅스 계정 관리와 su, sudo, id 명령어
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-08-07T00:00:00+09:00">
+	
+		    2020/08/07
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/Linux/">Linux</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <hr>
+<h1 id="목차"><a href="#목차" class="headerlink" title="목차"></a>목차</h1><ul>
+<li><a href="#%EA%B3%84%EC%A0%95-%EC%A2%85%EB%A5%98">계정 종류</a></li>
+<li><a href="#%EC%82%AC%EC%9A%A9%EC%9E%90-%EB%AA%A9%EB%A1%9D-%ED%99%95%EC%9D%B8">계정 목록 확인</a></li>
+<li><a href="#%EA%B3%84%EC%A0%95-%EB%B9%84%EB%B0%80%EB%B2%88%ED%98%B8">계정 비밀번호</a></li>
+<li><a href="#%EA%B7%B8%EB%A3%B9">그룹</a></li>
+<li><a href="#%EA%B3%84%EC%A0%95-%EC%B6%94%EA%B0%80">계정 추가</a></li>
+<li><a href="#%EA%B3%84%EC%A0%95-%EB%B9%84%EB%B0%80%EB%B2%88%ED%98%B8-%EC%84%A4%EC%A0%95">계정 비밀번호 설정</a></li>
+<li><a href="#%EA%B3%84%EC%A0%95-%EC%86%8D%EC%84%B1-%EB%B3%80%EA%B2%BD">계정 속성 변경</a></li>
+<li><a href="#%EA%B3%84%EC%A0%95-%EC%82%AD%EC%A0%9C">계정 삭제</a></li>
+<li><a href="#%ED%98%84%EC%9E%AC-%EA%B3%84%EC%A0%95-%ED%99%95%EC%9D%B8">현재 계정 확인</a></li>
+<li><a href="#%EA%B7%B8%EB%A3%B9-%EC%B6%94%EA%B0%80">그룹 추가</a></li>
+<li><a href="#%EA%B7%B8%EB%A3%B9-%ED%99%95%EC%9D%B8">그룹 확인</a></li>
+<li><a href="#%EA%B7%B8%EB%A3%B9-%EC%82%AD%EC%A0%9C">그룹 삭제</a></li>
+<li><a href="#su-%EB%AA%85%EB%A0%B9%EC%96%B4">su 명령어</a></li>
+<li><a href="#sudo-%EB%AA%85%EB%A0%B9%EC%96%B4">sudo 명령어</a></li>
+<li><a href="#id-%EB%AA%85%EB%A0%B9%EC%96%B4">id 명령어</a></li>
+</ul>
+<hr>
+<h1 id="계정-종류"><a href="#계정-종류" class="headerlink" title="계정 종류"></a>계정 종류</h1><p>리눅스에는 크게 세 가지 계정이 존재한다.</p>
+<ul>
+<li><code>루트 계정</code>: 모든 권한을 가지고 있는 최고 관리자. 0번 UID를 부여받는다.</li>
+<li><code>시스템 계정</code>: 시스템 운영상 필요한 계정. 일반적으로 로그인이 불가능하며, 1~100 사이의 UID를 부여받는다. </li>
+<li><code>일반 계정</code>: 레드햇 계열은 100에서 499 사이, 데비안 계열의 경우 100에서 999 사이의 UID를 부여받는다.</li>
+</ul>
+<h1 id="계정-목록-확인"><a href="#계정-목록-확인" class="headerlink" title="계정 목록 확인"></a>계정 목록 확인</h1><p>모든 계정은 <code>/etc/passwd</code>파일에 정의되어있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># cat /etc/passwd</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>계정은 다음과 같은 형태로 정의된다.<br><img src="1.png"></p>
+<ol>
+<li><code>계정 이름</code></li>
+<li><code>패스워드</code>: 값이 x인 경우 패스워드는 /etc/shadow에 암호화되어 저장된다.</li>
+<li><code>사용자 ID</code>: 모든 계정은 유일한 사용자 ID(UID)를 갖는다.</li>
+<li><code>그룹 ID:</code> 모든 계정은 적어도 하나의 그룹에 포함된다.</li>
+<li><code>설명</code>: 계정에 대한 설명</li>
+<li><code>홈 디렉토리</code>: 사용자의 홈 디렉토리</li>
+<li><code>기본 쉘</code>: 로그인 시 적용되는 기본 쉘</li>
+</ol>
+<h1 id="계정-비밀번호"><a href="#계정-비밀번호" class="headerlink" title="계정 비밀번호"></a>계정 비밀번호</h1><p>계정의 비밀번호는 암호화되어 <code>etc/shadow</code>에 저장된다.</p>
+<h1 id="그룹"><a href="#그룹" class="headerlink" title="그룹"></a>그룹</h1><p>사용자는 적어도 하나의 <code>그룹(Group)</code>에 포함된다. 그룹에 대한 정보는 <code>/etc/group</code>파일에 정의된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># cat /etc/group</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root:x:0:</span><br><span class="line">bin:x:1:</span><br><span class="line">daemon:x:2:</span><br><span class="line">sys:x:3:</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>그룹은 다음과 같은 형태로 정의된다.<br><img src="2.png"></p>
+<ol>
+<li><code>그룹 이름</code></li>
+<li><code>그룹 패스워드</code>: 새로운 계정을 그룹에 가입시킬 때 사용할 수 있다. 선택사항이다.</li>
+<li><code>그룹 ID</code>: 모든 그룹은 유일한 ID(GID)를 가진다.</li>
+<li><code>그룹 멤버:</code> 그룹에 포함된 모든 유저 목록. 콤마로 유저를 구분한다.</li>
+</ol>
+<h1 id="계정-추가"><a href="#계정-추가" class="headerlink" title="계정 추가"></a>계정 추가</h1><p>리눅스 설치 시 기본적으로 루트 계정과 시스템 계정만 존재하고 일반 계정은 존재하지 않는다. <code>useradd</code>명령어와 다양한 옵션을 사용하여 계정을 추가할 수 있다. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># useradd -m &lt;user_name&gt; -g &lt;group_name&gt; -d &lt;home_directory&gt; -s &lt;shell&gt;</span><br></pre></td></tr></table></figure>
+<p>user1, user2 계정을 추가해보자. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># useradd -m user1 -g group1 -d /home/user1 -s /bin/bash</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># useradd -m user2 -g group1 -d /home/user2 -s /bin/bash</span><br></pre></td></tr></table></figure>
+<p><code>/etc/passwd</code>파일에서 추가된 계정을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># cat /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">user1:x:1000:1000::/home/user1:/bin/bash</span><br><span class="line">user2:x:1001:1000::/home/user2:/bin/bash</span><br></pre></td></tr></table></figure>
+<p><code>/home</code>디렉토리에서 사용자의 홈 디렉토리가 생성된 것도 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cat /home</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user1   user2</span><br></pre></td></tr></table></figure>
+
+<h1 id="계정-비밀번호-설정"><a href="#계정-비밀번호-설정" class="headerlink" title="계정 비밀번호 설정"></a>계정 비밀번호 설정</h1><p><code>passwd</code>명령어로 계정 비밀번호를 설정할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># passwd &lt;user_name&gt;</span><br><span class="line">New password: </span><br><span class="line">Retype new password: </span><br><span class="line">passwd: all authentication tokens updated successfully.</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="계정-속성-변경"><a href="#계정-속성-변경" class="headerlink" title="계정 속성 변경"></a>계정 속성 변경</h1><p><code>usermod</code>명령어를 사용하면 사용자의 홈 디렉토리, 그룹, 기본 쉘 등 여러가지 속성을 변경할 수 있다. user1의 그룹을 group1에서 group2로 변경해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># usermod -g group2 user1</span><br></pre></td></tr></table></figure>
+
+<h1 id="계정-삭제"><a href="#계정-삭제" class="headerlink" title="계정 삭제"></a>계정 삭제</h1><p><code>userdel</code>명령어를 사용하면 사용자를 삭제할 수 있다. 계정 뿐만 아니라 홈 디렉토리 등 관련된 모든 정보를 삭제하려면 옵션 <code>-r</code>을 추가한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># userdel -r &lt;user_name&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># userdel -r user1 </span><br></pre></td></tr></table></figure>
+
+<h1 id="현재-계정-확인"><a href="#현재-계정-확인" class="headerlink" title="현재 계정 확인"></a>현재 계정 확인</h1><p>환경변수 <code>USER</code>의 값을 출력하여 현재 세션에 접속한 사용자를 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ echo $USER</span><br><span class="line">[user1] $ user1</span><br></pre></td></tr></table></figure>
+<p><code>whoami</code>명령어를 사용할 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ whoami</span><br><span class="line">user1</span><br></pre></td></tr></table></figure>
+
+<h1 id="그룹-추가"><a href="#그룹-추가" class="headerlink" title="그룹 추가"></a>그룹 추가</h1><p><code>groupadd</code>명령어와 옵션을 사용하면 그룹을 추가할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># groupadd &lt;group_name&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># groupadd group1</span><br></pre></td></tr></table></figure>
+
+<h1 id="그룹-확인"><a href="#그룹-확인" class="headerlink" title="그룹 확인"></a>그룹 확인</h1><p><code>groups</code>명령어로 현재 사용자가 속한 그룹을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ groups</span><br><span class="line">group1</span><br></pre></td></tr></table></figure>
+
+<h1 id="그룹-삭제"><a href="#그룹-삭제" class="headerlink" title="그룹 삭제"></a>그룹 삭제</h1><p><code>groupdel</code> 명령어로 그룹을 삭제할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># groupdel &lt;group_name&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># groupdel group1</span><br></pre></td></tr></table></figure>
+
+<h1 id="su-명령어"><a href="#su-명령어" class="headerlink" title="su 명령어"></a>su 명령어</h1><p><code>Switch User</code>의 약자인 <code>su</code>명령어를 사용하면 현재 계정을 로그아웃을 하지 않고 다른 계정으로 전환할 수 있다.</p>
+<p>루트 계정에서 일반 계정으로 전환할 때는 비밀번호를 입력할 필요가 없다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root /root # su - user1</span><br><span class="line">user1 /root $ </span><br></pre></td></tr></table></figure>
+<p>일반 계정에서 다른 일반 계정으로 전환할 때는 비밀번호를 입력한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">user1 /root $ su -user2</span><br><span class="line">Password:</span><br><span class="line">user2 /root $</span><br></pre></td></tr></table></figure>
+<p>계정 이름을 입력하지 않으면 루트 계정으로 전환한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user2 /root $ su</span><br><span class="line">root /root #</span><br></pre></td></tr></table></figure>
+
+
+<p><code>-</code>을 사용하면 계정을 전환하면서 환경변수까지 적용한다. 환경변수가 적용되었기 때문에 현재 경로가 계정의 홈 디렉토리로 이동했다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root /root # su user1</span><br><span class="line">user1 /home/user1 $  </span><br></pre></td></tr></table></figure>
+
+<p><code>logout</code>명령어를 사용하면 전환 전 계정으로 돌아갈 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user1 /home/user1 $ logout</span><br><span class="line">root /root #</span><br></pre></td></tr></table></figure>
+<p><code>exit</code> 명령어를 사용해도 된다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user1 /home/user1 $ exit</span><br><span class="line">root /root #</span><br></pre></td></tr></table></figure>
+
+<h1 id="sudo-명령어"><a href="#sudo-명령어" class="headerlink" title="sudo 명령어"></a>sudo 명령어</h1><p><code>Superuser do</code>의 약자인 <code>sudo</code>명령어를 사용하면 다른 계정의 권한을 빌려 명령어를 실행할 수 있다. 계정이 전환되진 않으며, 보통 일반 계정이 관리자 계정의 권한을 잠시 빌려서 명령어를 실행할 때 사용한다.</p>
+<p>예제를 살펴보자. 일반 계정에서 <code>apt-get update</code>를 실행하면 권한 오류가 발생한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">user1 $ apt-get update</span><br><span class="line">E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)</span><br><span class="line">E: Unable to lock directory /var/lib/apt/lists/</span><br><span class="line">E: Could not open lock file /var/lib/dpkg/lock - open (13: Permission denied)</span><br><span class="line">E: Unable to lock the administration directory (/var/lib/dpkg/), are you root?</span><br></pre></td></tr></table></figure>
+
+<p>관리자는 일반 계정에게 <code>sudo</code>명령어를 사용할 수 있는 권한을 부여해야한다. 관리자 계정에서 <code>/etc/sudoers</code>파일을 다음과 같이 수정하면 된다.</p>
+<figure class="highlight shell"><figcaption><span>/etc/sudoers</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="meta">#</span><span class="bash"> User privilege specification</span></span><br><span class="line">user1   ALL=(ALL:ALL) ALL</span><br></pre></td></tr></table></figure>
+<p>이제 일반 계정에서 <code>sudo</code>명령어를 사용할 수 있다. 이때 관리자 계정이 아닌 일반 계정의 비밀번호를 입력한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">user1 $ sudo apt-get update</span><br><span class="line">[sudo] password for user1: </span><br><span class="line">...</span><br><span class="line">Fetched 14.9 kB in 5s (2752 B/s)         </span><br><span class="line">Reading package lists... Done</span><br></pre></td></tr></table></figure>
+
+<h1 id="id-명령어"><a href="#id-명령어" class="headerlink" title="id 명령어"></a>id 명령어</h1><p><code>id</code>명령어를 사용하면 사용자의 ID를 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ id</span><br><span class="line">uid=1000(user1) gid=1000(group1) groups=1000(group1),1002(group2),1003(group3),1004(group4) </span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>uid</code>: 사용자의 ID (User ID)</li>
+<li><code>gid</code>: 사용자가 포함된 주 그룹의 ID (Group ID)</li>
+<li><code>groups</code>: 사용자는 주 그룹 외에도 다른 그룹에 속할 수 있다.</li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/ko/tags/Linux/" rel="tag">Linux</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/09/10_infra_devops/01_linux/20200809_linux_permission/"
+                    data-tooltip="[Linux] 리눅스 권한(Permission) 관리"
+                    aria-label="이전: [Linux] 리눅스 권한(Permission) 관리"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/03/08_android/12_di/20200803_hilt/"
+                    data-tooltip="[Android] 의존성 주입(DI) - Hilt 사용법"
+                    aria-label="다음: [Android] 의존성 주입(DI) - Hilt 사용법"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2022 yologger. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/09/10_infra_devops/01_linux/20200809_linux_permission/"
+                    data-tooltip="[Linux] 리눅스 권한(Permission) 관리"
+                    aria-label="이전: [Linux] 리눅스 권한(Permission) 관리"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/ko/2020/08/03/08_android/12_di/20200803_hilt/"
+                    data-tooltip="[Android] 의존성 주입(DI) - Hilt 사용법"
+                    aria-label="다음: [Android] 의존성 주입(DI) - Hilt 사용법"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2020/08/07/10_infra_devops/01_linux/20200807_linux_user_management/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">yologger</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/ko/assets/images/background.png');"></div>
+        <!--SCRIPTS-->
+
+<script src="/ko/assets/js/script-s1qf4dycbfqqmgvjljlv3c81jri2dhkbfsbrr18gdsntpulta4iextu4bozl.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

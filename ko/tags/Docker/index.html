@@ -445,6 +445,406 @@
         
     </article>
     
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2021/02/04/10_infra_devops/04_aws/20210204_aws_code_deploy/"
+                            aria-label=": [AWS] CodeDeploy 개념 및 사용법"
+                        >
+                            [AWS] CodeDeploy 개념 및 사용법
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-04T00:00:00+09:00">
+	
+		    2021/02/04
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/AWS/">AWS</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>Mac OS 환경에서는 <a href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/">Homebrew</a>로 Docker를 쉽게 설치할 수 있다.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install --cask docker</span> </span><br></pre></td></tr></table></figure>
+<p>도커 버전을 확인해보자.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker -v</span></span><br><span class="line">Docker version 20.10.11, build dea9396</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-이미지-다운로드"><a href="#도커-이미지-다운로드" class="headerlink" title="도커 이미지 다운로드"></a>도커 이미지 다운로드</h1><p>우선 다운받을 수 있는 <code>도커 이미지</code>를 검색해보자. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker search &lt;image_name&gt;</span><br><span class="line">$ docker search centos</span><br></pre></td></tr></table></figure>
+<p><code>docker pull</code>명령어로 도커 이미지를 다운받을 수 있다. <code>centos:7</code> 이미지를 다운받아보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull centos:7</span><br></pre></td></tr></table></figure>
+<p><code>docker images</code> 명령어로 다운받은 도커 이미지 목록을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos              7         eeb6ee3f44bd   3 months ago   204MB</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-생성"><a href="#도커-컨테이너-생성" class="headerlink" title="도커 컨테이너 생성"></a>도커 컨테이너 생성</h1><p><code>docker create</code> 명령어로 도커 컨테이너를 생성할 수 있다. 자세한 실행 옵션은 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/create/">이 곳</a>에서 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker create -i -t --name &lt;container_name&gt; &lt;image_name&gt; </span><br><span class="line">$ docker create -i -t --name my_centos centos:7</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨케이너-상태-및-목록-확인"><a href="#도커-컨케이너-상태-및-목록-확인" class="headerlink" title="도커 컨케이너 상태 및 목록 확인"></a>도커 컨케이너 상태 및 목록 확인</h1><p><code>docker ps</code>명령어로 도커 컨테이너 목록을 확인할 수 있다. 아무 옵션을 추가하지 않으면 실행 중인 컨테이너 목록만 출력된다. 정지된 컨테이너 목록까지 확인하려면 <code>-a</code> 옵션을 추가한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS    PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   7 seconds ago   Created             my_centos</span><br></pre></td></tr></table></figure>
+<p><code>STATUS</code>는 컨테이너의 상태를 나타내며 다음 값들을 가질 수 있다.</p>
+<ul>
+<li><code>Up</code>: 실행 중</li>
+<li><code>Exited</code>: 종료된 상태</li>
+<li><code>Pause</code>: 일시 중지된 상태</li>
+</ul>
+<h1 id="도커-컨테이너-실행"><a href="#도커-컨테이너-실행" class="headerlink" title="도커 컨테이너 실행"></a>도커 컨테이너 실행</h1><p><code>docker start</code> 명령어로 도커 컨테이너를 시작한다.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker start &lt;container_name&gt;</span></span><br><span class="line">docker start myubuntu</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker ps -a</span>          </span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED          STATUS         PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   28 seconds ago   Up 3 seconds             my_centos</span><br></pre></td></tr></table></figure>
+
+<p><code>docker attach</code>명령어로 컨테이너 내부로 접속할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker attach my_centos</span><br><span class="line">[root@a9adb823231 /]# </span><br></pre></td></tr></table></figure>
+<p><code>exit</code>을 입력하여 컨테이너에서 빠져나올 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@a9adb823231 /]# exit </span><br></pre></td></tr></table></figure>
+<p>주의할 점은 <code>exit</code>을 사용하여 컨테이너에서 빠져나오면 컨테이너가 종료된다는 것이다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS                       PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   4 minutes ago   Exited (127) 4 seconds ago             my_centos</span><br></pre></td></tr></table></figure>
+<p>컨테이너를 종료시키지 않고 빠져나오려면 <code>Ctrl + P, Q</code>를 입력한다.</p>
+<h1 id="docker-run-명령어"><a href="#docker-run-명령어" class="headerlink" title="docker run 명령어"></a>docker run 명령어</h1><p><code>docker run</code> 명령어를 사용하면 도커 이미지 다운, 도커 컨테이너 생성, 시작, 접속을 한 번에 할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// docker run -i -t --name [container_name] [image_name]</span><br><span class="line">$ docker run -i -t --name my_centos ubuntu:14.04</span><br><span class="line">root@bdccae5606a1:/#</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-정지"><a href="#도커-컨테이너-정지" class="headerlink" title="도커 컨테이너 정지"></a>도커 컨테이너 정지</h1><p><code>docker stop</code> 명령어를 사용하면 도커 컨테이너를 정지할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker stop &lt;container_name&gt;</span><br><span class="line">$ docker stop my_centos</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-삭제"><a href="#도커-컨테이너-삭제" class="headerlink" title="도커 컨테이너 삭제"></a>도커 컨테이너 삭제</h1><p><code>docker rm</code> 명령어를 사용하면 도커 컨테이너를 삭제할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker rm &lt;container_name&gt;</span><br><span class="line">$ docker rm my_centos</span><br></pre></td></tr></table></figure>
+<p><code>docker container prune</code> 명령어를 사용하면 모든 도커 컨테이너를 삭제한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker container prune</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2021/02/04/10_infra_devops/04_aws/20210204_aws_code_deploy/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2021/02/03/10_infra_devops/04_aws/20210203_aws_s3/"
+                            aria-label=": [AWS] S3 개념 및 사용법"
+                        >
+                            [AWS] S3 개념 및 사용법
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-03T00:00:00+09:00">
+	
+		    2021/02/03
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/AWS/">AWS</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>Mac OS 환경에서는 <a href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/">Homebrew</a>로 Docker를 쉽게 설치할 수 있다.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install --cask docker</span> </span><br></pre></td></tr></table></figure>
+<p>도커 버전을 확인해보자.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker -v</span></span><br><span class="line">Docker version 20.10.11, build dea9396</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-이미지-다운로드"><a href="#도커-이미지-다운로드" class="headerlink" title="도커 이미지 다운로드"></a>도커 이미지 다운로드</h1><p>우선 다운받을 수 있는 <code>도커 이미지</code>를 검색해보자. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker search &lt;image_name&gt;</span><br><span class="line">$ docker search centos</span><br></pre></td></tr></table></figure>
+<p><code>docker pull</code>명령어로 도커 이미지를 다운받을 수 있다. <code>centos:7</code> 이미지를 다운받아보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull centos:7</span><br></pre></td></tr></table></figure>
+<p><code>docker images</code> 명령어로 다운받은 도커 이미지 목록을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos              7         eeb6ee3f44bd   3 months ago   204MB</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-생성"><a href="#도커-컨테이너-생성" class="headerlink" title="도커 컨테이너 생성"></a>도커 컨테이너 생성</h1><p><code>docker create</code> 명령어로 도커 컨테이너를 생성할 수 있다. 자세한 실행 옵션은 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/create/">이 곳</a>에서 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker create -i -t --name &lt;container_name&gt; &lt;image_name&gt; </span><br><span class="line">$ docker create -i -t --name my_centos centos:7</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨케이너-상태-및-목록-확인"><a href="#도커-컨케이너-상태-및-목록-확인" class="headerlink" title="도커 컨케이너 상태 및 목록 확인"></a>도커 컨케이너 상태 및 목록 확인</h1><p><code>docker ps</code>명령어로 도커 컨테이너 목록을 확인할 수 있다. 아무 옵션을 추가하지 않으면 실행 중인 컨테이너 목록만 출력된다. 정지된 컨테이너 목록까지 확인하려면 <code>-a</code> 옵션을 추가한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS    PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   7 seconds ago   Created             my_centos</span><br></pre></td></tr></table></figure>
+<p><code>STATUS</code>는 컨테이너의 상태를 나타내며 다음 값들을 가질 수 있다.</p>
+<ul>
+<li><code>Up</code>: 실행 중</li>
+<li><code>Exited</code>: 종료된 상태</li>
+<li><code>Pause</code>: 일시 중지된 상태</li>
+</ul>
+<h1 id="도커-컨테이너-실행"><a href="#도커-컨테이너-실행" class="headerlink" title="도커 컨테이너 실행"></a>도커 컨테이너 실행</h1><p><code>docker start</code> 명령어로 도커 컨테이너를 시작한다.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker start &lt;container_name&gt;</span></span><br><span class="line">docker start myubuntu</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker ps -a</span>          </span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED          STATUS         PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   28 seconds ago   Up 3 seconds             my_centos</span><br></pre></td></tr></table></figure>
+
+<p><code>docker attach</code>명령어로 컨테이너 내부로 접속할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker attach my_centos</span><br><span class="line">[root@a9adb823231 /]# </span><br></pre></td></tr></table></figure>
+<p><code>exit</code>을 입력하여 컨테이너에서 빠져나올 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@a9adb823231 /]# exit </span><br></pre></td></tr></table></figure>
+<p>주의할 점은 <code>exit</code>을 사용하여 컨테이너에서 빠져나오면 컨테이너가 종료된다는 것이다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS                       PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   4 minutes ago   Exited (127) 4 seconds ago             my_centos</span><br></pre></td></tr></table></figure>
+<p>컨테이너를 종료시키지 않고 빠져나오려면 <code>Ctrl + P, Q</code>를 입력한다.</p>
+<h1 id="docker-run-명령어"><a href="#docker-run-명령어" class="headerlink" title="docker run 명령어"></a>docker run 명령어</h1><p><code>docker run</code> 명령어를 사용하면 도커 이미지 다운, 도커 컨테이너 생성, 시작, 접속을 한 번에 할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// docker run -i -t --name [container_name] [image_name]</span><br><span class="line">$ docker run -i -t --name my_centos ubuntu:14.04</span><br><span class="line">root@bdccae5606a1:/#</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-정지"><a href="#도커-컨테이너-정지" class="headerlink" title="도커 컨테이너 정지"></a>도커 컨테이너 정지</h1><p><code>docker stop</code> 명령어를 사용하면 도커 컨테이너를 정지할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker stop &lt;container_name&gt;</span><br><span class="line">$ docker stop my_centos</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-삭제"><a href="#도커-컨테이너-삭제" class="headerlink" title="도커 컨테이너 삭제"></a>도커 컨테이너 삭제</h1><p><code>docker rm</code> 명령어를 사용하면 도커 컨테이너를 삭제할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker rm &lt;container_name&gt;</span><br><span class="line">$ docker rm my_centos</span><br></pre></td></tr></table></figure>
+<p><code>docker container prune</code> 명령어를 사용하면 모든 도커 컨테이너를 삭제한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker container prune</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2021/02/03/10_infra_devops/04_aws/20210203_aws_s3/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2021/02/02/10_infra_devops/04_aws/20210202_aws_rds/"
+                            aria-label=": [AWS] RDS 개념 및 사용법"
+                        >
+                            [AWS] RDS 개념 및 사용법
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-02T00:00:00+09:00">
+	
+		    2021/02/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/AWS/">AWS</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>Mac OS 환경에서는 <a href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/">Homebrew</a>로 Docker를 쉽게 설치할 수 있다.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install --cask docker</span> </span><br></pre></td></tr></table></figure>
+<p>도커 버전을 확인해보자.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker -v</span></span><br><span class="line">Docker version 20.10.11, build dea9396</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-이미지-다운로드"><a href="#도커-이미지-다운로드" class="headerlink" title="도커 이미지 다운로드"></a>도커 이미지 다운로드</h1><p>우선 다운받을 수 있는 <code>도커 이미지</code>를 검색해보자. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker search &lt;image_name&gt;</span><br><span class="line">$ docker search centos</span><br></pre></td></tr></table></figure>
+<p><code>docker pull</code>명령어로 도커 이미지를 다운받을 수 있다. <code>centos:7</code> 이미지를 다운받아보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull centos:7</span><br></pre></td></tr></table></figure>
+<p><code>docker images</code> 명령어로 다운받은 도커 이미지 목록을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos              7         eeb6ee3f44bd   3 months ago   204MB</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-생성"><a href="#도커-컨테이너-생성" class="headerlink" title="도커 컨테이너 생성"></a>도커 컨테이너 생성</h1><p><code>docker create</code> 명령어로 도커 컨테이너를 생성할 수 있다. 자세한 실행 옵션은 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/create/">이 곳</a>에서 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker create -i -t --name &lt;container_name&gt; &lt;image_name&gt; </span><br><span class="line">$ docker create -i -t --name my_centos centos:7</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨케이너-상태-및-목록-확인"><a href="#도커-컨케이너-상태-및-목록-확인" class="headerlink" title="도커 컨케이너 상태 및 목록 확인"></a>도커 컨케이너 상태 및 목록 확인</h1><p><code>docker ps</code>명령어로 도커 컨테이너 목록을 확인할 수 있다. 아무 옵션을 추가하지 않으면 실행 중인 컨테이너 목록만 출력된다. 정지된 컨테이너 목록까지 확인하려면 <code>-a</code> 옵션을 추가한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS    PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   7 seconds ago   Created             my_centos</span><br></pre></td></tr></table></figure>
+<p><code>STATUS</code>는 컨테이너의 상태를 나타내며 다음 값들을 가질 수 있다.</p>
+<ul>
+<li><code>Up</code>: 실행 중</li>
+<li><code>Exited</code>: 종료된 상태</li>
+<li><code>Pause</code>: 일시 중지된 상태</li>
+</ul>
+<h1 id="도커-컨테이너-실행"><a href="#도커-컨테이너-실행" class="headerlink" title="도커 컨테이너 실행"></a>도커 컨테이너 실행</h1><p><code>docker start</code> 명령어로 도커 컨테이너를 시작한다.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker start &lt;container_name&gt;</span></span><br><span class="line">docker start myubuntu</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker ps -a</span>          </span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED          STATUS         PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   28 seconds ago   Up 3 seconds             my_centos</span><br></pre></td></tr></table></figure>
+
+<p><code>docker attach</code>명령어로 컨테이너 내부로 접속할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker attach my_centos</span><br><span class="line">[root@a9adb823231 /]# </span><br></pre></td></tr></table></figure>
+<p><code>exit</code>을 입력하여 컨테이너에서 빠져나올 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@a9adb823231 /]# exit </span><br></pre></td></tr></table></figure>
+<p>주의할 점은 <code>exit</code>을 사용하여 컨테이너에서 빠져나오면 컨테이너가 종료된다는 것이다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS                       PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   4 minutes ago   Exited (127) 4 seconds ago             my_centos</span><br></pre></td></tr></table></figure>
+<p>컨테이너를 종료시키지 않고 빠져나오려면 <code>Ctrl + P, Q</code>를 입력한다.</p>
+<h1 id="docker-run-명령어"><a href="#docker-run-명령어" class="headerlink" title="docker run 명령어"></a>docker run 명령어</h1><p><code>docker run</code> 명령어를 사용하면 도커 이미지 다운, 도커 컨테이너 생성, 시작, 접속을 한 번에 할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// docker run -i -t --name [container_name] [image_name]</span><br><span class="line">$ docker run -i -t --name my_centos ubuntu:14.04</span><br><span class="line">root@bdccae5606a1:/#</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-정지"><a href="#도커-컨테이너-정지" class="headerlink" title="도커 컨테이너 정지"></a>도커 컨테이너 정지</h1><p><code>docker stop</code> 명령어를 사용하면 도커 컨테이너를 정지할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker stop &lt;container_name&gt;</span><br><span class="line">$ docker stop my_centos</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-삭제"><a href="#도커-컨테이너-삭제" class="headerlink" title="도커 컨테이너 삭제"></a>도커 컨테이너 삭제</h1><p><code>docker rm</code> 명령어를 사용하면 도커 컨테이너를 삭제할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker rm &lt;container_name&gt;</span><br><span class="line">$ docker rm my_centos</span><br></pre></td></tr></table></figure>
+<p><code>docker container prune</code> 명령어를 사용하면 모든 도커 컨테이너를 삭제한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker container prune</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2021/02/02/10_infra_devops/04_aws/20210202_aws_rds/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2021/02/01/10_infra_devops/04_aws/20210201_aws_ec2/"
+                            aria-label=": [AWS] EC2 개념 및 사용법"
+                        >
+                            [AWS] EC2 개념 및 사용법
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-01T00:00:00+09:00">
+	
+		    2021/02/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/AWS/">AWS</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>Mac OS 환경에서는 <a href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/">Homebrew</a>로 Docker를 쉽게 설치할 수 있다.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install --cask docker</span> </span><br></pre></td></tr></table></figure>
+<p>도커 버전을 확인해보자.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker -v</span></span><br><span class="line">Docker version 20.10.11, build dea9396</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-이미지-다운로드"><a href="#도커-이미지-다운로드" class="headerlink" title="도커 이미지 다운로드"></a>도커 이미지 다운로드</h1><p>우선 다운받을 수 있는 <code>도커 이미지</code>를 검색해보자. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker search &lt;image_name&gt;</span><br><span class="line">$ docker search centos</span><br></pre></td></tr></table></figure>
+<p><code>docker pull</code>명령어로 도커 이미지를 다운받을 수 있다. <code>centos:7</code> 이미지를 다운받아보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull centos:7</span><br></pre></td></tr></table></figure>
+<p><code>docker images</code> 명령어로 다운받은 도커 이미지 목록을 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos              7         eeb6ee3f44bd   3 months ago   204MB</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-생성"><a href="#도커-컨테이너-생성" class="headerlink" title="도커 컨테이너 생성"></a>도커 컨테이너 생성</h1><p><code>docker create</code> 명령어로 도커 컨테이너를 생성할 수 있다. 자세한 실행 옵션은 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/create/">이 곳</a>에서 확인할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker create -i -t --name &lt;container_name&gt; &lt;image_name&gt; </span><br><span class="line">$ docker create -i -t --name my_centos centos:7</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨케이너-상태-및-목록-확인"><a href="#도커-컨케이너-상태-및-목록-확인" class="headerlink" title="도커 컨케이너 상태 및 목록 확인"></a>도커 컨케이너 상태 및 목록 확인</h1><p><code>docker ps</code>명령어로 도커 컨테이너 목록을 확인할 수 있다. 아무 옵션을 추가하지 않으면 실행 중인 컨테이너 목록만 출력된다. 정지된 컨테이너 목록까지 확인하려면 <code>-a</code> 옵션을 추가한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS    PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   7 seconds ago   Created             my_centos</span><br></pre></td></tr></table></figure>
+<p><code>STATUS</code>는 컨테이너의 상태를 나타내며 다음 값들을 가질 수 있다.</p>
+<ul>
+<li><code>Up</code>: 실행 중</li>
+<li><code>Exited</code>: 종료된 상태</li>
+<li><code>Pause</code>: 일시 중지된 상태</li>
+</ul>
+<h1 id="도커-컨테이너-실행"><a href="#도커-컨테이너-실행" class="headerlink" title="도커 컨테이너 실행"></a>도커 컨테이너 실행</h1><p><code>docker start</code> 명령어로 도커 컨테이너를 시작한다.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker start &lt;container_name&gt;</span></span><br><span class="line">docker start myubuntu</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker ps -a</span>          </span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED          STATUS         PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   28 seconds ago   Up 3 seconds             my_centos</span><br></pre></td></tr></table></figure>
+
+<p><code>docker attach</code>명령어로 컨테이너 내부로 접속할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker attach my_centos</span><br><span class="line">[root@a9adb823231 /]# </span><br></pre></td></tr></table></figure>
+<p><code>exit</code>을 입력하여 컨테이너에서 빠져나올 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@a9adb823231 /]# exit </span><br></pre></td></tr></table></figure>
+<p>주의할 점은 <code>exit</code>을 사용하여 컨테이너에서 빠져나오면 컨테이너가 종료된다는 것이다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS                       PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   4 minutes ago   Exited (127) 4 seconds ago             my_centos</span><br></pre></td></tr></table></figure>
+<p>컨테이너를 종료시키지 않고 빠져나오려면 <code>Ctrl + P, Q</code>를 입력한다.</p>
+<h1 id="docker-run-명령어"><a href="#docker-run-명령어" class="headerlink" title="docker run 명령어"></a>docker run 명령어</h1><p><code>docker run</code> 명령어를 사용하면 도커 이미지 다운, 도커 컨테이너 생성, 시작, 접속을 한 번에 할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// docker run -i -t --name [container_name] [image_name]</span><br><span class="line">$ docker run -i -t --name my_centos ubuntu:14.04</span><br><span class="line">root@bdccae5606a1:/#</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-정지"><a href="#도커-컨테이너-정지" class="headerlink" title="도커 컨테이너 정지"></a>도커 컨테이너 정지</h1><p><code>docker stop</code> 명령어를 사용하면 도커 컨테이너를 정지할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker stop &lt;container_name&gt;</span><br><span class="line">$ docker stop my_centos</span><br></pre></td></tr></table></figure>
+
+<h1 id="도커-컨테이너-삭제"><a href="#도커-컨테이너-삭제" class="headerlink" title="도커 컨테이너 삭제"></a>도커 컨테이너 삭제</h1><p><code>docker rm</code> 명령어를 사용하면 도커 컨테이너를 삭제할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker rm &lt;container_name&gt;</span><br><span class="line">$ docker rm my_centos</span><br></pre></td></tr></table></figure>
+<p><code>docker container prune</code> 명령어를 사용하면 모든 도커 컨테이너를 삭제한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker container prune</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2021/02/01/10_infra_devops/04_aws/20210201_aws_ec2/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -458,7 +858,7 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2021 yologger. All Rights Reserved.
+        Copyrights &copy; 2022 yologger. All Rights Reserved.
     </span>
 </footer>
 
