@@ -13,14 +13,16 @@
         <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n","dateCreated":"2020-08-11T00:00:00+09:00","dateModified":"2022-01-03T16:31:38+09:00","datePublished":"2020-08-11T00:00:00+09:00","description":"","headline":"[Linux] 리눅스 쉘 스크립트","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/08/11/10_infra_devops/01_linux/20200811_linux_shell_script/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/08/11/10_infra_devops/01_linux/20200811_linux_shell_script/","keywords":"Linux"}</script>
-    <meta property="og:type" content="blog">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n목차\n쉘 스크립트\nif 문\n숫자 비교\n문자열 비교\n파라미터\ncontinue와 break\n\n\nfor 문\nwhile 문\ncase 문\n쉘 함수\n\n\n쉘 스크립트쉘 스크립트(Shell Script)는 명령어들이 나열된 파일이다.\n간단한 쉘 스크립트를 작성해보자.\n1$ vi a.sh\na.sh123456789101112#!/bin/bash# This is comment.# 변수 선언name=&quot;Bill Gates&quot;age=34echo &quot;Hello World&quot;echo &quot;My name is $&#123;name&#125;&quot;echo &quot;I&#x27;m $&#123;age&#125; years old.&quot;echo &quot;Good bye~&quot;\n첫 줄의 #!/bin/bash는 쉘 스크립트를 실행할 쉘을 지정한다. \n그 다음 쉘 스크립트 파일에 실행 권한을 부여하자.\n1$ chmod a+x a.sh\n이제 다음과 같이 쉘 스크립트를 실행할 수 있다.\n12345$ ./a.shecho &quot;Hello World&quot;echo &quot;My name is Bill Gates&quot;echo &quot;I&#x27;m 34 years old.&quot;echo &quot;Good bye~&quot;\nsh명령어로 쉘 스크립트를 실행할 수도 있다.\n1$ sh a.sh\n\nif 문if 문은 다음과 같은 형태로 사용한다.\n123456789#!/bin/bashif [ .. ]    then [명령어]elif [ .. ]    then [명령어]else    [명령어]\tfi\n\n(1) 숫자 비교숫자 비교 예제를 첨부한다.\nnumber.sh12345678#!/bin/bashecho &quot;Please enter the value: &quot;read INPUTif [ $&#123;INPUT&#125; -ge 50 ]    then echo &quot;greater than 50&quot;fi\n1234$ ./number.shPlease enter the value: 100greater than 50\n숫자를 비교할 때는 다음 키워드를 사용한다.\n\n\n\n키워드\n설명\n\n\n\neq\nequal\n\n\nne\nnot equal\n\n\ngt\ngreater than\n\n\nge\ngreater than &amp; equal\n\n\nlt\nless than\n\n\nle\nless than &amp; equal\n\n\n(2) 문자열 비교문자열은 쌍따옴표로 감싸줘야한다.\n1name=&quot;Paul&quot;\n문자열 비교는 == 또는 !=을 사용한다.\n문자열 비교 예제를 첨부한다.\n12345678910!/bin/shVAR1=&quot;Paul&quot;VAR2=&quot;Paul&quot;if [ $&#123;VAR1&#125; = $&#123;VAR2&#125; ]    then echo &quot;equal&quot;else    echo &quot;not equal&quot;fi\n\n(3) 파라미터쉘 스크립트는 파라미터를 전달받을 수 있다. 쉘 스크립트 안에서는 $1, $2, … $n 형태로 파라미터에 접근할 수 있다.\n예제를 첨부한다.\ntest.sh1234567#!/bin/shif [ &quot;$1&quot; = &quot;$2&quot; ]    then echo &quot;same.”elif [ &quot;$1&quot; != &quot;$2&quot; ]    then echo &quot;different.”fi\n12$ ./test.sh &quot;Paul&quot; &quot;Monica&quot;different.\n12$ ./test.sh &quot;Paul&quot; &quot;Paul&quot;same.\n\n(4) continue와 breakif 문은 continue와 break와 함께 사용할 수도 있다. 보통 다음과 같은 형태로 사용한다.\n12345if [조건]    then continueelse    breakfi\n\nfor 문for 문은 다음과 같은 형태로 사용한다.\n12345for &quot;변수&quot; IN &quot;원소1&quot; &quot;원소2&quot; .. &quot;원소n&quot;do    # 명령어done    # 명령어\n예제를 첨부한다.\n1234567#!/bin/shfor name in &quot;Paul&quot; &quot;John&quot; &quot;Eric&quot;do    echo &quot;$&#123;name&#125;&quot;done    echo &quot;Finished.&quot;\n출력 결과1234PaulJohnEricFinished.\n\nwhile 문while 문은 다음과 같은 형태로 사용한다.\n1234while [조건]do    # 명렁어done\n예제를 첨부한다.\ntext.sh123456789#!/bin/shCNT=0while [ $&#123;CNT&#125; -lt 10 ]do    echo $&#123;CNT&#125;    CNT=$( expr $&#123;CNT&#125; + 1 )done    echo &quot;END&quot;\n출력 결과12345678910110123456789END\n\ncase 문12345678910111213#!/bin/shecho “Please enter the value: ”read numcase $&#123;num&#125; in    1)        echo “num is one.”;;    2)        echo “num is two.”;;    *)        echo “num is other number.”;;esac\n\n쉘 함수쉘 스크립트 안에는 함수를 정의할 수도 있다. 다음과 같은 형태로 정의한다.\n123function name()&#123;    # 내용&#125;\n예제를 첨부한다.\ntest.sh1234567#!/bin/shfunction myFun()&#123;    echo &quot;Hello myFun&quot;&#125;myFunmyFun\n123$ ./test.shHello myFunHello myFun\n함수에 인자를 전달할 수도 있다.\ntest.sh1234567#!/bin/shfunction myFun()&#123;    echo &quot;$1&quot;&#125;myFun &quot;Paul&quot;myFun &quot;John&quot;\n123$ ./test.shPaulJohn","dateCreated":"2020-08-11T00:00:00+09:00","dateModified":"2022-01-07T18:10:50+09:00","datePublished":"2020-08-11T00:00:00+09:00","description":"","headline":"[Linux] 리눅스 쉘 스크립트","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2020/08/11/10_infra_devops/01_linux/20200811_linux_shell_script/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2020/08/11/10_infra_devops/01_linux/20200811_linux_shell_script/","keywords":"Linux"}</script>
+    <meta name="description" content="목차 쉘 스크립트 if 문 숫자 비교 문자열 비교 파라미터 continue와 break   for 문 while 문 case 문 쉘 함수   쉘 스크립트쉘 스크립트(Shell Script)는 명령어들이 나열된 파일이다. 간단한 쉘 스크립트를 작성해보자. 1$ vi a.sh a.sh123456789101112#!&#x2F;bin&#x2F;bash# This is commen">
+<meta property="og:type" content="blog">
 <meta property="og:title" content="[Linux] 리눅스 쉘 스크립트">
 <meta property="og:url" content="https://yologger.github.io/ko/2020/08/11/10_infra_devops/01_linux/20200811_linux_shell_script/index.html">
 <meta property="og:site_name" content="Yologger&#39;s Blog">
+<meta property="og:description" content="목차 쉘 스크립트 if 문 숫자 비교 문자열 비교 파라미터 continue와 break   for 문 while 문 case 문 쉘 함수   쉘 스크립트쉘 스크립트(Shell Script)는 명령어들이 나열된 파일이다. 간단한 쉘 스크립트를 작성해보자. 1$ vi a.sh a.sh123456789101112#!&#x2F;bin&#x2F;bash# This is commen">
 <meta property="og:locale" content="ko_KR">
 <meta property="article:published_time" content="2020-08-10T15:00:00.000Z">
-<meta property="article:modified_time" content="2022-01-03T07:31:38.934Z">
+<meta property="article:modified_time" content="2022-01-07T09:10:50.138Z">
 <meta property="article:author" content="yologger">
 <meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
@@ -137,34 +139,6 @@
                     
                         <a
                             class="sidebar-button-link "
-                            href="/ko/all-categories"
-                            
-                            rel="noopener"
-                            title="Categories"
-                        >
-                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Categories</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/ko/all-tags"
-                            
-                            rel="noopener"
-                            title="Tags"
-                        >
-                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Tags</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
                             href="/ko/all-archives"
                             
                             rel="noopener"
@@ -202,20 +176,6 @@
                         >
                         <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
                         <span class="sidebar-button-desc">Mail</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="#about"
-                            
-                            rel="noopener"
-                            title="About"
-                        >
-                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">About</span>
                     </a>
             </li>
             
@@ -378,7 +338,109 @@
     <div class="post-content markdown">
         <div class="main-content-wrap">
             <hr>
+<h1 id="목차"><a href="#목차" class="headerlink" title="목차"></a>목차</h1><ul>
+<li><a href="#%EC%89%98-%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8">쉘 스크립트</a></li>
+<li><a href="#if-%EB%AC%B8">if 문</a><ul>
+<li><a href="#1-%EC%88%AB%EC%9E%90-%EB%B9%84%EA%B5%90">숫자 비교</a></li>
+<li><a href="#2-%EB%AC%B8%EC%9E%90%EC%97%B4-%EB%B9%84%EA%B5%90">문자열 비교</a></li>
+<li><a href="#3-%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0">파라미터</a></li>
+<li><a href="#4-continue%EC%99%80-break">continue와 break</a></li>
+</ul>
+</li>
+<li><a href="#for-%EB%AC%B8">for 문</a></li>
+<li><a href="#while-%EB%AC%B8">while 문</a></li>
+<li><a href="#case-%EB%AC%B8">case 문</a></li>
+<li><a href="#%EC%89%98-%ED%95%A8%EC%88%98">쉘 함수</a></li>
+</ul>
+<hr>
+<h1 id="쉘-스크립트"><a href="#쉘-스크립트" class="headerlink" title="쉘 스크립트"></a>쉘 스크립트</h1><p><code>쉘 스크립트(Shell Script)</code>는 명령어들이 나열된 파일이다.</p>
+<p>간단한 쉘 스크립트를 작성해보자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ vi a.sh</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><figcaption><span>a.sh</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># This is comment.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 변수 선언</span></span><br><span class="line">name=<span class="string">&quot;Bill Gates&quot;</span></span><br><span class="line">age=34</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Hello World&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;My name is <span class="variable">$&#123;name&#125;</span>&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;I&#x27;m <span class="variable">$&#123;age&#125;</span> years old.&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Good bye~&quot;</span></span><br></pre></td></tr></table></figure>
+<p>첫 줄의 <code>#!/bin/bash</code>는 쉘 스크립트를 실행할 쉘을 지정한다. </p>
+<p>그 다음 쉘 스크립트 파일에 실행 권한을 부여하자.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ chmod a+x a.sh</span><br></pre></td></tr></table></figure>
+<p>이제 다음과 같이 쉘 스크립트를 실행할 수 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ ./a.sh</span><br><span class="line">echo &quot;Hello World&quot;</span><br><span class="line">echo &quot;My name is Bill Gates&quot;</span><br><span class="line">echo &quot;I&#x27;m 34 years old.&quot;</span><br><span class="line">echo &quot;Good bye~&quot;</span><br></pre></td></tr></table></figure>
+<p><code>sh</code>명령어로 쉘 스크립트를 실행할 수도 있다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sh a.sh</span><br></pre></td></tr></table></figure>
 
+<h1 id="if-문"><a href="#if-문" class="headerlink" title="if 문"></a>if 문</h1><p><code>if 문</code>은 다음과 같은 형태로 사용한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">if [ .. ]</span><br><span class="line">    then [명령어]</span><br><span class="line">elif [ .. ]</span><br><span class="line">    then [명령어]</span><br><span class="line">else</span><br><span class="line">    [명령어]	</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-숫자-비교"><a href="#1-숫자-비교" class="headerlink" title="(1) 숫자 비교"></a>(1) 숫자 비교</h3><p>숫자 비교 예제를 첨부한다.</p>
+<figure class="highlight sh"><figcaption><span>number.sh</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Please enter the value: &quot;</span></span><br><span class="line"><span class="built_in">read</span> INPUT</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$&#123;INPUT&#125;</span> -ge 50 ]</span><br><span class="line">    <span class="keyword">then</span> <span class="built_in">echo</span> <span class="string">&quot;greater than 50&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ./number.sh</span><br><span class="line">Please enter the value: </span><br><span class="line">100</span><br><span class="line">greater than 50</span><br></pre></td></tr></table></figure>
+<p>숫자를 비교할 때는 다음 키워드를 사용한다.</p>
+<table>
+<thead>
+<tr>
+<th>키워드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>eq</td>
+<td>equal</td>
+</tr>
+<tr>
+<td>ne</td>
+<td>not equal</td>
+</tr>
+<tr>
+<td>gt</td>
+<td>greater than</td>
+</tr>
+<tr>
+<td>ge</td>
+<td>greater than &amp; equal</td>
+</tr>
+<tr>
+<td>lt</td>
+<td>less than</td>
+</tr>
+<tr>
+<td>le</td>
+<td>less than &amp; equal</td>
+</tr>
+</tbody></table>
+<h3 id="2-문자열-비교"><a href="#2-문자열-비교" class="headerlink" title="(2) 문자열 비교"></a>(2) 문자열 비교</h3><p>문자열은 쌍따옴표로 감싸줘야한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">name=&quot;Paul&quot;</span><br></pre></td></tr></table></figure>
+<p>문자열 비교는 <code>==</code> 또는 <code>!=</code>을 사용한다.</p>
+<p>문자열 비교 예제를 첨부한다.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"></span><br><span class="line">VAR1=<span class="string">&quot;Paul&quot;</span></span><br><span class="line">VAR2=<span class="string">&quot;Paul&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$&#123;VAR1&#125;</span> = <span class="variable">$&#123;VAR2&#125;</span> ]</span><br><span class="line">    <span class="keyword">then</span> <span class="built_in">echo</span> <span class="string">&quot;equal&quot;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;not equal&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-파라미터"><a href="#3-파라미터" class="headerlink" title="(3) 파라미터"></a>(3) 파라미터</h3><p>쉘 스크립트는 파라미터를 전달받을 수 있다. 쉘 스크립트 안에서는 <code>$1</code>, <code>$2</code>, … <code>$n</code> 형태로 파라미터에 접근할 수 있다.</p>
+<p>예제를 첨부한다.</p>
+<figure class="highlight sh"><figcaption><span>test.sh</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$1</span>&quot;</span> = <span class="string">&quot;<span class="variable">$2</span>&quot;</span> ]</span><br><span class="line">    <span class="keyword">then</span> <span class="built_in">echo</span> <span class="string">&quot;same.”</span></span><br><span class="line"><span class="string">elif [ &quot;</span><span class="variable">$1</span><span class="string">&quot; != &quot;</span><span class="variable">$2</span><span class="string">&quot; ]</span></span><br><span class="line"><span class="string">    then echo &quot;</span>different.”</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ./test.sh &quot;Paul&quot; &quot;Monica&quot;</span><br><span class="line">different.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ./test.sh &quot;Paul&quot; &quot;Paul&quot;</span><br><span class="line">same.</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-continue와-break"><a href="#4-continue와-break" class="headerlink" title="(4) continue와 break"></a>(4) continue와 break</h3><p><code>if 문</code>은 <code>continue</code>와 <code>break</code>와 함께 사용할 수도 있다. 보통 다음과 같은 형태로 사용한다.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> [조건]</span><br><span class="line">    <span class="keyword">then</span> <span class="built_in">continue</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">break</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="for-문"><a href="#for-문" class="headerlink" title="for 문"></a>for 문</h1><p><code>for 문</code>은 다음과 같은 형태로 사용한다.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> <span class="string">&quot;변수&quot;</span> IN <span class="string">&quot;원소1&quot;</span> <span class="string">&quot;원소2&quot;</span> .. <span class="string">&quot;원소n&quot;</span></span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="comment"># 명령어</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">    <span class="comment"># 명령어</span></span><br></pre></td></tr></table></figure>
+<p>예제를 첨부한다.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> name <span class="keyword">in</span> <span class="string">&quot;Paul&quot;</span> <span class="string">&quot;John&quot;</span> <span class="string">&quot;Eric&quot;</span></span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$&#123;name&#125;</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Finished.&quot;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Paul</span><br><span class="line">John</span><br><span class="line">Eric</span><br><span class="line">Finished.</span><br></pre></td></tr></table></figure>
+
+<h1 id="while-문"><a href="#while-문" class="headerlink" title="while 문"></a>while 문</h1><p><code>while 문</code>은 다음과 같은 형태로 사용한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">while [조건]</span><br><span class="line">do</span><br><span class="line">    # 명렁어</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<p>예제를 첨부한다.</p>
+<figure class="highlight sh"><figcaption><span>text.sh</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line">CNT=0</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> [ <span class="variable">$&#123;CNT&#125;</span> -lt 10 ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$&#123;CNT&#125;</span></span><br><span class="line">    CNT=$( expr <span class="variable">$&#123;CNT&#125;</span> + 1 )</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;END&quot;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>출력 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">0</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+
+<h1 id="case-문"><a href="#case-문" class="headerlink" title="case 문"></a>case 문</h1><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> “Please enter the value: ”</span><br><span class="line"><span class="built_in">read</span> num</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="variable">$&#123;num&#125;</span> <span class="keyword">in</span></span><br><span class="line">    1)</span><br><span class="line">        <span class="built_in">echo</span> “num is one.”;;</span><br><span class="line">    2)</span><br><span class="line">        <span class="built_in">echo</span> “num is two.”;;</span><br><span class="line">    *)</span><br><span class="line">        <span class="built_in">echo</span> “num is other number.”;;</span><br><span class="line"><span class="keyword">esac</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="쉘-함수"><a href="#쉘-함수" class="headerlink" title="쉘 함수"></a>쉘 함수</h1><p>쉘 스크립트 안에는 함수를 정의할 수도 있다. 다음과 같은 형태로 정의한다.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">name</span></span>()&#123;</span><br><span class="line">    <span class="comment"># 내용</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>예제를 첨부한다.</p>
+<figure class="highlight sh"><figcaption><span>test.sh</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">myFun</span></span>()&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Hello myFun&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">myFun</span><br><span class="line">myFun</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ./test.sh</span><br><span class="line">Hello myFun</span><br><span class="line">Hello myFun</span><br></pre></td></tr></table></figure>
+<p>함수에 인자를 전달할 수도 있다.</p>
+<figure class="highlight sh"><figcaption><span>test.sh</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">myFun</span></span>()&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">myFun <span class="string">&quot;Paul&quot;</span></span><br><span class="line">myFun <span class="string">&quot;John&quot;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ./test.sh</span><br><span class="line">Paul</span><br><span class="line">John</span><br></pre></td></tr></table></figure>
             
 
 

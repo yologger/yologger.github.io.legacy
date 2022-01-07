@@ -134,34 +134,6 @@
                     
                         <a
                             class="sidebar-button-link "
-                            href="/ko/all-categories"
-                            
-                            rel="noopener"
-                            title="Categories"
-                        >
-                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Categories</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/ko/all-tags"
-                            
-                            rel="noopener"
-                            title="Tags"
-                        >
-                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">Tags</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
                             href="/ko/all-archives"
                             
                             rel="noopener"
@@ -199,20 +171,6 @@
                         >
                         <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
                         <span class="sidebar-button-desc">Mail</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="#about"
-                            
-                            rel="noopener"
-                            title="About"
-                        >
-                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">About</span>
                     </a>
             </li>
             
@@ -432,406 +390,6 @@
                         <p>
                             <a
                                 href="/ko/2021/05/01/10_infra_devops/02_docker/20210501_install_start_docker/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2021/02/04/10_infra_devops/04_aws/20210204_aws_code_deploy/"
-                            aria-label=": [AWS] CodeDeploy 개념 및 사용법"
-                        >
-                            [AWS] CodeDeploy 개념 및 사용법
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-04T00:00:00+09:00">
-	
-		    2021/02/04
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/AWS/">AWS</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>Mac OS 환경에서는 <a href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/">Homebrew</a>로 Docker를 쉽게 설치할 수 있다.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install --cask docker</span> </span><br></pre></td></tr></table></figure>
-<p>도커 버전을 확인해보자.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker -v</span></span><br><span class="line">Docker version 20.10.11, build dea9396</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-이미지-다운로드"><a href="#도커-이미지-다운로드" class="headerlink" title="도커 이미지 다운로드"></a>도커 이미지 다운로드</h1><p>우선 다운받을 수 있는 <code>도커 이미지</code>를 검색해보자. </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker search &lt;image_name&gt;</span><br><span class="line">$ docker search centos</span><br></pre></td></tr></table></figure>
-<p><code>docker pull</code>명령어로 도커 이미지를 다운받을 수 있다. <code>centos:7</code> 이미지를 다운받아보자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull centos:7</span><br></pre></td></tr></table></figure>
-<p><code>docker images</code> 명령어로 다운받은 도커 이미지 목록을 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos              7         eeb6ee3f44bd   3 months ago   204MB</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-생성"><a href="#도커-컨테이너-생성" class="headerlink" title="도커 컨테이너 생성"></a>도커 컨테이너 생성</h1><p><code>docker create</code> 명령어로 도커 컨테이너를 생성할 수 있다. 자세한 실행 옵션은 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/create/">이 곳</a>에서 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker create -i -t --name &lt;container_name&gt; &lt;image_name&gt; </span><br><span class="line">$ docker create -i -t --name my_centos centos:7</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨케이너-상태-및-목록-확인"><a href="#도커-컨케이너-상태-및-목록-확인" class="headerlink" title="도커 컨케이너 상태 및 목록 확인"></a>도커 컨케이너 상태 및 목록 확인</h1><p><code>docker ps</code>명령어로 도커 컨테이너 목록을 확인할 수 있다. 아무 옵션을 추가하지 않으면 실행 중인 컨테이너 목록만 출력된다. 정지된 컨테이너 목록까지 확인하려면 <code>-a</code> 옵션을 추가한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS    PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   7 seconds ago   Created             my_centos</span><br></pre></td></tr></table></figure>
-<p><code>STATUS</code>는 컨테이너의 상태를 나타내며 다음 값들을 가질 수 있다.</p>
-<ul>
-<li><code>Up</code>: 실행 중</li>
-<li><code>Exited</code>: 종료된 상태</li>
-<li><code>Pause</code>: 일시 중지된 상태</li>
-</ul>
-<h1 id="도커-컨테이너-실행"><a href="#도커-컨테이너-실행" class="headerlink" title="도커 컨테이너 실행"></a>도커 컨테이너 실행</h1><p><code>docker start</code> 명령어로 도커 컨테이너를 시작한다.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker start &lt;container_name&gt;</span></span><br><span class="line">docker start myubuntu</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker ps -a</span>          </span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED          STATUS         PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   28 seconds ago   Up 3 seconds             my_centos</span><br></pre></td></tr></table></figure>
-
-<p><code>docker attach</code>명령어로 컨테이너 내부로 접속할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker attach my_centos</span><br><span class="line">[root@a9adb823231 /]# </span><br></pre></td></tr></table></figure>
-<p><code>exit</code>을 입력하여 컨테이너에서 빠져나올 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@a9adb823231 /]# exit </span><br></pre></td></tr></table></figure>
-<p>주의할 점은 <code>exit</code>을 사용하여 컨테이너에서 빠져나오면 컨테이너가 종료된다는 것이다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS                       PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   4 minutes ago   Exited (127) 4 seconds ago             my_centos</span><br></pre></td></tr></table></figure>
-<p>컨테이너를 종료시키지 않고 빠져나오려면 <code>Ctrl + P, Q</code>를 입력한다.</p>
-<h1 id="docker-run-명령어"><a href="#docker-run-명령어" class="headerlink" title="docker run 명령어"></a>docker run 명령어</h1><p><code>docker run</code> 명령어를 사용하면 도커 이미지 다운, 도커 컨테이너 생성, 시작, 접속을 한 번에 할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// docker run -i -t --name [container_name] [image_name]</span><br><span class="line">$ docker run -i -t --name my_centos ubuntu:14.04</span><br><span class="line">root@bdccae5606a1:/#</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-정지"><a href="#도커-컨테이너-정지" class="headerlink" title="도커 컨테이너 정지"></a>도커 컨테이너 정지</h1><p><code>docker stop</code> 명령어를 사용하면 도커 컨테이너를 정지할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker stop &lt;container_name&gt;</span><br><span class="line">$ docker stop my_centos</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-삭제"><a href="#도커-컨테이너-삭제" class="headerlink" title="도커 컨테이너 삭제"></a>도커 컨테이너 삭제</h1><p><code>docker rm</code> 명령어를 사용하면 도커 컨테이너를 삭제할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker rm &lt;container_name&gt;</span><br><span class="line">$ docker rm my_centos</span><br></pre></td></tr></table></figure>
-<p><code>docker container prune</code> 명령어를 사용하면 모든 도커 컨테이너를 삭제한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker container prune</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2021/02/04/10_infra_devops/04_aws/20210204_aws_code_deploy/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2021/02/03/10_infra_devops/04_aws/20210203_aws_s3/"
-                            aria-label=": [AWS] S3 개념 및 사용법"
-                        >
-                            [AWS] S3 개념 및 사용법
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-03T00:00:00+09:00">
-	
-		    2021/02/03
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/AWS/">AWS</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>Mac OS 환경에서는 <a href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/">Homebrew</a>로 Docker를 쉽게 설치할 수 있다.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install --cask docker</span> </span><br></pre></td></tr></table></figure>
-<p>도커 버전을 확인해보자.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker -v</span></span><br><span class="line">Docker version 20.10.11, build dea9396</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-이미지-다운로드"><a href="#도커-이미지-다운로드" class="headerlink" title="도커 이미지 다운로드"></a>도커 이미지 다운로드</h1><p>우선 다운받을 수 있는 <code>도커 이미지</code>를 검색해보자. </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker search &lt;image_name&gt;</span><br><span class="line">$ docker search centos</span><br></pre></td></tr></table></figure>
-<p><code>docker pull</code>명령어로 도커 이미지를 다운받을 수 있다. <code>centos:7</code> 이미지를 다운받아보자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull centos:7</span><br></pre></td></tr></table></figure>
-<p><code>docker images</code> 명령어로 다운받은 도커 이미지 목록을 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos              7         eeb6ee3f44bd   3 months ago   204MB</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-생성"><a href="#도커-컨테이너-생성" class="headerlink" title="도커 컨테이너 생성"></a>도커 컨테이너 생성</h1><p><code>docker create</code> 명령어로 도커 컨테이너를 생성할 수 있다. 자세한 실행 옵션은 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/create/">이 곳</a>에서 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker create -i -t --name &lt;container_name&gt; &lt;image_name&gt; </span><br><span class="line">$ docker create -i -t --name my_centos centos:7</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨케이너-상태-및-목록-확인"><a href="#도커-컨케이너-상태-및-목록-확인" class="headerlink" title="도커 컨케이너 상태 및 목록 확인"></a>도커 컨케이너 상태 및 목록 확인</h1><p><code>docker ps</code>명령어로 도커 컨테이너 목록을 확인할 수 있다. 아무 옵션을 추가하지 않으면 실행 중인 컨테이너 목록만 출력된다. 정지된 컨테이너 목록까지 확인하려면 <code>-a</code> 옵션을 추가한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS    PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   7 seconds ago   Created             my_centos</span><br></pre></td></tr></table></figure>
-<p><code>STATUS</code>는 컨테이너의 상태를 나타내며 다음 값들을 가질 수 있다.</p>
-<ul>
-<li><code>Up</code>: 실행 중</li>
-<li><code>Exited</code>: 종료된 상태</li>
-<li><code>Pause</code>: 일시 중지된 상태</li>
-</ul>
-<h1 id="도커-컨테이너-실행"><a href="#도커-컨테이너-실행" class="headerlink" title="도커 컨테이너 실행"></a>도커 컨테이너 실행</h1><p><code>docker start</code> 명령어로 도커 컨테이너를 시작한다.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker start &lt;container_name&gt;</span></span><br><span class="line">docker start myubuntu</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker ps -a</span>          </span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED          STATUS         PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   28 seconds ago   Up 3 seconds             my_centos</span><br></pre></td></tr></table></figure>
-
-<p><code>docker attach</code>명령어로 컨테이너 내부로 접속할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker attach my_centos</span><br><span class="line">[root@a9adb823231 /]# </span><br></pre></td></tr></table></figure>
-<p><code>exit</code>을 입력하여 컨테이너에서 빠져나올 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@a9adb823231 /]# exit </span><br></pre></td></tr></table></figure>
-<p>주의할 점은 <code>exit</code>을 사용하여 컨테이너에서 빠져나오면 컨테이너가 종료된다는 것이다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS                       PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   4 minutes ago   Exited (127) 4 seconds ago             my_centos</span><br></pre></td></tr></table></figure>
-<p>컨테이너를 종료시키지 않고 빠져나오려면 <code>Ctrl + P, Q</code>를 입력한다.</p>
-<h1 id="docker-run-명령어"><a href="#docker-run-명령어" class="headerlink" title="docker run 명령어"></a>docker run 명령어</h1><p><code>docker run</code> 명령어를 사용하면 도커 이미지 다운, 도커 컨테이너 생성, 시작, 접속을 한 번에 할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// docker run -i -t --name [container_name] [image_name]</span><br><span class="line">$ docker run -i -t --name my_centos ubuntu:14.04</span><br><span class="line">root@bdccae5606a1:/#</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-정지"><a href="#도커-컨테이너-정지" class="headerlink" title="도커 컨테이너 정지"></a>도커 컨테이너 정지</h1><p><code>docker stop</code> 명령어를 사용하면 도커 컨테이너를 정지할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker stop &lt;container_name&gt;</span><br><span class="line">$ docker stop my_centos</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-삭제"><a href="#도커-컨테이너-삭제" class="headerlink" title="도커 컨테이너 삭제"></a>도커 컨테이너 삭제</h1><p><code>docker rm</code> 명령어를 사용하면 도커 컨테이너를 삭제할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker rm &lt;container_name&gt;</span><br><span class="line">$ docker rm my_centos</span><br></pre></td></tr></table></figure>
-<p><code>docker container prune</code> 명령어를 사용하면 모든 도커 컨테이너를 삭제한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker container prune</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2021/02/03/10_infra_devops/04_aws/20210203_aws_s3/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2021/02/02/10_infra_devops/04_aws/20210202_aws_rds/"
-                            aria-label=": [AWS] RDS 개념 및 사용법"
-                        >
-                            [AWS] RDS 개념 및 사용법
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-02T00:00:00+09:00">
-	
-		    2021/02/02
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/AWS/">AWS</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>Mac OS 환경에서는 <a href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/">Homebrew</a>로 Docker를 쉽게 설치할 수 있다.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install --cask docker</span> </span><br></pre></td></tr></table></figure>
-<p>도커 버전을 확인해보자.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker -v</span></span><br><span class="line">Docker version 20.10.11, build dea9396</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-이미지-다운로드"><a href="#도커-이미지-다운로드" class="headerlink" title="도커 이미지 다운로드"></a>도커 이미지 다운로드</h1><p>우선 다운받을 수 있는 <code>도커 이미지</code>를 검색해보자. </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker search &lt;image_name&gt;</span><br><span class="line">$ docker search centos</span><br></pre></td></tr></table></figure>
-<p><code>docker pull</code>명령어로 도커 이미지를 다운받을 수 있다. <code>centos:7</code> 이미지를 다운받아보자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull centos:7</span><br></pre></td></tr></table></figure>
-<p><code>docker images</code> 명령어로 다운받은 도커 이미지 목록을 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos              7         eeb6ee3f44bd   3 months ago   204MB</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-생성"><a href="#도커-컨테이너-생성" class="headerlink" title="도커 컨테이너 생성"></a>도커 컨테이너 생성</h1><p><code>docker create</code> 명령어로 도커 컨테이너를 생성할 수 있다. 자세한 실행 옵션은 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/create/">이 곳</a>에서 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker create -i -t --name &lt;container_name&gt; &lt;image_name&gt; </span><br><span class="line">$ docker create -i -t --name my_centos centos:7</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨케이너-상태-및-목록-확인"><a href="#도커-컨케이너-상태-및-목록-확인" class="headerlink" title="도커 컨케이너 상태 및 목록 확인"></a>도커 컨케이너 상태 및 목록 확인</h1><p><code>docker ps</code>명령어로 도커 컨테이너 목록을 확인할 수 있다. 아무 옵션을 추가하지 않으면 실행 중인 컨테이너 목록만 출력된다. 정지된 컨테이너 목록까지 확인하려면 <code>-a</code> 옵션을 추가한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS    PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   7 seconds ago   Created             my_centos</span><br></pre></td></tr></table></figure>
-<p><code>STATUS</code>는 컨테이너의 상태를 나타내며 다음 값들을 가질 수 있다.</p>
-<ul>
-<li><code>Up</code>: 실행 중</li>
-<li><code>Exited</code>: 종료된 상태</li>
-<li><code>Pause</code>: 일시 중지된 상태</li>
-</ul>
-<h1 id="도커-컨테이너-실행"><a href="#도커-컨테이너-실행" class="headerlink" title="도커 컨테이너 실행"></a>도커 컨테이너 실행</h1><p><code>docker start</code> 명령어로 도커 컨테이너를 시작한다.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker start &lt;container_name&gt;</span></span><br><span class="line">docker start myubuntu</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker ps -a</span>          </span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED          STATUS         PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   28 seconds ago   Up 3 seconds             my_centos</span><br></pre></td></tr></table></figure>
-
-<p><code>docker attach</code>명령어로 컨테이너 내부로 접속할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker attach my_centos</span><br><span class="line">[root@a9adb823231 /]# </span><br></pre></td></tr></table></figure>
-<p><code>exit</code>을 입력하여 컨테이너에서 빠져나올 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@a9adb823231 /]# exit </span><br></pre></td></tr></table></figure>
-<p>주의할 점은 <code>exit</code>을 사용하여 컨테이너에서 빠져나오면 컨테이너가 종료된다는 것이다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS                       PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   4 minutes ago   Exited (127) 4 seconds ago             my_centos</span><br></pre></td></tr></table></figure>
-<p>컨테이너를 종료시키지 않고 빠져나오려면 <code>Ctrl + P, Q</code>를 입력한다.</p>
-<h1 id="docker-run-명령어"><a href="#docker-run-명령어" class="headerlink" title="docker run 명령어"></a>docker run 명령어</h1><p><code>docker run</code> 명령어를 사용하면 도커 이미지 다운, 도커 컨테이너 생성, 시작, 접속을 한 번에 할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// docker run -i -t --name [container_name] [image_name]</span><br><span class="line">$ docker run -i -t --name my_centos ubuntu:14.04</span><br><span class="line">root@bdccae5606a1:/#</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-정지"><a href="#도커-컨테이너-정지" class="headerlink" title="도커 컨테이너 정지"></a>도커 컨테이너 정지</h1><p><code>docker stop</code> 명령어를 사용하면 도커 컨테이너를 정지할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker stop &lt;container_name&gt;</span><br><span class="line">$ docker stop my_centos</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-삭제"><a href="#도커-컨테이너-삭제" class="headerlink" title="도커 컨테이너 삭제"></a>도커 컨테이너 삭제</h1><p><code>docker rm</code> 명령어를 사용하면 도커 컨테이너를 삭제할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker rm &lt;container_name&gt;</span><br><span class="line">$ docker rm my_centos</span><br></pre></td></tr></table></figure>
-<p><code>docker container prune</code> 명령어를 사용하면 모든 도커 컨테이너를 삭제한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker container prune</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2021/02/02/10_infra_devops/04_aws/20210202_aws_rds/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                댓글 공유
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/ko/2021/02/01/10_infra_devops/04_aws/20210201_aws_ec2/"
-                            aria-label=": [AWS] EC2 개념 및 사용법"
-                        >
-                            [AWS] EC2 개념 및 사용법
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-01T00:00:00+09:00">
-	
-		    2021/02/01
-    	
-    </time>
-    
-        <span>카테고리 </span>
-        
-    <a class="category-link" href="/ko/categories/Infra-DevOps/">Infra, DevOps</a>, <a class="category-link" href="/ko/categories/Infra-DevOps/AWS/">AWS</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <hr>
-<h1 id="설치"><a href="#설치" class="headerlink" title="설치"></a>설치</h1><p>Mac OS 환경에서는 <a href="/ko/2019/01/01/12_tools/00_homebrew/20190101_homebrew/">Homebrew</a>로 Docker를 쉽게 설치할 수 있다.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install --cask docker</span> </span><br></pre></td></tr></table></figure>
-<p>도커 버전을 확인해보자.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker -v</span></span><br><span class="line">Docker version 20.10.11, build dea9396</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-이미지-다운로드"><a href="#도커-이미지-다운로드" class="headerlink" title="도커 이미지 다운로드"></a>도커 이미지 다운로드</h1><p>우선 다운받을 수 있는 <code>도커 이미지</code>를 검색해보자. </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker search &lt;image_name&gt;</span><br><span class="line">$ docker search centos</span><br></pre></td></tr></table></figure>
-<p><code>docker pull</code>명령어로 도커 이미지를 다운받을 수 있다. <code>centos:7</code> 이미지를 다운받아보자.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull centos:7</span><br></pre></td></tr></table></figure>
-<p><code>docker images</code> 명령어로 다운받은 도커 이미지 목록을 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos              7         eeb6ee3f44bd   3 months ago   204MB</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-생성"><a href="#도커-컨테이너-생성" class="headerlink" title="도커 컨테이너 생성"></a>도커 컨테이너 생성</h1><p><code>docker create</code> 명령어로 도커 컨테이너를 생성할 수 있다. 자세한 실행 옵션은 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/create/">이 곳</a>에서 확인할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker create -i -t --name &lt;container_name&gt; &lt;image_name&gt; </span><br><span class="line">$ docker create -i -t --name my_centos centos:7</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨케이너-상태-및-목록-확인"><a href="#도커-컨케이너-상태-및-목록-확인" class="headerlink" title="도커 컨케이너 상태 및 목록 확인"></a>도커 컨케이너 상태 및 목록 확인</h1><p><code>docker ps</code>명령어로 도커 컨테이너 목록을 확인할 수 있다. 아무 옵션을 추가하지 않으면 실행 중인 컨테이너 목록만 출력된다. 정지된 컨테이너 목록까지 확인하려면 <code>-a</code> 옵션을 추가한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS    PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   7 seconds ago   Created             my_centos</span><br></pre></td></tr></table></figure>
-<p><code>STATUS</code>는 컨테이너의 상태를 나타내며 다음 값들을 가질 수 있다.</p>
-<ul>
-<li><code>Up</code>: 실행 중</li>
-<li><code>Exited</code>: 종료된 상태</li>
-<li><code>Pause</code>: 일시 중지된 상태</li>
-</ul>
-<h1 id="도커-컨테이너-실행"><a href="#도커-컨테이너-실행" class="headerlink" title="도커 컨테이너 실행"></a>도커 컨테이너 실행</h1><p><code>docker start</code> 명령어로 도커 컨테이너를 시작한다.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker start &lt;container_name&gt;</span></span><br><span class="line">docker start myubuntu</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> docker ps -a</span>          </span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED          STATUS         PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   28 seconds ago   Up 3 seconds             my_centos</span><br></pre></td></tr></table></figure>
-
-<p><code>docker attach</code>명령어로 컨테이너 내부로 접속할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker attach my_centos</span><br><span class="line">[root@a9adb823231 /]# </span><br></pre></td></tr></table></figure>
-<p><code>exit</code>을 입력하여 컨테이너에서 빠져나올 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@a9adb823231 /]# exit </span><br></pre></td></tr></table></figure>
-<p>주의할 점은 <code>exit</code>을 사용하여 컨테이너에서 빠져나오면 컨테이너가 종료된다는 것이다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE      COMMAND       CREATED         STATUS                       PORTS     NAMES</span><br><span class="line">b5df63051a50   centos:7   &quot;/bin/bash&quot;   4 minutes ago   Exited (127) 4 seconds ago             my_centos</span><br></pre></td></tr></table></figure>
-<p>컨테이너를 종료시키지 않고 빠져나오려면 <code>Ctrl + P, Q</code>를 입력한다.</p>
-<h1 id="docker-run-명령어"><a href="#docker-run-명령어" class="headerlink" title="docker run 명령어"></a>docker run 명령어</h1><p><code>docker run</code> 명령어를 사용하면 도커 이미지 다운, 도커 컨테이너 생성, 시작, 접속을 한 번에 할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// docker run -i -t --name [container_name] [image_name]</span><br><span class="line">$ docker run -i -t --name my_centos ubuntu:14.04</span><br><span class="line">root@bdccae5606a1:/#</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-정지"><a href="#도커-컨테이너-정지" class="headerlink" title="도커 컨테이너 정지"></a>도커 컨테이너 정지</h1><p><code>docker stop</code> 명령어를 사용하면 도커 컨테이너를 정지할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker stop &lt;container_name&gt;</span><br><span class="line">$ docker stop my_centos</span><br></pre></td></tr></table></figure>
-
-<h1 id="도커-컨테이너-삭제"><a href="#도커-컨테이너-삭제" class="headerlink" title="도커 컨테이너 삭제"></a>도커 컨테이너 삭제</h1><p><code>docker rm</code> 명령어를 사용하면 도커 컨테이너를 삭제할 수 있다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// docker rm &lt;container_name&gt;</span><br><span class="line">$ docker rm my_centos</span><br></pre></td></tr></table></figure>
-<p><code>docker container prune</code> 명령어를 사용하면 모든 도커 컨테이너를 삭제한다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker container prune</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/ko/2021/02/01/10_infra_devops/04_aws/20210201_aws_ec2/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1348,6 +906,433 @@
                         <p>
                             <a
                                 href="/ko/2020/10/03/08_android/13_tdd/20201003_espresso/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/10/02/08_android/13_tdd/20201002_junit/"
+                            aria-label=": [Android] TDD(Test-Driven Development) - (2) JUnit이란?"
+                        >
+                            [Android] TDD(Test-Driven Development) - (2) JUnit이란?
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-10-02T01:00:00+09:00">
+	
+		    2020/10/02
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/TDD/">TDD</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<h1 id="JUnit"><a href="#JUnit" class="headerlink" title="JUnit"></a>JUnit</h1><p><code>Junit</code>은 단위테스트 도구다. JUnit을 사용하면 디버깅을 위해 앱을 매번 빌드하고 <code>System.out.println()</code>으로 로그를 찍을 필요가 없어진다.</p>
+<h1 id="설정"><a href="#설정" class="headerlink" title="설정"></a>설정</h1><p>보통 안드로이드 프로젝트를 생성하면 JUnit과 관련된 의존성이 자동으로 포함된다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 buiid.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 로컬 단위 테스트에서의 JUnit</span></span><br><span class="line">    testImplementation <span class="string">&#x27;junit:junit:4.+&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 계측 테스트에서의 JUnit</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.ext:junit:1.1.3&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="사용"><a href="#사용" class="headerlink" title="사용"></a>사용</h1><p>합과 차를 계산해주는 <code>Calculator</code>클래스가 있다.</p>
+<figure class="highlight kotlin"><figcaption><span>Calculator.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Calculator</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a+b</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a-b</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 클래스를 JUnit으로 테스트해보자. <code>test</code>디렉토리에 <code>ExampleUnitTest.kt</code>을 생성하고 다음과 같이 작성하자.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.Assert.*</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_plus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">        assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_minus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">        assertEquals(<span class="number">3</span>, calculator.minus(<span class="number">10</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>test_plus()</code>에는 <code>Calculator.plus()</code>메소드를 테스트하는 코드를 작성한다. 또한 <code>@Test</code>어노테이션을 붙이면 테스트 실행 버튼이 생성된다.<br><img src="1.png"><br>JUnit의 <code>org.junit.Assert</code>패키지에는 테스트를 위한 다양한 함수가 존재한다. <code>assertEquals()</code>의 첫 번째 인자는 기대값, 두 번째 인자는 실제값을 전달한다. </p>
+<p>이 함수는 두 값이 동일하면 테스트를 성공시킨다.<br><img src="2.png"><br>두 값이 다르면 실패시킨다.<br><img src="3.png"></p>
+<p>다음은 자주 사용하는 메소드다.</p>
+<h3 id="1-assertEqual"><a href="#1-assertEqual" class="headerlink" title="(1) assertEqual()"></a>(1) assertEqual()</h3><p>두 값이 동일한지 비교한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_equal</span><span class="params">()</span></span> &#123;</span><br><span class="line">    assertEquals(<span class="number">10</span>, <span class="number">3</span>+<span class="number">7</span>)   <span class="comment">// SUCCESS</span></span><br><span class="line">    assertEquals(<span class="number">10</span>, <span class="number">1</span>+<span class="number">3</span>)   <span class="comment">// FAILURE</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-assertArrayEquals"><a href="#2-assertArrayEquals" class="headerlink" title="(2) assertArrayEquals()"></a>(2) assertArrayEquals()</h3><p>두 배열이 동일한지 비교한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_compare_arrays</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> arr1 = arrayOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    <span class="keyword">val</span> arr2 = arrayOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    <span class="keyword">val</span> arr3 = arrayOf(<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>)</span><br><span class="line">    assertArrayEquals(arr1, arr2)   <span class="comment">// Success</span></span><br><span class="line">    assertArrayEquals(arr1, arr3)   <span class="comment">// Failure</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-assertSame"><a href="#3-assertSame" class="headerlink" title="(3) assertSame()"></a>(3) assertSame()</h3><p>두 객체가 동일한지 비교한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_object</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> p1 = Person(<span class="string">&quot;Paul&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">    <span class="keyword">val</span> p2 = p1</span><br><span class="line">    assertSame(p1, p2)  <span class="comment">// SUCCESS</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-assertTrue"><a href="#4-assertTrue" class="headerlink" title="(4) assertTrue()"></a>(4) assertTrue()</h3><p>값이 <code>true</code>인지 확인한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_isMarried</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> isMarried = <span class="literal">true</span></span><br><span class="line">    assertTrue(isMarried) <span class="comment">// SUCCESS</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="5-assertNotNull"><a href="#5-assertNotNull" class="headerlink" title="(5) assertNotNull()"></a>(5) assertNotNull()</h3><p>값이 <code>null</code>인지 확인한다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test_notNull</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> person: Person? = Person(<span class="string">&quot;Paul&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">    assertNotNull(person)   <span class="comment">// SUCCESS</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">fun test_notNull() &#123;</span><br><span class="line">    val person: Person? = null</span><br><span class="line">    assertNotNull(person)   // FAILURE</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="http://junit.sourceforge.net/javadoc/org/junit/Assert.html">이 곳</a>에서 모든 Assert 메소드를 확인할 수 있다.</p>
+<h1 id="Before-After"><a href="#Before-After" class="headerlink" title="@Before, @After"></a>@Before, @After</h1><p><code>ExampleUnitTest.kt</code>는 다음 코드가 중복되고있다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br></pre></td></tr></table></figure>
+<p><code>@Before</code>, <code>@After</code> 어노테이션을 사용하면 코드의 중복을 제거할 수 있다.</p>
+<p><code>@Before</code>가 붙은 메소드는 클래스 내부의 테스트 메소드들이 실행되기 전에 호출된다. 보통 초기화 작업을 수행한다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.After</span><br><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.Assert.*</span><br><span class="line"><span class="keyword">import</span> org.junit.Before</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">lateinit</span> <span class="keyword">var</span> calculator: Calculator</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Before</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">setup</span><span class="params">()</span></span> &#123;</span><br><span class="line">        calculator = Calculator()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_plus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_minus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        assertEquals(<span class="number">3</span>, calculator.minus(<span class="number">10</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@After</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>@After</code>가 붙은 메소드는 클래스 내부의 테스트 메소드들이 실행된 후에 호출된다. 보통 테스트에 사용한 자원을 해제하는데 사용한다.</p>
+<h1 id="Test-Runner"><a href="#Test-Runner" class="headerlink" title="Test Runner"></a>Test Runner</h1><p><code>Test Runner</code>는 테스트 클래스를 초기화하고, 테스트 메소드를 실행하고, 테스트 결과를 로그에 알려준다. 모든 Test Runner는 <code>org.junit.runner.Runner</code>클래스를 상속한다.</p>
+<p>커스텀 Test Runner를 <code>@RunWith</code>어노테이션으로 지정할 수 있다. Test Runner를 지정하지 않으면 기본 Test Runner인 <code>BlockJUnit4ClassRunner</code>를 사용한다. 예를 들어 다음 코드는 </p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.Assert.*</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_add</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">        assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음 코드와 동일하다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.runners.BlockJUnit4ClassRunner</span><br><span class="line"></span><br><span class="line"><span class="meta">@RunWith(BlockJUnit4ClassRunner::class)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">localUnitTest</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>안드로이드 어플리케이션을 개발할 때에는 주로 <code>androidx.test.ext:junit:1.1.3&#39;</code>가 제공하는 <code>AndroidJUnit4</code>를 사용한다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleInstrumentedTest</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> androidx.test.ext.junit.runners.AndroidJUnit4</span><br><span class="line"><span class="keyword">import</span> org.junit.runner.RunWith</span><br><span class="line"></span><br><span class="line"><span class="meta">@RunWith(AndroidJUnit4::class)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleInstrumentedTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">instrumentedTest</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>스프링 부트 어플리케이션을 개발할 때에는 스프링 프레임워크가 제공하는 <code>SpringRunner</code>를 사용한다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleControllerTest</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.test.context.junit4.SpringRunner</span><br><span class="line"><span class="keyword">import</span> org.junit.runner.RunWith</span><br><span class="line"></span><br><span class="line"><span class="meta">@RunWith(SpringRunner::class)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleControllerTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">apiTest</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/10/02/08_android/13_tdd/20201002_junit/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/"
+                            aria-label=": [Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기"
+                        >
+                            [Android] TDD(Test-Driven Development) - (1) 안드로이드 테스트코드 작성 입문하기
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-10-01T01:00:00+09:00">
+	
+		    2020/10/01
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/TDD/">TDD</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p>안드로이드 스튜디오에서 프로젝트를 만들면 다음과 같은 구조로 디렉토리가 생성된다.<br><img src="1.png"><br><img src="2.png"><br>여기서 <code>test</code>와 <code>androidTest</code>디렉토리가 테스트를 위해 사용하는 폴더다.<br><img src="3.png"><br>두 디렉토리는 다음과 같은 특징이 있다.</p>
+<ul>
+<li><p><code>test</code></p>
+<ul>
+<li>이 디렉토리에서 진행되는 테스트는 <code>로컬 단위 테스트(Local unit test)</code>라고 한다.</li>
+<li>이 디렉토리의 테스트 코드는 컴파일 후 로컬 PC의 <u>JVM</u>에서 실행된다.</li>
+<li>로컬 PC에서 실행하기 때문에 테스트 속도가 빠르다.</li>
+<li>보통 Android Framework(android.jar)와 관련없는 순수한 Java 코드만 테스트한다.</li>
+<li>Android Framework에 의존적인 </li>
+</ul>
+</li>
+<li><p><code>androidTest</code></p>
+<ul>
+<li>이 디렉토리에서 진행하는 테스트는 <code>계측 테스트(Instrumented test)</code>라고 한다.</li>
+<li>이 디렉토리의 테스트 코드는 프로젝트 빌드 후 <u>에뮬레이터</u>나 <u>실제 기기</u>에서 실행된다.</li>
+<li>로컬 PC에서 빌드 후 에뮬레이터나 실제 기기에 설치해야하므로 테스트 속도가 느리다.</li>
+<li>Android Framework(android.jar)와 </li>
+</ul>
+</li>
+</ul>
+<h1 id="로컬-단위-테스트"><a href="#로컬-단위-테스트" class="headerlink" title="로컬 단위 테스트"></a>로컬 단위 테스트</h1><p>예제를 살펴보자. 다음 경로에 <code>Calculator.kt</code>를 생성하자.<br><img src="4.png"></p>
+<p>프로젝트를 생성할 때 함께 생성되는 <code>Calculator.kt</code>를 살펴보자.</p>
+<figure class="highlight kotlin"><figcaption><span>Calculator.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.yologger.app</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Calculator</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a+b</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">minus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a-b</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 이 클래스가 제대로 구현되었는지 확인해보자. <code>test</code>디렉토리의 <code>ExampleUnitTest.kt</code>를 다음과 같이 작성하자. <a href="/ko/2020/10/02/08_android/13_tdd/20201002_junit/"><code>JUnit</code></a>을 사용하여 3과 7을 더한 값이 10인지를 테스트하는 코드다. </p>
+<figure class="highlight kotlin"><figcaption><span>ExampleUnitTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.Assert.*</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleUnitTest</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_add</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> calculator = Calculator()</span><br><span class="line">        assertEquals(<span class="number">10</span>, calculator.plus(<span class="number">3</span>, <span class="number">7</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>화면 왼쪽의 화살표를 클릭하면 테스트를 시작한다.<br><img src="5.png"><br>테스트가 성공하면 다음과 같이 출력된다.<br><img src="6.png"><br>만약 테스트가 실패하면 다음과 같이 출력된다.<br><img src="7.png"></p>
+<h1 id="로컬-단위-테스트의-한계"><a href="#로컬-단위-테스트의-한계" class="headerlink" title="로컬 단위 테스트의 한계"></a>로컬 단위 테스트의 한계</h1><p>로컬 단위 테스트에서는 Android Framework(android.jar)의 컴포넌트를 테스트할 수 없다. 로컬 단위 테스트는 에뮬레이터나 실제 기기가 아닌 JVM 위에서 실행되기 때문이다. </p>
+<p>예제를 살펴보자. 다음과 같은 <code>MainActivity</code>클래스가 있다.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>로컬 단위 테스트에서 <code>MainActivity.onCreate()</code>를 테스트해보자.</p>
+<figure class="highlight kotlin"><figcaption><span>MainActivityTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivityTest</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_MainActivity_onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> mainActivity = MainActivity()</span><br><span class="line">        mainActivity.onCreate(<span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>테스트를 실행하면 다음과 같은 에러가 발생한다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Method getMainLooper in android.os.Looper not mocked. See http://g.co/androidstudio/not-mocked for details.</span><br><span class="line">java.lang.RuntimeException: Method getMainLooper in android.os.Looper not mocked. See http://g.co/androidstudio/not-mocked for details.</span><br><span class="line">	at android.os.Looper.getMainLooper(Looper.java)</span><br><span class="line">	at androidx.arch.core.executor.DefaultTaskExecutor.isMainThread(DefaultTaskExecutor.java:77)</span><br><span class="line">	at androidx.arch.core.executor.ArchTaskExecutor.isMainThread(ArchTaskExecutor.java:116)</span><br><span class="line">	at androidx.lifecycle.LifecycleRegistry.enforceMainThreadIfNeeded(LifecycleRegistry.java:316)</span><br><span class="line">	at androidx.lifecycle.LifecycleRegistry.addObserver(LifecycleRegistry.java:172)</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>이유는 로컬 단위 테스트에서는 Android Framework와 관련된 컴포넌트에 접근할 때 <code>android.jar</code>가 아닌 <code>android-stubs-src.jar</code>를 사용하기 때문이다.<br><img src="7-2.png"><br><code>android-stubs-src.jar</code>는 실제 구현부가 없는 빈 껍데기이기 때문에 단위테스트가 제대로 동작하지 않는다. 따라서 <u>Android Framework에 의존성이 있는 코드는 계측 테스트를 사용</u>하거나, <u><a href="/ko/2020/10/04/08_android/13_tdd/20201004_mockito/">Mockito</a> 같은 Mocking 라이브러리를 사용</u>하거나 <u><a href="/ko/2020/10/06/08_android/13_tdd/20201005_robolectric/">Robolectric</a> 라이브러리</u>를 사용해야한다.</p>
+<p>참고로 로컬 단위 테스트에서 의존성을 추가할 때는 <code>testImplementation</code>를 사용한다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 buiild.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// junit 라이브러리를 로컬 단위 테스트에서 사용할 수 있다.</span></span><br><span class="line">    testImplementation <span class="string">&#x27;junit:junit:4.+&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="계측-테스트"><a href="#계측-테스트" class="headerlink" title="계측 테스트"></a>계측 테스트</h1><p>코드에서 <code>Context</code>객체에 접근하거나 UI를 테스트하는 경우 로컬 단위테스트를 사용할 수 없다. 이러한 경우 계측 테스트를 사용한다.</p>
+<p><a href="/ko/2020/10/03/08_android/13_tdd/20201003_espresso/"><code>Espresso</code></a>라이브러리를 사용하여 <code>androidTest</code>디렉토리에서 UI를 테스트해보자. 화면을 다음과 같이 구현하자.</p>
+<figure class="highlight xml"><figcaption><span>activity_main.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:gravity</span>=<span class="string">&quot;center&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">EditText</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_editText&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;300dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:inputType</span>=<span class="string">&quot;text&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:hint</span>=<span class="string">&quot;Enter input&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_button&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/activity_main_textView&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><figcaption><span>MainActivity.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> editText: EditText <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_editText) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> textView: TextView <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_textView) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            textView.text = editText.text</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>androidTest</code>디렉토리의 <code>ExampleInstrumentedTest.kt</code>을 다음과 같이 작성한다.</p>
+<figure class="highlight kotlin"><figcaption><span>ExampleInstrumentedTest.kt</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> androidx.test.espresso.Espresso.onView</span><br><span class="line"><span class="keyword">import</span> androidx.test.espresso.action.ViewActions.*</span><br><span class="line"><span class="keyword">import</span> androidx.test.espresso.assertion.ViewAssertions.matches</span><br><span class="line"><span class="keyword">import</span> androidx.test.espresso.matcher.ViewMatchers.*</span><br><span class="line"><span class="keyword">import</span> androidx.test.ext.junit.runners.AndroidJUnit4</span><br><span class="line"><span class="keyword">import</span> org.junit.Test</span><br><span class="line"><span class="keyword">import</span> org.junit.runner.RunWith</span><br><span class="line"><span class="keyword">import</span> androidx.test.rule.ActivityTestRule</span><br><span class="line"><span class="keyword">import</span> org.junit.Rule</span><br><span class="line"></span><br><span class="line"><span class="meta">@RunWith(AndroidJUnit4::class)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExampleInstrumentedTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@get:Rule</span></span><br><span class="line">    <span class="keyword">val</span> activityRule = ActivityTestRule(MainActivity::<span class="keyword">class</span>.java)</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">test_onClick</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// EditText에 &quot;Hello World!&quot; 입력</span></span><br><span class="line">        onView(withId(R.id.activity_main_editText)).perform(typeText(<span class="string">&quot;Hello World!&quot;</span>))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 버튼을 클릭하고 키보드 닫음</span></span><br><span class="line">        onView(withId(R.id.activity_main_button)).perform(click(), closeSoftKeyboard())</span><br><span class="line"></span><br><span class="line">        <span class="comment">// TextView의 text 속성이 &quot;Hello World!&quot;인지 확인</span></span><br><span class="line">        onView(withId(R.id.activity_main_textView)).check(matches(withText(<span class="string">&quot;Hello World!&quot;</span>)))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 테스트를 시작하면 자동으로 문자열을 입력한 후 버튼을 클릭한다.<br><img src="8.gif"><br>테스트가 성공하면 로그에 다음과 같이 출력된다.<br><img src="9.png"><br>계측 테스트에서 의존성을 추가할 때는 <code>androidTestImplementation</code>를 사용한다.</p>
+<figure class="highlight groovy"><figcaption><span>모듈 수준의 buiid.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// espresso-core 라이브러리를 계측 테스트에서 사용할 수 있다.</span></span><br><span class="line">    androidTestImplementation <span class="string">&#x27;androidx.test.espresso:espresso-core:3.3.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/10/01/08_android/13_tdd/20201001_android_test_code/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/"
+                            aria-label=": [Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow"
+                        >
+                            [Android] 코루틴(Coroutine) - (6) Flow, Channel, StateFlow
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-09-06T00:00:00+09:00">
+	
+		    2020/09/06
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Coroutine/">Coroutine</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p>여섯 개의 포스트에 걸쳐 <code>코루틴(Coroutine)</code>에 대해 알아보고있습니다.</p>
+<ol>
+<li><a href="/ko/2020/09/01/08_android/05_coroutine/200901_coroutine/">코루틴이란?</a></li>
+<li><a href="/ko/2020/09/02/08_android/05_coroutine/200902_withContext_suspend/">withContext()와 suspend 함수</a></li>
+<li><a href="/ko/2020/09/03/08_android/05_coroutine/200903_scope/">스코프(Scope)의 종류</a></li>
+<li><a href="/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/">코루틴 생성하기 - launch(), async(), runBlocking()</a></li>
+<li><a href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/">코루틴 예외 처리</a></li>
+<li><a href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/">Flow, Channel, StateFlow</a></li>
+</ol>
+<hr>
+<h1 id="Flow"><a href="#Flow" class="headerlink" title="Flow"></a>Flow</h1><p>코루틴의 <code>Flow</code>는 순차적으로 값을 방출하고 정상적으로 또는 예외로 완료되는 비동기적인 <code>스트림</code>입니다. <code>RxJava</code>나 <code>RxKotlin</code>의 <code>Observable</code>과 유사합니다.</p>
+<p><code>Flow</code>는 다음과 같이 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    <span class="comment">// ..</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 <code>Flow</code>에서 정수 1, 2, 3을 방출해보겠습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    emit(<span class="number">1</span>)</span><br><span class="line">    emit(<span class="number">2</span>)</span><br><span class="line">    emit(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이렇게 방출된 데이터는 <code>collect()</code>메소드를 통해 수신할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    emit(<span class="number">1</span>)</span><br><span class="line">    emit(<span class="number">2</span>)</span><br><span class="line">    emit(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">flow</span><br><span class="line">    .collect &#123; value -&gt;</span><br><span class="line">        println(value)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>그러나 위 코드를 실행하면 다음과 같은 에러가 발생합니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Suspend function &#x27;collect&#x27; should be called only from a coroutine or another suspend function</span><br></pre></td></tr></table></figure>
+<p><code>collect()</code>함수는 코루틴에서 호출해야하기 때문입니다. 따라서 코루틴 내에서 <code>collect()</code>를 호출하도록 수정합시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    emit(<span class="number">1</span>)</span><br><span class="line">    emit(<span class="number">2</span>)</span><br><span class="line">    emit(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 스코프 생성</span></span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 코루틴 생성</span></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    flow</span><br><span class="line">        .collect &#123;</span><br><span class="line">            println(it)</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드는 <code>Flow</code>의 <u>데이터 방출</u>과 <u>데이터 수신</u>을 모두 <code>Dispatchers.IO</code>가 제공하는 스레드에서 처리합니다. 만약 <u>데이터 수신</u>만 매인 스레드에서 수행하려면 다음과 같이 코드를 수정합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    emit(<span class="number">1</span>)</span><br><span class="line">    emit(<span class="number">2</span>)</span><br><span class="line">    emit(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 스코프 생성</span></span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 코루틴 생성</span></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    flow</span><br><span class="line">        .collect &#123;</span><br><span class="line">            withContext(Dispatchers.Main) &#123;</span><br><span class="line">                println(it)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>delay()</code>함수를 사용하면 데이터 방출 주기를 조절할 수 있습니다. 1초에 한 번씩 한 개의 데이터를 방출하는 코드는 다음과 같습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    <span class="keyword">for</span> (i: <span class="built_in">Int</span> <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123;</span><br><span class="line">        emit(i)</span><br><span class="line">        delay(<span class="number">1000</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Flow</code> 내부에서 <code>Exception</code>을 방출할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    <span class="keyword">for</span> (i: <span class="built_in">Int</span> <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123;</span><br><span class="line">        emit(i)</span><br><span class="line">        delay(<span class="number">1000</span>)</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">5</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> Exception(<span class="string">&quot;This is error&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이러한 경우 <code>try-catch</code>구문으로 에러를 처리할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> flow = flow &#123;</span><br><span class="line">    <span class="keyword">for</span> (i: <span class="built_in">Int</span> <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123;</span><br><span class="line">        emit(i)</span><br><span class="line">        delay(<span class="number">1000</span>)</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">5</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> Exception(<span class="string">&quot;This is error&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        flow</span><br><span class="line">            .collect &#123;</span><br><span class="line">                withContext(Dispatchers.Main) &#123;</span><br><span class="line">                    println(it)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">        println(<span class="string">&quot;error: <span class="subst">$&#123;e.localizedMessage&#125;</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>다음과 같이 <code>catch()</code>를 사용하여 에러를 처리할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scope.launch &#123;</span><br><span class="line">    flow</span><br><span class="line">        .<span class="keyword">catch</span> &#123; e -&gt;</span><br><span class="line">            println(<span class="string">&quot;error: <span class="subst">$&#123;e.localizedMessage&#125;</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        .collect &#123;</span><br><span class="line">            withContext(Dispatchers.Main) &#123;</span><br><span class="line">                println(it)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h1><p><code>Flow</code>가 <a href="/ko/2020/01/09/08_android/04_reactivex/20200109_stream_dataflow/">콜드 스트림</a>이면 <code>Channel</code>은 <a href="/ko/2020/01/09/08_android/04_reactivex/20200109_stream_dataflow/">핫 스트림</a>입니다. 구독자의 관찰 여부와 상관없이 데이터를 방출합니다. <code>RxJava</code>의 <a href="/ko/2020/01/08/08_android/04_reactivex/20200108_subject/"><code>Subject</code></a>와 유사합니다. </p>
+<p>버튼을 누르면 <code>Channel</code>로 데이터를 한 개 배출하고, 이를 수신하여 로그에 출력하는 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 버튼을 눌렀을 때</span></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p><code>Channel</code>은 다음과 같이 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 채널 생성</span></span><br><span class="line">    <span class="keyword">val</span> channel = Channel&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p><code>Channel</code>클래스의 <code>send()</code>함수를 사용하여 채널에 데이터를 방출할 수 있습니다. <code>send()</code>함수는 <code>suspend</code>함수이므로 코루틴 내에서 호출되어야 합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 채널 생성</span></span><br><span class="line">    <span class="keyword">val</span> channel = Channel&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 스코프 생성</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 코루틴 생성</span></span><br><span class="line">            scope.launch(Dispatchers.IO) &#123;</span><br><span class="line">                <span class="comment">// 데이터 방출</span></span><br><span class="line">                channel.send(<span class="string">&quot;Data&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p>이제 데이터가 방출될 때 마다 수신하도록 관찰자를 등록합니다. <code>Channel</code>클래스의 <code>consumeEach()</code>를 사용하면 됩니다. <code>consumeEach()</code>또한 <code>suspend</code>함수이므로 코루틴 내에서 호출되어야합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 채널 생성</span></span><br><span class="line">    <span class="keyword">val</span> channel = Channel&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 스코프 생성</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">        </span><br><span class="line">            scope.launch(Dispatchers.IO) &#123;</span><br><span class="line">                channel.send(<span class="string">&quot;Data&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            scope.launch &#123;</span><br><span class="line">                <span class="comment">// 채널 관찰</span></span><br><span class="line">                channel.consumeEach &#123;</span><br><span class="line">                    println(it)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p>이제 앱을 실행합시다. 버튼을 클릭할 때 마다 로그에 아래와 같이 출력됩니다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Data    // 첫 번째 클릭</span><br><span class="line">Data    // 두 번째 클릭</span><br><span class="line">Data    // 세 번째 클릭</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p><code>Channel</code>을 다 사용하면 <code>Channel</code>클래스의 <code>close()</code>를 호출하여 자원을 해제해야합니다. <code>Activity</code>의 <code>onDestroy()</code>에서 이 함수를 호출해줍니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> channel = Channel&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">        </span><br><span class="line">            scope.launch(Dispatchers.IO) &#123;</span><br><span class="line">                channel.send(<span class="string">&quot;Data&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            scope.launch &#123;</span><br><span class="line">                channel.consumeEach &#123;</span><br><span class="line">                    println(it)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy()</span><br><span class="line">        <span class="comment">// 액티비티가 메모리에서 사라질 때 자원 해제</span></span><br><span class="line">        channel.close()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+
+<h1 id="StateFlow"><a href="#StateFlow" class="headerlink" title="StateFlow"></a>StateFlow</h1><p>코루틴의 <code>Flow</code>나 <code>Channel</code>은 <a href="/ko/2020/01/01/08_android/04_reactivex/20200101_reactive_programming/">이벤트 기반의 스트림</a>입니다. 상태를 유지하지 않으며, 이벤트 방출과 함께 값을 수신자에게 전달합니다.</p>
+<p>반면 코루틴의 <code>StateFlow</code> <a href="/ko/2020/01/01/08_android/04_reactivex/20200101_reactive_programming/">상태 기반의 스트림</a>입니다. 상태가 변하면 수신자에게 이 사실을 통보하게 됩니다. <code>상태 기반의 스트림</code>은 상태가 변한 후에도 값을 유지합니다. 따라서 상태가 변한 후에도 값에 계속 접근할 수 있습니다. 이러한 점에서 <code>StateFlow</code>은 <code>LiveData</code>와 유사합니다.</p>
+<table>
+<thead>
+<tr>
+<th>Coroutine</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Flow</td>
+<td>RxJava의 Observable과 유사</td>
+</tr>
+<tr>
+<td>Channel</td>
+<td>RxJava의 Subject와 유사</td>
+</tr>
+<tr>
+<td>LiveData</td>
+<td>ACC의 LiveData와 유사</td>
+</tr>
+</tbody></table>
+<p>버튼을 누르면 <code>StateFlow</code>의 상태를 변화시키고, 이를 탐지하여 로그에 출력하는 예제를 살펴봅시다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 버튼을 눌렀을 때</span></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p><code>StateFlow</code>는 상태를 변화시킬 수 없으며 <code>MutableStateFlow</code>는 상태를 변화시킬 수 있습니다. 보통 캡슐화를 위해 다음과 같이 <code>StateFlow</code>를 생성합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// StateFlow 생성</span></span><br><span class="line">    <span class="keyword">val</span> _stateFlow = MutableStateFlow(<span class="number">1</span>)    <span class="comment">//  초기값 1</span></span><br><span class="line">    <span class="keyword">val</span> stateFlow = _stateFlow</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p>이제 버튼을 클릭할 때 마다 상태에 저장된 값을 1씩 증가시키겠습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> _stateFlow = MutableStateFlow(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">val</span> stateFlow = _stateFlow</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            <span class="comment">// 값을 1씩 증가</span></span><br><span class="line">            _stateFlow.value = _stateFlow.value + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p><code>StateFlow</code>의 상태변화는 <code>collect()</code>함수를 사용하여 관찰합니다. <code>collect()</code>는 <code>suspend()</code>함수이므로 코루틴 내에서 호출합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 스코프 생성</span></span><br><span class="line">    <span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> button: Button <span class="keyword">by</span> lazy &#123; findViewById(R.id.activity_main_button) &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> _stateFlow = MutableStateFlow(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">val</span> stateFlow = _stateFlow</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</span><br><span class="line">        setContentView(R.layout.activity_main)</span><br><span class="line"></span><br><span class="line">        button.setOnClickListener &#123;</span><br><span class="line">            _stateFlow.value = _stateFlow.value + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scope.launch &#123;</span><br><span class="line">            <span class="comment">// StateFlow 관찰</span></span><br><span class="line">            stateFlow.collect &#123;</span><br><span class="line">                print(it)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                댓글 공유
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/"
+                            aria-label=": [Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리"
+                        >
+                            [Android] 코루틴(Coroutine) - (5) 코루틴 예외 처리
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2020-09-05T00:00:00+09:00">
+	
+		    2020/09/05
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/ko/categories/Android/">Android</a>, <a class="category-link" href="/ko/categories/Android/Coroutine/">Coroutine</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <hr>
+<p>여섯 개의 포스트에 걸쳐 <code>코루틴(Coroutine)</code>에 대해 알아보고있습니다.</p>
+<ol>
+<li><a href="/ko/2020/09/01/08_android/05_coroutine/200901_coroutine/">코루틴이란?</a></li>
+<li><a href="/ko/2020/09/02/08_android/05_coroutine/200902_withContext_suspend/">withContext()와 suspend 함수</a></li>
+<li><a href="/ko/2020/09/03/08_android/05_coroutine/200903_scope/">스코프(Scope)의 종류</a></li>
+<li><a href="/ko/2020/09/04/08_android/05_coroutine/200904_launch_async/">코루틴 생성하기 - launch(), async(), runBlocking()</a></li>
+<li><a href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/">코루틴 예외 처리</a></li>
+<li><a href="/ko/2020/09/06/08_android/05_coroutine/200906_flow_channel_stateflow/">Flow, Channel, StateFlow</a></li>
+</ol>
+<hr>
+<h1 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h1><p>스코프를 생성할 때 다음과 같이 <code>Job</code>을 전달할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main + Job())</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span> &#123;    </span><br><span class="line">    scope.launch &#123;</span><br><span class="line">        <span class="keyword">val</span> <span class="keyword">data</span> = networkRequest()</span><br><span class="line">        updateUI(<span class="keyword">data</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>CoroutineScope</code> 코드를 살펴봅시다. <code>Job</code>을 전달하지 않으면 기본 값으로 <code>Job()</code>을 생성하여 사용합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">fun</span> <span class="title">CoroutineScope</span><span class="params">(context: <span class="type">CoroutineContext</span>)</span></span>: CoroutineScope =</span><br><span class="line">    ContextScope(<span class="keyword">if</span> (context[Job] != <span class="literal">null</span>) context <span class="keyword">else</span> context + Job())</span><br></pre></td></tr></table></figure>
+<p>따라서 아래 두 코드는 동일합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main + Job())</span><br></pre></td></tr></table></figure>
+<p><code>Job</code>은 자식 <code>Job</code>을 가질 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> parentJob = CoroutineScope(Dispatchers.Main).launch &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> childJob = CoroutineScope(Dispatchers.IO).launch &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> grandChildJob = CoroutineScope(Dispatchers.Default).launch &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="SupervisorJob"><a href="#SupervisorJob" class="headerlink" title="SupervisorJob"></a>SupervisorJob</h1><p><code>Job()</code>을 전달하면 스코프 내에서 어떤 코루틴에서 예외가 발생할 때 <u>다른 모든 코루틴을 중지</u>시킵니다.</p>
+<p>반면 <code>SupervisorJob()</code>을 전달하면 스코프 내에서 어떤 코루틴에서 예외가 발생할 때 <u>그 코루틴만 중지</u>시킵니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main + SupervisorJob())</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span> &#123;    </span><br><span class="line">    scope.launch &#123;</span><br><span class="line">        <span class="keyword">val</span> <span class="keyword">data</span> = networkRequest()</span><br><span class="line">        updateUI(<span class="keyword">data</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="launch-의-에러-처리"><a href="#launch-의-에러-처리" class="headerlink" title="launch()의 에러 처리"></a>launch()의 에러 처리</h1><p>우선 <code>updateData()</code>라는 suspend 함수를 정의해봅시다. 이 함수는 10초 후 예외를 발생합니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateData</span><span class="params">()</span></span> &#123;</span><br><span class="line">    withContext(Dispatchers.IO) &#123;</span><br><span class="line">        Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>)</span><br><span class="line">        <span class="keyword">throw</span> Exception(<span class="string">&quot;exception&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>launch()</code> 함수로 코루틴을 생성했다면 다음과 같이 에러를 처리할 수 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 스코프 생성</span></span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 코루틴 생성</span></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        updateData()</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">        println(e.localizedMessage)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>suspend 함수</code>를 호출하는 부분을 <code>try-catch 구문</code>으로 감싸주면 됩니다.</p>
+<h1 id="async-await-의-에러처리"><a href="#async-await-의-에러처리" class="headerlink" title="async(), await()의 에러처리"></a>async(), await()의 에러처리</h1><p><code>async()</code>와 <code>await()</code> 함수를 사용한다면 다음과 같이 에러를 처리할 수 있습니다. </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> deferred = scope.async &#123;</span><br><span class="line">    updateData()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        deferred.await()</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">        println(e.localizedMessage)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Deferred</code>객체의 <code>await()</code> 함수를 호출하는 부분을 <code>try-catch 구문</code>으로 감싸주면 됩니다.</p>
+<h1 id="CoroutineExceptionHandler"><a href="#CoroutineExceptionHandler" class="headerlink" title="CoroutineExceptionHandler"></a>CoroutineExceptionHandler</h1><p><code>try-catch 구문</code> 대신 <code>CoroutineExceptionHandler</code>를 사용하여 예외를 처리할 수도 있습니다.</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.IO)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> handler = CoroutineExceptionHandler &#123; coroutineContext, throwable -&gt;</span><br><span class="line">    println(throwable.localizedMessage)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">scope.launch(handler) &#123;</span><br><span class="line">    updateData()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/ko/2020/09/05/08_android/05_coroutine/200905_coroutine_exception_handling/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
