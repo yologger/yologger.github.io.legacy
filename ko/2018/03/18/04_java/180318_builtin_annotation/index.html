@@ -6,32 +6,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Yologger&#39;s Blog">
-    <title>[Java] 주석 잘 작성하기, javadoc 사용법 - Yologger&#39;s Blog</title>
+    <title>[Java] 내장 어노테이션 - Yologger&#39;s Blog</title>
     <meta name="author" content="yologger">
     
     
         <link rel="icon" href="https://yologger.github.io/ko/assets/images/favicon.png">
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n한 줄 주석한 줄 주석(Single-line Comment)을 작성할 때는 //을 사용한다.\n12// This is Single-line CommentSystem.out.println();\n\n여러 줄 주석여러 줄 주석(Multi-line Comment)를 작성할 때는 /* */을 사용한다.\n123456/*This is Multi-line CommentThis is Multi-line CommentThis is Multi-line Comment*/System.out.println();\n\n주석 제대로 작성하기인텔리J에서 특정 메소드 위에 마우스를 올리면 메소드에 대한 자세한 설명을 확인할 수 있다.메소드에 대한 설명, 파라미터, 발생할 수 있는 예외 등을 설명하고 있다.\n여러 줄 주석(Multi-line Comment)을 사용하여 이러한 설명을 추가할 수 있다. 예를 들어보자.\n123456789101112131415161718public class Calculator &#123;    public int plus(int a, int b) &#123;        return a+b;    &#125;    public int minus(int a, int b) &#123;        return a-b;    &#125;    public int multiply(int a, int b) &#123;        return a*b;    &#125;    public int divide(int a, int b) throws ArithmeticException &#123;        return a/b;    &#125;&#125;\nCalculator의 메소드에 주석을 달아보자. 메소드 위에 /**를 입력하고 Enter버튼을 누르면 기본 템플릿이 자동으로 입력된다.다음과 같이 메소드에 주석을 달아보자.이제 Main클래스에서 Calculator클래스를 사용해보자.\nMain.java12345678910public class Main &#123;    public static void main(String[] args) &#123;        Calculator calculator = new Calculator();        calculator.plus(3, 4);        calculator.minus(4, 3);        calculator.multiply(4, 3);        calculator.divide(10, 3);    &#125;&#125;\n메소드 위에 마우스를 올리면 주석에서 작성한 내용을 확인할 수 있다.\njavadocJDK에 포함된 javadoc를 사용하면 소스코드를 문서화하고 HTML 등 다양한 포맷으로 export할 수 있다. javadoc는 JDK에 내장되어있으며, 사용법은 다음과 같다.\n1$ javadoc Calculator.java\n다음과 같은 파일들이 생성된다.\n12345678Calculator.html          index-all.html           package-tree.htmlCalculator.java          index.html               resourcesallclasses-index.html    member-search-index.js   script-dirallpackages-index.html   member-search-index.zip  script.jsconstant-values.html     overview-tree.html       search.jsdeprecated-list.html     package-search-index.js  stylesheet.csselement-list             package-search-index.zip type-search-index.jshelp-doc.html            package-summary.html     type-search-index.zip\nindex.html을 열어보자. 주석으로 작성한 설명이 문서화 되어있다.\n","dateCreated":"2018-03-26T00:00:00+09:00","dateModified":"2022-01-16T11:20:56+09:00","datePublished":"2018-03-26T00:00:00+09:00","description":"","headline":"[Java] 주석 잘 작성하기, javadoc 사용법","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/","keywords":"Java"}</script>
-    <meta name="description" content="한 줄 주석한 줄 주석(Single-line Comment)을 작성할 때는 &#x2F;&#x2F;을 사용한다. 12&#x2F;&#x2F; This is Single-line CommentSystem.out.println();  여러 줄 주석여러 줄 주석(Multi-line Comment)를 작성할 때는 &#x2F;* *&#x2F;을 사용한다. 123456&#x2F;*This is Multi-line CommentTh">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"yologger","sameAs":[]},"articleBody":"\n내장 어노테이션Java API는 사전에 정의된 내장 어노테이션을 제공한다. 내장 어노테이션은 java.lang 또는 java.annotation 패키지에 포함된다. 자주 사용되는 내장 어노테이션은 다음과 같다.\n@override@override는 부모 클래스의 메소드를 재정의했다는 것을 알려준다.\nPerson.java12345class Person &#123;    void work() &#123;        System.out.println(&quot;Work&quot;);    &#125;&#125;\nMusician.java123456class Musician extends Person &#123;    @override    void work() &#123;        System.out.println(&quot;Sing&quot;);    &#125;&#125;\n\n@Deprecated@deprecated는 앞으로 사용하지 않을 코드임을 표시한다.\nCalculator.java1234567891011121314151617class Calculator &#123;    int plus(int a, int b) &#123;        return a+b;    &#125;    @Deprecated    int minus(int a, int b) &#123;        return a-b;    &#125;&#125;public class App &#123;    public static void main(String[] args) &#123;        Calculator calculator = new Calculator();        calculator.minus();    &#125;&#125;\n이 어노테이션이 붙은 코드를 사용하면 경고를 보여준다.\n1Warning: java: minux() has been deprecated\n\n@SuppressWarnings경고를 무시하도록 컴파일러에게 지시한다.\n@FunctionalInterfaceJava 8부터 추가되었으며, 함수형 인터페이스를 정의하는데 사용된다.\n1234@FunctionalInterfaceinterface Lambda &#123;    void execute(String name);&#125;\n12345Lambda printName = (String name) -&gt; &#123;    System.out.println(name);&#125;;printName.execute(&quot;Paul&quot;);\n\n@ Documentedjavadoc 같은 문서화 도구로 코드를 문서화할 때 해당 어노테이션을 문서에 표시한다.\n@ Target어노테이션의 적용 범위를 지정할 수 있다. 예제를 살펴보자.\n12@Target(ElementType.FIELD)public @interface First &#123;&#125;\n커스텀 어노테이션 First를 정의하고 있다. 이 어노테이션은 필드에만 적용할 수 있다.\n또 다른 예제를 살펴보자.\n12@Target(&#123;ElementType.FIELD, ElementType.METHOD&#125;)public @interface Second &#123;&#125;\n이 어노테이션은 필드와 메소드에만 적용할 수 있게 된다.\n인자로는 다음과 같은 enum ElementType이 올 수 있다.\n\n\n\n이름\n설명\n\n\n\nTYPE\nclass, interface, annotation, enum에 적용 가능\n\n\nFIELD\nclass, interface의 필드에만 적용 가능\n\n\nMETHOD\n메소드에만 적용 가능\n\n\nPARAMETER\n함수의 파라미터에만 적용 가능\n\n\nCONSTRUCTOR\n생성자에만 적용 가능\n\n\nLOCAL_VARIABLE\n지역변수에만 적용 가능\n\n\nANNOTATION_TYPE\n어노테이션에만 적용 가능\n\n\nPACKAGE\n패키지에만 적용 가능\n\n\nTYPE_PARAMETER\n어노테이션의 타입 파라미터에만 적용 가능\n\n\n@Retention어노테이션의 유지 범위를 지정할 수 있으며, 세 가지의 enum RetentionPolicy 값이 올 수 있다.\n\n\n\n이름\n설명\n\n\n\nSOURCE\n어노테이션이 소스코드에서만 유지된다. 컴파일 시점에 어노테이션이 사라진다.\n\n\nCLASS\n어노테이션이 .class 파일에서도 유지된다. 런타임에서 실행될 때는 어노테이션이 사라진다.\n\n\nRUNTIME\n어노테이션이 JVM에서 실행될 때에도 유지된다.\n\n\n","dateCreated":"2018-03-18T00:00:00+09:00","dateModified":"2022-01-16T11:17:56+09:00","datePublished":"2018-03-18T00:00:00+09:00","description":"","headline":"[Java] 내장 어노테이션","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"},"publisher":{"@type":"Organization","name":"yologger","sameAs":[]},"url":"https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/","keywords":"Java"}</script>
+    <meta name="description" content="내장 어노테이션Java API는 사전에 정의된 내장 어노테이션을 제공한다. 내장 어노테이션은 java.lang 또는 java.annotation 패키지에 포함된다. 자주 사용되는 내장 어노테이션은 다음과 같다. @override@override는 부모 클래스의 메소드를 재정의했다는 것을 알려준다. Person.java12345class Person &amp;#1">
 <meta property="og:type" content="blog">
-<meta property="og:title" content="[Java] 주석 잘 작성하기, javadoc 사용법">
-<meta property="og:url" content="https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/index.html">
+<meta property="og:title" content="[Java] 내장 어노테이션">
+<meta property="og:url" content="https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/index.html">
 <meta property="og:site_name" content="Yologger&#39;s Blog">
-<meta property="og:description" content="한 줄 주석한 줄 주석(Single-line Comment)을 작성할 때는 &#x2F;&#x2F;을 사용한다. 12&#x2F;&#x2F; This is Single-line CommentSystem.out.println();  여러 줄 주석여러 줄 주석(Multi-line Comment)를 작성할 때는 &#x2F;* *&#x2F;을 사용한다. 123456&#x2F;*This is Multi-line CommentTh">
+<meta property="og:description" content="내장 어노테이션Java API는 사전에 정의된 내장 어노테이션을 제공한다. 내장 어노테이션은 java.lang 또는 java.annotation 패키지에 포함된다. 자주 사용되는 내장 어노테이션은 다음과 같다. @override@override는 부모 클래스의 메소드를 재정의했다는 것을 알려준다. Person.java12345class Person &amp;#1">
 <meta property="og:locale" content="ko_KR">
-<meta property="og:image" content="https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/1.png">
-<meta property="og:image" content="https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/2.png">
-<meta property="og:image" content="https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/3.png">
-<meta property="og:image" content="https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/4.png">
-<meta property="og:image" content="https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/6.png">
-<meta property="article:published_time" content="2018-03-25T15:00:00.000Z">
-<meta property="article:modified_time" content="2022-01-16T02:20:56.092Z">
+<meta property="article:published_time" content="2018-03-17T15:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-16T02:17:56.716Z">
 <meta property="article:author" content="yologger">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/1.png">
     
     
         
@@ -318,14 +312,14 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title">
-            [Java] 주석 잘 작성하기, javadoc 사용법
+            [Java] 내장 어노테이션
         </h1>
     
     
         <div class="post-meta">
-    <time datetime="2018-03-26T00:00:00+09:00">
+    <time datetime="2018-03-18T00:00:00+09:00">
 	
-		    2018/03/26
+		    2018/03/18
     	
     </time>
     
@@ -344,23 +338,94 @@
     <div class="post-content markdown">
         <div class="main-content-wrap">
             <hr>
-<h1 id="한-줄-주석"><a href="#한-줄-주석" class="headerlink" title="한 줄 주석"></a>한 줄 주석</h1><p><code>한 줄 주석(Single-line Comment)</code>을 작성할 때는 <code>//</code>을 사용한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This is Single-line Comment</span></span><br><span class="line">System.out.println();</span><br></pre></td></tr></table></figure>
+<h1 id="내장-어노테이션"><a href="#내장-어노테이션" class="headerlink" title="내장 어노테이션"></a>내장 어노테이션</h1><p>Java API는 사전에 정의된 내장 어노테이션을 제공한다. 내장 어노테이션은 <code>java.lang</code> 또는 <code>java.annotation</code> 패키지에 포함된다. 자주 사용되는 내장 어노테이션은 다음과 같다.</p>
+<h3 id="override"><a href="#override" class="headerlink" title="@override"></a>@override</h3><p><code>@override</code>는 부모 클래스의 메소드를 재정의했다는 것을 알려준다.</p>
+<figure class="highlight java"><figcaption><span>Person.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">work</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Work&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>Musician.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Musician</span> <span class="keyword">extends</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="meta">@override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">work</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Sing&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="여러-줄-주석"><a href="#여러-줄-주석" class="headerlink" title="여러 줄 주석"></a>여러 줄 주석</h1><p><code>여러 줄 주석(Multi-line Comment)</code>를 작성할 때는 <code>/* */</code>을 사용한다.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">This is Multi-line Comment</span></span><br><span class="line"><span class="comment">This is Multi-line Comment</span></span><br><span class="line"><span class="comment">This is Multi-line Comment</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">System.out.println();</span><br></pre></td></tr></table></figure>
+<h3 id="Deprecated"><a href="#Deprecated" class="headerlink" title="@Deprecated"></a>@Deprecated</h3><p><code>@deprecated</code>는 앞으로 사용하지 않을 코드임을 표시한다.</p>
+<figure class="highlight java"><figcaption><span>Calculator.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Calculator</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">plus</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> a+b;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Deprecated</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">minus</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> a-b;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Calculator calculator = <span class="keyword">new</span> Calculator();</span><br><span class="line">        calculator.minus();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 어노테이션이 붙은 코드를 사용하면 경고를 보여준다.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Warning: java: minux() has been deprecated</span><br></pre></td></tr></table></figure>
 
-<h1 id="주석-제대로-작성하기"><a href="#주석-제대로-작성하기" class="headerlink" title="주석 제대로 작성하기"></a>주석 제대로 작성하기</h1><p>인텔리J에서 특정 메소드 위에 마우스를 올리면 메소드에 대한 자세한 설명을 확인할 수 있다.<br><img src="1.png"><br>메소드에 대한 설명, 파라미터, 발생할 수 있는 예외 등을 설명하고 있다.</p>
-<p><code>여러 줄 주석(Multi-line Comment)</code>을 사용하여 이러한 설명을 추가할 수 있다. 예를 들어보자.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Calculator</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">plus</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> a+b;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">minus</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> a-b;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> a*b;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">divide</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> <span class="keyword">throws</span> ArithmeticException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> a/b;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Calculator</code>의 메소드에 주석을 달아보자. 메소드 위에 <code>/**</code>를 입력하고 <code>Enter</code>버튼을 누르면 기본 템플릿이 자동으로 입력된다.<br><img src="2.png"><br>다음과 같이 메소드에 주석을 달아보자.<br><img src="3.png"><br>이제 <code>Main</code>클래스에서 <code>Calculator</code>클래스를 사용해보자.</p>
-<figure class="highlight java"><figcaption><span>Main.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Calculator calculator = <span class="keyword">new</span> Calculator();</span><br><span class="line">        calculator.plus(<span class="number">3</span>, <span class="number">4</span>);</span><br><span class="line">        calculator.minus(<span class="number">4</span>, <span class="number">3</span>);</span><br><span class="line">        calculator.multiply(<span class="number">4</span>, <span class="number">3</span>);</span><br><span class="line">        calculator.divide(<span class="number">10</span>, <span class="number">3</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>메소드 위에 마우스를 올리면 주석에서 작성한 내용을 확인할 수 있다.<br><img src="4.png"></p>
-<h1 id="javadoc"><a href="#javadoc" class="headerlink" title="javadoc"></a>javadoc</h1><p>JDK에 포함된 <code>javadoc</code>를 사용하면 소스코드를 문서화하고 HTML 등 다양한 포맷으로 export할 수 있다. <code>javadoc</code>는 JDK에 내장되어있으며, 사용법은 다음과 같다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ javadoc Calculator.java</span><br></pre></td></tr></table></figure>
-<p>다음과 같은 파일들이 생성된다.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Calculator.html          index-all.html           package-tree.html</span><br><span class="line">Calculator.java          index.html               resources</span><br><span class="line">allclasses-index.html    member-search-index.js   script-dir</span><br><span class="line">allpackages-index.html   member-search-index.zip  script.js</span><br><span class="line">constant-values.html     overview-tree.html       search.js</span><br><span class="line">deprecated-list.html     package-search-index.js  stylesheet.css</span><br><span class="line">element-list             package-search-index.zip type-search-index.js</span><br><span class="line">help-doc.html            package-summary.html     type-search-index.zip</span><br></pre></td></tr></table></figure>
-<p><code>index.html</code>을 열어보자. 주석으로 작성한 설명이 문서화 되어있다.<br><img src="6.png"></p>
+<h3 id="SuppressWarnings"><a href="#SuppressWarnings" class="headerlink" title="@SuppressWarnings"></a>@SuppressWarnings</h3><p>경고를 무시하도록 컴파일러에게 지시한다.</p>
+<h3 id="FunctionalInterface"><a href="#FunctionalInterface" class="headerlink" title="@FunctionalInterface"></a>@FunctionalInterface</h3><p>Java 8부터 추가되었으며, 함수형 인터페이스를 정의하는데 사용된다.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Lambda</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">execute</span><span class="params">(String name)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Lambda printName = (String name) -&gt; &#123;</span><br><span class="line">    System.out.println(name);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">printName.execute(<span class="string">&quot;Paul&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="Documented"><a href="#Documented" class="headerlink" title="@ Documented"></a>@ Documented</h3><p>javadoc 같은 문서화 도구로 코드를 문서화할 때 해당 어노테이션을 문서에 표시한다.</p>
+<h3 id="Target"><a href="#Target" class="headerlink" title="@ Target"></a>@ Target</h3><p>어노테이션의 적용 범위를 지정할 수 있다. 예제를 살펴보자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(ElementType.FIELD)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> First &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>커스텀 어노테이션 <code>First</code>를 정의하고 있다. 이 어노테이션은 필드에만 적용할 수 있다.</p>
+<p>또 다른 예제를 살펴보자.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.FIELD, ElementType.METHOD&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Second &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>이 어노테이션은 필드와 메소드에만 적용할 수 있게 된다.</p>
+<p>인자로는 다음과 같은 enum <code>ElementType</code>이 올 수 있다.</p>
+<table>
+<thead>
+<tr>
+<th>이름</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TYPE</td>
+<td>class, interface, annotation, enum에 적용 가능</td>
+</tr>
+<tr>
+<td>FIELD</td>
+<td>class, interface의 필드에만 적용 가능</td>
+</tr>
+<tr>
+<td>METHOD</td>
+<td>메소드에만 적용 가능</td>
+</tr>
+<tr>
+<td>PARAMETER</td>
+<td>함수의 파라미터에만 적용 가능</td>
+</tr>
+<tr>
+<td>CONSTRUCTOR</td>
+<td>생성자에만 적용 가능</td>
+</tr>
+<tr>
+<td>LOCAL_VARIABLE</td>
+<td>지역변수에만 적용 가능</td>
+</tr>
+<tr>
+<td>ANNOTATION_TYPE</td>
+<td>어노테이션에만 적용 가능</td>
+</tr>
+<tr>
+<td>PACKAGE</td>
+<td>패키지에만 적용 가능</td>
+</tr>
+<tr>
+<td>TYPE_PARAMETER</td>
+<td>어노테이션의 타입 파라미터에만 적용 가능</td>
+</tr>
+</tbody></table>
+<h3 id="Retention"><a href="#Retention" class="headerlink" title="@Retention"></a>@Retention</h3><p>어노테이션의 유지 범위를 지정할 수 있으며, 세 가지의 enum <code>RetentionPolicy</code> 값이 올 수 있다.</p>
+<table>
+<thead>
+<tr>
+<th>이름</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SOURCE</td>
+<td>어노테이션이 소스코드에서만 유지된다. 컴파일 시점에 어노테이션이 사라진다.</td>
+</tr>
+<tr>
+<td>CLASS</td>
+<td>어노테이션이 .class 파일에서도 유지된다. 런타임에서 실행될 때는 어노테이션이 사라진다.</td>
+</tr>
+<tr>
+<td>RUNTIME</td>
+<td>어노테이션이 JVM에서 실행될 때에도 유지된다.</td>
+</tr>
+</tbody></table>
 
             
 
@@ -385,9 +450,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/ko/2018/04/01/12_tools/02_gradle/20180401_compile_build/"
-                    data-tooltip="[Gradle] Compile과 Build"
-                    aria-label="이전: [Gradle] Compile과 Build"
+                    href="/ko/2018/03/20/04_java/180320_compare_object/"
+                    data-tooltip="[Java] 객체 비교하기, Comparable, Comparator"
+                    aria-label="이전: [Java] 객체 비교하기, Comparable, Comparator"
                 >
                     
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
@@ -399,9 +464,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/ko/2018/03/20/04_java/180320_compare_object/"
-                    data-tooltip="[Java] 객체 비교하기, Comparable, Comparator"
-                    aria-label="다음: [Java] 객체 비교하기, Comparable, Comparator"
+                    href="/ko/2018/03/17/04_java/180317_annotation_processor/"
+                    data-tooltip="[Java] 어노테이션 프로세서(Annotation Processor)"
+                    aria-label="다음: [Java] 어노테이션 프로세서(Annotation Processor)"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">다음</span>
@@ -426,7 +491,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                     title="Facebook에 공유하기"
                     aria-label="Facebook에 공유하기"
                 >
@@ -439,7 +504,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                     title="Twitter에 공유하기"
                     aria-label="Twitter에 공유하기"
                 >
@@ -452,7 +517,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                     title="Google+에 공유하기"
                     aria-label="Google+에 공유하기"
                 >
@@ -500,9 +565,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/ko/2018/04/01/12_tools/02_gradle/20180401_compile_build/"
-                    data-tooltip="[Gradle] Compile과 Build"
-                    aria-label="이전: [Gradle] Compile과 Build"
+                    href="/ko/2018/03/20/04_java/180320_compare_object/"
+                    data-tooltip="[Java] 객체 비교하기, Comparable, Comparator"
+                    aria-label="이전: [Java] 객체 비교하기, Comparable, Comparator"
                 >
                     
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
@@ -514,9 +579,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/ko/2018/03/20/04_java/180320_compare_object/"
-                    data-tooltip="[Java] 객체 비교하기, Comparable, Comparator"
-                    aria-label="다음: [Java] 객체 비교하기, Comparable, Comparator"
+                    href="/ko/2018/03/17/04_java/180317_annotation_processor/"
+                    data-tooltip="[Java] 어노테이션 프로세서(Annotation Processor)"
+                    aria-label="다음: [Java] 어노테이션 프로세서(Annotation Processor)"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">다음</span>
@@ -541,7 +606,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                     title="Facebook에 공유하기"
                     aria-label="Facebook에 공유하기"
                 >
@@ -554,7 +619,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                     title="Twitter에 공유하기"
                     aria-label="Twitter에 공유하기"
                 >
@@ -567,7 +632,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                    target="new" href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                     title="Google+에 공유하기"
                     aria-label="Google+에 공유하기"
                 >
@@ -601,7 +666,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                         aria-label="Facebook에 공유하기"
                     >
                         <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
@@ -614,7 +679,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                        href="https://twitter.com/intent/tweet?text=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                         aria-label="Twitter에 공유하기"
                     >
                         <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
@@ -627,7 +692,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/26/04_java/180326_comment_javadoc/"
+                        href="https://plus.google.com/share?url=https://yologger.github.io/ko/2018/03/18/04_java/180318_builtin_annotation/"
                         aria-label="Google+에 공유하기"
                     >
                         <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
